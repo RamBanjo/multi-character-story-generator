@@ -100,3 +100,6 @@ class WorldState:
 
         return result
 
+    def add_to_worldstate(self, new_graph):
+        pass
+

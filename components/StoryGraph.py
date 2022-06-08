@@ -254,7 +254,23 @@ class StoryGraph:
                 
         else:
             print("Nothing is replaced: Rule is not subgraph of Self")
-    
+
+    '''
+    This function is for making the character's next node some node that already exists in another character's path.
+
+    It probably should also check for time paradoxes (to be defined)
+
+    Alright, to prevent time paradoxes, we will not allow joining into any nodes where the timestep numbers are different.
+    '''
+    def join_into_node(self, target_char, char_to_add, timestep):
+
+        #Make a check so that nodes don't join anything "in the past"
+
+        #For example, if there has already been a joint node in the char_to_add's storyline,
+
+        #It must be checked that the previous joint node is not in the future of the current joint node
+        pass
+
     def print_all_nodes(self):
         for node in self.story_parts:
             print(node)

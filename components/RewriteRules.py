@@ -23,7 +23,7 @@ class RewriteRule:
     {"lawbias": (0, 100)}
     '''
     
-    def __init__(self, story_condition: StoryGraph, story_change: StoryGraph, dummychar, name="", required_tags=[], unwanted_tags=[], bias_range=None):
+    def __init__(self, story_condition: StoryGraph, story_change: StoryGraph, dummychar, name="", required_tags=dict(), unwanted_tags=dict(), bias_range=None):
         self.rule_name = name
         self.story_condition = story_condition
         self.story_change = story_change
@@ -55,6 +55,22 @@ class RewriteRule:
                 
         #If the character passes all three tests, then return true. Otherwise, return false
         return compatibility
+'''
+Joint rule works this way:
+
+If doing so is possible and does not cause time paradox, then two characters performing 
+'''
+
+class JointRule:
+    def __init__(self, story_condition: StoryGraph, story_change: StoryGraph, dummychars=[], name="", required_tags=dict(), unwanted_tags=dict(), bias_range=None):
+        self.rule_name = name
+        self.story_condition = story_condition
+        self.story_change = story_change
+        self.dummychar = dummychars
+        self.required_tags = required_tags
+        self.unwanted_tags = unwanted_tags
+        self.bias_range = bias_range
+
 '''        
 Hey wait a second Ram, this method of rewriting rules might not work for our purpose
 Consider: This method will not preserve the previous state of the story map
