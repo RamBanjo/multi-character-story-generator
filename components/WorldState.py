@@ -101,5 +101,7 @@ class WorldState:
         return result
 
     def add_to_worldstate(self, new_graph):
+        #TODO: Maybe check everything in the new_graph, and: for each node in the new graph, add it to the self (if it isn't in)
+        #And add relationships too
         pass
 
