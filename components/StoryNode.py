@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biases, biasweight, tags, charcount):
+    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0):
         
         #the name of this action.
         self.name = name
@@ -36,6 +36,9 @@ class StoryNode:
         #dict of nodes that continue from here. Each entry has character's unique ID as key and points to
         #the node that character will perform after leaving this node.
         self.next_nodes = dict()
+
+        #timestep property. For template storynodes it will be 0. But once it is assigned to the story the number will never change.
+        #This will prevent stories from different timestep from being blended together.
         
         #TODO: An object that defines the change in relationship for characters and objects in this story node
 
