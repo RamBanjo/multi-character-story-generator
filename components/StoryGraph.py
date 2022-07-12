@@ -39,6 +39,8 @@ If we use a rule that replaces b with d, e on Alice's storyline the entries will
 
 For WorldStates, they will be kept in a list. Replacing the worldstate would be as easy as duplicating the worldstates from the rule and
 replacing it in the list. (Since we don't have to care about connections between world states here, this should be possible!)
+
+TODO: Rewrite this class entirely (all the functions) so that they can handle multiple events in one timestep
 '''
 class StoryGraph:
     def __init__(self, name, character_objects, location_objects):
@@ -64,7 +66,7 @@ class StoryGraph:
         if character_path_length > 0:
             self.story_parts[(char_name, character_path_length-1)].add_next_node(new_part, character)
 
-    def add_story_part_at_step(self, part, character, location, timestep, copy=True):
+    def add_story_part_at_step(self, part, character, location, absolute_step, copy=True):
 
         char_name = None
 
@@ -76,7 +78,7 @@ class StoryGraph:
         else:
             new_part = part
 
-        self.story_parts[(char_name, timestep)] = new_part
+        self.story_parts[(char_name, absolute_step)] = new_part
 
         new_part.add_actor(character)
 
@@ -87,14 +89,14 @@ class StoryGraph:
 
     
 
-    def remove_story_part(self, character, timestep):
+    def remove_story_part(self, character, absolute_step):
 
         char_name = None
 
         if character is not None:
             char_name = character.get_name()
 
-        removed = self.story_parts.pop((char_name, timestep), None)
+        removed = self.story_parts.pop((char_name, absolute_step), None)
 
         if removed is not None:
 
@@ -104,16 +106,16 @@ class StoryGraph:
             nextnode = None
 
             #if there is a previous node, remove references to this node
-            if timestep-1 >= 0:
-                prevnode = self.story_parts[(char_name, timestep-1)]
+            if absolute_step-1 >= 0:
+                prevnode = self.story_parts[(char_name, absolute_step-1)]
                 prevnode.remove_next_node(character)
             
             #if the removed thing is not the last thing, then we need to move stuff down
-            if timestep < current_longest:
+            if absolute_step < current_longest:
 
-                nextnode = self.story_parts[(char_name, timestep+1)]
+                nextnode = self.story_parts[(char_name, absolute_step+1)]
 
-                for i in range(timestep+1, current_longest+1):
+                for i in range(absolute_step+1, current_longest+1):
                 
                     move_down = self.story_parts.pop((char_name, i))
                     self.story_parts[(char_name, i-1)] = move_down
@@ -122,7 +124,7 @@ class StoryGraph:
             if prevnode is not None and nextnode is not None:
                 prevnode.add_next_node(nextnode, character)
 
-    def insert_story_part(self, part, character, location, timestep):
+    def insert_story_part(self, part, character, location, absolute_step):
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
 
         char_name = None
@@ -132,38 +134,38 @@ class StoryGraph:
 
         character_path_length = self.get_longest_path_length_by_character(character)
 
-        if timestep >= character_path_length:
+        if absolute_step >= character_path_length:
             self.add_story_part(part, character, location)
         else:
             #first, we need to move everything that comes after this part up by one
-            for i in range(character_path_length-1, timestep-1, -1):
+            for i in range(character_path_length-1, absolute_step-1, -1):
                 move_up = self.story_parts.pop((char_name, i))
                 self.story_parts[(char_name, i+1)] = move_up
 
             #then, we add a new story part at the spot
 
-            new_part = self.add_story_part_at_step(part, character, location, timestep)
+            new_part = self.add_story_part_at_step(part, character, location, absolute_step)
 
             #finally, connect this to other nodes
             #the node that comes after,
-            new_part.add_next_node(self.story_parts[(char_name, timestep+1)], character)
+            new_part.add_next_node(self.story_parts[(char_name, absolute_step+1)], character)
 
             #and the node that comes before if it's not inserted as first node
 
-            if timestep-1 >= 0:
-                prevnode =  self.story_parts[(char_name, timestep-1)]
+            if absolute_step-1 >= 0:
+                prevnode =  self.story_parts[(char_name, absolute_step-1)]
                 prevnode.remove_next_node(character)
                 prevnode.add_next_node(new_part, character)
 
-    def replace_story_parts(self, character, start_time, end_time, list_of_storynode_and_location_tuples):
+    def replace_story_parts(self, character, start_time_abs, end_time_abs, list_of_storynode_and_location_tuples):
 
         #First, record the start time. That is where the nodes will be inserted
 
         #Then, remove everything from start time to end time. That's a lot
-        for remove_index in range(start_time, end_time+1):
-            self.remove_story_part(character, start_time)
+        for remove_index in range(start_time_abs, end_time_abs+1):
+            self.remove_story_part(character, start_time_abs)
 
-        insert_index = start_time
+        insert_index = start_time_abs
         #Finally, insert everything at start time (increment each by 1), with the character's name attached. Neat!  
         for story_loc_tuple in list_of_storynode_and_location_tuples:
             self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index)
@@ -218,7 +220,8 @@ class StoryGraph:
         list_end = self.world_states[end_index+1:]
         new_world_state_list = list_start + list_of_world_states + list_end
         self.world_states = new_world_state_list
-        
+    
+
     def apply_rewrite_rule(self, rule, character, location_list, applyonce=False):
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
@@ -363,6 +366,9 @@ class StoryGraph:
         #If list is empty then it's false. If list is not empty then it's true. Then also return that list.
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs'''
 
+    '''
+    TODO: List of Subgraph Locs should exclude parts of subgraph that overlaps two different timesteps
+    '''
     def is_subgraph(subgraph, supergraph, subgraph_char, supergraph_char):
 
         #Since we only care if a certain character's storyline is a subgraph of another character's storyline
@@ -399,6 +405,9 @@ class StoryGraph:
                 result = result and subgraph.world_states[sub_i].is_subgraph(supergraph.world_states[super_i + sub_i])
 
             if result:
+
+                #Before adding this subgraph loc, we need to check all the events in this character to see if they're all in the same timestep
+
                 list_of_subgraph_locs.append(super_i)
 
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
