@@ -51,7 +51,7 @@ class StoryGraph:
         self.story_parts = dict()
         self.longest_path_length = 0
 
-    def add_story_part(self, part, character, location, copy=True):
+    def add_story_part(self, part, character, location, timestep, copy=True):
 
         char_name = None
 
@@ -61,12 +61,12 @@ class StoryGraph:
         #first we need to get the last entry in this character's story
         character_path_length = self.get_longest_path_length_by_character(character)
 
-        new_part = self.add_story_part_at_step(part, character, location, character_path_length, copy)
+        new_part = self.add_story_part_at_step(part, character, location, character_path_length, timestep, copy)
 
         if character_path_length > 0:
             self.story_parts[(char_name, character_path_length-1)].add_next_node(new_part, character)
 
-    def add_story_part_at_step(self, part, character, location, absolute_step, copy=True):
+    def add_story_part_at_step(self, part, character, location, absolute_step, timestep, copy=True):
 
         char_name = None
 
@@ -81,6 +81,7 @@ class StoryGraph:
         self.story_parts[(char_name, absolute_step)] = new_part
 
         new_part.add_actor(character)
+        new_part.timestep = timestep
 
         if location is not None:
             new_part.set_location(location)
@@ -264,6 +265,8 @@ class StoryGraph:
     It probably should also check for time paradoxes (to be defined)
 
     Alright, to prevent time paradoxes, we will not allow joining into any nodes where the timestep numbers are different.
+
+    Lol as it turns out this retains the same wording but now has a different meaning, thanks to the new way to handle timesteps (lol)
     '''
     def join_into_node(self, target_char, char_to_add, timestep):
 
