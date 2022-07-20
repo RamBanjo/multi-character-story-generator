@@ -133,10 +133,12 @@ class StoryGraph:
         if character is not None:
             char_name = character.get_name()
 
+        timestep = self.story_parts[(char_name, absolute_step-1)].timestep
+
         character_path_length = self.get_longest_path_length_by_character(character)
 
         if absolute_step >= character_path_length:
-            self.add_story_part(part, character, location)
+            self.add_story_part(part, character, location, timestep)
         else:
             #first, we need to move everything that comes after this part up by one
             for i in range(character_path_length-1, absolute_step-1, -1):
@@ -145,7 +147,7 @@ class StoryGraph:
 
             #then, we add a new story part at the spot
 
-            new_part = self.add_story_part_at_step(part, character, location, absolute_step)
+            new_part = self.add_story_part_at_step(part, character, location, absolute_step, timestep)
 
             #finally, connect this to other nodes
             #the node that comes after,
@@ -253,7 +255,7 @@ class StoryGraph:
             
             for start_index in subgraph_locs:
                 end_index = start_index + rule_length - 1
-                self.replace_world_states(start_index, end_index, rule.story_change.world_states)
+                #self.replace_world_states(start_index, end_index, rule.story_change.world_states)
                 self.replace_story_parts(character, start_index, end_index, part_and_loc_tuple_list)
                 
         else:
@@ -381,6 +383,7 @@ class StoryGraph:
 
         subset = dict()
         superset = dict()
+        supertimestepdict = dict()
 
         for key in subdict:
             if key[0] == subgraph_char.get_name():
@@ -388,6 +391,7 @@ class StoryGraph:
         for key in superdict:
             if key[0] == supergraph_char.get_name():
                 superset[key[1]] = superdict[key].get_name()
+                supertimestepdict[key[1]] = superdict[key].timestep
 
         list_of_subgraph_locs = []
 
@@ -399,18 +403,23 @@ class StoryGraph:
 
             result = True
 
+            timesteps_of_superset = []
+
             for sub_i in range(0, len(subset)):
                 
                 #For each of the timestep in this graph, we check if the steps the character (this one in specific) take are the same.
                 result = result and subset[sub_i] == superset[super_i + sub_i]
-
+                
+                #NEED ANOTHER WAY TO CHECK SUBGRAPHS
                 #We also check if the world state is a subset.
-                result = result and subgraph.world_states[sub_i].is_subgraph(supergraph.world_states[super_i + sub_i])
+                #result = result and subgraph.world_states[sub_i].is_subgraph(supergraph.world_states[super_i + sub_i])
 
-            if result:
-
-                #Before adding this subgraph loc, we need to check all the events in this character to see if they're all in the same timestep
-
+                #Add the timestep to the list of superset timesteps
+                timesteps_of_superset.append(supertimestepdict[super_i+sub_i])
+            
+            
+            #The subgraph loc will only be added if the supergraph steps are in the same timesteps
+            if result and all(ele == timesteps_of_superset[0] for ele in timesteps_of_superset):
                 list_of_subgraph_locs.append(super_i)
 
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs

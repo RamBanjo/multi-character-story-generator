@@ -37,13 +37,13 @@ charlie = CharacterNode("Charlie")
 
 my_graph = StoryGraph("Test Graph", [alice, bob, charlie], [placeholder_location])
 
-my_graph.add_story_part(node_a, alice, placeholder_location)
-my_graph.add_story_part(node_b, alice, placeholder_location)
-my_graph.add_story_part(node_c, alice, placeholder_location)
-my_graph.add_story_part(node_f, alice, placeholder_location)
-my_graph.add_story_part(node_a, bob, placeholder_location)
-my_graph.add_story_part(node_d, bob, placeholder_location)
-my_graph.add_story_part(node_e, bob, placeholder_location)
+my_graph.add_story_part(node_a, alice, placeholder_location, 0)
+my_graph.add_story_part(node_b, alice, placeholder_location, 0)
+my_graph.add_story_part(node_c, alice, placeholder_location, 0)
+my_graph.add_story_part(node_f, alice, placeholder_location, 0)
+my_graph.add_story_part(node_a, bob, placeholder_location, 0)
+my_graph.add_story_part(node_d, bob, placeholder_location, 0)
+my_graph.add_story_part(node_e, bob, placeholder_location, 0)
 
 #Since we want Bob to join in on the same part as Alice's 3rd step, we do this:
 #Set copy as false so we don't create a copy of Alice's node and instead use the already existing Node
@@ -201,15 +201,15 @@ my_graph.add_world_state(placeholder_ws)
 my_graph.add_world_state(placeholder_ws)
 my_graph.add_world_state(placeholder_ws)
 
-cond_graph.add_story_part(node_b, dummy, None)
-cond_graph.add_story_part(node_c, dummy, None)
+cond_graph.add_story_part(node_b, dummy, None, 0)
+cond_graph.add_story_part(node_c, dummy, None, 0)
 cond_graph.add_world_state(placeholder_ws)
 cond_graph.add_world_state(placeholder_ws)
 
 repl_graph = StoryGraph("rule2", None, None)
 
-repl_graph.add_story_part(node_d, dummy, None)
-repl_graph.add_story_part(node_e, dummy, None)
+repl_graph.add_story_part(node_d, dummy, None, 0)
+repl_graph.add_story_part(node_e, dummy, None, 0)
 cond_graph.add_world_state(placeholder_ws)
 cond_graph.add_world_state(placeholder_ws)
 
