@@ -5,7 +5,7 @@ from components.StoryNode import *
 from components.StoryObjects import ObjectNode
 
 class WorldState:
-    def __init__(self, name, objectnodes=[]):
+    def __init__(self, name, objectnodes=[], node_dict = dict()):
 
         '''
         Graph properties
@@ -16,7 +16,7 @@ class WorldState:
         self.name = name
         self.objectnodes = objectnodes
         self.edges = []
-        self.node_dict = {}
+        self.node_dict = node_dict
         self.make_node_dict()
 
     '''
@@ -46,8 +46,6 @@ class WorldState:
     def set_node_attribute(self, node, attribute, tag):
         nodenum = self.objectnodes.index(node)
         self.objectnodes[nodenum].set_tag(attribute, tag)
-
-        
 
     def make_node_dict(self):
         for node in self.objectnodes:	
@@ -106,5 +104,25 @@ class WorldState:
         pass
 
     def apply_relationship_change(self, relchange_object):
-        pass
+        if relchange_object.add_or_remove == "add":
+            #If the intention is to add, then we add a connection between the nodes
+            #If either nodes don't exist already, then they must be added to the list of nodes.
+
+            #Checks if either nodes already exists in the node dict
+            #If it doesn't exist, add it to the node dict
+            if not self.node_dict.has_key(relchange_object.node_a.get_name()):
+                self.node_dict[relchange_object.node_a.get_name()] = relchange_object.node_a
+            if not self.node_dict.has_key(relchange_object.node_b.get_name()):
+                self.node_dict[relchange_object.node_b.get_name()] = relchange_object.node_b
+            #After adding nodes that don't already exist, make the connections and add it to the list of edges
+                self.connect(self.node_dict[relchange_object.node_a.get_name()], relchange_object.edge, self.node_dict[relchange_object.node_b.get_name()])
+
+        if relchange_object.add_or_remove == "remove":
+            #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
+            #Don't delete the nodes, though
+            #Check if this exact edge between these exact nodes exists
+            if relchange_object.edge in self.edges:
+                #If it exists, remove it
+                self.edges.remove(relchange_object.edge)
+
 
