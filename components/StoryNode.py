@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0):
+    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effect_on_next_ts = None):
         
         #the name of this action.
         self.name = name
@@ -39,6 +39,14 @@ class StoryNode:
 
         #timestep property. For template storynodes it will be 0. But once it is assigned to the story the number will never change.
         #This will prevent stories from different timestep from being blended together.
+        self.timestep = timestep
+
+        #PENDING: Effect on next Timestep. What this node will cause to happen in the next timestep if added.
+        #Need to think of a proper representation.
+        #Worldstate graph? (Probably Worldstate Graph, will need to plan idea around this)
+        #Time to grab a pen and paper, time to draft!
+        #List of edges?
+        self.effect_on_next_ts = effect_on_next_ts
         
         #TODO: An object that defines the change in relationship for characters and objects in this story node
 

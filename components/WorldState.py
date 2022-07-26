@@ -105,3 +105,6 @@ class WorldState:
         #And add relationships too
         pass
 
+    def apply_relationship_change(self, relchange_object):
+        pass
+
