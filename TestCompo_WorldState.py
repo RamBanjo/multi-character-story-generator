@@ -16,4 +16,9 @@ WorldState/ObjectNodes:
 StoryGraph
 - Rewrite it to support adding multiple nodes
 - TODO: Draft the before and after of how nodes should look like on paper
+
+
+Node Details:
+- The nodes should be taken from P'Put's Quest Generator because it has a Wait property that I want to use
+- Use "Wait" nodes as placeholder for characters that do nothing/isn't starting to act yet
 '''

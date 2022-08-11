@@ -1,7 +1,7 @@
+from operator import truediv
 import random
 from time import time
 from numpy import empty
-from components.RewriteRules import ContinuousJointRule, JoiningJointRule, JointRule, SplittingJointRule
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
@@ -53,6 +53,9 @@ class StoryGraph:
         self.longest_path_length = 0
 
     #Copy=False would be used in the case of joint.
+
+    #TODO: Add an option that allows the user to start at another point other than 0.
+    #Possible: Create blank nodes in order to keep all the nodes equal?
     def add_story_part(self, part, character, location, timestep, copy=True):
 
         char_name = None
@@ -84,6 +87,7 @@ class StoryGraph:
 
         new_part.add_actor(character)
         new_part.timestep = timestep
+        new_part.abs_step = absolute_step
 
         if location is not None:
             new_part.set_location(location)
@@ -211,12 +215,6 @@ class StoryGraph:
         else:
             return 0'''
 
-    def get_absolute_timestep_given_node_and_character(self, story_node, character):
-
-        #This function will look up 
-
-        pass
-
     def add_world_state(self, new_state):
         self.world_states.append(new_state)
 
@@ -280,7 +278,7 @@ class StoryGraph:
 
     There should be three of these, one for each type of Joint Rule.
     '''
-    def apply_joint_rule(self, joint_rule: JointRule, characters, location_list, applyonce=False):
+    def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False):
 
         if joint_rule.joint_type == "joining":
             self.apply_joining_joint_rule(joint_rule, characters, location_list, applyonce)
@@ -290,22 +288,50 @@ class StoryGraph:
             self.apply_splitting_joint_rule(joint_rule, characters, location_list, applyonce)
     
     #If you figure out one, you figure out all three
-    def apply_joining_joint_rule(self, join_rule, characters, location_list, applyonce=False):
+    def apply_joining_joint_rule(self, join_rule, characters, location, applyonce=False):
 
-        #First, we must check if the base nodes exist in the same absolute step for the characters that we chose.
+        eligible_insertion_list = []
 
-        #If they exist, then they get added to The List.
+        for i in range(0, self.get_longest_path_length_by_character(characters[0])):
+
+            current_index_eligible = False
+
+            #First, check for the length of the first character's path
+            #Check if any nodes that character perform is the same as the first node in the join rule's requirement
+            current_first_char_node = self.story_parts.get(self.story_parts[(characters[0].name, i)], None)
+            if current_first_char_node == join_rule.base_actions[0]:
+
+                current_index_eligible = True
+
+                #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if it's the same as
+                #the required node
+                for other_char_index in range(1, join_rule.merge_count):
+                    current_chars_node = self.story_parts.get(self.story_parts[(characters[other_char_index].name, other_char_index)], None)
+                    current_index_eligible = current_index_eligible and current_chars_node == join_rule.base_actions[other_char_index]
+                
+                #Add to list if true
+                if current_index_eligible:
+                    eligible_insertion_list.append(i)
 
         #After all the nodes are checked, check if The List is empty. If it is, nothing happens.
-
         #If there is something in The List, then apply the rule and append the Joint Story Node.
-
-        #If Apply Once is False, then all the instances in The List gets applied.
-        #Otherwise, a random instance is applied to.
+        if len(eligible_insertion_list) > 0:
+            
+            #If Apply Once is False, then all the instances in The List gets applied.
+            #Otherwise, a random instance is applied to.
+            if applyonce:
+                eligible_insertion_list = [random.choice(eligible_insertion_list)]
 
         #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
         #This is where the copy=false in the add node function comes in handy.
-        pass
+        for insert_loc in eligible_insertion_list:
+            new_joint = deepcopy(join_rule.joint_node)
+            new_joint.remove_all_actors()
+
+            self.insert_story_part(new_joint, characters[0], location, insert_loc)
+
+            for other_char_index in range(1, join_rule.merge_count):
+                self.add_story_part(new_joint, characters[other_char_index], location, insert_loc, copy=False)
 
     def apply_continuous_joint_rule(self, cont_rule, characters, location_list, applyonce=False):
         #First, we must check if the base joint node exist for the characters that we chose.

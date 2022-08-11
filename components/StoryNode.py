@@ -47,6 +47,9 @@ class StoryNode:
         #Time to grab a pen and paper, time to draft!
         #List of edges?
         self.effect_on_next_ts = effect_on_next_ts
+
+        #Absolute Step is for the Joint Rules, so that the rules know which nodes to join together
+        self.abs_step = 0
         
         #TODO: An object that defines the change in relationship for characters and objects in this story node
 
@@ -67,6 +70,9 @@ class StoryNode:
 
     def remove_actor(self, remove_actor):
         self.actor.remove(remove_actor)
+
+    def remove_all_actors(self):
+        self.actor = []
 
     def add_target(self, new_target):
         self.target.append(new_target)
