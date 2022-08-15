@@ -1,0 +1,26 @@
+11 Aug 2022
+- Handle Actors and Targets
+- Handle only one character splitting
+- test the codes to make sure that they work
+- Look at REGEN Code (Done)
+    - Init Rules:
+        - Assassinate
+        - Break Ally
+        - Fight
+        - Forge Ally
+        - Give Blackmail Letter
+        - Give Gift
+        - Murder
+        - Murder Blackmailer
+        - Rebel
+        - Spy
+        - Steal
+    - Replacement Rules:
+        - Ambush
+        - Ambush by Hater
+        - Caught
+        - Encounter
+        - More Fight
+        - Spare
+        - Stealth Kill
+        - Stolen Gift
