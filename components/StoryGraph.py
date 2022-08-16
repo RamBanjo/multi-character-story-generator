@@ -85,6 +85,7 @@ class StoryGraph:
 
         self.story_parts[(char_name, absolute_step)] = new_part
 
+        #print(character.name, "added to", part.name)
         new_part.add_actor(character)
         new_part.timestep = timestep
         new_part.abs_step = absolute_step
@@ -93,8 +94,6 @@ class StoryGraph:
             new_part.set_location(location)
 
         return new_part
-
-    
 
     def remove_story_part(self, character, absolute_step):
 
@@ -131,7 +130,7 @@ class StoryGraph:
             if prevnode is not None and nextnode is not None:
                 prevnode.add_next_node(nextnode, character)
 
-    def insert_story_part(self, part, character, location, absolute_step):
+    def insert_story_part(self, part, character, location, absolute_step, copy=True):
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
 
         char_name = None
@@ -153,7 +152,7 @@ class StoryGraph:
 
             #then, we add a new story part at the spot
 
-            new_part = self.add_story_part_at_step(part, character, location, absolute_step, timestep)
+            new_part = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy)
 
             #finally, connect this to other nodes
             #the node that comes after,
@@ -298,7 +297,7 @@ class StoryGraph:
 
             #First, check for the length of the first character's path
             #Check if any nodes that character perform is the same as the first node in the join rule's requirement
-            current_first_char_node = self.story_parts.get(self.story_parts[(characters[0].name, i)], None)
+            current_first_char_node = self.story_parts.get((characters[0].name, i), None)
             if current_first_char_node.get_name() == join_rule.base_actions[0].get_name():
 
                 current_index_eligible = True
@@ -306,12 +305,12 @@ class StoryGraph:
                 #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if it's the same as
                 #the required node
                 for other_char_index in range(1, join_rule.merge_count):
-                    current_chars_node = self.story_parts.get(self.story_parts[(characters[other_char_index].name, other_char_index)], None)
+                    current_chars_node = self.story_parts.get((characters[other_char_index].name, other_char_index), None)
                     current_index_eligible = current_index_eligible and current_chars_node.get_name() == join_rule.base_actions[other_char_index].get_name()
                 
                 #Add to list if true
                 if current_index_eligible:
-                    eligible_insertion_list.append(i)
+                    eligible_insertion_list.append(i+1)
 
         #After all the nodes are checked, check if The List is empty. If it is, nothing happens.
         #If there is something in The List, then apply the rule and append the Joint Story Node.
@@ -325,13 +324,14 @@ class StoryGraph:
         #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
         #This is where the copy=false in the add node function comes in handy.
         for insert_loc in eligible_insertion_list:
+
             new_joint = deepcopy(join_rule.joint_node)
             new_joint.remove_all_actors()
 
-            self.insert_story_part(new_joint, characters[0], location, insert_loc)
+            self.insert_story_part(new_joint, characters[0], location[0], insert_loc, copy=False)
 
             for other_char_index in range(1, join_rule.merge_count):
-                self.add_story_part(new_joint, characters[other_char_index], location, insert_loc, copy=False)
+                self.insert_story_part(new_joint, characters[other_char_index], location[0], insert_loc, copy=False)
 
     def apply_continuous_joint_rule(self, cont_rule, characters, location, applyonce=False):
         eligible_insertion_list = []
@@ -342,17 +342,18 @@ class StoryGraph:
 
             #First, check for the length of the first character's path
             #Check if any nodes that character perform is the same as the first node in the join rule's requirement
-            current_first_char_node = self.story_parts.get(self.story_parts[(characters[0].name, i)], None)
+            current_first_char_node = self.story_parts.get((characters[0].name, i), None)
             if current_first_char_node.get_name() == cont_rule.base_joint.get_name():
                 current_index_eligible = True
 
                 #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if they are in the joint node
                 for other_char_index in range(1, cont_rule.merge_count):
+
                     current_index_eligible = current_index_eligible and characters[other_char_index] in current_first_char_node.actor
                 
                 #Add to list if true
                 if current_index_eligible:
-                    eligible_insertion_list.append(i)
+                    eligible_insertion_list.append(i+1)
 
         #After all the nodes are checked, check if The List is empty. If it is, nothing happens.
         #If there is something in The List, then apply the rule and append the Joint Story Node.
@@ -369,10 +370,10 @@ class StoryGraph:
             new_joint = deepcopy(cont_rule.joint_node)
             new_joint.remove_all_actors()
 
-            self.insert_story_part(new_joint, characters[0], location, insert_loc)
+            self.insert_story_part(new_joint, characters[0], location[0], insert_loc, copy=False)
 
             for other_char_index in range(1, cont_rule.merge_count):
-                self.add_story_part(new_joint, characters[other_char_index], location, insert_loc, copy=False)
+                self.insert_story_part(new_joint, characters[other_char_index], location[0], insert_loc, copy=False)
 
     def apply_splitting_joint_rule(self, split_rule, characters, location_list, applyonce=False):
         eligible_insertion_list = []
@@ -383,7 +384,7 @@ class StoryGraph:
 
             #First, check for the length of the first character's path
             #Check if any nodes that character perform is the same as the first node in the join rule's requirement
-            current_first_char_node = self.story_parts.get(self.story_parts[(characters[0].name, i)], None)
+            current_first_char_node = self.story_parts.get((characters[0].name, i), None)
             if current_first_char_node.get_name() == split_rule.base_joint.get_name():
                 current_index_eligible = True
 
@@ -393,7 +394,7 @@ class StoryGraph:
                 
                 #Add to list if true
                 if current_index_eligible:
-                    eligible_insertion_list.append(i)
+                    eligible_insertion_list.append(i+1)
 
         #After all the nodes are checked, check if The List is empty. If it is, nothing happens.
         #If there is something in The List, then apply the rule and append the Joint Story Node.
