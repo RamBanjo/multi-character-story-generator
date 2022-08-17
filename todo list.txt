@@ -2,6 +2,9 @@
 - Handle Actors and Targets
     - Add a new property in StoryNode that specifies target, and allow the target to be any type of object node. (Done)
     - Add a new property in JointNode that specifies target or actor.
+        - This will have to be done both for Normal Rules and Joint Rules
+            - For Normal Rules, there is a List of Targets
+            - For Joint Rules, there is a List of Targets
 - Handle only one character splitting
     - Solution is to instead of splitting into individuals, we split into groups instead
         - For example, a node containing Alice, Bob, Charlie, and Dave fits the criteria for a split
@@ -33,4 +36,4 @@
     - Flexible rules that allows nodes with any number of actors, allowing them to be used in multiple instances
         - For example:
             - If there is more than 1 person doing X, then they are eligible to do Y together with no targts in the next node
-    - Get rid of Dummies OR change equality testing
+    - Get rid of Dummies OR change equality testing (Dummies gotten rid of in Joint!)

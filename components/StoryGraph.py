@@ -277,6 +277,7 @@ class StoryGraph:
 
     There should be three of these, one for each type of Joint Rule.
     '''
+
     def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False):
 
         if joint_rule.joint_type == "joining":
