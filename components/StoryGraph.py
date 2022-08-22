@@ -130,7 +130,7 @@ class StoryGraph:
             if prevnode is not None and nextnode is not None:
                 prevnode.add_next_node(nextnode, character)
 
-    def insert_story_part(self, part, character, location, absolute_step, copy=True):
+    def insert_story_part(self, part, character, location, absolute_step, copy=True, targets=[]):
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
 
         char_name = None
@@ -151,8 +151,11 @@ class StoryGraph:
                 self.story_parts[(char_name, i+1)] = move_up
 
             #then, we add a new story part at the spot
-
             new_part = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy)
+
+            #we also add the targets here
+            for target in targets:
+                new_part.add_target(target)
 
             #finally, connect this to other nodes
             #the node that comes after,
@@ -165,7 +168,7 @@ class StoryGraph:
                 prevnode.remove_next_node(character)
                 prevnode.add_next_node(new_part, character)
 
-    def replace_story_parts(self, character, start_time_abs, end_time_abs, list_of_storynode_and_location_tuples):
+    def replace_story_parts(self, character, start_time_abs, end_time_abs, list_of_storynode_and_location_and_target_tuples):
 
         #First, record the start time. That is where the nodes will be inserted
 
@@ -175,8 +178,12 @@ class StoryGraph:
 
         insert_index = start_time_abs
         #Finally, insert everything at start time (increment each by 1), with the character's name attached. Neat!  
-        for story_loc_tuple in list_of_storynode_and_location_tuples:
-            self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index)
+        for story_loc_tuple in list_of_storynode_and_location_and_target_tuples:
+
+            if(len(story_loc_tuple[2]) > 0):
+                self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index, targets=story_loc_tuple[2])
+            else:
+                self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index)
             insert_index += 1
 
     def refresh_longest_path_length(self):
@@ -230,11 +237,11 @@ class StoryGraph:
         self.world_states = new_world_state_list
     
 
-    def apply_rewrite_rule(self, rule, character, location_list, applyonce=False):
+    def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False):
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
 
-        is_subgraph, subgraph_locs = StoryGraph.is_subgraph(rule.story_condition, self, rule.dummychar, character)
+        is_subgraph, subgraph_locs = StoryGraph.is_subgraph(rule.story_condition, self, rule.dummychar, character, targets_requirement_list)
 
         if is_subgraph:
             #If yes to both, do a replacement
@@ -255,8 +262,10 @@ class StoryGraph:
             for i in range(0, rule_length):
                 new_part = deepcopy(rule.story_change.story_parts[(rule.dummychar.get_name(), i)])
                 new_part.remove_actor(rule.dummychar)
-                new_part_and_loc_tuple = (new_part, location_list[i])
-                part_and_loc_tuple_list.append(new_part_and_loc_tuple)
+
+                #TODO: Add the target into this tuple
+                new_part_and_loc_and_tar_tuple = (new_part, location_list[i], target_replacement_list[i])
+                part_and_loc_tuple_list.append(new_part_and_loc_and_tar_tuple)
             
             for start_index in subgraph_locs:
                 end_index = start_index + rule_length - 1
@@ -278,7 +287,7 @@ class StoryGraph:
     There should be three of these, one for each type of Joint Rule.
     '''
 
-    def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False):
+    def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False, target_require=[], target_replace=[]):
 
         if joint_rule.joint_type == "joining":
             self.apply_joining_joint_rule(joint_rule, characters, location_list, applyonce)
@@ -511,7 +520,7 @@ class StoryGraph:
     '''
     TODO: List of Subgraph Locs should exclude parts of subgraph that overlaps two different timesteps
     '''
-    def is_subgraph(subgraph, supergraph, subgraph_char, supergraph_char):
+    def is_subgraph(subgraph, supergraph, subgraph_char, supergraph_char, targets_list=[]):
 
         #Since we only care if a certain character's storyline is a subgraph of another character's storyline
         #We will do this
@@ -521,6 +530,7 @@ class StoryGraph:
         subset = dict()
         superset = dict()
         supertimestepdict = dict()
+        supertargetsdict = dict()
 
         for key in subdict:
             if key[0] == subgraph_char.get_name():
@@ -529,6 +539,7 @@ class StoryGraph:
             if key[0] == supergraph_char.get_name():
                 superset[key[1]] = superdict[key].get_name()
                 supertimestepdict[key[1]] = superdict[key].timestep
+                supertargetsdict[key[1]] = tuple(sorted([key].target))
 
         list_of_subgraph_locs = []
 
@@ -544,8 +555,12 @@ class StoryGraph:
 
             for sub_i in range(0, len(subset)):
                 
-                #For each of the timestep in this graph, we check if the steps the character (this one in specific) take are the same.
+                #For each of the node in this graph, we check if the steps the character (this one in specific) take are the same.
                 result = result and subset[sub_i] == superset[super_i + sub_i]
+
+                #Additionally, if targets_list isn't empty, then we also need to check the superset's targets to see if they line up with the list of targets.
+                if len(targets_list) > 0:
+                    result = result and supertargetsdict[super_i + sub_i] == tuple(sorted(targets_list[sub_i]))
                 
                 #NEED ANOTHER WAY TO CHECK WORLDSTATES
 
@@ -569,6 +584,8 @@ class StoryGraph:
                 list_of_subgraph_locs.append(super_i)
 
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
+
+    
 
 
     
