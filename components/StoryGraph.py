@@ -56,7 +56,7 @@ class StoryGraph:
 
     #TODO: Add an option that allows the user to start at another point other than 0.
     #Possible: Create blank nodes in order to keep all the nodes equal?
-    def add_story_part(self, part, character, location, timestep, copy=True):
+    def add_story_part(self, part, character, location, timestep, copy=True, targets=[]):
 
         char_name = None
 
@@ -68,8 +68,13 @@ class StoryGraph:
 
         new_part = self.add_story_part_at_step(part, character, location, character_path_length, timestep, copy)
 
+        for target in targets:
+            new_part.add_target(target)
+
         if character_path_length > 0:
             self.story_parts[(char_name, character_path_length-1)].add_next_node(new_part, character)
+
+        return new_part
 
     def add_story_part_at_step(self, part, character, location, absolute_step, timestep, copy=True):
 
@@ -132,7 +137,7 @@ class StoryGraph:
 
     def insert_story_part(self, part, character, location, absolute_step, copy=True, targets=[]):
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
-
+        #TODO: Also need to check whether this story part 
         char_name = None
 
         if character is not None:
@@ -176,15 +181,27 @@ class StoryGraph:
         for remove_index in range(start_time_abs, end_time_abs+1):
             self.remove_story_part(character, start_time_abs)
 
+
         insert_index = start_time_abs
         #Finally, insert everything at start time (increment each by 1), with the character's name attached. Neat!  
-        for story_loc_tuple in list_of_storynode_and_location_and_target_tuples:
+        #Also, if doing this causes the entire story graph to be empty, then there is no need to call insert story part, just call add story part lol
 
-            if(len(story_loc_tuple[2]) > 0):
-                self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index, targets=story_loc_tuple[2])
-            else:
-                self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index)
-            insert_index += 1
+        if self.get_longest_path_length_by_character(character) <= 0:
+            for story_loc_tuple in list_of_storynode_and_location_and_target_tuples:
+                if(len(story_loc_tuple[2]) > 0):
+                    self.add_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index, copy=True, targets=story_loc_tuple[2])
+                else:
+                    self.add_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index, copy=True)
+                insert_index += 1
+        else:
+            for story_loc_tuple in list_of_storynode_and_location_and_target_tuples:
+                if(len(story_loc_tuple[2]) > 0):
+                    self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index, targets=story_loc_tuple[2])
+                else:
+                    self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index)
+                insert_index += 1
+
+        
 
     def refresh_longest_path_length(self):
         longest = 0
@@ -539,7 +556,7 @@ class StoryGraph:
             if key[0] == supergraph_char.get_name():
                 superset[key[1]] = superdict[key].get_name()
                 supertimestepdict[key[1]] = superdict[key].timestep
-                supertargetsdict[key[1]] = tuple(sorted([key].target))
+                supertargetsdict[key[1]] = tuple(sorted(superdict[key].target))
 
         list_of_subgraph_locs = []
 

@@ -37,7 +37,7 @@
         - For example:
             - If there is more than 1 person doing X, then they are eligible to do Y together with no targts in the next node
     - Get rid of Dummies OR change equality testing (Dummies gotten rid of in Joint!)
-    - How do I even handle targets from the perspective of the Rewrite Rules???? (DONE, Untested)
+    - How do I even handle targets from the perspective of the Rewrite Rules???? (DONE, TESTED)
         - Since a large portion will be replaced, do I need to list out the targets in all of those instances?
         - What do I need to do with the targets of these ones?
         - (TODO: PAPER PLOTTING REQUIRED)
