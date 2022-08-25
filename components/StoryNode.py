@@ -18,6 +18,7 @@ class StoryNode:
         self.tags = tags
         
         #charcount will be 1 if it's single char node, if it's joint then it will be more than 1
+        #If the char count is -1, it means that the amount is not fixed and can by any amount.
         self.charcount = charcount
         
         #set of characters acting. if it's a template, then it should be blank
