@@ -20,5 +20,5 @@ search_location = StoryNode("Search for Evidence at Location", None, None, None,
 
 story = StoryGraph("Let's Split Up, Gang!", [fred, daph, velma, shag, scoob], [haunted_house])
 
-split_up_to_search_at_location = SplittingJointRule()
+split_up_to_search_at_location = SplittingJointRule(3,)
 
