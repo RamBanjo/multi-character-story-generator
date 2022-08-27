@@ -74,9 +74,9 @@ test_graph.add_story_part(node_d, bob, town, 0)
 test_graph.add_story_part(node_e, alice, town, 0)
 test_graph.add_story_part(node_f, bob, town, 0)
 
-test_graph.apply_joint_rule(other_rule, [alice, bob], [town], True)
-test_graph.apply_joint_rule(other_rule_2, [alice, bob], [town], True)
-test_graph.apply_joint_rule(other_rule_3, [alice, bob], [town, town], True)
+test_graph.apply_joint_rule(other_rule, [alice, bob], [town], applyonce=True)
+test_graph.apply_joint_rule(other_rule_2, [alice, bob], [town], applyonce=True)
+test_graph.apply_joint_rule(other_rule_3, [alice, bob], [town, town], applyonce=True)
 
 #Now, let's see if it works!
 print("Alice's Actions, from steps 0 to 5:")

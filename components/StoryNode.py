@@ -94,6 +94,19 @@ class StoryNode:
             actornamestring += ", "
         return actornamestring[:-2]
 
+    def get_target_names(self):
+        targetnamestring = ""
+        for targetobject in self.target:
+
+            if targetobject is not None:
+                targetnamestring += targetobject.get_name()
+            else:
+                targetnamestring += "None"
+                
+
+            targetnamestring += ", "
+        return targetnamestring[:-2]
+
 
     def __str__(self) -> str:
         return self.get_name() + ": " + self.get_actor_names()

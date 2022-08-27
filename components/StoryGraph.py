@@ -143,12 +143,15 @@ class StoryGraph:
         if character is not None:
             char_name = character.get_name()
 
-        timestep = self.story_parts[(char_name, absolute_step-1)].timestep
+        if self.story_parts.get((char_name, absolute_step-1), None) is None:
+            timestep = 0
+        else:
+            timestep = self.story_parts[(char_name, absolute_step-1)].timestep
 
         character_path_length = self.get_longest_path_length_by_character(character)
 
         if absolute_step >= character_path_length:
-            self.add_story_part(part, character, location, timestep)
+            self.add_story_part(part, character, location, timestep, copy)
         else:
             #first, we need to move everything that comes after this part up by one
             for i in range(character_path_length-1, absolute_step-1, -1):
@@ -292,14 +295,16 @@ class StoryGraph:
         else:
             print("Nothing is replaced: Rule is not subgraph of Self")
 
-    def apply_joint_node (self, joint_node, character_list, location_list, absolute_step):
+    def apply_joint_node (self, joint_node, character_list, location, absolute_step):
         new_joint = deepcopy(joint_node)
         new_joint.remove_all_actors()
 
-        self.insert_story_part(new_joint, character_list[0], location_list[0], absolute_step, copy=False)
+        self.insert_story_part(new_joint, character_list[0], location, absolute_step, copy=False)
 
         for other_char_index in range(1, len(character_list)):
-            self.insert_story_part(new_joint, character_list[other_char_index], location_list[0], absolute_step, copy=False)
+            self.insert_story_part(new_joint, character_list[other_char_index], location, absolute_step, copy=False)
+
+        return new_joint
 
 
     '''
@@ -314,14 +319,14 @@ class StoryGraph:
     There should be three of these, one for each type of Joint Rule.
     '''
 
-    def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False, target_require=[], target_replace=[]):
+    def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False, target_require=[], target_replace=[], character_grouping=[]):
 
         if joint_rule.joint_type == "joining":
             self.apply_joining_joint_rule(joint_rule, characters, location_list, applyonce)
         if joint_rule.joint_type == "continuous":
             self.apply_continuous_joint_rule(joint_rule, characters, location_list, applyonce)
         if joint_rule.joint_type == "splitting":
-            self.apply_splitting_joint_rule(joint_rule, characters, location_list, applyonce)
+            self.apply_splitting_joint_rule(joint_rule, characters, location_list, character_grouping=character_grouping, applyonce=applyonce)
     
     #If you figure out one, you figure out all three
     def apply_joining_joint_rule(self, join_rule, characters, location, applyonce=False):
@@ -363,7 +368,7 @@ class StoryGraph:
         for insert_loc in eligible_insertion_list:
             self.apply_joint_node(join_rule.joint_node, characters, location, insert_loc)
 
-    def apply_continuous_joint_rule(self, cont_rule, characters, location, character_grouping=[], applyonce=False):
+    def apply_continuous_joint_rule(self, cont_rule, characters, location, applyonce=False):
         eligible_insertion_list = []
 
         for i in range(0, self.get_longest_path_length_by_character(characters[0])):
@@ -455,6 +460,16 @@ class StoryGraph:
     def print_all_node_values(self):
         for node in self.story_parts.values():
             print(node)
+
+    def print_all_node_beautiful_format(self):
+        print("LIST OF NODES")
+        for node in self.story_parts:
+            print(node)
+            print("Node Name:", self.story_parts[node].get_name())
+            print("Timestep", self.story_parts[node].timestep)
+            print("Actors:", self.story_parts[node].get_actor_names())
+            print("Targets:", self.story_parts[node].get_target_names())
+            print("----------")
         
     '''
     A story graph is considered to be a subgraph of another storygraph when:

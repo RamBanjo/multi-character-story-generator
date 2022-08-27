@@ -1,4 +1,4 @@
-11 Aug 2022 (ALL BACKLOGS COMPLETE)
+11 Aug 2022 (One Incomplete Item)
     - Handle Actors and Targets (DONE for Normal Rewrite Rules, TBA for Joint Rules)
         - Add a new property in StoryNode that specifies target, and allow the target to be any type of object node. (Done)
         - Add a new property in JointNode that specifies target or actor.
@@ -44,4 +44,10 @@
 25 Aug 2022
     - Handle Targets for Joint Rule 
     - Test Multi-Group Splitting Rule
-    - Check Proposal to Compare Progress
+    - Check Proposal to Compare 
+        - Quality Metrics needs to be done
+        - I think that almost everything in regards of the graph has been done except:
+            - The untested and the unadded
+            - The program that ties up all the components together
+                - This includes a function that automates relationship change with targets
+            - Graph Visualization

@@ -101,7 +101,7 @@ class JointRule:
         compatibility = True
 
         #This part below is lifted from regular rules.
-        for i in range (0, self.merge_count):
+        for i in range (0, len(character_list)):
             #TODO: Check if the character contains tags in Required Tags (not compatible if false)
 
             if self.required_tags_list[i] is not None:

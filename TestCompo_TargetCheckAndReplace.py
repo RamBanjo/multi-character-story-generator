@@ -36,11 +36,11 @@ rhs_graph.add_story_part(go_to_location, dummy, dumloc, 0, copy=True)
 
 buy_at_shop_instead = RewriteRule(lhs_graph, rhs_graph, dummy, "Buy at Shop Instead")
 
-main_graph.apply_rewrite_rule(buy_at_shop_instead, bob, [town, store, store], [[sword]], [[], [sword], []])
+main_graph.apply_rewrite_rule(buy_at_shop_instead, bob, [town, store, store], [[sword]], [[store], [sword], [town]])
 
 main_graph.print_all_nodes()
 
 #Only the 2nd item would be the sword
-print(main_graph.story_parts[('Bob', 0)].target)
+print(main_graph.story_parts[('Bob', 0)].target[0].get_name())
 print(main_graph.story_parts[('Bob', 1)].target[0].get_name())
-print(main_graph.story_parts[('Bob', 2)].target)
+print(main_graph.story_parts[('Bob', 2)].target[0].get_name())
