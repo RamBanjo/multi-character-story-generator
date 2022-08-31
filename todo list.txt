@@ -1,11 +1,11 @@
-11 Aug 2022 (One Incomplete Item)
-    - Handle Actors and Targets (DONE, UNTESTED)
+11 Aug 2022 (ALL BACKLOGS COMPLETE)
+    - Handle Actors and Targets (DONE)
         - Add a new property in StoryNode that specifies target, and allow the target to be any type of object node. (Done)
         - Add a new property in JointNode that specifies target or actor.
             - This will have to be done both for Normal Rules and Joint Rules
               - For Normal Rules, there is a List of Targets
               - For Joint Rules, there is a List of Targets
-    - Handle only one character splitting (DONE, )
+    - Handle only one character splitting (DONE)
     - Solution is to instead of splitting into individuals, we split into groups instead (DONE)
         - For example, a node containing Alice, Bob, Charlie, and Dave fits the criteria for a split
         - The next node should allow them to split into two groups, Alice Bob and Chalie into left node with no target, dave becomes the main actor of right node
@@ -42,7 +42,7 @@
         - What do I need to do with the targets of these ones?
         - (TODO: PAPER PLOTTING REQUIRED)
 25 Aug 2022
-    - Handle Targets for Joint Rule
+    - Handle Targets for Joint Rule (DONE)
     - Test Multi-Group Splitting Rule (DONE)
     - Check Proposal to Compare 
         - Quality Metrics needs to be done
@@ -51,3 +51,4 @@
             - The program that ties up all the components together
                 - This includes a function that automates relationship change with targets
             - Graph Visualization
+    - Read and Summarize new Kybartas Paper
