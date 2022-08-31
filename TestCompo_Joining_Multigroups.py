@@ -23,6 +23,10 @@ living_room = LocationNode("Living Room")
 dining_room = LocationNode("Dining Room")
 study = LocationNode("Study")
 
+couch = ObjectNode("Couch")
+oven = ObjectNode("Oven")
+bookshelf = ObjectNode("Bookshelf")
+
 move_location = StoryNode("Move To Location", None, None, None, -1)
 search_location = StoryNode("Search for Evidence at Location", None, None, None, -1)
 
@@ -33,6 +37,6 @@ enter_house.add_target(haunted_house)
 
 split_up_to_search_at_location = SplittingJointRule(3, move_location, [search_location, search_location, search_location], "split up and search")
 
-story.apply_splitting_joint_rule(split_up_to_search_at_location, [fred, daph, velma, shag, scoob], [living_room, dining_room, study], [[fred], [shag, scoob], [daph, velma]], applyonce=True)
+story.apply_splitting_joint_rule(split_up_to_search_at_location, [fred, daph, velma, shag, scoob], [living_room, dining_room, study], [[fred], [shag, scoob], [daph, velma]], applyonce=True, target_require=[haunted_house], target_replace=[[couch],[oven],[bookshelf]])
 
 story.print_all_node_beautiful_format()

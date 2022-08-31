@@ -329,7 +329,7 @@ class StoryGraph:
             self.apply_splitting_joint_rule(joint_rule, characters, location_list, character_grouping=character_grouping, applyonce=applyonce)
     
     #If you figure out one, you figure out all three
-    def apply_joining_joint_rule(self, join_rule, characters, location, applyonce=False):
+    def apply_joining_joint_rule(self, join_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
 
         eligible_insertion_list = []
 
@@ -344,11 +344,18 @@ class StoryGraph:
 
                 current_index_eligible = True
 
+                if len(target_require) > 0:
+                    for target in target_require[0]:
+                        current_index_eligible = current_index_eligible and target in current_first_char_node.target
+
                 #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if it's the same as
                 #the required node
                 for other_char_index in range(1, len(characters)):
                     current_chars_node = self.story_parts.get((characters[other_char_index].name, other_char_index), None)
                     current_index_eligible = current_index_eligible and current_chars_node.get_name() == join_rule.base_actions[other_char_index].get_name()
+                    if len(target_require) > 0:
+                        for target in target_require[other_char_index]:
+                            current_index_eligible = current_index_eligible and target in current_chars_node.target
                 
                 #Add to list if true
                 if current_index_eligible:
@@ -366,9 +373,13 @@ class StoryGraph:
         #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
         #This is where the copy=false in the add node function comes in handy.
         for insert_loc in eligible_insertion_list:
-            self.apply_joint_node(join_rule.joint_node, characters, location, insert_loc)
+            new_joint = self.apply_joint_node(join_rule.joint_node, characters, location, insert_loc)
 
-    def apply_continuous_joint_rule(self, cont_rule, characters, location, applyonce=False):
+            if len(target_replace) > 0:
+                for target in target_replace:
+                    new_joint.add_target(target)
+
+    def apply_continuous_joint_rule(self, cont_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
         eligible_insertion_list = []
 
         for i in range(0, self.get_longest_path_length_by_character(characters[0])):
@@ -380,6 +391,10 @@ class StoryGraph:
             current_first_char_node = self.story_parts.get((characters[0].name, i), None)
             if current_first_char_node.get_name() == cont_rule.base_joint.get_name():
                 current_index_eligible = True
+
+                if len(target_require) > 0:
+                    for target in target_require:
+                        current_index_eligible = current_index_eligible and target in current_first_char_node.target
 
                 #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if they are in the joint node
                 for other_char_index in range(1, len(characters)):
@@ -402,9 +417,14 @@ class StoryGraph:
         #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
         #This is where the copy=false in the add node function comes in handy.
         for insert_loc in eligible_insertion_list:
-            self.apply_joint_node(cont_rule.joint_node, characters, location, insert_loc)
+            new_joint = self.apply_joint_node(cont_rule.joint_node, characters, location, insert_loc)
 
-    def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False):
+            if len(target_replace) > 0:
+                for target in target_replace:
+                    new_joint.add_target(target)
+
+
+    def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):
         eligible_insertion_list = []
 
         for i in range(0, self.get_longest_path_length_by_character(characters[0])):
@@ -416,6 +436,10 @@ class StoryGraph:
             current_first_char_node = self.story_parts.get((characters[0].name, i), None)
             if current_first_char_node.get_name() == split_rule.base_joint.get_name():
                 current_index_eligible = True
+
+                if len(target_require) > 0:
+                    for target in target_require:
+                        current_index_eligible = current_index_eligible and target in current_first_char_node.target
 
                 #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if they are in the joint node
                 for other_char_index in range(1, len(characters)):
@@ -442,15 +466,21 @@ class StoryGraph:
                 for i in range(0, len(character_grouping)):
                     new_joint = deepcopy(split_rule.split_list[i])
                     new_joint.remove_all_actors()
-                    self.apply_joint_node(new_joint, character_grouping[i], location_list[i], insert_loc)
+                    added_joint = self.apply_joint_node(new_joint, character_grouping[i], location_list[i], insert_loc)
+
+                    if len(target_replace) > 0:
+                        for target in target_replace[i]:
+                            added_joint.add_target(target)
         else:
             for insert_loc in eligible_insertion_list:
                 for i in range(0, len(characters)):
                     new_joint = deepcopy(split_rule.split_list[i])
                     new_joint.remove_all_actors()
-                    self.insert_story_part(new_joint, characters[i], location_list[i], insert_loc)    
+                    added_joint = self.insert_story_part(new_joint, characters[i], location_list[i], insert_loc)   
 
-        
+                    if len(target_replace) > 0:
+                        for target in target_replace[i]:
+                            added_joint.add_target(target)
 
 
     def print_all_nodes(self):
