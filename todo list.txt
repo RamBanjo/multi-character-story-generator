@@ -51,4 +51,6 @@
             - The program that ties up all the components together
                 - This includes a function that automates relationship change with targets
             - Graph Visualization
+        - Generic Constraints
     - Read and Summarize new Kybartas Paper
+        - Uses the same story metrics as REGEN
