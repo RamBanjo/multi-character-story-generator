@@ -1,3 +1,4 @@
+from cgitb import text
 from numpy import true_divide
 
 from components.Edge import Edge
@@ -60,6 +61,23 @@ class WorldState:
                 return True
             else:
                 return False
+
+    def list_location_adjacencies(self):
+        print("Location Adjacencies:")
+
+        locations_in_dict = [loco for loco in self.node_dict.values() if ('Type', 'Location') in loco.tags.items()]
+
+        for location in locations_in_dict:
+            qld_adjacencies = self.node_dict[location.get_name()].get_incoming_edge("adjacent_to")
+
+            texttoprint = location.get_name()
+            texttoprint += " -> "
+
+            for in_edge in qld_adjacencies:
+                texttoprint += in_edge.from_node.get_name()
+                texttoprint += ", "
+
+            print(texttoprint[:-2])
 
 
     '''

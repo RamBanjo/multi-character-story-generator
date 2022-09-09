@@ -31,6 +31,7 @@ class RewriteRule:
         self.required_tags = required_tags
         self.unwanted_tags = unwanted_tags
         self.bias_range = bias_range
+        self.is_joint_rule = False
 
     def check_character_compatibility(self, character_node):
 
@@ -95,6 +96,7 @@ class JointRule:
         self.required_tags_list = required_tags_list
         self.unwanted_tags_list = unwanted_tags_list
         self.bias_range_list = bias_range_list
+        self.is_joint_rule = True
 
     def check_compatibilities(self, character_list):
         #This function should be the same as the function that checks compatibilities in the normal rewrite rules but it checks for each character

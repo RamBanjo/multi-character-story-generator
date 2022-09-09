@@ -54,3 +54,10 @@
         - Generic Constraints
     - Read and Summarize new Kybartas Paper
         - Uses the same story metrics as REGEN
+08 Sep 2022
+    - Map Representation in World State
+        - Function in World State, that given a LocationNode, returns all adjacent locations
+    - StoryGenerationFunction's rule application will make a Location List this way:
+        - Assume the location doesn't change
+        - However, if there is an action node that calls for a location change, refer to the map and choose one random location to change to
+        - After that, all the actions will be performed in that location unless there is another change

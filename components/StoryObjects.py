@@ -45,7 +45,7 @@ class ObjectNode:
     
     def add_outgoing_edge(self, edge):
         edge.from_node = self
-        self.incoming_edges.append(edge)
+        self.outgoing_edges.append(edge)
 
     def remove_incoming_edge(self, edge):
         edge.to_node = None

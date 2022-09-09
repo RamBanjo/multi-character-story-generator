@@ -66,7 +66,7 @@ class StoryGraph:
         #first we need to get the last entry in this character's story
         character_path_length = self.get_longest_path_length_by_character(character)
 
-        new_part = self.add_story_part_at_step(part, character, location, character_path_length, timestep, copy)
+        new_part = self.add_story_part_at_step(part, character, location, character_path_length, timestep, copy, targets)
 
         for target in targets:
             new_part.add_target(target)
@@ -76,7 +76,7 @@ class StoryGraph:
 
         return new_part
 
-    def add_story_part_at_step(self, part, character, location, absolute_step, timestep, copy=True):
+    def add_story_part_at_step(self, part, character, location, absolute_step, timestep, copy=True, targets=[]):
 
         char_name = None
 
@@ -97,6 +97,9 @@ class StoryGraph:
 
         if location is not None:
             new_part.set_location(location)
+
+        for target in targets:
+            new_part.add_target(target)
 
         return new_part
 
@@ -257,11 +260,14 @@ class StoryGraph:
         self.world_states = new_world_state_list
     
 
-    def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False):
+    def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
 
         is_subgraph, subgraph_locs = StoryGraph.is_subgraph(rule.story_condition, self, rule.dummychar, character, targets_requirement_list)
+
+        for banned_loc in banned_subgraph_locs:
+            subgraph_locs.remove(banned_loc)
 
         if is_subgraph:
             #If yes to both, do a replacement
