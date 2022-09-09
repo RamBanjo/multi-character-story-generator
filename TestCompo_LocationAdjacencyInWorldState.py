@@ -20,6 +20,7 @@ nt = LocationNode("Northern Territory")
 wa = LocationNode("Western Australia")
 sa = LocationNode("South Australia")
 tas = LocationNode("Tasmania")
+act = LocationNode("Australia Central Territory")
 
 australia.add_node(nsw)
 australia.add_node(vic)
@@ -28,6 +29,7 @@ australia.add_node(nt)
 australia.add_node(wa)
 australia.add_node(sa)
 australia.add_node(tas)
+australia.add_node(act)
 
 australia.doubleconnect(nsw, "adjacent_to", vic)
 australia.doubleconnect(nsw, "adjacent_to", sa)
@@ -35,10 +37,11 @@ australia.doubleconnect(nsw, "adjacent_to", qld)
 australia.doubleconnect(qld, "adjacent_to", nt)
 australia.doubleconnect(qld, "adjacent_to", sa)
 australia.doubleconnect(vic, "adjacent_to", sa)
-australia.doubleconnect(vic, "adjacent_to", tas)
+#australia.doubleconnect(vic, "adjacent_to", tas)
 australia.doubleconnect(nt, "adjacent_to", wa)
 australia.doubleconnect(nt, "adjacent_to", sa)
 australia.doubleconnect(wa, "adjacent_to", sa)
+australia.doubleconnect(act, "adjacent_to", nsw)
 
 # Query: What is Queensland adjacent to?
 

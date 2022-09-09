@@ -68,16 +68,18 @@ class WorldState:
         locations_in_dict = [loco for loco in self.node_dict.values() if ('Type', 'Location') in loco.tags.items()]
 
         for location in locations_in_dict:
-            qld_adjacencies = self.node_dict[location.get_name()].get_incoming_edge("adjacent_to")
+            adjacencies = self.node_dict[location.get_name()].get_incoming_edge("adjacent_to")
 
             texttoprint = location.get_name()
             texttoprint += " -> "
 
-            for in_edge in qld_adjacencies:
+            for in_edge in adjacencies:
                 texttoprint += in_edge.from_node.get_name()
                 texttoprint += ", "
-
-            print(texttoprint[:-2])
+            if len(adjacencies) > 0:
+                print(texttoprint[:-2])
+            else:
+                print(location.get_name(), "has no adjacencies!")
 
 
     '''
