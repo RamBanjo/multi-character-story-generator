@@ -328,9 +328,9 @@ class StoryGraph:
     def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False, target_require=[], target_replace=[], character_grouping=[]):
 
         if joint_rule.joint_type == "joining":
-            self.apply_joining_joint_rule(joint_rule, characters, location_list, applyonce)
+            self.apply_joining_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
         if joint_rule.joint_type == "continuous":
-            self.apply_continuous_joint_rule(joint_rule, characters, location_list, applyonce)
+            self.apply_continuous_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
         if joint_rule.joint_type == "splitting":
             self.apply_splitting_joint_rule(joint_rule, characters, location_list, character_grouping=character_grouping, applyonce=applyonce)
     

@@ -86,6 +86,10 @@ class CharacterNode(ObjectNode):
 class LocationNode(ObjectNode):
     def __init__(self, name, tags={"Type": "Location"}):
         super().__init__(name, tags)
+
+    def get_adjacent_locations_list(self):
+        adjacencies = self.get_incoming_edge("adjacent_to")
+        return adjacencies
         
 #alice = StoryCharacter("Alice", {'lawbias': 0, 'moralbias': 0}, {"Race":"Human", "Job":"Spellcaster", "Life":"Alive", "Gender":"Female"}, 5)
 

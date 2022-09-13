@@ -6,6 +6,7 @@ from components.StoryObjects import ObjectNode
 from components.StoryObjects import CharacterNode
 from components.StoryObjects import LocationNode
 from components.RewriteRules import *
+from components.UtilFunctions import RelationshipChange
 
 '''
 This function will return a story graph that is generated according to the given specifications.
@@ -70,12 +71,6 @@ def generate_story_from_starting_graph(base_story, minimum_satisfy_length, rules
                 current_rule_loc_tuple = random.choice(list_of_applicable_rules)
                 current_rule, current_loclist = current_rule_loc_tuple[0], current_rule_loc_tuple[1]
                 rule_validity = True
-        
-        # If the rule is a joint one, then check other characters in the shortest-route-list and make a list of characters that can join the joint.
-        #    If there aren't enough characters to satisfy this, then eliminate this rule from the list and return to choosing.
-                actor_list = []
-                if current_rule.is_joint_rule:
-                    pass
 
         # If there is at least one constraint, check if applying this rule would violate the constraint.
         #    If there is a violation, eliminate this rule from the list and return to choosing.
@@ -101,6 +96,19 @@ def generate_story_from_starting_graph(base_story, minimum_satisfy_length, rules
                 if not coord_validity:
                     #None of these coords present a valid scenario, so we'll have to remove this rule from the list.
                     rule_validity = False
+        
+        # If the rule is a joint one, check what kind of joint it is.
+        # Joining Joint: Check other characters in the shortest-route-list and make a list of characters that can join the joint in that step.
+        # Eligible characters are characters who are not locked in by other actions
+        # (such as nodes marked with tags that would not let them come join this node) in that absolute step
+        # For example:
+        # Char. A has a Joint Node where he talks to someone at a bar, but Char. B can't join because he's fighting a dragon and he can't leave the fight to talk to A, and then go back to the fight.
+        #    If there aren't enough characters to satisfy this, then eliminate this rule from the list and return to choosing.
+        # Continuous Joint: We don't assign actor_list yet, we will assign it once the absolute step is chosen.
+        # Splitting Joint: Same as above.
+                actor_list = []
+                if current_rule.is_joint_rule:
+                    pass
                 
         # This line checks if the rule is not valid. If it's not, then it gets removed from the possible list.
                 if not rule_validity:
@@ -113,14 +121,59 @@ def generate_story_from_starting_graph(base_story, minimum_satisfy_length, rules
         # The location needs to be decided.
         # TODO: Check the Potential Replacement if it's a node that changes the location.
         # If there is, then for each one of those, pick a valid location. Then, from that point on that character's location will change.
+        # To dictate this change, add a RelChange object to this node.
+        # At the end of sorting out 
 
+                    
 
                     if current_rule.is_joint_rule:
+
+                        # Check what kind of Joint Rule it is
+
+                        old_location = base_story.story_nodes[(current_char.get_name, shortest_route_length-1)].get_location()
+                        new_location = old_location
+
+                        # TODO: List of relationship changes given the node keys and values
+                        # Function:
+                        # Input: Input the List of NodeKey, NodeValue, and RelationshipChanges.
+                        # Output: Return None if there is no Relationship Change, Return List of Relationship Change Objects if there is a Relationship Change
+                        
+                        if base_story.base_joint.tags.get("movement", None) == "change_location":
+                            new_rl_edge = "is_in"
+
+                            #pick new random location
+                            new_location = base_story.world_states[shortest_route_length-1]
+
+                            #Apply this for each of the actors in the joint node.
+                            #Remove the old location,
+                            new_relchange = RelationshipChange()
+
+                        #if base_story.base_joint.tags.get("item", None) == "pick_up":
+                        #    new_rl_edge = "holds"
+
+                        #if base_story.base_joint.tags.get("item", None) == "drop":
+                        #    new_rl_edge = "holds"
+
+                        #... and so on.
+
+                        # If it does, randomize the next location, put the new location as base joint's target
+                        # If it's a splitting joint, each of the new node's locations are random, then add all those new locations as targets in base joint
+
                         base_story.apply_joint_rule(current_rule, actor_list, )
                     else:
+
+                        # Check entire length of rule
+                        # For each rule that has no "change_location" tag, the location stays the same
+                        # If there is a "change_location" tag, then a random adjacent location is chosen for the next node
+                        # This new location will also be
+
                         base_story.apply_rewrite_rule()
 
         # This will also update the world states. Since WorldState is no longer tied to the StoryGraph, it must be updated separately.
+        # To do this, we must check if the step where the worldstate is added already has a world state.
+        # If there isn't one, copy the world state from the previous absolute step.
+        # After that, apply the relationship changes that the stories in the previous steps had to offer.
+        # If there is one, only apply the relationship change that the newly-added node had to offer.
 
         # 8. Jump back to step 2.
 

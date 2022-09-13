@@ -41,10 +41,10 @@
         - Since a large portion will be replaced, do I need to list out the targets in all of those instances?
         - What do I need to do with the targets of these ones?
         - (TODO: PAPER PLOTTING REQUIRED)
-25 Aug 2022
+25 Aug 2022 (ALL BACKLOGS COMPLETE)
     - Handle Targets for Joint Rule (DONE)
     - Test Multi-Group Splitting Rule (DONE)
-    - Check Proposal to Compare 
+    - Check Proposal to Compare (DONE)
         - Quality Metrics needs to be done
         - I think that almost everything in regards of the graph has been done except:
             - The untested and the unadded
@@ -52,12 +52,13 @@
                 - This includes a function that automates relationship change with targets
             - Graph Visualization
         - Generic Constraints
-    - Read and Summarize new Kybartas Paper
+    - Read and Summarize new Kybartas Paper (DONE)
         - Uses the same story metrics as REGEN
 08 Sep 2022
-    - Map Representation in World State
+    - Map Representation in World State (DONE)
         - Function in World State, that given a LocationNode, returns all adjacent locations
     - StoryGenerationFunction's rule application will make a Location List this way:
         - Assume the location doesn't change
         - However, if there is an action node that calls for a location change, refer to the map and choose one random location to change to
         - After that, all the actions will be performed in that location unless there is another change
+    - Location Adjecnecy Function in World State (DONE)

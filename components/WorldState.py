@@ -68,7 +68,7 @@ class WorldState:
         locations_in_dict = [loco for loco in self.node_dict.values() if ('Type', 'Location') in loco.tags.items()]
 
         for location in locations_in_dict:
-            adjacencies = self.node_dict[location.get_name()].get_incoming_edge("adjacent_to")
+            adjacencies = self.node_dict[location.get_name()].get_adjacent_locations_list()
 
             texttoprint = location.get_name()
             texttoprint += " -> "
