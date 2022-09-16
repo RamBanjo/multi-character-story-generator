@@ -258,6 +258,11 @@ class StoryGraph:
         list_end = self.world_states[end_index+1:]
         new_world_state_list = list_start + list_of_world_states + list_end
         self.world_states = new_world_state_list
+
+    def clone_world_state(self, index):
+        new_ws = deepcopy(self.world_states[index])
+        self.insert_world_state(new_ws, index+1)
+        return new_ws
     
 
     def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):

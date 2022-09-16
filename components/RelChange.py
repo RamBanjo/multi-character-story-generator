@@ -5,3 +5,11 @@ class RelChange:
         self.edge = edge
         self.node_b = node_b
         self.add_or_remove = add_or_remove
+
+class TagChange:
+    def __init__(self, name, object_node_name, tag, value, add_or_remove):
+        self.name = name
+        self.object_node_name = object_node_name
+        self.tag = tag
+        self.value = value
+        self.add_or_remove = add_or_remove
