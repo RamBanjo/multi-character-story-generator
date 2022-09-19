@@ -65,11 +65,11 @@
 15 Sep 2022
     - Change the future World States according to Present
     - Memory issues from copying WorldStates, how much is too much
-    - Record only changes to WorldState, keep latest version
+    - Record only changes to WorldState, keep latest version (DONE)
         - Pending: Rewind back in case of errors
         - Keep 2 world states: Initial Worldstate and Current Worldstate
             - In the case that there is a change to the worldstate, take the initial worldstate and apply all the changes in each step, then make that the new current worldstate
     - Function that takes Tag and Value as input, and then outputs the proper relationship change (where actor/target can be added later)
     - ApplyRule, but with past timesteps
     - Check if Character is in the same location
-        - Take the init step, advance it until it hits the place we want to check, 
+        - Take the init step, advance it until it hits the place we want to check, and then check relationship
