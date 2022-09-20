@@ -55,6 +55,11 @@ class ObjectNode:
         edge.from_node = None
         self.outgoing_edges.remove(edge)
 
+    def print_all_tags(self):
+        print("==== Tags found on", self.get_name(), "====")
+        for key, value in self.tags.items():
+            print(key, ":" ,value)
+
     def __str__(self) -> str:
         return self.get_name()
 

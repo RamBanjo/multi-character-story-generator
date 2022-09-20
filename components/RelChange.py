@@ -5,6 +5,7 @@ class RelChange:
         self.edge = edge
         self.node_b = node_b
         self.add_or_remove = add_or_remove
+        self.changetype = "relationship"
 
 class TagChange:
     def __init__(self, name, object_node_name, tag, value, add_or_remove):
@@ -13,3 +14,4 @@ class TagChange:
         self.tag = tag
         self.value = value
         self.add_or_remove = add_or_remove
+        self.changetype = "tag"

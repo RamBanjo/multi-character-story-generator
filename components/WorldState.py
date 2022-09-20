@@ -118,6 +118,12 @@ class WorldState:
 
         return result
 
+    def apply_some_change(self, changeobject):
+        if changeobject.changetype == "relationship":
+            self.apply_relationship_change(changeobject)
+        if changeobject.changetype == "tag":
+            self.apply_tag_change(changeobject)
+
     def apply_relationship_change(self, relchange_object):
         if relchange_object.add_or_remove == "add":
             #If the intention is to add, then we add a connection between the nodes
@@ -139,6 +145,12 @@ class WorldState:
             if relchange_object.edge in self.edges:
                 #If it exists, remove it
                 self.edges.remove(relchange_object.edge)
+
+    def apply_tag_change(self, tagchange_object):
+        if tagchange_object.add_or_remove == "add":
+            self.node_dict[tagchange_object.object_node_name].set_tag(tagchange_object.tag, tagchange_object.value)
+        if tagchange_object.add_or_remove == "remove":
+            self.node_dict[tagchange_object.object_node_name].remove_tag(tagchange_object.tag)
 
     def print_all_nodes(self):
         print("=== List of Nodes in {} ===".format(self.name))
