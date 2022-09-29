@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effect_on_next_ts = None):
+    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effect_on_next_ts = None, required_tags_list = None, unwanted_tags_list = None, bias_range = None):
         
         #the name of this action.
         self.name = name
@@ -51,6 +51,11 @@ class StoryNode:
 
         #Absolute Step is for the Joint Rules, so that the rules know which nodes to join together
         self.abs_step = 0
+
+        #Required Tags List, Unwanted Tags List, and Bias Range are taken from RewriteRule.
+        self.required_tags_list = required_tags_list
+        self.unwanted_tags_list = unwanted_tags_list
+        self.bias_range = bias_range
         
         #TODO: An object that defines the change in relationship for characters and objects in this story node
 
@@ -149,5 +154,35 @@ class StoryNode:
 
         del next_node.previous_nodes[char_name]
         del self.next_nodes[char_name]
+
+    def check_character_compatibility(self, character_node):
+
+        compatibility = True
+
+        #TODO: Check if the character contains tags in Required Tags (not compatible if false)
+
+        if self.required_tags is not None:
+            for tag in self.required_tags.values():
+                compatibility = compatibility and tag in character_node.tags.values()
+
+        #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
+
+        if self.unwanted_tags is not None:
+            for tag in self.unwanted_tags.values():
+                compatibility = compatibility and tag not in character_node.tags.values()
+        
+        #TODO: Check if character's bias is within the acceptable range (not compatible if false)
+        if self.bias_range is not None:
+            for bias in self.bias_range:
+                char_bias_value = character_node.biases[bias]
+                compatibility = compatibility and char_bias_value >= self.bias_range[bias][0]
+                compatibility = compatibility and char_bias_value <= self.bias_range[bias][1]
+                
+        #If the character passes all three tests, then return true. Otherwise, return false
+        return compatibility
+
+    #TODO: What if we move Graph Compatibility here too?
+    #TODO: Input:
+    #TODO: Output:
 
 

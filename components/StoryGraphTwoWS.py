@@ -40,19 +40,19 @@ If we use a rule that replaces b with d, e on Alice's storyline the entries will
 ("Alice", 2) -> e
 ("Alice", 3) -> c
 
-For WorldStates, they will be kept in a list. Replacing the worldstate would be as easy as duplicating the worldstates from the rule and
-replacing it in the list. (Since we don't have to care about connections between world states here, this should be possible!)
-
-TODO: Rewrite this class entirely (all the functions) so that they can handle multiple events in one timestep
+Only two world states will be kept: The starting world state and the worldstate of the latest world state.
 '''
 class StoryGraph:
-    def __init__(self, name, character_objects, location_objects):
+    def __init__(self, name, character_objects, location_objects, starting_ws, list_of_changes):
         self.name = name
-        self.world_states = []
         self.character_objects = character_objects
         self.location_objects = location_objects
         self.story_parts = dict()
         self.longest_path_length = 0
+        self.starting_ws = starting_ws
+        
+        self.list_of_changes = list_of_changes
+        self.latest_ws = self.make_latest_state()
 
     #Copy=False would be used in the case of joint.
 
@@ -246,26 +246,35 @@ class StoryGraph:
         else:
             return 0'''
 
-    def add_world_state(self, new_state):
-        self.world_states.append(new_state)
+    def make_latest_state(self, state_name = "Latest State"):
+        #TODO: Take the initial world state and copy it.
+        #TODO: Then, cycle through the list of changes, applying the changes from it.
+        #TODO: returns the latest state
 
-    def remove_world_state(self, index):
-        self.world_states.pop(index)
+        return self.make_state_at_step(len(self.list_of_changes), state_name = "Latest State")
 
-    def insert_world_state(self, new_state, index):
-        self.world_states.insert(index, new_state)
+    def make_state_at_step(self, stopping_step, state_name = "Traveling State"):
+        #TODO: Same as make_latest_state, but you can choose the step where to stop.
+        #TODO: In fact, make_latest_state should call this function but set the stopping step as the last step.
 
-    def replace_world_states(self, start_index, end_index, list_of_world_states):
-        list_start = self.world_states[:start_index]
-        list_end = self.world_states[end_index+1:]
-        new_world_state_list = list_start + list_of_world_states + list_end
-        self.world_states = new_world_state_list
+        traveling_state = deepcopy(self.starting_ws)
+        traveling_state.name = state_name
 
-    def clone_world_state(self, index):
-        new_ws = deepcopy(self.world_states[index])
-        self.insert_world_state(new_ws, index+1)
-        return new_ws
-    
+        for index in range(0, stopping_step):
+            for change in self.list_of_changes[index]:
+                traveling_state.apply_relationship_change(change)
+        
+        return traveling_state
+
+    def reverse_steps(self, number_of_reverse, state_name = "Reversed State"):
+        #TODO: Returns a World State, reversing the changes for steps equal to number_of_reverse from the last state
+
+        traveling_state = deepcopy(self.latest_ws)
+        traveling_state.name = state_name
+
+        for index in range(len(self.list_of_changes)-1, len(self.list_of_changes)-1-number_of_reverse, -1):
+            for change in self.list_of_changes[index]:
+                traveling_state.apply_relationship_change(change, reverse=True)
 
     def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline

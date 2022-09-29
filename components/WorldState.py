@@ -118,14 +118,14 @@ class WorldState:
 
         return result
 
-    def apply_some_change(self, changeobject):
+    def apply_some_change(self, changeobject, reverse=False):
         if changeobject.changetype == "relationship":
-            self.apply_relationship_change(changeobject)
+            self.apply_relationship_change(changeobject, reverse)
         if changeobject.changetype == "tag":
-            self.apply_tag_change(changeobject)
+            self.apply_tag_change(changeobject, reverse)
 
-    def apply_relationship_change(self, relchange_object):
-        if relchange_object.add_or_remove == "add":
+    def apply_relationship_change(self, relchange_object, reverse=False):
+        if (relchange_object.add_or_remove == "add" and not reverse) or (relchange_object.add_or_remove == "remove" and reverse):
             #If the intention is to add, then we add a connection between the nodes
             #If either nodes don't exist already, then they must be added to the list of nodes.
             #Checks if either nodes already exists in the node dict
@@ -137,7 +137,7 @@ class WorldState:
             #After adding nodes that don't already exist, make the connections and add it to the list of edges
             self.connect(self.node_dict[relchange_object.node_a.get_name()], relchange_object.edge.name, self.node_dict[relchange_object.node_b.get_name()])
 
-        if relchange_object.add_or_remove == "remove":
+        if (relchange_object.add_or_remove == "remove" and not reverse) or (relchange_object.add_or_remove == "add" and reverse):
             #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
             #Don't delete the nodes, though
             #Check if this exact edge between these exact nodes exists
@@ -146,10 +146,10 @@ class WorldState:
                 #If it exists, remove it
                 self.edges.remove(relchange_object.edge)
 
-    def apply_tag_change(self, tagchange_object):
-        if tagchange_object.add_or_remove == "add":
+    def apply_tag_change(self, tagchange_object, reverse=False):
+        if (tagchange_object.add_or_remove == "add" and not reverse) or (tagchange_object.add_or_remove == "remove" and reverse):
             self.node_dict[tagchange_object.object_node_name].set_tag(tagchange_object.tag, tagchange_object.value)
-        if tagchange_object.add_or_remove == "remove":
+        if (tagchange_object.add_or_remove == "remove" and not reverse) or (tagchange_object.add_or_remove == "add" and reverse):
             self.node_dict[tagchange_object.object_node_name].remove_tag(tagchange_object.tag)
 
     def print_all_nodes(self):
