@@ -15,3 +15,10 @@ class TagChange:
         self.value = value
         self.add_or_remove = add_or_remove
         self.changetype = "tag"
+
+class EdgeReq:
+    def __init__(self, from_node_name, edge_name, to_node_name, must_exist = True):
+        self.from_node_name = from_node_name
+        self.edge_name = edge_name
+        self.to_node_name = to_node_name
+        self.must_exist = must_exist

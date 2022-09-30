@@ -18,7 +18,8 @@ class RewriteRule:
         self.world_state_condition = world_state_condition
         self.world_state_change = world_state_change
 
-    def check_character_compatibility(self, character_node):
+    #TODO: Make it account for all the past world states, by inputting list of changes from the story graph
+    def check_character_compatibility(self, character_node, init_world_state, list_of_changes):
 
         compatibility = True
 

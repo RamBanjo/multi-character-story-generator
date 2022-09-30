@@ -91,4 +91,4 @@
     - Interestingly, there is no reason that rewrite rule has to take StoryGraph as an input
         - We could use lists of story nodes as condition/replacement for stories
         - We could use lists of world states as condition/replacement for world states (and run a check)
-            - Tags work with this method, however, World States requires concrete Characters and Objects, so we'll have to 
+            - Tags work with this method, however, World States requires concrete Characters and Objects, so we'll have to make customized rules for more specific nodes.

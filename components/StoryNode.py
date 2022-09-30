@@ -161,14 +161,14 @@ class StoryNode:
 
         #TODO: Check if the character contains tags in Required Tags (not compatible if false)
 
-        if self.required_tags is not None:
-            for tag in self.required_tags.values():
+        if self.required_tags_list is not None:
+            for tag in self.required_tags_list.values():
                 compatibility = compatibility and tag in character_node.tags.values()
 
         #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
 
-        if self.unwanted_tags is not None:
-            for tag in self.unwanted_tags.values():
+        if self.unwanted_tags_list is not None:
+            for tag in self.unwanted_tags_list.values():
                 compatibility = compatibility and tag not in character_node.tags.values()
         
         #TODO: Check if character's bias is within the acceptable range (not compatible if false)
@@ -180,9 +180,5 @@ class StoryNode:
                 
         #If the character passes all three tests, then return true. Otherwise, return false
         return compatibility
-
-    #TODO: What if we move Graph Compatibility here too?
-    #TODO: Input:
-    #TODO: Output:
 
 
