@@ -4,10 +4,11 @@ from components.WorldState import WorldState
 class RewriteRule:
 
 
-    '''
-    Okay, we have a problem here because 
     
-    '''
+    # ...do we really need World State Change, if all of the world state changes will be stated in the change to world states in the story parts?
+    # We probably don't.
+    # With the same logic, we don't need World State Condition either, since we can put all the conditions in the 
+
 
     def __init__(self, story_condition, story_change, world_state_condition, world_state_change, dummychar, name=""):
         self.rule_name = name
@@ -19,7 +20,7 @@ class RewriteRule:
         self.world_state_change = world_state_change
 
     #TODO: Make it account for all the past world states, by inputting list of changes from the story graph
-    def check_character_compatibility(self, character_node, init_world_state, list_of_changes):
+    def check_character_compatibility(self, character_node, init_world_state, list_of_changes, start_of_check):
 
         compatibility = True
 

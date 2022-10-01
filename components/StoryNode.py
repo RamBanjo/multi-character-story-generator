@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effect_on_next_ts = None, required_tags_list = None, unwanted_tags_list = None, bias_range = None):
+    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effect_on_next_ts = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), edge_requirements = []):
         
         #the name of this action.
         self.name = name
@@ -42,11 +42,7 @@ class StoryNode:
         #This will prevent stories from different timestep from being blended together.
         self.timestep = timestep
 
-        #PENDING: Effect on next Timestep. What this node will cause to happen in the next timestep if added.
-        #Need to think of a proper representation.
-        #Worldstate graph? (Probably Worldstate Graph, will need to plan idea around this)
-        #Time to grab a pen and paper, time to draft!
-        #List of edges?
+        #Effects on next TimeStep. We will use RelChange objects to represent the changes that this node will do to the next world state.
         self.effect_on_next_ts = effect_on_next_ts
 
         #Absolute Step is for the Joint Rules, so that the rules know which nodes to join together
@@ -56,6 +52,9 @@ class StoryNode:
         self.required_tags_list = required_tags_list
         self.unwanted_tags_list = unwanted_tags_list
         self.bias_range = bias_range
+
+        #edge_requirements is a list of EdgeReq objects. In order to perform this story node, the world state must fulfil all the conditions in it.
+        self.edge_requirements = edge_requirements
         
         #TODO: An object that defines the change in relationship for characters and objects in this story node
 

@@ -32,3 +32,13 @@
 # 1. With the list of world state changes, bring the world state up to the point where the replacement starts. Create a "Simulated World State" for the specific purpose of testing.
 # 2. At that point, check if the character chosen satisfies the condition in that specific timestep.
 # 3. Apply the changes, and then try again until all the states in the changes have been accounted for. Only return True if all of them satisfies the conditions.
+#
+# NEW WAY TO HANDLE WORLD STATE:
+# Imagine that actions take place in-between world states. Each action will have a preceding state before the action was taken, then a following state that is the result of taking the action.
+# This would make it easier to decide the current world state and keep track of things that has happened so far.
+#
+# For example:
+# WS0: House holds Key, House holds Bob
+# SG0 Bob: Bob picks up Key
+# WS1: House holds Bob, Bob holds Key
+# This way, it is easier to decide which story step predates what.
