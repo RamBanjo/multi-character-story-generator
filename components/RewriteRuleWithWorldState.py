@@ -7,17 +7,15 @@ class RewriteRule:
     
     # ...do we really need World State Change, if all of the world state changes will be stated in the change to world states in the story parts?
     # We probably don't.
-    # With the same logic, we don't need World State Condition either, since we can put all the conditions in the 
+    # With the same logic, we don't need World State Condition either, since we can put all the conditions in the story nodes
 
 
-    def __init__(self, story_condition, story_change, world_state_condition, world_state_change, dummychar, name=""):
+    def __init__(self, story_condition, story_change, dummychar, name=""):
         self.rule_name = name
         self.story_condition = story_condition
         self.story_change = story_change
         self.dummychar = dummychar
         self.is_joint_rule = False
-        self.world_state_condition = world_state_condition
-        self.world_state_change = world_state_change
 
     #TODO: Make it account for all the past world states, by inputting list of changes from the story graph
     def check_character_compatibility(self, character_node, init_world_state, list_of_changes, start_of_check):

@@ -1,7 +1,8 @@
 from components.RewriteRules import ContinuousJointRule, JoiningJointRule, RewriteRule, SplittingJointRule
-from components.StoryGraph import StoryGraph
+from components.StoryGraphTwoWS import StoryGraph
 from components.StoryNode import StoryNode
 from components.StoryObjects import CharacterNode, LocationNode
+from components.WorldState import WorldState
 
 node_a = StoryNode("Action A", None, None, None, 1)
 node_b = StoryNode("Action B", None, None, None, 1)
@@ -62,11 +63,13 @@ node_h = StoryNode("Action H", None, None, None, 1)
 
 town = LocationNode("Town")
 
+dummy_ws = WorldState("Dummy WS", [alice, bob])
+
 other_rule = JoiningJointRule(2, [node_c, node_d], node_x, "If CD Then X")
 other_rule_2 = ContinuousJointRule(2, node_x, node_y, "If X then Y")
 other_rule_3 = SplittingJointRule(2, node_y, [node_g, node_h], "If Y then GH")
 
-test_graph = StoryGraph("Test Joint Rule Graph", [alice, bob], [town])
+test_graph = StoryGraph("Test Joint Rule Graph", [alice, bob], [town], dummy_ws, [])
 test_graph.add_story_part(node_a, alice, town, 0)
 test_graph.add_story_part(node_b, bob, town, 0)
 test_graph.add_story_part(node_c, alice, town, 0)

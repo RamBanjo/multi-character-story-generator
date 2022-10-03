@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effect_on_next_ts = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), edge_requirements = []):
+    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), edge_requirements = []):
         
         #the name of this action.
         self.name = name
@@ -42,8 +42,8 @@ class StoryNode:
         #This will prevent stories from different timestep from being blended together.
         self.timestep = timestep
 
-        #Effects on next TimeStep. We will use RelChange objects to represent the changes that this node will do to the next world state.
-        self.effect_on_next_ts = effect_on_next_ts
+        #Effects on next World State. We will use RelChange objects to represent the changes that this node will do to the next world state.
+        self.effects_on_next_ws = effects_on_next_ws
 
         #Absolute Step is for the Joint Rules, so that the rules know which nodes to join together
         self.abs_step = 0

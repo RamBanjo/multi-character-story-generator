@@ -54,10 +54,10 @@ class StoryGraph:
         self.list_of_changes = list_of_changes
         self.latest_ws = self.make_latest_state()
 
-    #Copy=False would be used in the case of joint.
+    def add_to_story_part_dict(self, character_name, abs_step, story_part):
+        self.story_parts[(character_name, abs_step)] = story_part
 
-    #TODO: Add an option that allows the user to start at another point other than 0.
-    #Possible: Create blank nodes in order to keep all the nodes equal?
+    #Copy=False would be used in the case of joint.
     def add_story_part(self, part, character, location, timestep, copy=True, targets=[]):
 
         char_name = None
@@ -70,11 +70,10 @@ class StoryGraph:
 
         new_part = self.add_story_part_at_step(part, character, location, character_path_length, timestep, copy, targets)
 
-        for target in targets:
-            new_part.add_target(target)
-
         if character_path_length > 0:
             self.story_parts[(char_name, character_path_length-1)].add_next_node(new_part, character)
+
+        self.refresh_longest_path_length()
 
         return new_part
 
@@ -90,7 +89,7 @@ class StoryGraph:
         else:
             new_part = part
 
-        self.story_parts[(char_name, absolute_step)] = new_part
+        self.add_to_story_part_dict(character_name=char_name, abs_step=absolute_step, story_part=new_part)
 
         #print(character.name, "added to", part.name)
         new_part.add_actor(character)
@@ -102,6 +101,8 @@ class StoryGraph:
 
         for target in targets:
             new_part.add_target(target)
+
+        self.refresh_longest_path_length()
 
         return new_part
 
@@ -134,11 +135,14 @@ class StoryGraph:
                 for i in range(absolute_step+1, current_longest+1):
                 
                     move_down = self.story_parts.pop((char_name, i))
-                    self.story_parts[(char_name, i-1)] = move_down
+
+                    self.add_to_story_part_dict(character_name=char_name, abs_step=i-1, story_part=move_down)
 
             #finally, if both conditions are met, then those two must be connected
             if prevnode is not None and nextnode is not None:
                 prevnode.add_next_node(nextnode, character)
+        
+        self.refresh_longest_path_length()
 
     def insert_story_part(self, part, character, location, absolute_step, copy=True, targets=[]):
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
@@ -161,7 +165,7 @@ class StoryGraph:
             #first, we need to move everything that comes after this part up by one
             for i in range(character_path_length-1, absolute_step-1, -1):
                 move_up = self.story_parts.pop((char_name, i))
-                self.story_parts[(char_name, i+1)] = move_up
+                self.add_to_story_part_dict(character_name=char_name, abs_step=i+1, story_part=move_up)
 
             #then, we add a new story part at the spot
             new_part = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy)
@@ -180,6 +184,8 @@ class StoryGraph:
                 prevnode =  self.story_parts[(char_name, absolute_step-1)]
                 prevnode.remove_next_node(character)
                 prevnode.add_next_node(new_part, character)
+
+        self.refresh_longest_path_length()
 
     def replace_story_parts(self, character, start_time_abs, end_time_abs, list_of_storynode_and_location_and_target_tuples):
 
@@ -208,6 +214,8 @@ class StoryGraph:
                 else:
                     self.insert_story_part(story_loc_tuple[0], character, story_loc_tuple[1], insert_index)
                 insert_index += 1
+
+        self.refresh_longest_path_length()
 
         
 
@@ -251,7 +259,7 @@ class StoryGraph:
         #TODO: Then, cycle through the list of changes, applying the changes from it.
         #TODO: returns the latest state
 
-        return self.make_state_at_step(len(self.list_of_changes), state_name = "Latest State")
+        return self.make_state_at_step(len(self.list_of_changes), state_name)
 
     def make_state_at_step(self, stopping_step, state_name = "Traveling State"):
         #TODO: Same as make_latest_state, but you can choose the step where to stop.
@@ -316,6 +324,7 @@ class StoryGraph:
                 
         else:
             print("Nothing is replaced: Rule is not subgraph of Self")
+        self.refresh_longest_path_length()
 
     def apply_joint_node (self, joint_node, character_list, location, absolute_step):
         new_joint = deepcopy(joint_node)
@@ -349,7 +358,56 @@ class StoryGraph:
             self.apply_continuous_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
         if joint_rule.joint_type == "splitting":
             self.apply_splitting_joint_rule(joint_rule, characters, location_list, character_grouping=character_grouping, applyonce=applyonce)
+        self.refresh_longest_path_length()
     
+
+    def add_story_node_to_targets_storyline(self, pot_target, abs_step, story_part):
+        if pot_target in self.character_objects:
+            self.add_to_story_part_dict(character_name=pot_target.get_name(), abs_step=abs_step, story_part=story_part)
+
+    def joint_continuation(self, loclist, applyonce, jointrule, actors, location, target_list):
+        insert_list = if_applyonce_choose_one(loclist, applyonce)
+
+        #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
+        #This is where the copy=false in the add node function comes in handy.
+        for insert_loc in insert_list:
+            new_joint = self.apply_joint_node(jointrule, actors, location, insert_loc)
+
+            if len(target_list) > 0:
+                for target in target_list:
+                    new_joint.add_target(target)
+                    #TODO: Check if any of the targets exist in self.characters. If there is one, then make sure to add this node to that character's StoryGraph in the same step.
+                    self.add_story_node_to_targets_storyline(target, insert_loc, new_joint)
+
+    def find_shared_base_joint_locations(self, character_list, rule, target_requirements):
+
+        eligible_list = []
+
+        for i in range(0, self.get_longest_path_length_by_character(character_list[0])):
+
+            current_index_eligible = False
+
+            #First, check for the length of the first character's path
+            #Check if any nodes that character perform is the same as the first node in the join rule's requirement
+            current_first_char_node = self.story_parts.get((character_list[0].name, i), None)
+            if current_first_char_node.get_name() == rule.base_joint.get_name():
+                current_index_eligible = True
+
+                if len(target_requirements) > 0:
+                    for target in target_requirements:
+                        current_index_eligible = current_index_eligible and target in current_first_char_node.target
+
+                #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if they are also in the joint node
+                for other_char_index in range(1, len(character_list)):
+
+                    current_index_eligible = current_index_eligible and character_list[other_char_index] in current_first_char_node.actor
+                
+                #Add to list if true
+                if current_index_eligible:
+                    eligible_list.append(i+1)
+
+        return eligible_list
+
     #If you figure out one, you figure out all three
     def apply_joining_joint_rule(self, join_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
 
@@ -383,102 +441,16 @@ class StoryGraph:
                 if current_index_eligible:
                     eligible_insertion_list.append(i+1)
 
-        #After all the nodes are checked, check if The List is empty. If it is, nothing happens.
-        #If there is something in The List, then apply the rule and append the Joint Story Node.
-        if len(eligible_insertion_list) > 0:
-            
-            #If Apply Once is False, then all the instances in The List gets applied.
-            #Otherwise, a random instance is applied to.
-            if applyonce:
-                eligible_insertion_list = [random.choice(eligible_insertion_list)]
-
-        #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
-        #This is where the copy=false in the add node function comes in handy.
-        for insert_loc in eligible_insertion_list:
-            new_joint = self.apply_joint_node(join_rule.joint_node, characters, location, insert_loc)
-
-            if len(target_replace) > 0:
-                for target in target_replace:
-                    new_joint.add_target(target)
+        self.joint_continuation(eligible_insertion_list, applyonce, join_rule.joint_node, characters, location, target_replace)
 
     def apply_continuous_joint_rule(self, cont_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
-        eligible_insertion_list = []
-
-        for i in range(0, self.get_longest_path_length_by_character(characters[0])):
-
-            current_index_eligible = False
-
-            #First, check for the length of the first character's path
-            #Check if any nodes that character perform is the same as the first node in the join rule's requirement
-            current_first_char_node = self.story_parts.get((characters[0].name, i), None)
-            if current_first_char_node.get_name() == cont_rule.base_joint.get_name():
-                current_index_eligible = True
-
-                if len(target_require) > 0:
-                    for target in target_require:
-                        current_index_eligible = current_index_eligible and target in current_first_char_node.target
-
-                #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if they are in the joint node
-                for other_char_index in range(1, len(characters)):
-
-                    current_index_eligible = current_index_eligible and characters[other_char_index] in current_first_char_node.actor
-                
-                #Add to list if true
-                if current_index_eligible:
-                    eligible_insertion_list.append(i+1)
-
-        #After all the nodes are checked, check if The List is empty. If it is, nothing happens.
-        #If there is something in The List, then apply the rule and append the Joint Story Node.
-        if len(eligible_insertion_list) > 0:
-            
-            #If Apply Once is False, then all the instances in The List gets applied.
-            #Otherwise, a random instance is applied to.
-            if applyonce:
-                eligible_insertion_list = [random.choice(eligible_insertion_list)]
-
-        #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
-        #This is where the copy=false in the add node function comes in handy.
-        for insert_loc in eligible_insertion_list:
-            new_joint = self.apply_joint_node(cont_rule.joint_node, characters, location, insert_loc)
-
-            if len(target_replace) > 0:
-                for target in target_replace:
-                    new_joint.add_target(target)
-
+        eligible_insertion_list = self.find_shared_base_joint_locations(characters, cont_rule, target_require)
+        self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
 
     def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):
-        eligible_insertion_list = []
-
-        for i in range(0, self.get_longest_path_length_by_character(characters[0])):
-
-            current_index_eligible = False
-
-            #First, check for the length of the first character's path
-            #Check if any nodes that character perform is the same as the first node in the join rule's requirement
-            current_first_char_node = self.story_parts.get((characters[0].name, i), None)
-            if current_first_char_node.get_name() == split_rule.base_joint.get_name():
-                current_index_eligible = True
-
-                if len(target_require) > 0:
-                    for target in target_require:
-                        current_index_eligible = current_index_eligible and target in current_first_char_node.target
-
-                #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if they are in the joint node
-                for other_char_index in range(1, len(characters)):
-                    current_index_eligible = current_index_eligible and characters[other_char_index] in current_first_char_node.actor
-                
-                #Add to list if true
-                if current_index_eligible:
-                    eligible_insertion_list.append(i+1)
-
-        #After all the nodes are checked, check if The List is empty. If it is, nothing happens.
-        #If there is something in The List, then apply the rule and append the Joint Story Node.
-        if len(eligible_insertion_list) > 0:
-            
-            #If Apply Once is False, then all the instances in The List gets applied.
-            #Otherwise, a random instance is applied to.
-            if applyonce:
-                eligible_insertion_list = [random.choice(eligible_insertion_list)]
+        
+        eligible_insertion_list = self.find_shared_base_joint_locations(characters, split_rule, target_require)
+        eligible_insertion_list = if_applyonce_choose_one(eligible_insertion_list, applyonce)
 
         #Applying here is inserting the next nodes for each character in the node, splitting the characters apart. If working with more than 2 characters,
         #It might be possible to split
@@ -493,6 +465,8 @@ class StoryGraph:
                     if len(target_replace) > 0:
                         for target in target_replace[i]:
                             added_joint.add_target(target)
+                            #TODO: Check if any of the targets exist in self.characters. If there is one, then make sure to add this node to that character's StoryGraph in the same step.
+                            self.add_story_node_to_targets_storyline(target, insert_loc, new_joint)
         else:
             for insert_loc in eligible_insertion_list:
                 for i in range(0, len(characters)):
@@ -503,7 +477,8 @@ class StoryGraph:
                     if len(target_replace) > 0:
                         for target in target_replace[i]:
                             added_joint.add_target(target)
-
+                            #TODO: Check if any of the targets exist in self.characters. If there is one, then make sure to add this node to that character's StoryGraph in the same step.
+                            self.add_story_node_to_targets_storyline(target, insert_loc, new_joint)
 
     def print_all_nodes(self):
         for node in self.story_parts:
@@ -523,93 +498,6 @@ class StoryGraph:
             print("Targets:", self.story_parts[node].get_target_names())
             print("----------")
         
-    '''
-    A story graph is considered to be a subgraph of another storygraph when:
-    1) There exists a sequence of timesteps that contains similar nodes
-    2) Each of the node mentioned must be performed by the same character
-
-    Oh also. I want this function to return the starting points of each subgraph
-
-    ToDo: Fix this Subgraph Function
-
-    def is_subgraph(self, other_graph, character):
-
-        list_of_subgraph_locs = []
-
-        #First of all, this graph can't be the other graph's subgraph if it has more timesteps than the other graph
-        if self.get_longest_path_length_by_character(character) > other_graph.get_longest_path_length_by_character(character):
-            return False, list_of_subgraph_locs
-
-        #Second of all, check each timestep to see if the timestep is in fact a sub timestep of the othergraph's timestep
-        #If there are less timesteps remaining in the other graph than there are timesteps in this graph then it can't be subset 
-        for x in range(0, other_graph.get_longest_path_length_by_character(character) - self.get_longest_path_length_by_character(character) + 1):
-
-            result = True
-
-            #Check all the timesteps of this graph to see if it's contained within the other timestep
-            for y in range(0, self.get_longest_path_length_by_character(character)):
-
-                #For each of the timestep in this graph, we check if the steps the character (this one in specific) take are the same.
-                result = result and self.story_parts[(character.get_name(), x+y)] == other_graph.story_parts[(character.get_name(), y)]
-
-                #We also check if the world state is a subset.
-                result = result and self.world_states[x+y].is_subgraph(other_graph.world_states[y])
-
-                if result:
-                    list_of_subgraph_locs.append(x)
-
-
-        #If list is empty then it's false. If list is not empty then it's true. Then also return that list.
-        return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
-
-    '''
-    
-    '''def is_subgraph(self, other_graph, character, self_none = False):
-
-        list_of_subgraph_locs = []
-
-        self_char = None
-        self_charname = None
-
-        if not self_none:
-            self_char = character
-            self_charname = character.get_name()
-
-        #First of all, this graph can't be the other graph's subgraph if it has more timesteps than the other graph
-        if self.get_longest_path_length_by_character(self_char) > other_graph.get_longest_path_length_by_character(character):
-            return False, list_of_subgraph_locs
-
-        #Second of all, check each timestep to see if the timestep is in fact a sub timestep of the othergraph's timestep
-        #If there are less timesteps remaining in the other graph than there are timesteps in this graph then it can't be subset 
-        for x in range(0, other_graph.get_longest_path_length_by_character(character) - self.get_longest_path_length_by_character(self_char) + 1):
-
-            result = True
-
-            #Check all the timesteps of this graph to see if it's contained within the other timestep
-            for y in range(0, self.get_longest_path_length_by_character(self_char)):
-                print(y)
-                #For each of the timestep in this graph, we check if the steps the character (this one in specific) take are the same.
-
-                this_part_here = self.story_parts[(self_charname, y)].get_name()
-                other_part_here = other_graph.story_parts[(character.get_name(), x+y)].get_name()
-
-                print(this_part_here)
-                print(other_part_here)
-
-                result = result and this_part_here == other_part_here
-
-                #We also check if the world state is a subset.
-                result = result and self.world_states[y].is_subgraph(other_graph.world_states[x+y])
-
-            if result:
-                list_of_subgraph_locs.append(x)
-
-        #If list is empty then it's false. If list is not empty then it's true. Then also return that list.
-        return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs'''
-
-    '''
-    TODO: List of Subgraph Locs should exclude parts of subgraph that overlaps two different timesteps
-    '''
     def is_subgraph(subgraph, supergraph, subgraph_char, supergraph_char, targets_list=[]):
 
         #Since we only care if a certain character's storyline is a subgraph of another character's storyline
@@ -667,6 +555,45 @@ class StoryGraph:
         
         
         pass
+
+    def make_list_of_nodes_at_step(self, abs_step):
+        list_of_nodes_at_step = []
+
+        for character in self.character_objects:
+            if self.story_parts[(character.get_name(), abs_step)] is not None:
+                list_of_nodes_at_step.append(self.story_parts[(character.get_name(), abs_step)])
+
+        return list_of_nodes_at_step
+
+    def make_list_of_changes_at_step(self, abs_step):
+        return make_list_of_changes_from_list_of_story_nodes(self.make_list_of_nodes_at_step(abs_step))
+
+    def update_list_of_changes(self):
+        max_length = self.longest_path_length
+        self.list_of_changes = []
+
+        for index in range(0, max_length):
+            self.list_of_changes.append(self.make_list_of_changes_at_step(index)) 
+
+def make_list_of_changes_from_list_of_story_nodes(story_node_list):
+    changeslist = []
+        
+    for snode in story_node_list:
+        changeslist.extend(snode.effects_on_next_ws)
+
+    return changeslist
+
+def if_applyonce_choose_one(loclist, applyonce):
+    #After all the nodes are checked, check if The List is empty. If it is, nothing happens.
+    #If there is something in The List, then apply the rule and append the Joint Story Node.
+    if len(loclist) > 0:
+            
+        #If Apply Once is False, then all the instances in The List gets applied.
+        #Otherwise, a random instance is applied to.
+        if applyonce:
+            loclist = [random.choice(loclist)]
+        
+    return loclist
 
     
 

@@ -124,6 +124,8 @@ class WorldState:
         if changeobject.changetype == "tag":
             self.apply_tag_change(changeobject, reverse)
 
+    # TODO: Change how this entire function works.
+    # Instead of directly calling the obj
     def apply_relationship_change(self, relchange_object, reverse=False):
         if (relchange_object.add_or_remove == "add" and not reverse) or (relchange_object.add_or_remove == "remove" and reverse):
             #If the intention is to add, then we add a connection between the nodes

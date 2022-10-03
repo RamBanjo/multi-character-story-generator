@@ -78,12 +78,13 @@
     - Undo state changes (DONE)
         - Run from the initial state, input number and run through?
         - Run from final state, input number and reverse?
-    - Effect on next Timestep must be developed in order to define how the stories will change
+    - Effect on next Timestep must be developed in order to define how the stories will change (Partially done, but still unsure)
         - Either this, or parameters are needed
             - Figure out what parameters are needed
-            - Define how each actions/events will change states and tags (Partially done, but still unsure)
+            - Define how each actions/events will change states and tags
     - Rule Change in the story cannot force the State Changes yet
-    - Rewrite Rule that applies Story Node Changes then applies World State Changes
+        - Oh, they are about to. We just need a little bit of setup.
+    - Rewrite Rule that applies Story Node Changes then applies World State Changes (Planned, now we intend to interleave to make things clearer)
 2 Oct 2022
     - Since RewriteRule uses Tags and Tags are supposed to depend on the current world state, we need to think of what we're supposed to do here
         - Only take into account the first step of the rewrite rule???
@@ -92,3 +93,21 @@
         - We could use lists of story nodes as condition/replacement for stories
         - We could use lists of world states as condition/replacement for world states (and run a check)
             - Tags work with this method, however, World States requires concrete Characters and Objects, so we'll have to make customized rules for more specific nodes.
+    - Still need to check if Character is in the Same Location
+        - New EdgeReq type object?
+        - ShareLocReq?
+            - Contains a list of characters
+            - Check the location of the first character, then check if the other characters are in the same location?
+    - Need to remake WorldState to interleave with StoryNodes?
+    - We also need to have the RelChange pull the character from the WorldState instead of the initial character setting
+        - This is required in order to make sure the characters are properly affected by changes when they take actions
+        - Instead of calling objects directly, RelChange should contain the name and call the tag's name from the WorldState
+        - We can do this, we have node_dict[(node name)]. We'll use it to call the node from the proper WorldState after all the required change are applied.
+    - Paired items that are required in order to interact with other items
+        - Need a specific key to interact with a door
+        - Skeleton Keys exist, and might be able to open all doors
+    - Did a bit of housekeeping and reduced some duplicate code into functions (Entire work will never be done but a lot of it was done. Thanks Ram!)
+9 Oct 2022
+    - How important is StoryNode.next_node, exactly...?
+        - Since we could figure out next node/previous node information from the StoryGraph itself, it might not be that needed...
+        - We'll keep it for now, but if it turns out there's no need to put it there we're removing it to streamline our work process.
