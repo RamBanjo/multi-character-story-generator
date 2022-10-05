@@ -99,7 +99,7 @@
             - Contains a list of characters
             - Check the location of the first character, then check if the other characters are in the same location?
     - Need to remake WorldState to interleave with StoryNodes?
-    - We also need to have the RelChange pull the character from the WorldState instead of the initial character setting
+    - We also need to have the RelChange pull the character from the WorldState instead of the initial character setting (Partially Done)
         - This is required in order to make sure the characters are properly affected by changes when they take actions
         - Instead of calling objects directly, RelChange should contain the name and call the tag's name from the WorldState
         - We can do this, we have node_dict[(node name)]. We'll use it to call the node from the proper WorldState after all the required change are applied.
@@ -107,6 +107,10 @@
         - Need a specific key to interact with a door
         - Skeleton Keys exist, and might be able to open all doors
     - Did a bit of housekeeping and reduced some duplicate code into functions (Entire work will never be done but a lot of it was done. Thanks Ram!)
+    - Break up with Magic Variables/Strings and use ENUM-like configurations instead. This includes:
+        - "add", "remove"
+        - Markers for relative nodes
+        - Joint Types
 9 Oct 2022
     - How important is StoryNode.next_node, exactly...?
         - Since we could figure out next node/previous node information from the StoryGraph itself, it might not be that needed...

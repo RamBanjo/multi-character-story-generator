@@ -1,10 +1,8 @@
+from enum import Enum
 from components.StoryGraphTwoWS import StoryGraph
 from components.WorldState import WorldState
 
 class RewriteRule:
-
-
-    
     # ...do we really need World State Change, if all of the world state changes will be stated in the change to world states in the story parts?
     # We probably don't.
     # With the same logic, we don't need World State Condition either, since we can put all the conditions in the story nodes
@@ -59,6 +57,12 @@ Dummy Chars: The dummies used for the purpose of replacing. Dummies are consiste
 Required Tags List, unwanted tags list, and bias range list are the same as normal rules, but written in a list so that characters can
 have separate values if needs be. If a particular slot has no prerequisites, it should be an empty dict if it's tags, or None if it's a bias range.
 '''
+
+class JointType(Enum):
+    JOIN = 0
+    CONT = 1
+    SPLIT = 2
+
 class JointRule:
     def __init__(self, merge_count, joint_type, rule_name="", required_tags_list=[], unwanted_tags_list=[], bias_range_list=[]):
         self.rule_name = rule_name
@@ -104,7 +108,7 @@ Joining Joint's base is a list of nodes for each of the character intending to j
 class JoiningJointRule(JointRule):
     def __init__(self, merge_count, base_actions, joint_node, rule_name="", required_tags_list=[], unwanted_tags_list=[], bias_range_list=[]):
 
-        super().__init__(merge_count, "joining", rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
+        super().__init__(merge_count, JointType.JOIN, rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
 
         self.base_actions = base_actions
         self.joint_node = joint_node
@@ -117,7 +121,7 @@ Cont. Joint's base is a joint itself, and then a joint would connect to it.
 class ContinuousJointRule(JointRule):
     def __init__(self, merge_count, base_joint, joint_node, rule_name="", required_tags_list=[], unwanted_tags_list=[], bias_range_list=[]):
 
-        super().__init__(merge_count, "continuous", rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
+        super().__init__(merge_count, JointType.CONT, rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
 
         self.base_joint = base_joint
         self.joint_node = joint_node
@@ -130,7 +134,7 @@ Splitting Joint Rule's base would be the joint node where dummy chars will go se
 class SplittingJointRule(JointRule):
     def __init__(self, merge_count, base_joint, split_list, rule_name="", required_tags_list=[], unwanted_tags_list=[], bias_range_list=[]):
 
-        super().__init__(merge_count, "splitting", rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
+        super().__init__(merge_count, JointType.SPLIT, rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
 
         self.base_joint = base_joint
         self.split_list = split_list
