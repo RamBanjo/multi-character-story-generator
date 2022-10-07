@@ -98,7 +98,7 @@
         - ShareLocReq?
             - Contains a list of characters
             - Check the location of the first character, then check if the other characters are in the same location?
-    - Need to remake WorldState to interleave with StoryNodes?
+    - Need to remake WorldState to interleave with StoryNodes? (DONE)
     - We also need to have the RelChange pull the character from the WorldState instead of the initial character setting (Partially Done)
         - This is required in order to make sure the characters are properly affected by changes when they take actions
         - Instead of calling objects directly, RelChange should contain the name and call the tag's name from the WorldState
@@ -106,8 +106,12 @@
     - Paired items that are required in order to interact with other items
         - Need a specific key to interact with a door
         - Skeleton Keys exist, and might be able to open all doors
+        - Like prof. said, this could work with pairing objects. Example:
+            - Red Key {Type: Object, Unlocks: Red}
+            - Red Door {Type: Object, State: Locked, UnlockWith: Red}
+            - Skeleton Key {Type: Object, Unlocks: [Red, Green, Blue]} (We can exclude tags that a Skeleton Key don't unlock (For example: digital locks with no keyholes))
     - Did a bit of housekeeping and reduced some duplicate code into functions (Entire work will never be done but a lot of it was done. Thanks Ram!)
-    - Break up with Magic Variables/Strings and use ENUM-like configurations instead. This includes:
+    - Break up with Magic Variables/Strings and use ENUM-like configurations instead. This includes: (DONE)
         - "add", "remove"
         - Markers for relative nodes
         - Joint Types

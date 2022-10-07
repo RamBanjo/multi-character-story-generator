@@ -7,6 +7,8 @@
 
 from enum import Enum
 
+# Overlap of Location-based Actions?
+# Define clearly how Location should be handled if it's also a Target, and vice versa.
 class GenericObjectNode(Enum):
     GENERIC_ACTOR = 0
     GENERIC_LOCATION = 1

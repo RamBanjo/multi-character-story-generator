@@ -1,4 +1,9 @@
+from components.Edge import Edge
+from components.RelChange import ChangeAction, RelChange, TagChange
 from components.StoryGraphTwoWS import StoryGraph
+from components.StoryNode import StoryNode
+from components.StoryObjects import CharacterNode, LocationNode, ObjectNode
+from components.WorldState import WorldState
 
 # We're making a basic storyline with no complex changes yet
 # WS0: Home holds Bob. Home holds Key. Home holds Door. Door has the tag {LockState: Locked}
@@ -11,3 +16,37 @@ from components.StoryGraphTwoWS import StoryGraph
 # roles instead of actual objects, we should be able to enforce these changes.
 
 # For now though, here are the objects.
+
+bob = CharacterNode("Bob")
+key = ObjectNode("Key", tags={"Type": "Object", "Unlocks":"BobHomeDoor"})
+home = LocationNode("Home")
+door = ObjectNode("Door", tags={"Type": "Object", "UnlockGroup":"BobHomeDoor", "LockState":"Locked"})
+
+# Init Worldstate
+bws = WorldState("Base Worldstate", [bob, key, home, door])
+bws.connect(home, "holds", key)
+bws.connect(home, "holds", bob)
+bws.connect(home, "holds", door)
+
+home_has_key = Edge("holds", home, key)
+bob_has_key = Edge("holds", bob, key)
+
+#And here are the nodes.
+take_key_effects = [RelChange("home not key", home, home_has_key, key, ChangeAction.REMOVE), RelChange("bob get key", bob, bob_has_key, key, ChangeAction.ADD)]
+take_key = StoryNode("take_key", None, None, None, 1, 0, effects_on_next_ws=take_key_effects)
+
+door_unlock_effects = [TagChange("door unlock", "Door", "LockState", "Unlocked", ChangeAction.ADD)]
+unlock_door = StoryNode("unlock_door", None, None, None, 1, 0, effects_on_next_ws=door_unlock_effects)
+
+#This Story Node will contain these story parts.
+mygraph = StoryGraph("My Graph", [bob], [home], bws, [])
+
+mygraph.add_story_part(take_key, bob, home, 0, copy=True, targets=[key])
+mygraph.add_story_part(unlock_door, bob, home, 0, copy=True, targets=[door])
+
+mygraph.update_list_of_changes()
+latest_state = mygraph.make_latest_state()
+
+#If this is right, the door should be open and Bob should have the key.
+latest_state.print_all_edges()
+latest_state.node_dict["Door"].print_all_tags()

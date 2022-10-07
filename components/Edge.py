@@ -21,8 +21,10 @@ class Edge:
         self.name = new_name
 
 # EdgeReq objects are used to specify the WorldState requirements for StoryNodes.
-# For example, a node where a character opens a locked door would require that the "Actor" of the node holds "Key" for the door.
+# For example, a node where a character opens a locked door would require that the "Actor" of the node holds the appropriate "Key" for the door.
+# To open the door with the tag {UnlockGroup: Red}, the character must hold an item with the tag {Unlocks: Red}
 # Still need to think of a way to specify that two characters are in the same location (I.E. one location holding two characters at the same time)
+# Could Edge Req be used to specify that it doesn't have to be a specific object, but an object with a certain tag?
 class EdgeReq:
     def __init__(self, from_node_name, edge_name, to_node_name, must_exist = True):
         self.from_node_name = from_node_name

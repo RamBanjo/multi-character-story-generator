@@ -270,7 +270,7 @@ class StoryGraph:
 
         for index in range(0, stopping_step):
             for change in self.list_of_changes[index]:
-                traveling_state.apply_relationship_change(change)
+                traveling_state.apply_some_change(change)
         
         return traveling_state
 
@@ -282,7 +282,7 @@ class StoryGraph:
 
         for index in range(len(self.list_of_changes)-1, len(self.list_of_changes)-1-number_of_reverse, -1):
             for change in self.list_of_changes[index]:
-                traveling_state.apply_relationship_change(change, reverse=True)
+                traveling_state.apply_some_change(change, reverse=True)
 
     def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline
