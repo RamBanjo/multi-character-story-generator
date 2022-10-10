@@ -6,6 +6,9 @@
 # For relationship changes where one of the sides are specific, use the actual node.
 
 from enum import Enum
+from operator import lshift
+
+from components.Edge import Edge
 
 # Overlap of Location-based Actions?
 # Define clearly how Location should be handled if it's also a Target, and vice versa.
@@ -40,20 +43,3 @@ class TagChange:
         self.value = value
         self.add_or_remove = add_or_remove
         self.changetype = ChangeType.TAGCHANGE
-
-# Put in a generalized relchange with "actor"
-def translate_generic_relchange(relchange, populated_story_node):
-    actor = populated_story_node.actor
-    location = populated_story_node.location
-    target = populated_story_node.target
-    
-    check_and_replace_both_ends(relchange, GenericObjectNode.GENERIC_ACTOR, actor)
-    check_and_replace_both_ends(relchange, GenericObjectNode.GENERIC_LOCATION, location)
-    check_and_replace_both_ends(relchange, GenericObjectNode.GENERIC_TARGET, target)
-    check_and_replace_both_ends(relchange, GenericObjectNode.ALL_ACTORS, actor)
-
-def check_and_replace_both_ends(relchange, keyword, replacement):
-    if relchange.node_a is keyword:
-        relchange.node_a = replacement
-    if relchange.node_b is keyword:
-        relchange.node_b = replacement

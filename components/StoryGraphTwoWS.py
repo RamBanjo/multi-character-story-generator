@@ -2,6 +2,7 @@ from operator import truediv
 import random
 from time import time
 from numpy import empty
+from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
@@ -579,7 +580,9 @@ def make_list_of_changes_from_list_of_story_nodes(story_node_list):
     changeslist = []
         
     for snode in story_node_list:
-        changeslist.extend(snode.effects_on_next_ws)
+        for change in snode.effects_on_next_ws:
+            changes_from_snode = translate_generic_change(change, snode)
+            changeslist.extend(changes_from_snode)
 
     return changeslist
 
@@ -595,6 +598,61 @@ def if_applyonce_choose_one(loclist, applyonce):
         
     return loclist
 
+# Put in a generalized relchange with "actor"
+
+#This method should return a list of relationshp changes
+#If there's only one actor and target, then the list should only be 1 element long
+#Otherwise, we need to pair all the actors to all the targets and return a list of all pairs
+#Even if there is no change in relationship, return the relationship as a 1 element list anyways
+
+def translate_generic_change(change, populated_story_node):
+    if change.changetype == ChangeType.RELCHANGE:
+        return translate_generic_relchange(change, populated_story_node)
+    if change.changetype == ChangeType.TAGCHANGE:
+        return translate_generic_tagchange(change, populated_story_node)
+
+    return []
+
+def translate_generic_relchange(relchange, populated_story_node):
+    lhs_list = check_keyword_and_return_objectnodelist(populated_story_node, relchange.node_a)
+    rhs_list = check_keyword_and_return_objectnodelist(populated_story_node, relchange.node_b)
+
+    list_of_equivalent_relchanges = []
+
+    for lhs_item in lhs_list:
+        for rhs_item in rhs_list:
+            newedge = Edge(relchange.edge.name, lhs_item, rhs_item)
+            newchange = RelChange(relchange.name, lhs_item, newedge, rhs_item, relchange.add_or_remove)
+            list_of_equivalent_relchanges.append(newchange)
+
+    return list_of_equivalent_relchanges
+
+def translate_generic_tagchange(tagchange, populated_story_node):
+    list_of_equivalent_tagchanges = []
+
+    objectlist = check_keyword_and_return_objectnodelist(populated_story_node, tagchange.object_node_name)
+
+    for item in objectlist:
+        list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item.name, tagchange.tag, tagchange.value, tagchange.add_or_remove))
+
+    return list_of_equivalent_tagchanges
+
+def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
+    return_list = []
+
+    match objnode_to_check:
+        case GenericObjectNode.GENERIC_ACTOR:
+            return_list.append(storynode.actor[0])
+        case GenericObjectNode.GENERIC_LOCATION:
+            return_list.append(storynode.location)
+        case GenericObjectNode.GENERIC_TARGET:
+            return_list.extend(storynode.target)
+        case GenericObjectNode.ALL_ACTORS:
+            return_list.extend(storynode.actor)
+        case _:
+            return_list.append(objnode_to_check)
+
+    return return_list
     
 
 

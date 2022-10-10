@@ -2,7 +2,7 @@ from cgitb import text
 from numpy import true_divide
 
 from components.Edge import Edge
-from components.RelChange import ChangeAction, ChangeType, RelChange
+from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import ObjectNode
 

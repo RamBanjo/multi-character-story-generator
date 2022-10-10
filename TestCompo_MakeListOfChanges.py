@@ -1,5 +1,5 @@
 from components.Edge import Edge
-from components.RelChange import ChangeAction, RelChange, TagChange
+from components.RelChange import ChangeAction, GenericObjectNode, RelChange, TagChange
 from components.StoryGraphTwoWS import StoryGraph
 from components.StoryNode import StoryNode
 from components.StoryObjects import CharacterNode, LocationNode, ObjectNode
@@ -28,14 +28,14 @@ bws.connect(home, "holds", key)
 bws.connect(home, "holds", bob)
 bws.connect(home, "holds", door)
 
-home_has_key = Edge("holds", home, key)
-bob_has_key = Edge("holds", bob, key)
+home_has_key = Edge("holds", GenericObjectNode.GENERIC_LOCATION, GenericObjectNode.GENERIC_TARGET)
+bob_has_key = Edge("holds", GenericObjectNode.GENERIC_ACTOR, GenericObjectNode.GENERIC_TARGET)
 
 #And here are the nodes.
-take_key_effects = [RelChange("home not key", home, home_has_key, key, ChangeAction.REMOVE), RelChange("bob get key", bob, bob_has_key, key, ChangeAction.ADD)]
+take_key_effects = [RelChange("generic_pickup_loc", GenericObjectNode.GENERIC_LOCATION, home_has_key, GenericObjectNode.GENERIC_TARGET, ChangeAction.REMOVE), RelChange("generic_pickup_actor", GenericObjectNode.GENERIC_ACTOR, bob_has_key, GenericObjectNode.GENERIC_TARGET, ChangeAction.ADD)]
 take_key = StoryNode("take_key", None, None, None, 1, 0, effects_on_next_ws=take_key_effects)
 
-door_unlock_effects = [TagChange("door unlock", "Door", "LockState", "Unlocked", ChangeAction.ADD)]
+door_unlock_effects = [TagChange("door unlock", GenericObjectNode.GENERIC_TARGET, "LockState", "Unlocked", ChangeAction.ADD)]
 unlock_door = StoryNode("unlock_door", None, None, None, 1, 0, effects_on_next_ws=door_unlock_effects)
 
 #This Story Node will contain these story parts.
@@ -50,3 +50,5 @@ latest_state = mygraph.make_latest_state()
 #If this is right, the door should be open and Bob should have the key.
 latest_state.print_all_edges()
 latest_state.node_dict["Door"].print_all_tags()
+
+#TODO: Instead of setting up arbritary markers, we want to set up generic relationship changes.
