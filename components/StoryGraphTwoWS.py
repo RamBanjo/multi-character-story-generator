@@ -551,9 +551,40 @@ class StoryGraph:
 
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
 
-    def check_continuation_validity(self, abs_step_to_cont_from, cont_list):
-        #TODO:
-        
+    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list):
+        #TODO: Given the Actor, the parts that will be inserted, and the steps to insert the parts at,
+        #Decide if the continuation will be valid.
+
+        #These are cases in which the continuation isn't valid:
+        #1. If the character cannot perform the continuation because of unsuitable conditions at certain steps
+        #2. In the case the insertion is not at the end and there are a few continuations left, something in the future becomes invalid
+        #3. If the performing of the continuation will cause stories in other storylines to become invalid
+
+        #There are a few ways we can approach this problem:
+        #1. Simulate situation by creating a copy of this very graph, see if the things we intend to add are valid. Then, if it's valid, we do the add for real.
+        #2. Just add the stuff without validation, and then validate. If it's bad, then undo the addition.
+
+        #--------
+        # Steps to take
+        # 1. Make a copy of this graph here
+        # 2. Without any restrictions at all, add the extension to the storyline
+        # 3. For each step in the story, calculate if each character are performing in the timestep properly.
+        # 4. Return True if all actions are valid. False if any invalid actions are found.
+        #
+        # The Problem:
+        # How to handle insertion?
+        # In the examples, Char A and Char B have steps 0 to 4. A-B is inserted between 3 and 4 for Char A.
+        # 1. Don't insert anything, non-inserted storyline stays where they are:
+        # A: 0-1-2-3-A-B-4
+        # B: 0-1-2-3-4
+        # Pros: No need to alter storyline more than needed.
+        # Cons: Might cause time to be a bit weird and joint nodes might end up in different steps.
+        #
+        # 2. Insert a few blank steps in the unaltered character's storyline.
+        # A: 0-1-2-3-A-B-4
+        # B: 0-1-2-3-X-X-4
+        # Pros: Joint nodes will always be in the same timestep.
+        # Cons: Might need to rework the "End Condition" to exclude wait nodes.
         
         pass
 

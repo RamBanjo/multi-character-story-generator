@@ -99,7 +99,7 @@
             - Contains a list of characters
             - Check the location of the first character, then check if the other characters are in the same location?
     - Need to remake WorldState to interleave with StoryNodes? (DONE)
-    - We also need to have the RelChange pull the character from the WorldState instead of the initial character setting (Partially Done)
+    - We also need to have the RelChange pull the character from the WorldState instead of the initial character setting (Done)
         - This is required in order to make sure the characters are properly affected by changes when they take actions
         - Instead of calling objects directly, RelChange should contain the name and call the tag's name from the WorldState
         - We can do this, we have node_dict[(node name)]. We'll use it to call the node from the proper WorldState after all the required change are applied.
@@ -110,6 +110,7 @@
             - Red Key {Type: Object, Unlocks: Red}
             - Red Door {Type: Object, State: Locked, UnlockWith: Red}
             - Skeleton Key {Type: Object, Unlocks: [Red, Green, Blue]} (We can exclude tags that a Skeleton Key don't unlock (For example: digital locks with no keyholes))
+        - Tag Requirement for Items?
     - Did a bit of housekeeping and reduced some duplicate code into functions (Entire work will never be done but a lot of it was done. Thanks Ram!)
     - Break up with Magic Variables/Strings and use ENUM-like configurations instead. This includes: (DONE)
         - "add", "remove"
@@ -119,3 +120,19 @@
     - How important is StoryNode.next_node, exactly...?
         - Since we could figure out next node/previous node information from the StoryGraph itself, it might not be that needed...
         - We'll keep it for now, but if it turns out there's no need to put it there we're removing it to streamline our work process.
+13 Oct 2022
+    - We need to discuss on how to handle adding step insertion
+        # The Problem:
+        # How to handle insertion?
+        # In the examples, Char A and Char B have steps 0 to 4. A-B is inserted between 3 and 4 for Char A.
+        # 1. Don't insert anything, non-inserted storyline stays where they are:
+        # A: 0-1-2-3-A-B-4
+        # B: 0-1-2-3-4
+        # Pros: No need to alter storyline more than needed.
+        # Cons: Might cause time to be a bit weird and joint nodes might end up in different steps.
+        #
+        # 2. Insert a few blank steps in the unaltered character's storyline.
+        # A: 0-1-2-3-A-B-4
+        # B: 0-1-2-3-X-X-4
+        # Pros: Joint nodes will always be in the same timestep.
+        # Cons: Might need to rework the "End Condition" to exclude wait nodes.

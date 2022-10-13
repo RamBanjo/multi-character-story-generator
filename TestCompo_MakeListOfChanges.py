@@ -50,5 +50,3 @@ latest_state = mygraph.make_latest_state()
 #If this is right, the door should be open and Bob should have the key.
 latest_state.print_all_edges()
 latest_state.node_dict["Door"].print_all_tags()
-
-#TODO: Instead of setting up arbritary markers, we want to set up generic relationship changes.
