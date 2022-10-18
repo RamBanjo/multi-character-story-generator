@@ -60,6 +60,30 @@ class ObjectNode:
         for key, value in self.tags.items():
             print(key, ":" ,value)
 
+    #This assumes that only one thing (location or character) can hold another item at a time.
+    def get_holder(self):
+        holds_edge = self.get_incoming_edge("holds")
+        return holds_edge[0].from_node
+
+    def get_list_of_things_held_by_this_item(self):
+        things_list = []
+
+        for edge in self.outgoing_edges:
+            if edge.get_name() == "holds":
+                things_list.append(edge.to_node)
+
+        return things_list
+
+    def check_if_this_item_holds_item_with_tag(self, tag, value):
+        held_items_list = self.get_list_of_things_held_by_this_item()
+
+        for thing in held_items_list:
+            if (tag, value) in thing.tags.items():
+                return True
+
+        return False
+
+
     def __str__(self) -> str:
         return self.get_name()
 
@@ -95,6 +119,7 @@ class LocationNode(ObjectNode):
     def get_adjacent_locations_list(self):
         adjacencies = self.get_incoming_edge("adjacent_to")
         return adjacencies
+
         
 #alice = StoryCharacter("Alice", {'lawbias': 0, 'moralbias': 0}, {"Race":"Human", "Job":"Spellcaster", "Life":"Alive", "Gender":"Female"}, 5)
 
@@ -102,3 +127,4 @@ class LocationNode(ObjectNode):
 #print(alice.biases)
 #print(alice.tags)
 #print(alice.start_timestep)
+

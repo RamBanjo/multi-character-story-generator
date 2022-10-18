@@ -136,3 +136,7 @@
         # B: 0-1-2-3-X-X-4
         # Pros: Joint nodes will always be in the same timestep.
         # Cons: Might need to rework the "End Condition" to exclude wait nodes.
+    - it's decided, we'll take case 1 (as long as it's in the same timestep, it should be fine, absolute step shouldn't matter)
+    - We can use character to point back at Location?
+    - Same Location, use location from Story Node to check? We can do Follow Graph
+        - Same Location can now be checked! Hooray!

@@ -34,6 +34,10 @@ class WorldState:
         self.objectnodes.append(node)
         self.node_dict[node.get_name()] = node
 
+    def add_nodes(self, nodes: list):
+        for thing in nodes:
+            self.add_node(thing)
+
     def remove_node(self, node: ObjectNode):
 
         for edge in node.get_outgoing_edge():
@@ -82,6 +86,15 @@ class WorldState:
             else:
                 print(location.get_name(), "has no adjacencies!")
 
+    def make_list_of_nodes_from_tag(self, tag, value):
+        
+        list_of_applicable_object_nodes = []
+
+        for objectnode in self.node_dict.values():
+            if objectnode.tags[tag] == value:
+                list_of_applicable_object_nodes.append(objectnode)
+
+        return list_of_applicable_object_nodes
 
     '''
     connect
@@ -168,5 +181,24 @@ class WorldState:
             print("- {}".format(edge))
         print("======")
 
+    @staticmethod
+    def check_items_in_same_location(item_checklist):
+        #If there is one item or less in the list, return true
+        if len(item_checklist) <= 1:
+            return True
+        else:
+            #If it's not empty, first get the location of the first item in the list
+            location_to_check = item_checklist[0].get_holder()
+            list_of_things_at_checkloc = location_to_check.get_list_of_things_held_by_this_item()
+            same_location = True
+
+            for check_thing in item_checklist:
+                same_location = same_location and check_thing in list_of_things_at_checkloc
+
+            return same_location
 
 
+
+
+            
+            
