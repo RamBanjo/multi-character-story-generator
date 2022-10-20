@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), edge_requirements = []):
+    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), condition_tests = []):
         
         #the name of this action.
         self.name = name
@@ -53,8 +53,8 @@ class StoryNode:
         self.unwanted_tags_list = unwanted_tags_list
         self.bias_range = bias_range
 
-        #edge_requirements is a list of EdgeReq objects. In order to perform this story node, the world state must fulfil all the conditions in it.
-        self.edge_requirements = edge_requirements
+        #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
+        self.condition_tests = condition_tests
         
         #TODO: An object that defines the change in relationship for characters and objects in this story node
 

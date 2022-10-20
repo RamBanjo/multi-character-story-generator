@@ -6,6 +6,7 @@ from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
+from components.UtilityEnums import GenericObjectNode
 
 from components.WorldState import WorldState
 
@@ -554,6 +555,8 @@ class StoryGraph:
     def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list):
         #TODO: Given the Actor, the parts that will be inserted, and the steps to insert the parts at,
         #Decide if the continuation will be valid.
+
+        #Check Continuation Validity will check the Story Node's ConditionTestList here.
 
         #These are cases in which the continuation isn't valid:
         #1. If the character cannot perform the continuation because of unsuitable conditions at certain steps

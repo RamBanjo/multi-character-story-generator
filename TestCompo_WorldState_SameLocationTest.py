@@ -55,6 +55,14 @@ ws.connect(bob, "holds", donut)
 print()
 print("Test held item verification")
 print("Test Alice holding Weapon (Expect True):", alice.check_if_this_item_holds_item_with_tag("Type", "Weapon"))
-print("Test Alice holding Weapon (Expect True):", alice.check_if_this_item_holds_item_with_tag("Type", "Weapon"))
-print("Test Alice holding Weapon (Expect True):", alice.check_if_this_item_holds_item_with_tag("Type", "Weapon"))
-print("Test Alice holding Weapon (Expect True):", alice.check_if_this_item_holds_item_with_tag("Type", "Weapon"))
+print("Test Bob holding Food (Expect True):", bob.check_if_this_item_holds_item_with_tag("Type", "Food"))
+print("Test Alice holding Food (Expect False):", alice.check_if_this_item_holds_item_with_tag("Type", "Food"))
+print("Test Bob holding Weapon (Expect False):", bob.check_if_this_item_holds_item_with_tag("Type", "Weapon"))
+
+#Next goal on the list: Create object representation of these things so that we can run a checklist of these checks.
+# For example:
+# HeldItemTagTest(alice, "Type", "Weapon")
+# SharedLocationTest([])
+
+# A new class called Tests? And then we can make a list of Tests and stick them into the world state
+# Tests should also be able to benefit from the Generic Object Types implemented in RelChange

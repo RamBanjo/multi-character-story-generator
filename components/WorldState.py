@@ -5,6 +5,7 @@ from components.Edge import Edge
 from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import ObjectNode
+from components.UtilityEnums import *
 
 class WorldState:
     def __init__(self, name, objectnodes=[], node_dict = dict()):
@@ -180,6 +181,22 @@ class WorldState:
         for edge in self.edges:
             print("- {}".format(edge))
         print("======")
+
+    def test_story_compatibility_with_storynode(self, story_node):
+
+        compatibility_result = True
+        
+        test_condition_list = story_node.condition_tests
+
+        for condtest in test_condition_list:
+            compatibility_result = compatibility_result and self.test_story_compatibility_with_conditiontest(condtest)
+
+        return compatibility_result
+
+    def test_story_compatibility_with_conditiontest(self, test):
+
+        return True
+
 
     @staticmethod
     def check_items_in_same_location(item_checklist):

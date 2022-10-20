@@ -137,6 +137,10 @@
         # Pros: Joint nodes will always be in the same timestep.
         # Cons: Might need to rework the "End Condition" to exclude wait nodes.
     - it's decided, we'll take case 1 (as long as it's in the same timestep, it should be fine, absolute step shouldn't matter)
-    - We can use character to point back at Location?
-    - Same Location, use location from Story Node to check? We can do Follow Graph
+    - We can use character to point back at Location? (DONE)
+    - Same Location, use location from Story Node to check? We can do Follow Graph (DONE)
         - Same Location can now be checked! Hooray!
+    - Moved Enums to Utility (DONE)
+20 Oct 2022
+    - Work on the ConditionTest objects, so that changes can be dictated using them
+    - Consider if other ConditionTest objects are needed
