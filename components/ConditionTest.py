@@ -22,20 +22,23 @@ class SameLocationTest(ConditionTest):
         self.list_to_test = list_to_test
         self.test_type = TestType.SAME_LOCATION
 
-class HasOutgoingEdgeTest(ConditionTest):
-    def __init__(self, edge_name_test, object_to_test):
+class HasEdgeTest(ConditionTest):
+    def __init__(self, object_from_test, edge_name_test, object_to_test):
 
-        super().__init__("Has Outgoing Edge Test")
+        super().__init__("Has Edge Test")
 
+        self.object_from_test = object_from_test
         self.edge_name_test = edge_name_test
         self.object_to_test = object_to_test
-        self.test_type = TestType.OUTGOING_LINK
+        self.test_type = TestType.HAS_EDGE
 
-class HasIncomingEdgeTest(ConditionTest):
-    def __init__(self, edge_name_test, object_to_test):
+class HasDoubleEdgeTest(ConditionTest):
+    def __init__(self, object_from_test, edge_name_test, object_to_test):
 
-        super().__init__("Has Incoming Edge Test")
+        super().__init__("Has Edge Test")
 
+        self.object_from_test = object_from_test
         self.edge_name_test = edge_name_test
         self.object_to_test = object_to_test
-        self.test_type = TestType.INCOMING_LINK
+        self.test_type = TestType.HAS_DOUBLE_EDGE
+        

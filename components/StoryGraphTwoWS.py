@@ -644,7 +644,6 @@ def translate_generic_change(change, populated_story_node):
         return translate_generic_relchange(change, populated_story_node)
     if change.changetype == ChangeType.TAGCHANGE:
         return translate_generic_tagchange(change, populated_story_node)
-
     return []
 
 def translate_generic_relchange(relchange, populated_story_node):
@@ -687,6 +686,10 @@ def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
             return_list.append(objnode_to_check)
 
     return return_list
+
+#We'll use this to translate tests with generic tags instead of node here
+def translate_generic_test():
+    pass
     
 
 

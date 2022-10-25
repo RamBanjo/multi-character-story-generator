@@ -19,5 +19,5 @@ class ChangeType(Enum):
 class TestType(Enum):
     HELD_ITEM_TAG = 0
     SAME_LOCATION = 1
-    OUTGOING_LINK = 2
-    INCOMING_LINK = 3
+    HAS_EDGE = 2
+    HAS_DOUBLE_EDGE = 3

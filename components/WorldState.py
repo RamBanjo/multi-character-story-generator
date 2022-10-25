@@ -61,12 +61,29 @@ class WorldState:
     '''
     edge functions
     '''
-    def check_adjacency(self, node_a: ObjectNode, node_b: ObjectNode):
+
+    def check_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None):
+
+
+        node_a_retrieved = self.node_dict.get(node_a.get_name(), None)
+        node_b_retrieved = self.node_dict.get(node_b.get_name(), None)
+
+        if node_a_retrieved is None or node_b_retrieved is None:
+            return False
+
+        check_name = True
+
+        if edge_name is None:
+            check_name = False
+
         for edge in self.edges:
-            if (edge.from_node == node_a and edge.to_node == node_b) or (edge.from_node == node_b and edge.to_node == node_a):
+            if (edge.from_node == node_a_retrieved and edge.to_node == node_b_retrieved) and (not check_name or edge.get_name() == edge_name):
                 return True
-            else:
-                return False
+            
+        return False
+
+    def check_double_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None):
+        return self.check_connection(node_a, node_b, edge_name) and self.check_connection(node_b, node_a, edge_name)
 
     def list_location_adjacencies(self):
         print("Location Adjacencies:")
@@ -195,8 +212,43 @@ class WorldState:
 
     def test_story_compatibility_with_conditiontest(self, test):
 
-        return True
+        #Check what kind of test is going to be done here
 
+        test_type = test.test_type
+        test_result = False
+
+        #TODO: Make a function to check the condition for each separate case
+        match test_type:
+            case TestType.HELD_ITEM_TAG:
+                test_result = self.held_item_tag_check(test.holder_to_test, test.tag_to_test, test.value_to_test)
+            case TestType.SAME_LOCATION:
+                test_result = self.same_location_check(test.list_to_test)
+            case TestType.HAS_EDGE:
+                test_result = self.check_connection(test.object_from_test, test.object_to_test, test.edge_name_test)
+            case TestType.HAS_DOUBLE_EDGE:
+                test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test)
+            case _:
+                test_result = False
+            
+        return test_result
+
+    #In order to ensure that all nodes called are from the worldstate directly, we will use the object name to invoke them
+    def same_location_check(self, check_list):
+        list_from_this_ws = []
+
+        for item in check_list:
+            list_from_this_ws.append(self.node_dict.get(item.get_name(), None))
+            list_from_this_ws = list(filter(lambda a: a is not None, list_from_this_ws))
+        
+        return WorldState.check_items_in_same_location(list_from_this_ws)
+
+    def held_item_tag_check(self, holder_test, value_test, tag_test):
+        holder = self.node_dict.get(holder_test.get_name(), None)
+
+        if holder is None:
+            return False
+
+        return holder.check_if_this_item_holds_item_with_tag(value_test, tag_test)
 
     @staticmethod
     def check_items_in_same_location(item_checklist):
