@@ -2,11 +2,12 @@ from operator import truediv
 import random
 from time import time
 from numpy import empty
+from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest, HeldItemTagTest, SameLocationTest
 from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
-from components.UtilityEnums import GenericObjectNode
+from components.UtilityEnums import GenericObjectNode, TestType
 
 from components.WorldState import WorldState
 
@@ -552,7 +553,7 @@ class StoryGraph:
 
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
 
-    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list):
+    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = []):
         #TODO: Given the Actor, the parts that will be inserted, and the steps to insert the parts at,
         #Decide if the continuation will be valid.
 
@@ -577,19 +578,35 @@ class StoryGraph:
         # The Problem:
         # How to handle insertion?
         # In the examples, Char A and Char B have steps 0 to 4. A-B is inserted between 3 and 4 for Char A.
-        # 1. Don't insert anything, non-inserted storyline stays where they are:
+        # We don't insert anything, non-inserted storyline stays where they are:
         # A: 0-1-2-3-A-B-4
         # B: 0-1-2-3-4
-        # Pros: No need to alter storyline more than needed.
-        # Cons: Might cause time to be a bit weird and joint nodes might end up in different steps.
         #
-        # 2. Insert a few blank steps in the unaltered character's storyline.
-        # A: 0-1-2-3-A-B-4
-        # B: 0-1-2-3-X-X-4
-        # Pros: Joint nodes will always be in the same timestep.
-        # Cons: Might need to rework the "End Condition" to exclude wait nodes.
+        # Since each timestep is separate, we do not need to take any further actions.
         
-        pass
+        graphcopy = deepcopy(self)
+        insertloc = abs_step_to_cont_from
+        target_index = 0
+
+        continutation_is_valid = True
+        
+        # We need a "Make Location List" function in here
+        # It detects all the "RelChanges" that changes locations of a character and then applies the location to the Story Graph
+        # I forgot if we ever made that a thing but for now, we will use None as the 
+        # Wait we cannot get away with using None. There are some Generic Locations we would use in 
+
+        for cont in cont_list:
+            current_step = graphcopy.insert_story_part(cont, actor, None, insertloc, True, target_list[target_index])
+            insertloc += 1
+            target_index += 1
+
+        graphcopy.fill_in_locations_on_self()
+
+        #TODO: A loop that goes through all the each character, and checks the Req/Unwanted Tag Lists, Bias Range
+        #TODO: and Condition Tests and check whether it's valid.
+        #TODO: If any is found out to be false then continuation_is_valid should be turned to False.
+
+        return continutation_is_valid
 
     def make_list_of_nodes_at_step(self, abs_step):
         list_of_nodes_at_step = []
@@ -608,7 +625,34 @@ class StoryGraph:
         self.list_of_changes = []
 
         for index in range(0, max_length):
-            self.list_of_changes.append(self.make_list_of_changes_at_step(index)) 
+            self.list_of_changes.append(self.make_list_of_changes_at_step(index))
+
+    def fill_in_locations_on_self(self):
+        #TODO: Make a function that checks through the storyline of each character.
+        #TODO: Assume that the first location is given.
+        #TODO: Give that Location to each of the absolute step. Until a new RelationshipChange comes up, the location would be the same
+        #TODO: When the character owning the storyline changes their location, then the location of the story changes.
+        #TODO: Repeat this for all characters.
+
+        #TODO: We will cycle through all the timesteps. Since we know that each node comes with a relChange anyways, we can pull the location information from
+        #the current worldstate.
+
+        self.refresh_longest_path_length()
+
+        for index in range(0, self.longest_path_length):
+            cur_state = self.make_state_at_step(index)
+
+            for story_char in self.character_objects:
+
+                current_step = self.story_parts.get((story_char.get_name(), index), None)
+
+                if current_step is not None:
+
+                    #Pull the location information from cur_state
+                    char_in_ws = cur_state.node_dict[story_char.get_name()]
+                    location_holding_char = char_in_ws.get_holder()
+                    current_step.set_location(location_holding_char)
+
 
 def make_list_of_changes_from_list_of_story_nodes(story_node_list):
     changeslist = []
@@ -640,11 +684,18 @@ def if_applyonce_choose_one(loclist, applyonce):
 #Even if there is no change in relationship, return the relationship as a 1 element list anyways
 
 def translate_generic_change(change, populated_story_node):
-    if change.changetype == ChangeType.RELCHANGE:
-        return translate_generic_relchange(change, populated_story_node)
-    if change.changetype == ChangeType.TAGCHANGE:
-        return translate_generic_tagchange(change, populated_story_node)
-    return []
+
+    equivalent_changelist = []
+
+    match change.changetype:
+        case ChangeType.RELCHANGE:
+            equivalent_changelist = translate_generic_relchange(change, populated_story_node)
+        case ChangeType.TAGCHANGE:
+            equivalent_changelist = translate_generic_tagchange(change, populated_story_node)
+        case _:
+            equivalent_changelist = [change]
+
+    return equivalent_changelist
 
 def translate_generic_relchange(relchange, populated_story_node):
     lhs_list = check_keyword_and_return_objectnodelist(populated_story_node, relchange.node_a)
@@ -688,9 +739,67 @@ def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
     return return_list
 
 #We'll use this to translate tests with generic tags instead of node here
-def translate_generic_test():
-    pass
-    
+def translate_generic_test(condtest, populated_story_node):
 
+    list_of_equivalent_condtests = []
 
+    match condtest.test_type:
+        case TestType.HELD_ITEM_TAG:
+            list_of_equivalent_condtests = translate_generic_held_item_test(condtest, populated_story_node)
+        case TestType.SAME_LOCATION:
+            list_of_equivalent_condtests = translate_generic_same_location_test(condtest, populated_story_node)
+        case TestType.HAS_EDGE:
+            list_of_equivalent_condtests = translate_generic_has_edge_test(condtest, populated_story_node)
+        case TestType.HAS_DOUBLE_EDGE:
+            list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
+        case _:
+            list_of_equivalent_condtests = [condtest]
+        
+    return list_of_equivalent_condtests
+
+def translate_generic_held_item_test(test, node):
+
+    list_of_equivalent_tests = []
+
+    objectlist = check_keyword_and_return_objectnodelist(node, test.holder_to_test)
+
+    for item in objectlist:
+        list_of_equivalent_tests.append(HeldItemTagTest(item, node.tag_to_test, node.value_to_test))
+
+    return list_of_equivalent_tests
+
+def translate_generic_same_location_test(test, node):
+
+    objectlist = []
+
+    for item in test.list_to_test:
+        objectlist.extend(check_keyword_and_return_objectnodelist(node, item))
+
+    return [SameLocationTest(objectlist)]
+
+def translate_generic_has_edge_test(test, node):
+
+    list_of_equivalent_tests = []
+
+    from_node = check_keyword_and_return_objectnodelist(node, test.object_from_test)
+    to_node = check_keyword_and_return_objectnodelist(node, test.object_to_test)
+
+    for lhs_item in from_node:
+        for rhs_item in to_node:
+            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item))    
+
+    return list_of_equivalent_tests
+
+def translate_generic_has_doubleedge_test(test, node):
     
+    list_of_equivalent_tests = []
+
+    from_node = check_keyword_and_return_objectnodelist(node, test.object_from_test)
+    to_node = check_keyword_and_return_objectnodelist(node, test.object_to_test)
+
+    for lhs_item in from_node:
+        for rhs_item in to_node:
+            list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item))    
+
+    return list_of_equivalent_tests
+

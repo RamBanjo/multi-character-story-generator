@@ -168,18 +168,20 @@ class WorldState:
             if relchange_object.node_b.get_name() not in self.node_dict:
                 self.node_dict[relchange_object.node_b.get_name()] = relchange_object.node_b
             #After adding nodes that don't already exist, make the connections and add it to the list of edges
-            self.connect(self.node_dict[relchange_object.node_a.get_name()], relchange_object.edge.name, self.node_dict[relchange_object.node_b.get_name()])
+            self.connect(self.node_dict[relchange_object.node_a.get_name()], relchange_object.edge_name, self.node_dict[relchange_object.node_b.get_name()])
 
         if (relchange_object.add_or_remove == ChangeAction.REMOVE and not reverse) or (relchange_object.add_or_remove == ChangeAction.ADD and reverse):
             #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
             #Don't delete the nodes, though
             #Check if this exact edge between these exact nodes exists
 
+            check_edge = Edge(relchange_object.edge_name, relchange_object.node_a, relchange_object.node_b)
+
             for my_edge in self.edges:
-                if my_edge == relchange_object.edge:
-                    my_edge.from_node.outgoing_edges.remove(relchange_object.edge)
-                    my_edge.to_node.incoming_edges.remove(relchange_object.edge)
-                    self.edges.remove(relchange_object.edge)
+                if my_edge == check_edge:
+                    my_edge.from_node.outgoing_edges.remove(check_edge)
+                    my_edge.to_node.incoming_edges.remove(check_edge)
+                    self.edges.remove(check_edge)
 
     def apply_tag_change(self, tagchange_object, reverse=False):
         if (tagchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (tagchange_object.add_or_remove == ChangeAction.REMOVE and reverse):

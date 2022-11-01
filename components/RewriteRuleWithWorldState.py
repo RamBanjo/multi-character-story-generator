@@ -2,6 +2,8 @@ from enum import Enum
 from components.StoryGraphTwoWS import StoryGraph
 from components.WorldState import WorldState
 
+#TODO: Rewrite this class so instead of replacing things, it *inserts* things after the condition.
+
 class RewriteRule:
     # ...do we really need World State Change, if all of the world state changes will be stated in the change to world states in the story parts?
     # We probably don't.
@@ -15,17 +17,17 @@ class RewriteRule:
         self.dummychar = dummychar
         self.is_joint_rule = False
 
-    #TODO: Make it account for all the past world states, by inputting list of changes from the story graph
-    def check_character_compatibility(self, character_node, init_world_state, list_of_changes, start_of_check):
+    #TODO: This probably is no longer needed considering that we have moved all these checks to the Nodes themselves?
+    # def check_character_compatibility(self, character_node, init_world_state, list_of_changes, start_of_check):
 
-        compatibility = True
+    #     compatibility = True
 
-        #Instead of checking directly with this thing, we'll need to check with each individual node in story_change.
+    #     #Instead of checking directly with this thing, we'll need to check with each individual node in story_change.
 
-        for story_node in self.story_change:
-            compatibility = compatibility and story_node.check_character_compatibility(character_node)
+    #     for story_node in self.story_change:
+    #         compatibility = compatibility and story_node.check_character_compatibility(character_node)
 
-        return compatibility
+    #     return compatibility
 
 '''
 JointRule needs 2 dummy characters and joints in one of three ways:
