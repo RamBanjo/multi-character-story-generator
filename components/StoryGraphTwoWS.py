@@ -46,7 +46,7 @@ If we use a rule that replaces b with d, e on Alice's storyline the entries will
 Only two world states will be kept: The starting world state and the worldstate of the latest world state.
 '''
 class StoryGraph:
-    def __init__(self, name, character_objects, location_objects, starting_ws, list_of_changes):
+    def __init__(self, name, character_objects, location_objects, starting_ws):
         self.name = name
         self.character_objects = character_objects
         self.location_objects = location_objects
@@ -54,14 +54,14 @@ class StoryGraph:
         self.longest_path_length = 0
         self.starting_ws = starting_ws
         
-        self.list_of_changes = list_of_changes
+        self.list_of_changes = []
         self.latest_ws = self.make_latest_state()
 
     def add_to_story_part_dict(self, character_name, abs_step, story_part):
         self.story_parts[(character_name, abs_step)] = story_part
 
     #Copy=False would be used in the case of joint.
-    def add_story_part(self, part, character, location, timestep, copy=True, targets=[]):
+    def add_story_part(self, part, character, location=None, timestep=0, copy=True, targets=[]):
 
         char_name = None
 
@@ -80,7 +80,7 @@ class StoryGraph:
 
         return new_part
 
-    def add_story_part_at_step(self, part, character, location, absolute_step, timestep, copy=True, targets=[]):
+    def add_story_part_at_step(self, part, character, location=None, absolute_step=0, timestep=0, copy=True, targets=[]):
 
         char_name = None
 
@@ -640,6 +640,7 @@ class StoryGraph:
         self.refresh_longest_path_length()
 
         for index in range(0, self.longest_path_length):
+            self.update_list_of_changes()
             cur_state = self.make_state_at_step(index)
 
             for story_char in self.character_objects:
@@ -705,8 +706,7 @@ def translate_generic_relchange(relchange, populated_story_node):
 
     for lhs_item in lhs_list:
         for rhs_item in rhs_list:
-            newedge = Edge(relchange.edge.name, lhs_item, rhs_item)
-            newchange = RelChange(relchange.name, lhs_item, newedge, rhs_item, relchange.add_or_remove)
+            newchange = RelChange(relchange.name, lhs_item, relchange.edge_name, rhs_item, relchange.add_or_remove)
             list_of_equivalent_relchanges.append(newchange)
 
     return list_of_equivalent_relchanges

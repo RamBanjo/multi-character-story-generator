@@ -158,6 +158,7 @@ class WorldState:
 
     # TODO: Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
     def apply_relationship_change(self, relchange_object, reverse=False):
+
         if (relchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (relchange_object.add_or_remove == ChangeAction.REMOVE and reverse):
             #If the intention is to add, then we add a connection between the nodes
             #If either nodes don't exist already, then they must be added to the list of nodes.
@@ -174,7 +175,7 @@ class WorldState:
             #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
             #Don't delete the nodes, though
             #Check if this exact edge between these exact nodes exists
-
+            
             check_edge = Edge(relchange_object.edge_name, relchange_object.node_a, relchange_object.node_b)
 
             for my_edge in self.edges:
