@@ -66,41 +66,11 @@ class JointType(Enum):
     SPLIT = 2
 
 class JointRule:
-    def __init__(self, merge_count, joint_type, rule_name="", required_tags_list=[], unwanted_tags_list=[], bias_range_list=[]):
+    def __init__(self, merge_count, joint_type, rule_name=""):
         self.rule_name = rule_name
         self.merge_count = merge_count
         self.joint_type = joint_type
-        self.required_tags_list = required_tags_list
-        self.unwanted_tags_list = unwanted_tags_list
-        self.bias_range_list = bias_range_list
         self.is_joint_rule = True
-
-    def check_compatibilities(self, character_list):
-        #This function should be the same as the function that checks compatibilities in the normal rewrite rules but it checks for each character
-        compatibility = True
-
-        #This part below is lifted from regular rules.
-        for i in range (0, len(character_list)):
-            #TODO: Check if the character contains tags in Required Tags (not compatible if false)
-
-            if self.required_tags_list[i] is not None:
-                for tag in self.required_tags_list[i].values():
-                    compatibility = compatibility and tag in character_list[i].tags.values()
-
-            #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
-            if self.unwanted_tags_list[i] is not None:
-                for tag in self.unwanted_tags_list[i].values():
-                    compatibility = compatibility and tag not in character_list[i].tags.values()
-        
-            #TODO: Check if character's bias is within the acceptable range (not compatible if false)
-            if self.bias_range_list[i] is not None:
-                for bias in self.bias_range_list[i]:
-                    char_bias_value = character_list[i].biases[bias]
-                    compatibility = compatibility and char_bias_value >= self.bias_range_list[i][bias][0]
-                    compatibility = compatibility and char_bias_value <= self.bias_range_list[i][bias][1]
-                
-        #If the character passes all three tests, then return true. Otherwise, return false
-        return compatibility
 
 '''
 Joining Joint Rule!

@@ -147,7 +147,7 @@ class StoryGraph:
         
         self.refresh_longest_path_length()
 
-    def insert_story_part(self, part, character, location, absolute_step, copy=True, targets=[]):
+    def insert_story_part(self, part, character, location=None, absolute_step=0, copy=True, targets=[]):
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
         #TODO: Also need to check whether this story part 
         char_name = None
@@ -287,6 +287,10 @@ class StoryGraph:
             for change in self.list_of_changes[index]:
                 traveling_state.apply_some_change(change, reverse=True)
 
+
+    #TODO: Rewrite all the rewrite rules to take into account Check Continuation Validity
+    #TODO: Might need to do Insert instead of Replace and Insert
+    #TODO: This also extends towards the Joint Rewrite Rules
     def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
@@ -596,17 +600,39 @@ class StoryGraph:
         # Wait we cannot get away with using None. There are some Generic Locations we would use in 
 
         for cont in cont_list:
-            current_step = graphcopy.insert_story_part(cont, actor, None, insertloc, True, target_list[target_index])
+            current_step = graphcopy.insert_story_part(cont, actor, location=None, abs_step=insertloc, copy=True, target_list=target_list[target_index])
             insertloc += 1
             target_index += 1
 
         graphcopy.fill_in_locations_on_self()
 
-        #TODO: A loop that goes through all the each character, and checks the Req/Unwanted Tag Lists, Bias Range
+        #TODO: A loop that goes through each of the steps, checking the story for each char and checks the Req/Unwanted Tag Lists, Bias Range
         #TODO: and Condition Tests and check whether it's valid.
         #TODO: If any is found out to be false then continuation_is_valid should be turned to False.
 
-        return continutation_is_valid
+        for check_index in range(abs_step_to_cont_from, abs_step_to_cont_from+len(cont_list)):
+
+            #Make the world state
+            current_ws = graphcopy.make_state_at_step(check_index)
+
+            for current_char in graphcopy.character_objects:
+                current_step = graphcopy.story_parts.get((current_char.get_name(), check_index))
+                current_char_at_current_step = current_ws.node_dict[current_char.get_name()]
+
+                if current_step is not None:
+
+                    if not current_step.check_character_compatibility(current_char_at_current_step):
+                        return False
+
+                    for current_test_to_convert in current_step.condition_tests:
+
+                        equivalent_tests = translate_generic_test(current_test_to_convert, current_step)
+
+                        for current_test_to_check in equivalent_tests:
+
+                            if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
+                                return False
+        return True
 
     def make_list_of_nodes_at_step(self, abs_step):
         list_of_nodes_at_step = []
