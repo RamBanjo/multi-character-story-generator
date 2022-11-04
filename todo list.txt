@@ -142,5 +142,11 @@
         - Same Location can now be checked! Hooray!
     - Moved Enums to Utility (DONE)
 20 Oct 2022
-    - Work on the ConditionTest objects, so that changes can be dictated using them
+    - Work on the ConditionTest objects, so that changes can be dictated using them (DONE)
     - Consider if other ConditionTest objects are needed
+        - We will only go with the basic 4 tests for now and make more as needed.
+03 Nov 2022
+    - Created a new function called Fill Locations On Self, which allows Location Data to come from the WorldState instead of the add node input itself (DONE)
+    - Finished the function called Check Continuation Validity that checks if a given continuation is valid. (Done, Untested)
+    - Make Inverese tests (Done, Untested)
+    - Revise the Apply Rule function so it only adds rather than remove then add

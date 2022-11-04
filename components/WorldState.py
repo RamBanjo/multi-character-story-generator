@@ -77,10 +77,7 @@ class WorldState:
             check_name = False
 
         for edge in self.edges:
-            if (edge.from_node == node_a_retrieved and edge.to_node == node_b_retrieved) and (not check_name or edge.get_name() == edge_name):
-                return True
-            
-        return False
+            return (edge.from_node == node_a_retrieved and edge.to_node == node_b_retrieved) and (not check_name or edge.get_name() == edge_name)
 
     def check_double_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None):
         return self.check_connection(node_a, node_b, edge_name) and self.check_connection(node_b, node_a, edge_name)
@@ -223,15 +220,18 @@ class WorldState:
         #TODO: Make a function to check the condition for each separate case
         match test_type:
             case TestType.HELD_ITEM_TAG:
-                test_result = self.held_item_tag_check(test.holder_to_test, test.tag_to_test, test.value_to_test)
+                test_result = self.held_item_tag_check(test.holder_to_test, test.tag_to_test, test.value_to_test, test.inverse)
             case TestType.SAME_LOCATION:
-                test_result = self.same_location_check(test.list_to_test)
+                test_result = self.same_location_check(test.list_to_test, test.inverse)
             case TestType.HAS_EDGE:
-                test_result = self.check_connection(test.object_from_test, test.object_to_test, test.edge_name_test)
+                test_result = self.check_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.inverse)
             case TestType.HAS_DOUBLE_EDGE:
-                test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test)
+                test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.inverse)
             case _:
                 test_result = False
+
+        if test.inverse:
+            return not test_result
             
         return test_result
 
