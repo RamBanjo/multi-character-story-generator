@@ -34,16 +34,36 @@ test_ws.connect(alice_house, "holds", alice)
 #Tests:
 #Has Edge Inverse
 #Test that Alice does not like Bob: True
-#Test that Charlie does not like Bob: False
+#Test that Charlie does not like Bob: 
+inverse_edge_a = HasEdgeTest(alice, "likes", bob, inverse=True)
+inverse_edge_b = HasEdgeTest(charlie, "likes", bob, inverse=True)
+
+print("Test that Alice does not like Bob (Expect True):", test_ws.test_story_compatibility_with_conditiontest(inverse_edge_a))
+print("Test that Charlie does not like Bob (Expect False):", test_ws.test_story_compatibility_with_conditiontest(inverse_edge_b))
 
 #Has Double Edge Inverse
 #Test that Alice House is not Double adjacent_to Charlie House: True
 #Test that Alice House is not Double adjacent_to Town Square: False
+inverse_double_a = HasDoubleEdgeTest(alice_house, "adjacent_to", charlie_house, inverse=True)
+inverse_double_b = HasDoubleEdgeTest(alice_house, "adjacent_to", town_square, inverse=True)
+
+print("Test that Alice House is not Double adjacent_to Charlie House (Expect True):", test_ws.test_story_compatibility_with_conditiontest(inverse_double_a))
+print("Test that Alice House is not Double adjacent_to Town Square (Expect False):", test_ws.test_story_compatibility_with_conditiontest(inverse_double_b))
 
 #Carry Item Inverse
 #Test that Alice is not carrying a weapon: True
 #Test that Bob is not carrying a weapon: False
+inverse_carry_a = HeldItemTagTest(alice, "Type", "Weapon", inverse=True)
+inverse_carry_b = HeldItemTagTest(charlie, "Type", "Weapon", inverse=True)
+
+print("Test that Alice is not carrying (Type: Weapon) (Expect True):", test_ws.test_story_compatibility_with_conditiontest(inverse_carry_a))
+print("Test that Charlie is not carrying (Type: Weapon) (Expect False):", test_ws.test_story_compatibility_with_conditiontest(inverse_carry_b))
 
 #Same Location 
 #Test that Bob, Charlie, and Alice are not in the same location: True
 #Test that Bob, Charlie, and Book are not in the same location: False
+inverse_location_a = SameLocationTest([bob, charlie, alice], inverse=True)
+inverse_location_b = SameLocationTest([bob, charlie, book], inverse=True)
+
+print("Test that Bob, Charlie, and Alice are not in the same location (Expect True):", test_ws.test_story_compatibility_with_conditiontest(inverse_location_a))
+print("Test that Bob, Charlie, and Book are not in the same location. (Expect False):", test_ws.test_story_compatibility_with_conditiontest(inverse_location_b))
