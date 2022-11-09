@@ -557,7 +557,7 @@ class StoryGraph:
 
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
 
-    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = []):
+    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None):
         #TODO: Given the Actor, the parts that will be inserted, and the steps to insert the parts at,
         #Decide if the continuation will be valid.
 
@@ -600,7 +600,13 @@ class StoryGraph:
         # Wait we cannot get away with using None. There are some Generic Locations we would use in 
 
         for cont in cont_list:
-            current_step = graphcopy.insert_story_part(cont, actor, location=None, abs_step=insertloc, copy=True, target_list=target_list[target_index])
+
+            if target_list is None:
+                current_step = graphcopy.insert_story_part(cont, actor, location=None, absolute_step=insertloc, copy=True)
+            else:
+                current_step = graphcopy.insert_story_part(cont, actor, location=None, absolute_step=insertloc, copy=True, target_list=target_list[target_index])
+
+            
             insertloc += 1
             target_index += 1
 
@@ -610,6 +616,10 @@ class StoryGraph:
         #TODO: and Condition Tests and check whether it's valid.
         #TODO: If any is found out to be false then continuation_is_valid should be turned to False.
 
+        # for node in graphcopy.story_parts:
+        #     print(node)
+        #     print(graphcopy.story_parts[node])
+
         for check_index in range(abs_step_to_cont_from, abs_step_to_cont_from+len(cont_list)):
 
             #Make the world state
@@ -618,6 +628,7 @@ class StoryGraph:
             for current_char in graphcopy.character_objects:
                 current_step = graphcopy.story_parts.get((current_char.get_name(), check_index))
                 current_char_at_current_step = current_ws.node_dict[current_char.get_name()]
+                print(current_step)
 
                 if current_step is not None:
 
@@ -631,6 +642,8 @@ class StoryGraph:
                         for current_test_to_check in equivalent_tests:
 
                             if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
+
+                                #print(current_test_to_check)
                                 return False
         return True
 
@@ -790,7 +803,7 @@ def translate_generic_held_item_test(test, node):
     objectlist = check_keyword_and_return_objectnodelist(node, test.holder_to_test)
 
     for item in objectlist:
-        list_of_equivalent_tests.append(HeldItemTagTest(item, node.tag_to_test, node.value_to_test))
+        list_of_equivalent_tests.append(HeldItemTagTest(item, test.tag_to_test, test.value_to_test, inverse=test.inverse))
 
     return list_of_equivalent_tests
 
@@ -801,7 +814,7 @@ def translate_generic_same_location_test(test, node):
     for item in test.list_to_test:
         objectlist.extend(check_keyword_and_return_objectnodelist(node, item))
 
-    return [SameLocationTest(objectlist)]
+    return [SameLocationTest(objectlist, inverse=test.inverse)]
 
 def translate_generic_has_edge_test(test, node):
 
@@ -812,7 +825,7 @@ def translate_generic_has_edge_test(test, node):
 
     for lhs_item in from_node:
         for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item))    
+            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, inverse=test.inverse))    
 
     return list_of_equivalent_tests
 
@@ -825,7 +838,7 @@ def translate_generic_has_doubleedge_test(test, node):
 
     for lhs_item in from_node:
         for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item))    
+            list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, inverse=test.inverse))    
 
     return list_of_equivalent_tests
 

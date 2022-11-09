@@ -15,6 +15,9 @@ class HeldItemTagTest(ConditionTest):
         self.value_to_test = value_to_test
         self.test_type = TestType.HELD_ITEM_TAG
 
+    def __str__(self):
+        return self.name + " (" + self.holder_to_test.get_name() + " {" + self.tag_to_test + ":" + self.value_to_test + "}, inverse = " + str(self.inverse) + ")"
+
 class SameLocationTest(ConditionTest):
     def __init__(self, list_to_test, inverse = False):
 
@@ -22,6 +25,16 @@ class SameLocationTest(ConditionTest):
 
         self.list_to_test = list_to_test
         self.test_type = TestType.SAME_LOCATION
+
+    def __str__(self):
+
+        printlist = ""
+
+        for item in self.list_to_test:
+            printlist += item.get_name()
+            printlist += ", "
+
+        return self.name + " (" + printlist[:-2] + ", inverse = " + str(self.inverse) + ")"
 
 class HasEdgeTest(ConditionTest):
     def __init__(self, object_from_test, edge_name_test, object_to_test, inverse = False):
@@ -33,6 +46,9 @@ class HasEdgeTest(ConditionTest):
         self.object_to_test = object_to_test
         self.test_type = TestType.HAS_EDGE
 
+    def __str__(self):
+        return self.name + " (" + self.object_from_test.get_name() + " " + self.edge_name_test + " " + self.object_to_test.get_name() + ", " + "inverse = " + str(self.inverse) + ")"
+
 class HasDoubleEdgeTest(ConditionTest):
     def __init__(self, object_from_test, edge_name_test, object_to_test, inverse = False):
 
@@ -42,4 +58,8 @@ class HasDoubleEdgeTest(ConditionTest):
         self.edge_name_test = edge_name_test
         self.object_to_test = object_to_test
         self.test_type = TestType.HAS_DOUBLE_EDGE
+
+    def __str__(self):
+        return self.name + " (" + self.object_from_test.get_name() + " " + self.edge_name_test + " " + self.object_to_test.get_name() + ", " + "inverse = " + str(self.inverse) + ")"
+
         
