@@ -288,9 +288,8 @@ class StoryGraph:
                 traveling_state.apply_some_change(change, reverse=True)
 
 
-    #TODO: Rewrite all the rewrite rules to take into account Check Continuation Validity
-    #TODO: Might need to do Insert instead of Replace and Insert
-    #TODO: This also extends towards the Joint Rewrite Rules
+    #TODO: Redo this entire function. Since we no longer intend to include the Dummy Character
+    #TODO: We also need to redo the is subgraph function in this case
     def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
@@ -304,10 +303,10 @@ class StoryGraph:
             #If yes to both, do a replacement
             #Get all instances and replace all of them if ApplyOnce is false
             #If ApplyOnce is true, then replace only one random instance
-            print("Rule is subgraph of Self, replacing storyline")
+            print("Rule is subgraph of Self, applying storyline")
 
             if not applyonce:
-                print("applyonce is false, replacing all instances of this rule")
+                print("applyonce is false, applying all instances of this rule")
             else:
                 print("applyonce is true, one random instance will be replaced")
                 subgraph_locs = [random.choice(subgraph_locs)]
@@ -504,7 +503,12 @@ class StoryGraph:
             print("Actors:", self.story_parts[node].get_actor_names())
             print("Targets:", self.story_parts[node].get_target_names())
             print("----------")
-        
+
+    #TODO: Need to replace this function with a better, clearer one.
+    #TODO: For example, instead of the following parameters, we need to use self instead
+    #TODO: Maybe add new function to return a normal list of story parts or a dict of story parts given a character name
+    #TODO: And then we translate the input from the rewrite rule (that will be a list) into a dict
+
     def is_subgraph(subgraph, supergraph, subgraph_char, supergraph_char, targets_list=[]):
 
         #Since we only care if a certain character's storyline is a subgraph of another character's storyline
@@ -557,6 +561,27 @@ class StoryGraph:
 
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
 
+    def check_self_is_subgraph_of(self, supergraph_to_test, character_to_extract):
+        
+        #This will return the length of subgraph locs and the list of subgraph locs, just like the function above it.
+        #The only difference is that we will require way, way less inputs.
+        pass
+
+    def make_story_part_list_of_one_character(self, character_to_extract):
+        
+        #This function accepts an input of character and extracts parts involving that character along with the index into a dict
+        #For use with the new subgraph function
+
+        list_of_char_parts = []
+
+        keys_for_this_char = [selfkey for selfkey in self.story_parts.keys() if selfkey[0] == character_to_extract.get_name()]
+
+        for cur_index in range(0, len(keys_for_this_char)):
+            list_of_char_parts.append(keys_for_this_char[(character_to_extract.get_name(), cur_index)])
+
+        return list_of_char_parts
+        
+
     def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None):
         #TODO: Given the Actor, the parts that will be inserted, and the steps to insert the parts at,
         #Decide if the continuation will be valid.
@@ -591,8 +616,6 @@ class StoryGraph:
         graphcopy = deepcopy(self)
         insertloc = abs_step_to_cont_from
         target_index = 0
-
-        continutation_is_valid = True
         
         # We need a "Make Location List" function in here
         # It detects all the "RelChanges" that changes locations of a character and then applies the location to the Story Graph

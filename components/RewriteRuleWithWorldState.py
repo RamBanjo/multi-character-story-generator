@@ -10,11 +10,10 @@ class RewriteRule:
     # With the same logic, we don't need World State Condition either, since we can put all the conditions in the story nodes
 
 
-    def __init__(self, story_condition, story_change, dummychar, name=""):
+    def __init__(self, story_condition, story_change, name=""):
         self.rule_name = name
         self.story_condition = story_condition
         self.story_change = story_change
-        self.dummychar = dummychar
         self.is_joint_rule = False
 
     #TODO: This probably is no longer needed considering that we have moved all these checks to the Nodes themselves?

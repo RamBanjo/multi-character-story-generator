@@ -147,6 +147,13 @@
         - We will only go with the basic 4 tests for now and make more as needed.
 03 Nov 2022
     - Created a new function called Fill Locations On Self, which allows Location Data to come from the WorldState instead of the add node input itself (DONE)
-    - Finished the function called Check Continuation Validity that checks if a given continuation is valid. (Done, Untested)
+    - Finished the function called Check Continuation Validity that checks if a given continuation is valid. (Done, Partially Tested)
     - Make Inverese tests (DONE)
     - Revise the Apply Rule function so it only adds rather than remove then add
+        - This also means we must also redo the apply replacement rule function?
+10 Nov 2022 (Happy Birthday! You're 3 days late)
+    - Redo the Replacement Rules to maybe include a slot for targets so that we can pull information from there into the add node function
+        - Replacement rules no longer need dummy char, because we will now only use a list of nodes
+        - target list will also be able to be included
+    - Need to redo the is_subgraph and apply_rewrite_rule functions!
+
