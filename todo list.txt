@@ -155,5 +155,18 @@
     - Redo the Replacement Rules to maybe include a slot for targets so that we can pull information from there into the add node function
         - Replacement rules no longer need dummy char, because we will now only use a list of nodes
         - target list will also be able to be included
-    - Need to redo the is_subgraph and apply_rewrite_rule functions!
-
+        - Put all the targets in the rewrite rules, yeah!
+    - Need to redo quite a few functions!
+        - is_subgraph (DONE)
+        - rewrite rule function, so instead of removing nodes it only insert new nodes
+            - Reasons to keep old function: Replacement could work for "Non-Terminal Symbols"
+                - For example, Bob goes Outside -> (Heroic Deed) -> Bob Gets Awarded
+                - Heroic Deed is intended to be a non-terminal symbol to be replaced that will be replaced with a storyline that fits the criteria of a heroic deed.
+            - Proposal: Figure out a way to let the system know when to do replacement and when to do only insertion
+                - Special property within RewriteRule? (We could go with this, it's just one boolean)
+                - If the beginning is the same, don't replace?
+17 Nov 2022
+    - Current method only allows story nodes with unique names.
+    - We probably should rename story nodes to make them less confusing.
+        - Might need to ensure Story Node VS Character Node VS Location Node VS Object Node don't sound too confusing on Paper
+        - Maybe go back to using StoryPart?

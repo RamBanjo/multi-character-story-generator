@@ -10,11 +10,12 @@ class RewriteRule:
     # With the same logic, we don't need World State Condition either, since we can put all the conditions in the story nodes
 
 
-    def __init__(self, story_condition, story_change, name=""):
+    def __init__(self, story_condition, story_change, name="", remove_before_insert = False):
         self.rule_name = name
         self.story_condition = story_condition
         self.story_change = story_change
         self.is_joint_rule = False
+        self.remove_before_insert = remove_before_insert
 
     #TODO: This probably is no longer needed considering that we have moved all these checks to the Nodes themselves?
     # def check_character_compatibility(self, character_node, init_world_state, list_of_changes, start_of_check):

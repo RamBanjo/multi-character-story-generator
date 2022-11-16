@@ -190,6 +190,29 @@ class StoryGraph:
 
         self.refresh_longest_path_length()
 
+    def insert_multiple_parts(self, part_list, character, location_list=None, absolute_step=0, copy=True, targets=None):
+
+        index = 0
+
+        for item in part_list:
+
+            cur_loc = None
+            cur_tar = []
+
+            if location_list != None:
+                cur_loc = location_list[index]
+            if targets != None:
+                cur_tar = targets[index]
+
+            self.insert_story_part(item, character, cur_loc, absolute_step+index, copy, cur_tar)
+
+            index += 1
+                
+
+
+
+        
+
     def replace_story_parts(self, character, start_time_abs, end_time_abs, list_of_storynode_and_location_and_target_tuples):
 
         #First, record the start time. That is where the nodes will be inserted
@@ -290,11 +313,12 @@ class StoryGraph:
 
     #TODO: Redo this entire function. Since we no longer intend to include the Dummy Character
     #TODO: We also need to redo the is subgraph function in this case
-    def apply_rewrite_rule(self, rule, character, location_list, targets_requirement_list=[], target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):
+    def apply_rewrite_rule(self, rule, character, location_list, target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
+        #Check if the rule that will be applied is a valid continuation in each of the subgraph loc
 
-        is_subgraph, subgraph_locs = StoryGraph.is_subgraph(rule.story_condition, self, rule.dummychar, character, targets_requirement_list)
+        is_subgraph, subgraph_locs = self.check_for_pattern_in_storyline(rule.story_condition, character)
 
         for banned_loc in banned_subgraph_locs:
             subgraph_locs.remove(banned_loc)
@@ -509,64 +533,93 @@ class StoryGraph:
     #TODO: Maybe add new function to return a normal list of story parts or a dict of story parts given a character name
     #TODO: And then we translate the input from the rewrite rule (that will be a list) into a dict
 
-    def is_subgraph(subgraph, supergraph, subgraph_char, supergraph_char, targets_list=[]):
+    # def is_subgraph(subgraph, supergraph, subgraph_char, supergraph_char, targets_list=[]):
 
-        #Since we only care if a certain character's storyline is a subgraph of another character's storyline
-        #We will do this
-        subdict = deepcopy(subgraph.story_parts)
-        superdict = deepcopy(supergraph.story_parts)
+    #     #Since we only care if a certain character's storyline is a subgraph of another character's storyline
+    #     #We will do this
+    #     subdict = deepcopy(subgraph.story_parts)
+    #     superdict = deepcopy(supergraph.story_parts)
 
-        subset = dict()
-        superset = dict()
-        supertimestepdict = dict()
-        supertargetsdict = dict()
+    #     subset = dict()
+    #     superset = dict()
+    #     supertimestepdict = dict()
+    #     supertargetsdict = dict()
 
-        for key in subdict:
-            if key[0] == subgraph_char.get_name():
-                subset[key[1]] = subdict[key].get_name()
-        for key in superdict:
-            if key[0] == supergraph_char.get_name():
-                superset[key[1]] = superdict[key].get_name()
-                supertimestepdict[key[1]] = superdict[key].timestep
-                supertargetsdict[key[1]] = tuple(sorted(superdict[key].target))
+    #     for key in subdict:
+    #         if key[0] == subgraph_char.get_name():
+    #             subset[key[1]] = subdict[key].get_name()
+    #     for key in superdict:
+    #         if key[0] == supergraph_char.get_name():
+    #             superset[key[1]] = superdict[key].get_name()
+    #             supertimestepdict[key[1]] = superdict[key].timestep
+    #             supertargetsdict[key[1]] = tuple(sorted(superdict[key].target))
 
-        list_of_subgraph_locs = []
+    #     list_of_subgraph_locs = []
 
-        #First of all, this graph can't be the other graph's subgraph if it has more timesteps than the other graph
-        if len(subset) > len(superset):
-            return False, list_of_subgraph_locs
+    #     #First of all, this graph can't be the other graph's subgraph if it has more timesteps than the other graph
+    #     if len(subset) > len(superset):
+    #         return False, list_of_subgraph_locs
 
-        for super_i in range(0, len(superset) - len(subset) + 1):
+    #     for super_i in range(0, len(superset) - len(subset) + 1):
 
-            result = True
+    #         result = True
 
-            timesteps_of_superset = []
+    #         timesteps_of_superset = []
 
-            for sub_i in range(0, len(subset)):
+    #         for sub_i in range(0, len(subset)):
                 
-                #For each of the node in this graph, we check if the steps the character (this one in specific) take are the same.
-                result = result and subset[sub_i] == superset[super_i + sub_i]
+    #             #For each of the node in this graph, we check if the steps the character (this one in specific) take are the same.
+    #             result = result and subset[sub_i] == superset[super_i + sub_i]
 
-                #Additionally, if targets_list isn't empty, then we also need to check the superset's targets to see if they line up with the list of targets.
-                if len(targets_list) > 0:
-                    result = result and supertargetsdict[super_i + sub_i] == tuple(sorted(targets_list[sub_i]))
+    #             #Additionally, if targets_list isn't empty, then we also need to check the superset's targets to see if they line up with the list of targets.
+    #             if len(targets_list) > 0:
+    #                 result = result and supertargetsdict[super_i + sub_i] == tuple(sorted(targets_list[sub_i]))
                 
-                #Add the timestep to the list of superset timesteps
-                timesteps_of_superset.append(supertimestepdict[super_i+sub_i])
+    #             #Add the timestep to the list of superset timesteps
+    #             timesteps_of_superset.append(supertimestepdict[super_i+sub_i])
             
             
-            #The subgraph loc will only be added if the supergraph steps are in the same timesteps
-            if result and all(ele == timesteps_of_superset[0] for ele in timesteps_of_superset):
-                list_of_subgraph_locs.append(super_i)
+    #         #The subgraph loc will only be added if the supergraph steps are in the same timesteps
+    #         if result and all(ele == timesteps_of_superset[0] for ele in timesteps_of_superset):
+    #             list_of_subgraph_locs.append(super_i)
 
-        return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
+    #     return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs
 
-    def check_self_is_subgraph_of(self, supergraph_to_test, character_to_extract):
+    def check_for_pattern_in_storyline(self, pattern_to_test, character_to_extract):
         
         #This will return the length of subgraph locs and the list of subgraph locs, just like the function above it.
         #The only difference is that we will require way, way less inputs.
-        pass
+        character_storyline = self.make_story_part_list_of_one_character(character_to_extract)
 
+        list_of_subgraph_locs = []
+
+        #The pattern can't exist in the storyline if it's longer than the storyline.
+        if len(pattern_to_test) > len(character_storyline):
+            return False, list_of_subgraph_locs
+
+        #We will now cycle through the character's storyline.
+        for super_index in range(0, len(character_storyline) - len(pattern_to_test) + 1):
+            
+            result = True
+
+            timesteps_of_storyline = []
+
+            for pattern_index in range(0, len(pattern_to_test)):
+
+                #For each node in the graph, we check if the steps are the same.
+                result = result and (pattern_to_test[pattern_index].get_name() == character_storyline[super_index + pattern_index].get_name())
+
+                #We will no longer check the Target List, that is the responsibility of the Condition Test.
+
+                #However, checking that the entire list shares the same timestep is still our responsibility.
+                timesteps_of_storyline.append(character_storyline[super_index + pattern_index].timestep)
+
+            #So we still need to check if all the elements have the same timestep.
+            if result and all(ele == timesteps_of_storyline[0] for ele in timesteps_of_storyline):
+                list_of_subgraph_locs.append(super_index)
+
+        return len(list_of_subgraph_locs) >0, list_of_subgraph_locs
+        
     def make_story_part_list_of_one_character(self, character_to_extract):
         
         #This function accepts an input of character and extracts parts involving that character along with the index into a dict
@@ -577,12 +630,17 @@ class StoryGraph:
         keys_for_this_char = [selfkey for selfkey in self.story_parts.keys() if selfkey[0] == character_to_extract.get_name()]
 
         for cur_index in range(0, len(keys_for_this_char)):
-            list_of_char_parts.append(keys_for_this_char[(character_to_extract.get_name(), cur_index)])
+            list_of_char_parts.append(self.story_parts[keys_for_this_char[cur_index]])
 
         return list_of_char_parts
         
+    def remove_parts_by_count(self, start_step, count, actor):
+        end_index = start_step + count - 1
 
-    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None):
+        for remove_index in range(start_step, end_index+1):
+            self.remove_story_part(actor, start_step)
+
+    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None, purge_count = 0):
         #TODO: Given the Actor, the parts that will be inserted, and the steps to insert the parts at,
         #Decide if the continuation will be valid.
 
@@ -614,24 +672,35 @@ class StoryGraph:
         # Since each timestep is separate, we do not need to take any further actions.
         
         graphcopy = deepcopy(self)
-        insertloc = abs_step_to_cont_from
-        target_index = 0
+        # insertloc = abs_step_to_cont_from
+        # target_index = 0
         
         # We need a "Make Location List" function in here
         # It detects all the "RelChanges" that changes locations of a character and then applies the location to the Story Graph
         # I forgot if we ever made that a thing but for now, we will use None as the 
         # Wait we cannot get away with using None. There are some Generic Locations we would use in 
 
-        for cont in cont_list:
+        if purge_count > 0:
+            graphcopy.remove_parts_by_count(abs_step_to_cont_from, purge_count, actor)
 
-            if target_list is None:
-                current_step = graphcopy.insert_story_part(cont, actor, location=None, absolute_step=insertloc, copy=True)
-            else:
-                current_step = graphcopy.insert_story_part(cont, actor, location=None, absolute_step=insertloc, copy=True, target_list=target_list[target_index])
+        graphcopy.insert_multiple_parts(cont_list, actor, None, abs_step_to_cont_from, targets=target_list)
+
+        # for storypart in graphcopy.story_parts:
+        #     print(storypart, graphcopy.story_parts[storypart])
+
+        # for cont in cont_list:
+
+        #     if target_list is None:
+        #         current_step = graphcopy.insert_story_part(cont, actor, location=None, absolute_step=insertloc, copy=True)
+        #     else:
+        #         current_step = graphcopy.insert_story_part(cont, actor, location=None, absolute_step=insertloc, copy=True, target_list=target_list[target_index])
 
             
-            insertloc += 1
-            target_index += 1
+        #     insertloc += 1
+        #     target_index += 1
+
+        # for node in graphcopy.story_parts:
+        #     print(node)
 
         graphcopy.fill_in_locations_on_self()
 
