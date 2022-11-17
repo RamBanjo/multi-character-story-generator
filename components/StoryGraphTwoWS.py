@@ -313,7 +313,7 @@ class StoryGraph:
 
     #TODO: Redo this entire function. Since we no longer intend to include the Dummy Character
     #TODO: We also need to redo the is subgraph function in this case
-    def apply_rewrite_rule(self, rule, character, location_list, target_replacement_list=[], applyonce=False, banned_subgraph_locs=[]):
+    def apply_rewrite_rule(self, rule, character, location_list = None, applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
         #Check if the rule that will be applied is a valid continuation in each of the subgraph loc
@@ -323,37 +323,38 @@ class StoryGraph:
         for banned_loc in banned_subgraph_locs:
             subgraph_locs.remove(banned_loc)
 
-        if is_subgraph:
-            #If yes to both, do a replacement
-            #Get all instances and replace all of them if ApplyOnce is false
-            #If ApplyOnce is true, then replace only one random instance
-            print("Rule is subgraph of Self, applying storyline")
+        #Here, we will check each loc in subgraph_locs to see if the continuation from that point on is valid.
+        valid_insert_points = []
+        for potential_insert_point in subgraph_locs:
 
+            purge_count = 0
+
+            if rule.remove_before_insert:
+                purge_count = len(rule.story_condition)
+
+            if self.check_continuation_validity(character, potential_insert_point, rule.story_change, rule.target_list, purge_count):
+                valid_insert_points.append(potential_insert_point)
+
+        if len(valid_insert_points) > 0:
+            print("There is at least one valid insert point. Applying Rule.")
             if not applyonce:
                 print("applyonce is false, applying all instances of this rule")
             else:
                 print("applyonce is true, one random instance will be replaced")
                 subgraph_locs = [random.choice(subgraph_locs)]
 
-            rule_length = rule.story_change.get_longest_path_length_by_character(rule.dummychar)
+            for change_location in subgraph_locs:
+                if rule.remove_before_insert:
 
-            part_and_loc_tuple_list = []
+                    #Remove the parts
+                    self.remove_parts_by_count(change_location, len(rule.story_condition), character)
 
-            for i in range(0, rule_length):
-                new_part = deepcopy(rule.story_change.story_parts[(rule.dummychar.get_name(), i)])
-                new_part.remove_actor(rule.dummychar)
+                #add the right parts
+                self.insert_multiple_parts(self.story_before_insert, character, location_list, change_location, copy=True, targets=rule.target_list)
 
-                #TODO: Add the target into this tuple
-                new_part_and_loc_and_tar_tuple = (new_part, location_list[i], target_replacement_list[i])
-                part_and_loc_tuple_list.append(new_part_and_loc_and_tar_tuple)
-            
-            for start_index in subgraph_locs:
-                end_index = start_index + rule_length - 1
-                #self.replace_world_states(start_index, end_index, rule.story_change.world_states)
-                self.replace_story_parts(character, start_index, end_index, part_and_loc_tuple_list)
-                
         else:
-            print("Nothing is replaced: Rule is not subgraph of Self")
+            print("There are no valid insert points. Rule is not applied.")
+
         self.refresh_longest_path_length()
 
     def apply_joint_node (self, joint_node, character_list, location, absolute_step):
