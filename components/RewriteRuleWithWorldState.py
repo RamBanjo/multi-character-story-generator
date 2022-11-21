@@ -61,6 +61,8 @@ Required Tags List, unwanted tags list, and bias range list are the same as norm
 have separate values if needs be. If a particular slot has no prerequisites, it should be an empty dict if it's tags, or None if it's a bias range.
 '''
 
+#TODO: redo this so that instead of the rules defining the required tags, this information is placed into the story node itself.
+
 class JointType(Enum):
     JOIN = 0
     CONT = 1

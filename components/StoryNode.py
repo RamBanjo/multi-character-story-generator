@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), condition_tests = []):
+    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), condition_tests = []):
         
         #the name of this action.
         self.name = name
@@ -52,6 +52,10 @@ class StoryNode:
         self.required_tags_list = required_tags_list
         self.unwanted_tags_list = unwanted_tags_list
         self.bias_range = bias_range
+
+        self.required_tags_list_target = required_tags_list_target
+        self.unwanted_tags_list_target = unwanted_tags_list_target
+        self.bias_range_target = bias_range_target
 
         #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
         self.condition_tests = condition_tests
@@ -179,5 +183,32 @@ class StoryNode:
                 
         #If the character passes all three tests, then return true. Otherwise, return false
         return compatibility
+
+    def check_target_compatibility(self, character_node):
+        
+        compatibility = True
+
+        #TODO: Check if the character contains tags in Required Tags (not compatible if false)
+
+        if self.required_tags_list_target is not None:
+            for tag in self.required_tags_list_target.values():
+                compatibility = compatibility and tag in character_node.tags.values()
+
+        #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
+
+        if self.unwanted_tags_list_target is not None:
+            for tag in self.unwanted_tags_list_target.values():
+                compatibility = compatibility and tag not in character_node.tags.values()
+        
+        #TODO: Check if character's bias is within the acceptable range (not compatible if false)
+        if self.bias_range_target is not None:
+            for bias in self.bias_range_target:
+                char_bias_value = character_node.biases[bias]
+                compatibility = compatibility and char_bias_value >= self.bias_range_target[bias][0]
+                compatibility = compatibility and char_bias_value <= self.bias_range_target[bias][1]
+                
+        #If the character passes all three tests, then return true. Otherwise, return false
+        return compatibility
+        
 
 
