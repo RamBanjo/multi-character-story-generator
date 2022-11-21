@@ -162,11 +162,20 @@
             - Reasons to keep old function: Replacement could work for "Non-Terminal Symbols"
                 - For example, Bob goes Outside -> (Heroic Deed) -> Bob Gets Awarded
                 - Heroic Deed is intended to be a non-terminal symbol to be replaced that will be replaced with a storyline that fits the criteria of a heroic deed.
-            - Proposal: Figure out a way to let the system know when to do replacement and when to do only insertion
-                - Special property within RewriteRule? (We could go with this, it's just one boolean)
+            - Proposal: Figure out a way to let the system know when to do replacement and when to do only insertion (DONE)
+                - Special property within RewriteRule? (We could go with this, it's just one boolean) (WE DID THIS ITS DONE)
                 - If the beginning is the same, don't replace?
 17 Nov 2022
     - Current method only allows story nodes with unique names.
     - We probably should rename story nodes to make them less confusing.
         - Might need to ensure Story Node VS Character Node VS Location Node VS Object Node don't sound too confusing on Paper
         - Maybe go back to using StoryPart?
+    - New Rewrite Rule is now done and has to be Tested
+    - Check if the Joint Rule still works with the new WS format
+        - Whoops, when I checked on friday it didn't. Good thing I fixed it on Monday!
+        - Still needs testing, though.
+    - Hey, uh, so remember the split joint thing we implemented? If we want to keep it, we probably need to figure out a way to include that information in the Rewrite Rules?
+        - How do we know how to split? We put in a rule, and we give the split list some sort of distribution?
+        - Distribution could be based on randomization or character bias ranking?
+        - Make a list of all possible permutations and randomly choose one from the valid
+    - Plot out Rules, Init Test WS, Characters, Objects, and decide the kind of story we want to generate (important)
