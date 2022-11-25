@@ -8,7 +8,6 @@ from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
 from components.UtilityEnums import GenericObjectNode, TestType
-
 from components.WorldState import WorldState
 
 '''
@@ -662,8 +661,16 @@ class StoryGraph:
 
                 if current_step is not None:
 
-                    if not current_step.check_character_compatibility(current_char_at_current_step):
+                    if (current_char_at_current_step not in current_step.actor) and (current_char_at_current_step not in current_step.target):
                         return False
+
+                    if current_char_at_current_step in current_step.actor:
+                        if not current_step.check_character_compatibility(current_char_at_current_step):
+                            return False
+
+                    if current_char_at_current_step in current_step.target:
+                        if not current_step.check_target_compatibility(current_char_at_current_step):
+                            return False
 
                     for current_test_to_convert in current_step.condition_tests:
 
@@ -871,4 +878,3 @@ def translate_generic_has_doubleedge_test(test, node):
             list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, inverse=test.inverse))    
 
     return list_of_equivalent_tests
-

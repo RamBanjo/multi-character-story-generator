@@ -81,12 +81,14 @@ Joining Joint Rule!
 Joining Joint's base is a list of nodes for each of the character intending to join in.
 '''
 class JoiningJointRule(JointRule):
-    def __init__(self, merge_count, base_actions, joint_node, rule_name="", required_tags_list=[], unwanted_tags_list=[], bias_range_list=[]):
+    def __init__(self, merge_count, base_actions, joint_node, rule_name=""):
 
-        super().__init__(merge_count, JointType.JOIN, rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
+        super().__init__(merge_count, JointType.JOIN, rule_name)
 
         self.base_actions = base_actions
         self.joint_node = joint_node
+
+    
 
 '''
 Continuous Joint Rule!
@@ -94,9 +96,9 @@ Continuous Joint Rule!
 Cont. Joint's base is a joint itself, and then a joint would connect to it.
 '''
 class ContinuousJointRule(JointRule):
-    def __init__(self, merge_count, base_joint, joint_node, rule_name="", required_tags_list=[], unwanted_tags_list=[], bias_range_list=[]):
+    def __init__(self, merge_count, base_joint, joint_node, rule_name=""):
 
-        super().__init__(merge_count, JointType.CONT, rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
+        super().__init__(merge_count, JointType.CONT, rule_name)
 
         self.base_joint = base_joint
         self.joint_node = joint_node
@@ -107,9 +109,9 @@ Splitting Joint Rule!
 Splitting Joint Rule's base would be the joint node where dummy chars will go separate ways.
 '''
 class SplittingJointRule(JointRule):
-    def __init__(self, merge_count, base_joint, split_list, rule_name="", required_tags_list=[], unwanted_tags_list=[], bias_range_list=[]):
+    def __init__(self, merge_count, base_joint, split_list, rule_name=""):
 
-        super().__init__(merge_count, JointType.SPLIT, rule_name, required_tags_list, unwanted_tags_list, bias_range_list)
+        super().__init__(merge_count, JointType.SPLIT, rule_name)
 
         self.base_joint = base_joint
         self.split_list = split_list

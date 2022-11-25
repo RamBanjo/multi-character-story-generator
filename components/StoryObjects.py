@@ -78,10 +78,19 @@ class ObjectNode:
         held_items_list = self.get_list_of_things_held_by_this_item()
 
         for thing in held_items_list:
-            if (tag, value) in thing.tags.items():
+            if thing.check_if_this_item_has_tag(tag, value):
                 return True
 
         return False
+
+    #If both tag and value are given, both must match.
+    #If only tag is given and value is None, then only the tag has to exist.
+    def check_if_this_item_has_tag(self, tag, value=None):
+
+        if value == None:
+            return tag in self.tags.keys()
+        else:
+            return (tag, value) in self.tags.items()
 
 
     def __str__(self) -> str:

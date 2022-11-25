@@ -177,5 +177,11 @@
     - Hey, uh, so remember the split joint thing we implemented? If we want to keep it, we probably need to figure out a way to include that information in the Rewrite Rules?
         - How do we know how to split? We put in a rule, and we give the split list some sort of distribution?
         - Distribution could be based on randomization or character bias ranking?
-        - Make a list of all possible permutations and randomly choose one from the valid
+        - Make a list of all possible permutations and randomly choose one from the valid list?
+        - Probably should consult professor about this
+        - Random first, then check if this combination is good
     - Plot out Rules, Init Test WS, Characters, Objects, and decide the kind of story we want to generate (important)
+24 Nov 2022
+    - Change the Tag check requirements
+        - If the value is blank, then it can be anything
+    - Splitting Joint should just randomly assign characters and then go with the first combination that works

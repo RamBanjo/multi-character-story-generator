@@ -182,6 +182,14 @@ class StoryNode:
                 compatibility = compatibility and char_bias_value <= self.bias_range[bias][1]
                 
         #If the character passes all three tests, then return true. Otherwise, return false
+        return 
+        
+    def check_character_compatibility_for_many_characters(self, list_of_chars):
+        compatibility = True
+
+        for character_node in list_of_chars:
+            compatibility = compatibility and self.check_character_compatibility(character_node)
+
         return compatibility
 
     def check_target_compatibility(self, character_node):
@@ -208,7 +216,14 @@ class StoryNode:
                 compatibility = compatibility and char_bias_value <= self.bias_range_target[bias][1]
                 
         #If the character passes all three tests, then return true. Otherwise, return false
+        return compatibility 
+
+    def check_target_compatibility_for_many_characters(self, list_of_chars):
+        compatibility = True
+
+        for character_node in list_of_chars:
+            compatibility = compatibility and self.check_target_compatibility(character_node)
+
         return compatibility
-        
 
 
