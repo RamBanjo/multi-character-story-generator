@@ -12,9 +12,17 @@ class Edge:
         return self.name + " (" + self.from_node.name + " ---> " + self.to_node.name + ")"
 
     def soft_equal(self, rhs):
+
+        if type(self) != type(rhs):
+            return False
+
         return self.name == rhs.name and self.from_node == rhs.from_node and self.to_node == rhs.to_node
 
     def __eq__(self, rhs):
+
+        if type(self) != type(rhs):
+            return False
+
         return self.name == rhs.name and self.from_node == rhs.from_node and self.to_node == rhs.to_node and self.value == rhs.value
 
     def get_name(self):
@@ -22,6 +30,12 @@ class Edge:
 
     def set_name(self, new_name):
         self.name = new_name
+
+    def get_value(self):
+        return self.value
+
+    def set_value(self, new_value):
+        self.value = new_value
 
 # EdgeReq objects are used to specify the WorldState requirements for StoryNodes.
 # For example, a node where a character opens a locked door would require that the "Actor" of the node holds the appropriate "Key" for the door.

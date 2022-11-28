@@ -782,7 +782,7 @@ def translate_generic_relchange(relchange, populated_story_node):
 
     for lhs_item in lhs_list:
         for rhs_item in rhs_list:
-            newchange = RelChange(relchange.name, lhs_item, relchange.edge_name, rhs_item, relchange.add_or_remove)
+            newchange = RelChange(relchange.name, lhs_item, relchange.edge_name, rhs_item, relchange.value, relchange.add_or_remove)
             list_of_equivalent_relchanges.append(newchange)
 
     return list_of_equivalent_relchanges
@@ -862,7 +862,7 @@ def translate_generic_has_edge_test(test, node):
 
     for lhs_item in from_node:
         for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, inverse=test.inverse))    
+            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
 
     return list_of_equivalent_tests
 
@@ -875,6 +875,6 @@ def translate_generic_has_doubleedge_test(test, node):
 
     for lhs_item in from_node:
         for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, inverse=test.inverse))    
+            list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
 
     return list_of_equivalent_tests

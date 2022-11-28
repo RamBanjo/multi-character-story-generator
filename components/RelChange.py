@@ -16,13 +16,14 @@ class SomeChange:
         self.name = name
 
 class RelChange(SomeChange):
-    def __init__(self, name, node_a, edge_name, node_b, add_or_remove: ChangeAction):
+    def __init__(self, name, node_a, edge_name, node_b, value, add_or_remove: ChangeAction):
         
         super().__init__(name)
 
         self.node_a = node_a
         self.edge_name = edge_name
         self.node_b = node_b
+        self.value = value
         self.add_or_remove = add_or_remove
         self.changetype = ChangeType.RELCHANGE
 

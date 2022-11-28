@@ -184,4 +184,10 @@
 24 Nov 2022
     - Change the Tag check requirements
         - If the value is blank, then it can be anything
+        - We extended this and added the values to the edges too.
     - Splitting Joint should just randomly assign characters and then go with the first combination that works
+    - Since we rewrote a bunch of new Edge functions, we should test the following: (COMPLETE)
+        - StoryNode: Check if Item has Tag (TESTED)
+        - WorldState: Disconnect (TESTED)
+        - Edge: Edge Equality (both __eq__ and soft_equal) (TESTED)
+        - ConditionTest: HasEdge must be tested (Double Has Edge gets a free pass because it's based off of HasEdge) (TESTED)

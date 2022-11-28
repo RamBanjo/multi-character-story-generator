@@ -62,7 +62,7 @@ class WorldState:
     edge functions
     '''
 
-    def check_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None):
+    def check_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None, edge_value=None, soft_equal=False):
 
 
         node_a_retrieved = self.node_dict.get(node_a.get_name(), None)
@@ -77,13 +77,15 @@ class WorldState:
             check_name = False
 
         for edge in self.edges:
-            if (edge.from_node == node_a_retrieved and edge.to_node == node_b_retrieved) and (not check_name or edge.get_name() == edge_name):
+            if not soft_equal and (edge.from_node == node_a_retrieved and edge.to_node == node_b_retrieved and edge.get_value() == edge_value) and (not check_name or edge.get_name() == edge_name):
+                return True
+            if soft_equal and (edge.from_node == node_a_retrieved and edge.to_node == node_b_retrieved) and (not check_name or edge.get_name() == edge_name):
                 return True
         
         return False
 
-    def check_double_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None):
-        return self.check_connection(node_a, node_b, edge_name) and self.check_connection(node_b, node_a, edge_name)
+    def check_double_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None, edge_value=None, soft_equal = False):
+        return self.check_connection(node_a, node_b, edge_name, edge_value, soft_equal) and self.check_connection(node_b, node_a, edge_name, edge_value, soft_equal)
 
     def list_location_adjacencies(self):
         print("Location Adjacencies:")
@@ -117,10 +119,10 @@ class WorldState:
     '''
     connect
     '''
-    def connect(self, from_node: ObjectNode, edge_name, to_node: ObjectNode):
+    def connect(self, from_node: ObjectNode, edge_name, to_node: ObjectNode, value = None):
 
         #new edge
-        new_edge = Edge(edge_name, from_node, to_node)
+        new_edge = Edge(edge_name, from_node, to_node, value)
 
         #add stuff to the nodes
         from_node.add_outgoing_edge(new_edge)
@@ -132,6 +134,17 @@ class WorldState:
 
         self.connect(nodeA, edge_name, nodeB)
         self.connect(nodeB, edge_name, nodeA)
+
+    def disconnect(self, from_node, edge_name, to_node, value = None, soft_equal = False):
+
+        to_remove = Edge(edge_name, from_node, to_node, value)
+
+        for my_edge in self.edges:
+            if (not soft_equal and my_edge == to_remove) or (soft_equal and to_remove.soft_equal(my_edge)):
+                my_edge.from_node.outgoing_edges.remove(to_remove)
+                my_edge.to_node.incoming_edges.remove(to_remove)
+                self.edges.remove(to_remove)
+
 
     def is_subgraph(self, other_world_state):
         #Okay, same deal with the other subgraph functions here:
@@ -227,9 +240,9 @@ class WorldState:
             case TestType.SAME_LOCATION:
                 test_result = self.same_location_check(test.list_to_test)
             case TestType.HAS_EDGE:
-                test_result = self.check_connection(test.object_from_test, test.object_to_test, test.edge_name_test)
+                test_result = self.check_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
             case TestType.HAS_DOUBLE_EDGE:
-                test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test)
+                test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
             case _:
                 test_result = False
 

@@ -37,26 +37,30 @@ class SameLocationTest(ConditionTest):
         return self.name + " (" + printlist[:-2] + ", inverse = " + str(self.inverse) + ")"
 
 class HasEdgeTest(ConditionTest):
-    def __init__(self, object_from_test, edge_name_test, object_to_test, inverse = False):
+    def __init__(self, object_from_test, edge_name_test, object_to_test, value_test = None, soft_equal = False, inverse = False):
 
         super().__init__("Has Edge Test", inverse)
 
         self.object_from_test = object_from_test
         self.edge_name_test = edge_name_test
         self.object_to_test = object_to_test
+        self.value_test = value_test
+        self.soft_equal = soft_equal
         self.test_type = TestType.HAS_EDGE
 
     def __str__(self):
         return self.name + " (" + self.object_from_test.get_name() + " " + self.edge_name_test + " " + self.object_to_test.get_name() + ", " + "inverse = " + str(self.inverse) + ")"
 
 class HasDoubleEdgeTest(ConditionTest):
-    def __init__(self, object_from_test, edge_name_test, object_to_test, inverse = False):
+    def __init__(self, object_from_test, edge_name_test, object_to_test, value_test = None, soft_equal = False, inverse = False):
 
         super().__init__("Has Edge Test", inverse)
 
         self.object_from_test = object_from_test
         self.edge_name_test = edge_name_test
         self.object_to_test = object_to_test
+        self.value_test = value_test
+        self.soft_equal = soft_equal
         self.test_type = TestType.HAS_DOUBLE_EDGE
 
     def __str__(self):
