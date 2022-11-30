@@ -15,11 +15,11 @@ bob = CharacterNode("Bob")
 
 #Bob also goes to the forest, but he's not there to take the sword, he's there to do some fishing. So, his storyline will not return true if we ask about the pattern.
 
-go_forest = StoryNode("Go to Forest", None, None, {"Type": "movement"}, 1)
-take_sword = StoryNode("Take Sword", None, None, {"Type": "gain_item"}, 1)
-go_fishing = StoryNode("Go Fishing", None, None, {"Type": "hobby"}, 1)
-slay_monsters = StoryNode("Slay Monsters", None, None, {"Type": "quest"}, 1)
-cook_fish = StoryNode("Cook Fish", None, None, {"Type": "cooking"}, 1)
+go_forest = StoryNode("Go to Forest", None, {"Type": "movement"}, 1)
+take_sword = StoryNode("Take Sword", None, {"Type": "gain_item"}, 1)
+go_fishing = StoryNode("Go Fishing", None, {"Type": "hobby"}, 1)
+slay_monsters = StoryNode("Slay Monsters", None, {"Type": "quest"}, 1)
+cook_fish = StoryNode("Cook Fish", None, {"Type": "cooking"}, 1)
 
 ws = WorldState("Test WS", [alice, sword, forest, castle, bob])
 

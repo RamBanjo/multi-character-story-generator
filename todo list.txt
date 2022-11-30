@@ -182,12 +182,13 @@
         - Random first, then check if this combination is good
     - Plot out Rules, Init Test WS, Characters, Objects, and decide the kind of story we want to generate (important)
 24 Nov 2022
-    - Change the Tag check requirements
+    - Change the Tag check requirements (Done and Tested!)
         - If the value is blank, then it can be anything
         - We extended this and added the values to the edges too.
-    - Splitting Joint should just randomly assign characters and then go with the first combination that works
+    - Splitting Joint should just randomly assign characters and then go with the first combination that works (Done, Untested)
     - Since we rewrote a bunch of new Edge functions, we should test the following: (COMPLETE)
         - StoryNode: Check if Item has Tag (TESTED)
         - WorldState: Disconnect (TESTED)
         - Edge: Edge Equality (both __eq__ and soft_equal) (TESTED)
         - ConditionTest: HasEdge must be tested (Double Has Edge gets a free pass because it's based off of HasEdge) (TESTED)
+    - Plot the World State and Initial Graph State, based on ReGEN

@@ -29,18 +29,18 @@ move_to_shop = RelChange("move_towards_shop", shop, "holds", GenericObjectNode.G
 move_away = RelChange("move_away_from_cur_loc", GenericObjectNode.GENERIC_LOCATION, "holds", GenericObjectNode.GENERIC_ACTOR, ChangeAction.REMOVE)
 double_edge_shop = HasDoubleEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", shop)
 
-go_shop = StoryNode("Go to Shop", None, None, {"Type": "movement"}, 1, effects_on_next_ws=[move_away, move_to_shop], condition_tests=[double_edge_shop])
+go_shop = StoryNode("Go to Shop", None, {"Type": "movement"}, 1, effects_on_next_ws=[move_away, move_to_shop], condition_tests=[double_edge_shop])
 
 present_pickup_add = RelChange("present_pickup_add", GenericObjectNode.GENERIC_ACTOR, "holds", birthdaypresent, ChangeAction.ADD)
 present_pickup_rem = RelChange("present_pickup_rem", GenericObjectNode.GENERIC_LOCATION, "holds", birthdaypresent, ChangeAction.REMOVE)
 actor_in_same_room_as_present = SameLocationTest([GenericObjectNode.GENERIC_ACTOR, birthdaypresent])
 
-get_present = StoryNode("Get Present", None, None, {"Type" "item_pickup"}, 1, effects_on_next_ws=[present_pickup_add, present_pickup_rem], condition_tests=[actor_in_same_room_as_present])
+get_present = StoryNode("Get Present", None, {"Type" "item_pickup"}, 1, effects_on_next_ws=[present_pickup_add, present_pickup_rem], condition_tests=[actor_in_same_room_as_present])
 
 move_to_alicehouse = RelChange("move_towards_ahouse", alicehouse, "holds", GenericObjectNode.GENERIC_ACTOR, ChangeAction.ADD)
 double_edge_alicehouse = HasDoubleEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", alicehouse)
 
-go_to_alicehouse = StoryNode("Go to Alicehouse", None, None, {"Type": "movement"}, 1, effects_on_next_ws=[move_to_alicehouse, move_away], condition_tests=[double_edge_alicehouse])
+go_to_alicehouse = StoryNode("Go to Alicehouse", None, {"Type": "movement"}, 1, effects_on_next_ws=[move_to_alicehouse, move_away], condition_tests=[double_edge_alicehouse])
 
 mystory = StoryGraph("Bob Gets Birthday Present for Alice", [bob], [bobhouse, shop, alicehouse], init_ws)
 
@@ -72,13 +72,13 @@ park = LocationNode("Park")
 move_to_park = RelChange("move_towards_shop", shop, "holds", GenericObjectNode.GENERIC_ACTOR, ChangeAction.ADD)
 double_edge_park = HasDoubleEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", park)
 
-go_park = StoryNode("Go to Park", None, None, {"Type": "movement"}, 1, effects_on_next_ws=[move_away, move_to_park], condition_tests=[double_edge_park])
+go_park = StoryNode("Go to Park", None, {"Type": "movement"}, 1, effects_on_next_ws=[move_away, move_to_park], condition_tests=[double_edge_park])
 
 bob_not_hate_charlie = HasEdgeTest(GenericObjectNode.GENERIC_ACTOR, "hates", charlie, inverse=True)
 bob_has_present = HeldItemTagTest(GenericObjectNode.GENERIC_ACTOR, "Type", "Present")
 #There is no change in world state doing this action
 
-talk_charlie = StoryNode("Talk to Charlie about Present", None, None, {"Type": "conversation"}, 2, condition_tests=[bob_not_hate_charlie, bob_has_present])
+talk_charlie = StoryNode("Talk to Charlie about Present", None, {"Type": "conversation"}, 2, condition_tests=[bob_not_hate_charlie, bob_has_present])
 
 present_give_to_alice_add = RelChange("present_give_to_alice_add", alice, "holds", birthdaypresent, ChangeAction.ADD)
 present_give_to_alice_rem = RelChange("present_give_to_alice_rem", GenericObjectNode.GENERIC_ACTOR, "holds", birthdaypresent, ChangeAction.REMOVE)
@@ -86,7 +86,7 @@ bob_holds_present = HasEdgeTest(GenericObjectNode.GENERIC_ACTOR, "holds", birthd
 bob_likes_alice = HasEdgeTest(GenericObjectNode.GENERIC_ACTOR, "likes", alice)
 bob_same_room_alice = SameLocationTest([GenericObjectNode.GENERIC_ACTOR, alice])
 
-give_present_to_alice = StoryNode("Give Present to Alice", None, None, {"Type": "give_item"}, 2, effects_on_next_ws=[], condition_tests=[bob_holds_present, bob_likes_alice, bob_same_room_alice])
+give_present_to_alice = StoryNode("Give Present to Alice", None, {"Type": "give_item"}, 2, effects_on_next_ws=[], condition_tests=[bob_holds_present, bob_likes_alice, bob_same_room_alice])
 
 mystory.fill_in_locations_on_self()
 

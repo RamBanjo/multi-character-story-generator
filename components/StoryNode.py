@@ -2,13 +2,10 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biases, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), condition_tests = []):
+    def __init__(self, name, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), condition_tests = []):
         
         #the name of this action.
         self.name = name
-        
-        #biases. forbids characters outside of this range from performing this action.
-        self.biases = biases
 
         #bias weight. How much this action will affect the bias of the character performing it.
         self.biasweight = biasweight
@@ -164,25 +161,29 @@ class StoryNode:
 
         #TODO: Check if the character contains tags in Required Tags (not compatible if false)
 
+        #print("Before All Tests", compatibility)
         if self.required_tags_list is not None:
             for tag in self.required_tags_list.values():
                 compatibility = compatibility and tag in character_node.tags.values()
 
         #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
 
+        #print("After Req Tags Test", compatibility)
         if self.unwanted_tags_list is not None:
             for tag in self.unwanted_tags_list.values():
                 compatibility = compatibility and tag not in character_node.tags.values()
         
+        #print("After Unwanted Tags Test", compatibility)
         #TODO: Check if character's bias is within the acceptable range (not compatible if false)
         if self.bias_range is not None:
             for bias in self.bias_range:
                 char_bias_value = character_node.biases[bias]
                 compatibility = compatibility and char_bias_value >= self.bias_range[bias][0]
                 compatibility = compatibility and char_bias_value <= self.bias_range[bias][1]
-                
+        
+        #print("After Bias Range Test", compatibility)
         #If the character passes all three tests, then return true. Otherwise, return false
-        return 
+        return compatibility
         
     def check_character_compatibility_for_many_characters(self, list_of_chars):
         compatibility = True

@@ -6,15 +6,15 @@ from components.WorldState import WorldState
 bob = CharacterNode("Bob")
 home = LocationNode("Home")
 
-node_a = StoryNode("Node A", None, None, {"Type":"placeholder"}, 1)
-node_b = StoryNode("Node B", None, None, {"Type":"placeholder"}, 1)
-node_c = StoryNode("Node C", None, None, {"Type":"placeholder"}, 1)
-node_d = StoryNode("Node D", None, None, {"Type":"placeholder"}, 1)
-node_e = StoryNode("Node E", None, None, {"Type":"placeholder"}, 1)
+node_a = StoryNode("Node A", None, {"Type":"placeholder"}, 1)
+node_b = StoryNode("Node B", None, {"Type":"placeholder"}, 1)
+node_c = StoryNode("Node C", None, {"Type":"placeholder"}, 1)
+node_d = StoryNode("Node D", None, {"Type":"placeholder"}, 1)
+node_e = StoryNode("Node E", None, {"Type":"placeholder"}, 1)
 
-node_x = StoryNode("Node X", None, None, {"Type":"placeholder"}, 1)
-node_y = StoryNode("Node Y", None, None, {"Type":"placeholder"}, 1)
-node_z = StoryNode("Node Z", None, None, {"Type":"placeholder"}, 1)
+node_x = StoryNode("Node X", None, {"Type":"placeholder"}, 1)
+node_y = StoryNode("Node Y", None, {"Type":"placeholder"}, 1)
+node_z = StoryNode("Node Z", None, {"Type":"placeholder"}, 1)
 
 insert_list = [node_x, node_y, node_z]
 

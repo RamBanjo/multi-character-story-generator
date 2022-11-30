@@ -494,6 +494,61 @@ class StoryGraph:
         eligible_insertion_list = self.find_shared_base_joint_locations(characters, cont_rule, target_require)
         self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
 
+    #TODO: We don't have the character grouping YET. So we need a function to generate the grouping.
+
+    def generate_valid_character_grouping(self, continuations, abs_step, character_list, grouping=[]):
+        
+        failed_groupings = []
+
+        state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
+
+        found_valid_grouping = False
+
+        while (not found_valid_grouping):
+
+            unchosen_chars = []
+
+            for charobj in character_list:
+                unchosen_chars.append(state_at_step.node_dict[charobj.get_name()])
+
+            current_grouping = []
+
+            if len(grouping) > 0:
+                #TODO: For the list of Grouping, we expect an array of the grouping. For example, [2,3] means that we want two groups, 2 members for the first group and 3 for the second group.
+
+                for group_size in grouping:
+
+                    new_group = random.sample(unchosen_chars, group_size)
+                    current_grouping.append(new_group)
+
+                    for remove_char in new_group:
+                        unchosen_chars.remove(remove_char)
+
+            else:
+                #If grouping information is empty, then assume there are equal number of characters and nodes and randomly assign.
+                for iteration in range(0, len(character_list)):
+                
+                    chosen_char = random.sample(unchosen_chars, 1)
+                    current_grouping.append(chosen_char)
+
+                    unchosen_chars.remove(chosen_char[0])
+            this_one_is_valid = True
+
+            if current_grouping not in failed_groupings: #Only check combinations that have not failed yet
+                for story_index in range(0, len(continuations)):
+                    this_one_is_valid = this_one_is_valid and continuations[story_index].check_character_compatibility_for_many_characters(current_grouping[story_index])
+            else:
+                this_one_is_valid = False #We will skip checking any combinations that we know have already failed
+
+            if this_one_is_valid:
+                found_valid_grouping = True
+            else:
+                failed_groupings.append(current_grouping)
+
+        return current_grouping
+
+
+    #TODO: Maybe decide upon the split grouping before calling split continuation
     def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):
         
         eligible_insertion_list = self.find_shared_base_joint_locations(characters, split_rule, target_require)
