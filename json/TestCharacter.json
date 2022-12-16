@@ -1,0 +1,6 @@
+{
+    "type":"character_object",
+    "name":"Alice",
+    "tags":{"Type":"Character", "Job":"Swordmaster"},
+    "biases":{"lawbias":0, "moralbias":0}
+}

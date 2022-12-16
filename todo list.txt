@@ -185,10 +185,37 @@
     - Change the Tag check requirements (Done and Tested!)
         - If the value is blank, then it can be anything
         - We extended this and added the values to the edges too.
-    - Splitting Joint should just randomly assign characters and then go with the first combination that works (Done, Untested)
+    - Splitting Joint should just randomly assign characters and then go with the first combination that works (Done, Tested)
     - Since we rewrote a bunch of new Edge functions, we should test the following: (COMPLETE)
         - StoryNode: Check if Item has Tag (TESTED)
         - WorldState: Disconnect (TESTED)
         - Edge: Edge Equality (both __eq__ and soft_equal) (TESTED)
         - ConditionTest: HasEdge must be tested (Double Has Edge gets a free pass because it's based off of HasEdge) (TESTED)
     - Plot the World State and Initial Graph State, based on ReGEN
+08 Nov 2022
+    - Well, we did it, we're going to need more Replacement Rules
+        - Take from Quest Generator
+        - Finish implanting parts from ReGEN that we haven't added from the other sheet yet
+    - Try to plot some representations in our code
+        - Since we foresee that we will need a way to input the data, we will need to start working on the thing that will let us read json files/strings and translate them to proper objects
+        - We need to figure out which JSON things we need and don't need as well
+            - JSON Story Objects
+                - JSON Locations
+                - JSON Characters
+            - JSON Story Graphs
+            - JSON Story Nodes
+            - JSON Replacement Rules
+            - JSON RelChanges
+            - JSON Edges
+            - JSON Condition Tests
+            - JSON World States
+        - If we're doing JSON things we need to figure out how we handle connecting to other things
+            - For example, defining an Edge requires referencing nodes. We need to handle that
+            - Use the character/object name as IDs?
+            - Make a new ID property?
+    - Go read Quest Generator again to see where the story parts came from
+        - Possibly Witcher?
+        - Fallout? (Main Quest)
+        - Skyrim (Main Quest)
+        - I checked out these games and all they gave me are highly branched out questlines that feel like they'd be out of my scope to replicate
+        - Also, I'm pretty sure the story parts used here are completely original, there doesn't seem to be any rules here...
