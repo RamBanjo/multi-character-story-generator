@@ -15,17 +15,42 @@ def read_from_json(json_file_name):
 
     return data
 
-def read_character_node_from_json(json_file_name):
-    data = read_from_json(json_file_name)
+def read_character_node_from_extracted_dict(data):
     return CharacterNode(name = data["name"], biases = data["biases"], tags = data["tags"])
 
-def read_object_node_from_json(json_file_name):
-    data = read_from_json(json_file_name)
+def read_object_node_from_extracted_dict(data):
     return ObjectNode(name = data["name"], tags = data["tags"])
 
-def read_location_node_from_json(json_file_name):
-    data = read_from_json(json_file_name)
+def read_location_node_from_extracted_dict(data):
     return LocationNode(name = data["name"], tags = data["tags"])
+
+def read_list_of_objects_from_json(json_file_name, verbose = False):
+    data = read_from_json(json_file_name)
+
+    obj_list_returns = []
+
+    for sub_data in data:
+        detected_type = sub_data.get("type", "[Cannot Find Object Type]")
+        match detected_type:
+            case "story_object":
+                if verbose:
+                    print("Adding Story Object:", sub_data["name"])
+                obj_list_returns.append(read_object_node_from_extracted_dict(sub_data))
+            case "character_object":
+                if verbose:
+                    print("Adding Character Object:", sub_data["name"])                
+                obj_list_returns.append(read_character_node_from_extracted_dict(sub_data))
+            case "location_object":
+                if verbose:
+                    print("Adding Location Object:", sub_data["name"])                
+                obj_list_returns.append(read_location_node_from_extracted_dict(sub_data))
+            case _:
+                if verbose:
+                    print("Invalid object type, nothing added. Detected type:", detected_type)
+
+    if verbose:
+        print("Object list is complete! List size:", str(len(obj_list_returns)))
+    return obj_list_returns
 
 #Switch Case?
 #There are so many types of Condition Tests so it might be better to break this into multiple functions
@@ -149,11 +174,15 @@ def make_world_state_from_json(json_file_name, object_dict: dict):
 
     return WorldState(name = data["name"], objectnodes=object_in_ws)
 
+#Paper draft this to see how it would fare?
+#Maybe figure out how the JSON File would look like?
+#Decide on what inputs we need and where we're getting initial graph states from? The story nodes?
+#Or can we just initialize an empty story graph with just the characters and names?
+#Just checked the constructor, we don't need this, we just need a world state input
 def make_story_graph_from_json(json_file_name, world_state):
+
+    data = read_from_json(json_file_name)
+    
     pass
 
-alice = read_character_node_from_json("json/TestCharacter.json")
-
-print(alice)
-print(alice.biases)
-print(alice.tags)
+thing_list = read_list_of_objects_from_json("json/TestObjectList.json", verbose=True)
