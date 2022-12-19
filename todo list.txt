@@ -219,3 +219,7 @@
         - Skyrim (Main Quest)
         - I checked out these games and all they gave me are highly branched out questlines that feel like they'd be out of my scope to replicate
         - Also, I'm pretty sure the story parts used here are completely original, there doesn't seem to be any rules here...
+15 Nov 2022
+    - Update the JSON things to accept lists
+    - Determine all the JSON functions we need to write
+    - Show the prof examples of nodes and objects from ReGEN in JSON Form
