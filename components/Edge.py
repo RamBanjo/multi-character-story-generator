@@ -9,7 +9,7 @@ class Edge:
         self.value = value
         
     def __str__(self):
-        return self.name + " (" + self.from_node.name + " ---> " + self.to_node.name + ")"
+        return self.from_node.name + " --" + self.name + "--> " + self.to_node.name + " (Value: " + str(self.value) + ")"
 
     def soft_equal(self, rhs):
 

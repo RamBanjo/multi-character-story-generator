@@ -220,6 +220,10 @@
         - I checked out these games and all they gave me are highly branched out questlines that feel like they'd be out of my scope to replicate
         - Also, I'm pretty sure the story parts used here are completely original, there doesn't seem to be any rules here...
 15 Nov 2022
-    - Update the JSON things to accept lists
+    - Update the JSON things to accept lists (Partially Done, need to do the CondTest list as well as Change List)
+        - List of Connections (DONE)
+        - List of Changes
+        - List of Condition Tests
+    - Need to test the JSON Functions that we wrote to see if it works (Partially Done)
     - Determine all the JSON functions we need to write
     - Show the prof examples of nodes and objects from ReGEN in JSON Form

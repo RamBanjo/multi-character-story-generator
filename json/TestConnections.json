@@ -1,0 +1,70 @@
+[
+    {
+        "from_node": "Alice",
+        "to_node": "Bob",
+        "edge_name": "likes",
+        "value": "friendship"
+    },
+    {
+        "from_node": "Bob",
+        "to_node": "Alice",
+        "edge_name": "likes",
+        "value": "friendship"
+    },
+    {
+        "from_node": "Alice",
+        "to_node": "Charlie",
+        "edge_name": "dislikes",
+        "value": "arrogant"
+    },
+    {
+        "from_node": "Charlie",
+        "to_node": "Alice",
+        "edge_name": "likes",
+        "value": "looks"
+    },
+    {
+        "from_node": "Pallet Town",
+        "to_node": "Alice",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Pallet Town",
+        "to_node": "Bob",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Pallet Town",
+        "to_node": "Charlie",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Excalibur",
+        "to_node": "Alice",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Charlie",
+        "to_node": "Dave",
+        "edge_name": "likes",
+        "value": "friendship"
+    },{
+        "from_node": "Eve",
+        "to_node": "Alice",
+        "edge_name": "dislike",
+        "value": "arrogant"
+    },{
+        "from_node": "Frank",
+        "to_node": "Gary",
+        "edge_name": "like",
+        "value": "friendship"
+    },{
+        "from_node": "Bob",
+        "to_node": "Alice"
+    },{
+        "from_node": "Charlie",
+        "to_node": "Alice",
+        "edge_name":"kill_target"
+    }
+    
+]

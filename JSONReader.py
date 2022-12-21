@@ -1,4 +1,5 @@
 from components.RelChange import *
+from components.StoryGraphTwoWS import StoryGraph
 from components.StoryObjects import *
 from components.ConditionTest import *
 from components.StoryNode import *
@@ -157,11 +158,34 @@ def make_rel_change_object_from_extracted_list(data, world_state):
     
     return RelChange(name = data["name"], node_a=world_state.node_dict[data["node_a"]], edge_name=data["edge_name"], node_b = world_state.node_dict[data["node_b"]], value=data["value"], add_or_remove=add_or_remove)
 
-def make_connection_from_json(json_file_name, world_state):
+def make_connection_from_json(json_file_name, world_state, verbose = False):
 
     data = read_from_json(json_file_name)
+    connections_made = 0
     for connection in data:
-        world_state.connect(from_node = world_state.node_dict[connection["from_node"]], edge_name = connection["edge_name"], to_node = world_state.node_dict[connection["to_node"]])
+
+
+        #First, we must check if both the from node and the two node are nodes that exist within the world state. Only make a connection if they exist.
+
+        designated_from_node = world_state.node_dict.get(connection["from_node"], None)
+        designated_to_node = world_state.node_dict.get(connection["to_node"], None)
+        designated_value = connection.get("value", None)
+        designated_edge_name = connection.get("edge_name", None)
+       
+
+        if designated_from_node is not None and designated_to_node is not None and designated_edge_name is not None:
+            if verbose:
+                print("Connecting from", str(designated_from_node), "to", str(designated_to_node), "with edge", designated_edge_name, "(Value:", designated_value,")")
+            world_state.connect(from_node = designated_from_node, edge_name = designated_edge_name, to_node = designated_to_node, value = designated_value)
+            connections_made += 1
+        elif verbose:
+            print("Skipping incompatible input...")
+
+    if verbose:
+        print("Finished making connections in world state! Connections made:", str(connections_made))
+
+    
+            
 
 def make_world_state_from_json(json_file_name, object_dict: dict):
 
@@ -179,10 +203,55 @@ def make_world_state_from_json(json_file_name, object_dict: dict):
 #Decide on what inputs we need and where we're getting initial graph states from? The story nodes?
 #Or can we just initialize an empty story graph with just the characters and names?
 #Just checked the constructor, we don't need this, we just need a world state input
-def make_story_graph_from_json(json_file_name, world_state):
 
-    data = read_from_json(json_file_name)
-    
-    pass
+#Maybe we do not need any specific file for World State
+#Tested, this works
+def make_world_state_from_extracted_list_of_objects(name, object_list):
+    return WorldState(name, object_list)
+
+#Might probably need to make the connection in a text file
+
+#UNTESTED
+def make_initial_graph_from_world_state(name, world_state):
+
+    character_object_list = [storychar for storychar in world_state.objectnodes if type(storychar) is CharacterNode]
+    location_object_list = [storyloc for storyloc in world_state.objectnodes if type(storyloc) is LocationNode]
+
+    return StoryGraph(name=name, character_objects=character_object_list, location_objects=location_object_list, starting_ws=world_state)
 
 thing_list = read_list_of_objects_from_json("json/TestObjectList.json", verbose=True)
+
+print()
+print("Printing list of objects made with the read list function:")
+for item in thing_list:
+    print(item)
+
+print()
+print("Now, we will attempt to make a world state out of this list")
+
+test_ws = make_world_state_from_extracted_list_of_objects("Test WS", thing_list)
+
+print("We made the World State! Now we will print all the nodes")
+test_ws.print_all_nodes()
+
+print()
+print("We will now attempt to connect nodes!")
+print()
+make_connection_from_json("json/TestConnections.json", test_ws, verbose=True)
+print()
+print("We finished making connections! Printing all edges...")
+test_ws.print_all_edges()
+print()
+
+test_sg = make_initial_graph_from_world_state("Test SG", test_ws)
+
+print()
+print("We finished making the Story Graph, now we will print the things we put in")
+print("Location Objects in Story Graph")
+for loc in test_sg.location_objects:
+    print(loc)
+
+print()
+print("Character Objects in Story Graph")
+for chara in test_sg.character_objects:
+    print(chara)
