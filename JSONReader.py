@@ -74,21 +74,65 @@ def read_condition_test_from_extracted_dict(data, world_state):
         case _:
             return     
 
+def read_condition_test_list_from_json(json_file_name, world_state):
+    data = read_from_json(json_file_name)
+
+    test_list = []
+    for test in data:
+        test_to_append = read_condition_test_from_extracted_dict(test, world_state)
+        if test_to_append is not None:
+            test_list.append(test)
+
+    return data
+
 def read_held_item_test_from_extracted_dict(data, world_state):
-    return HeldItemTagTest(holder_to_test=world_state.node_dict[data["holder"]], tag_to_test=data["tag_to_test"], value_to_test=data["value_to_test"], inverse=data["inverse"])
+
+    designated_holder = world_state.node_dict.get(data.get("holder", None), None)
+    designated_tag = world_state.node_dict.get(data.get("tag_to_test", None), None)
+    designated_value = world_state.node_dict.get(data.get("value_to_test", None), None)
+    designated_inverse = data.get("inverse", False)
+
+    if designated_holder is None or designated_tag is None:
+        return None
+
+    return HeldItemTagTest(holder_to_test=designated_holder, tag_to_test=designated_tag, value_to_test=designated_value, inverse=designated_inverse)
 
 def read_has_edge_test_from_extracted_dict(data, world_state):
-    return HasEdgeTest(object_from_test=world_state.node_dict[data["from"]], object_to_test=world_state.node_dict[data["to"]], edge_name_test=data["edge_name"], soft_equal=data["soft_equal"], inverse=data["inverse"])
+
+    designated_from_node = world_state.node_dict.get(data.get("from", None), None)
+    designated_to_node = world_state.node_dict.get(data.get("to", None), None)
+    designated_edge_name = data.get("edge_name", None)
+    designated_value = data.get("value", None)
+    desginated_soft_equal = data.get("soft_equal", False)
+    designated_inverse = data.get("inverse", False)
+
+    if designated_from_node is None or designated_to_node is None:
+        return None
+
+    return HasEdgeTest(object_from_test=designated_from_node, object_to_test=designated_to_node, edge_name_test=designated_edge_name, value_test=designated_value,soft_equal=desginated_soft_equal, inverse=designated_inverse)
 
 def read_has_double_edge_test_from_extracted_dict(data, world_state):
-    return HasDoubleEdgeTest(object_from_test=world_state.node_dict[data["from"]], object_to_test=world_state.node_dict[data["to"]], edge_name_test=data["edge_name"], soft_equal=data["soft_equal"], inverse=data["inverse"])
+
+    designated_from_node = world_state.node_dict.get(data.get("from", None), None)
+    designated_to_node = world_state.node_dict.get(data.get("to", None), None)
+    designated_edge_name = data.get("edge_name", None)
+    designated_value = data.get("value", None)
+    desginated_soft_equal = data.get("soft_equal", False)
+    designated_inverse = data.get("inverse", False)
+
+    if designated_from_node is None or designated_to_node is None:
+        return None
+    
+    return HasDoubleEdgeTest(object_from_test=designated_from_node, object_to_test=designated_to_node, edge_name_test=designated_edge_name, value_test=designated_value,soft_equal=desginated_soft_equal, inverse=designated_inverse)
 
 def read_same_location_test_from_extracted_dict(data, world_state):
 
     list_to_test = []
 
     for char_name in data["char_name_list"]:
-        list_to_test.append(world_state.node_dict[char_name])
+
+        if world_state.node_dict.get(char_name, None) is not None:
+            list_to_test.append(world_state.node_dict[char_name])
 
     return SameLocationTest(list_to_test=list_to_test, inverse=data["inverse"])
 
@@ -100,7 +144,9 @@ def read_story_node_from_json(json_file_name, world_state):
 
     return StoryNode(name = data["name"], biasweight=data["biasweight"], tags=data["tags"], charcount=data["charcount"], required_tags_list=data["required_tags"], unwanted_tags_list=data["unwanted_tags"], bias_range = data["bias_range"], required_tags_list_target=data["required_tags"], unwanted_tags_list_target=data["unwanted_tags"], bias_range_target=data["bias_range"],condition_tests=test_list)
 
-def read_list_of_tests_from_json(data, world_state):
+def read_list_of_tests_from_json(json_file_name, world_state):
+
+    data = read_from_json(json_file_name)
 
     test_list_returns = []
 
@@ -167,8 +213,8 @@ def make_connection_from_json(json_file_name, world_state, verbose = False):
 
         #First, we must check if both the from node and the two node are nodes that exist within the world state. Only make a connection if they exist.
 
-        designated_from_node = world_state.node_dict.get(connection["from_node"], None)
-        designated_to_node = world_state.node_dict.get(connection["to_node"], None)
+        designated_from_node = world_state.node_dict.get(connection.get("from_node", None), None)
+        designated_to_node = world_state.node_dict.get(connection.get("to_node", None), None)
         designated_value = connection.get("value", None)
         designated_edge_name = connection.get("edge_name", None)
        
@@ -255,3 +301,11 @@ print()
 print("Character Objects in Story Graph")
 for chara in test_sg.character_objects:
     print(chara)
+
+print()
+print("Attempting to create a list of Condition Tests")
+
+test_condlist = read_condition_test_list_from_json("json/TestCondTests.json", test_ws)
+
+for item in test_condlist:
+    print(item)

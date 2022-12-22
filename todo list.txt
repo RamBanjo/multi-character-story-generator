@@ -227,3 +227,8 @@
     - Need to test the JSON Functions that we wrote to see if it works (Partially Done)
     - Determine all the JSON functions we need to write
     - Show the prof examples of nodes and objects from ReGEN in JSON Form
+22 Nov 202
+    - There is no need to verify input. We can assume that all inputs are correct, given that the tools we use to create the JSON Files are always accurate.
+        - However, we still need to verify inputs for things that we pull from World States, because we can't always assume that the requests will be reasonable.
+    - Continue working on Condition Test Reading and Story Node Reading
+    - Absolutely, positively, create examples from ReGEN
