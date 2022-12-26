@@ -17,13 +17,13 @@ def read_from_json(json_file_name):
     return data
 
 def read_character_node_from_extracted_dict(data):
-    return CharacterNode(name = data["name"], biases = data["biases"], tags = data["tags"])
+    return CharacterNode(**data)
 
 def read_object_node_from_extracted_dict(data):
-    return ObjectNode(name = data["name"], tags = data["tags"])
+    return ObjectNode(**data)
 
 def read_location_node_from_extracted_dict(data):
-    return LocationNode(name = data["name"], tags = data["tags"])
+    return LocationNode(**data)
 
 def read_list_of_objects_from_json(json_file_name, verbose = False):
     data = read_from_json(json_file_name)
@@ -95,7 +95,9 @@ def read_held_item_test_from_extracted_dict(data, world_state):
     if designated_holder is None or designated_tag is None:
         return None
 
-    return HeldItemTagTest(holder_to_test=designated_holder, tag_to_test=designated_tag, value_to_test=designated_value, inverse=designated_inverse)
+    kwargs = {"holder_to_test":designated_holder, "tag_to_test":designated_tag, "value_to_test":designated_value, "inverse":designated_inverse}
+
+    return HeldItemTagTest(**kwargs)
 
 def read_has_edge_test_from_extracted_dict(data, world_state):
 
@@ -109,7 +111,9 @@ def read_has_edge_test_from_extracted_dict(data, world_state):
     if designated_from_node is None or designated_to_node is None:
         return None
 
-    return HasEdgeTest(object_from_test=designated_from_node, object_to_test=designated_to_node, edge_name_test=designated_edge_name, value_test=designated_value,soft_equal=desginated_soft_equal, inverse=designated_inverse)
+    kwargs = {"object_from_test":designated_from_node, "object_to_test":designated_to_node, "edge_name_test":designated_edge_name, "value_test":designated_value, "soft_equal":desginated_soft_equal, "inverse":designated_inverse}
+
+    return HasEdgeTest(**kwargs)
 
 def read_has_double_edge_test_from_extracted_dict(data, world_state):
 
@@ -122,8 +126,10 @@ def read_has_double_edge_test_from_extracted_dict(data, world_state):
 
     if designated_from_node is None or designated_to_node is None:
         return None
+
+    kwargs = {"object_from_test":designated_from_node, "object_to_test":designated_to_node, "edge_name_test":designated_edge_name, "value_test":designated_value, "soft_equal":desginated_soft_equal, "inverse":designated_inverse}
     
-    return HasDoubleEdgeTest(object_from_test=designated_from_node, object_to_test=designated_to_node, edge_name_test=designated_edge_name, value_test=designated_value,soft_equal=desginated_soft_equal, inverse=designated_inverse)
+    return HasDoubleEdgeTest(**kwargs)
 
 def read_same_location_test_from_extracted_dict(data, world_state):
 
@@ -134,7 +140,9 @@ def read_same_location_test_from_extracted_dict(data, world_state):
         if world_state.node_dict.get(char_name, None) is not None:
             list_to_test.append(world_state.node_dict[char_name])
 
-    return SameLocationTest(list_to_test=list_to_test, inverse=data["inverse"])
+    kwargs = {"list_to_test":list_to_test, "inverse":data["inverse"]}
+
+    return SameLocationTest(**kwargs)
 
 #Story Node will require some conversions from the test functions above
 def read_story_node_from_json(json_file_name, world_state):
@@ -142,7 +150,7 @@ def read_story_node_from_json(json_file_name, world_state):
 
     test_list = read_list_of_tests_from_json(data["condition_test_list"], world_state)
 
-    return StoryNode(name = data["name"], biasweight=data["biasweight"], tags=data["tags"], charcount=data["charcount"], required_tags_list=data["required_tags"], unwanted_tags_list=data["unwanted_tags"], bias_range = data["bias_range"], required_tags_list_target=data["required_tags"], unwanted_tags_list_target=data["unwanted_tags"], bias_range_target=data["bias_range"],condition_tests=test_list)
+    return StoryNode(condition_tests=test_list, **data)
 
 def read_list_of_tests_from_json(json_file_name, world_state):
 
@@ -175,7 +183,7 @@ def make_change_object_from_extracted_list(data, world_state):
 
 
 def text_to_changeaction(text):
-    
+
     add_or_remove = "invalid"
 
     if text == "add":
@@ -186,14 +194,14 @@ def text_to_changeaction(text):
     return add_or_remove
 
 
-def make_tag_change_object_from_extracted_list(data, world_state):
+def make_tag_change_object_from_extracted_list(data):
 
-    add_or_remove = text_to_changeaction(data["add_or_remove"])
+    add_or_remove = text_to_changeaction(data["add_or_remove_text"])
 
     if add_or_remove == "invalid":
         return
 
-    return TagChange(name = data["name"], object_node_name = world_state.node_dict[data["node_name"]], tag=data["tag"], add_or_remove=add_or_remove)
+    return TagChange(add_or_remove=add_or_remove, **data)
 
 def make_rel_change_object_from_extracted_list(data, world_state):
 
@@ -201,8 +209,11 @@ def make_rel_change_object_from_extracted_list(data, world_state):
 
     if add_or_remove == "invalid":
         return
+
+    node_a = world_state.node_dict[data["node_a_name"]]
+    node_b = world_state.node_dict[data["node_b_name"]]
     
-    return RelChange(name = data["name"], node_a=world_state.node_dict[data["node_a"]], edge_name=data["edge_name"], node_b = world_state.node_dict[data["node_b"]], value=data["value"], add_or_remove=add_or_remove)
+    return RelChange(node_a = node_a, node_b = node_b, add_or_remove=add_or_remove, **data)
 
 def make_connection_from_json(json_file_name, world_state, verbose = False):
 
@@ -222,16 +233,15 @@ def make_connection_from_json(json_file_name, world_state, verbose = False):
         if designated_from_node is not None and designated_to_node is not None and designated_edge_name is not None:
             if verbose:
                 print("Connecting from", str(designated_from_node), "to", str(designated_to_node), "with edge", designated_edge_name, "(Value:", designated_value,")")
-            world_state.connect(from_node = designated_from_node, edge_name = designated_edge_name, to_node = designated_to_node, value = designated_value)
+
+            kwargs = {"from_node":designated_from_node, "to_node":designated_to_node, "edge_name":designated_edge_name, "value":designated_value}
+            world_state.connect(**kwargs)
             connections_made += 1
         elif verbose:
             print("Skipping incompatible input...")
 
     if verbose:
-        print("Finished making connections in world state! Connections made:", str(connections_made))
-
-    
-            
+        print("Finished making connections in world state! Connections made:", str(connections_made))          
 
 def make_world_state_from_json(json_file_name, object_dict: dict):
 
@@ -263,7 +273,9 @@ def make_initial_graph_from_world_state(name, world_state):
     character_object_list = [storychar for storychar in world_state.objectnodes if type(storychar) is CharacterNode]
     location_object_list = [storyloc for storyloc in world_state.objectnodes if type(storyloc) is LocationNode]
 
-    return StoryGraph(name=name, character_objects=character_object_list, location_objects=location_object_list, starting_ws=world_state)
+    kwargs = {"name":name, "character_objects":character_object_list, "location_objects":location_object_list, "starting_ws":world_state}
+
+    return StoryGraph(**kwargs)
 
 thing_list = read_list_of_objects_from_json("json/TestObjectList.json", verbose=True)
 

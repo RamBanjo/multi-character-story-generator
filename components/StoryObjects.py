@@ -1,5 +1,5 @@
 class ObjectNode:
-    def __init__(self, name, tags={"Type": "Object"}):
+    def __init__(self, name, tags={"Type": "Object"}, **kwargs):
         
         #What this object will be referred to as. Assumed to be unique.
         self.name = name
@@ -107,7 +107,7 @@ class CharacterNode(ObjectNode):
 
     DEFAULT_BIASES = {"lawbias": 0, "moralbias": 0}
 
-    def __init__(self, name, biases=DEFAULT_BIASES, tags={"Type": "Character"}, start_timestep=0):
+    def __init__(self, name, biases=DEFAULT_BIASES, tags={"Type": "Character"}, start_timestep=0, **kwargs):
 
         #call super constructor
         super().__init__(name, tags)
@@ -122,7 +122,7 @@ class CharacterNode(ObjectNode):
         self.start_timestep = start_timestep
 
 class LocationNode(ObjectNode):
-    def __init__(self, name, tags={"Type": "Location"}):
+    def __init__(self, name, tags={"Type": "Location"}, **kwargs):
         super().__init__(name, tags)
 
     def get_adjacent_locations_list(self):
