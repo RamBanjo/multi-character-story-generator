@@ -232,6 +232,6 @@
         - However, we still need to verify inputs for things that we pull from World States, because we can't always assume that the requests will be reasonable.
         - Thanks to kwargs, this work is rendered trivial. Thank you Ami! You're cool
     - Continue working on Condition Test Reading and Story Node Reading
-        - This will be tested soon.
+        - Condition Test List has been Tested, need to test Story Node Reading
     - Absolutely, positively, create examples from ReGEN
         - This, too, will be done soon.

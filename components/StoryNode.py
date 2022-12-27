@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), condition_tests = []):
+    def __init__(self, name, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), condition_tests = [], **kwargs):
         
         #the name of this action.
         self.name = name
@@ -114,7 +114,7 @@ class StoryNode:
 
 
     def __str__(self) -> str:
-        return self.get_name() + ": " + self.get_actor_names()
+        return self.get_name() + " (Actors: " + self.get_actor_names() + ")"
 
     def __eq__(self, rhs):
         return self.get_name() == rhs.get_name() and sorted(self.actor) == sorted(rhs.actor) and sorted(self.target) == sorted(rhs.target)

@@ -154,8 +154,11 @@ def read_story_node_from_json(json_file_name, world_state):
 
 def read_list_of_tests_from_json(json_file_name, world_state):
 
-    data = read_from_json(json_file_name)
+    data = read_list_of_tests_from_data(json_file_name, world_state)
+    return data
+    
 
+def read_list_of_tests_from_data(data, world_state):
     test_list_returns = []
 
     for test in data:
@@ -321,3 +324,11 @@ test_condlist = read_condition_test_list_from_json("json/TestCondTests.json", te
 
 for item in test_condlist:
     print(item)
+
+print()
+print("Attempting to do a Story Node.")
+
+test_sn = read_story_node_from_json("json/TestStoryNode.json", test_ws)
+print("We created a story node, now we're adding Alice to it!")
+test_sn.add_actor(test_ws.node_dict["Alice"])
+print(test_sn)
