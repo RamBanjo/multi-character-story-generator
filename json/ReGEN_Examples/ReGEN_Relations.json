@@ -1,0 +1,407 @@
+[
+    {
+        "from_node": "Goblin_City",
+        "to_node": "Large_Forest",
+        "edge_name": "connects",
+        "value": "west"
+    },
+    {
+        "from_node": "Large_Forest",
+        "to_node": "Goblin_City",
+        "edge_name": "connects",
+        "value": "east"
+    },
+    {
+        "from_node": "Large_Forest",
+        "to_node": "Orc_Cave",
+        "edge_name": "connects",
+        "value": "west"
+    },
+    {
+        "from_node": "Large_Forest",
+        "to_node": "Peasant_Village",
+        "edge_name": "connects",
+        "value": "south"
+    },
+    {
+        "from_node": "Large_Forest",
+        "to_node": "Main_Town",
+        "edge_name": "connects",
+        "value": "north"
+    },
+    {
+        "from_node": "Main_Town",
+        "to_node": "Royal_Castle",
+        "edge_name": "connects",
+        "value": "north"
+    },
+    {
+        "from_node": "Main_Town",
+        "to_node": "Large_Forest",
+        "edge_name": "connects",
+        "value": "south"
+    },
+    {
+        "from_node": "Orc_Cave",
+        "to_node": "Large_Forest",
+        "edge_name": "connects",
+        "value": "east"
+    },
+    {
+        "from_node": "Peasant_Village",
+        "to_node": "Large_Forest",
+        "edge_name": "connects",
+        "value": "north"
+    },
+    {
+        "from_node": "Royal_Castle",
+        "to_node": "Main_Town",
+        "edge_name": "connects",
+        "value": "south"
+    },
+    {
+        "from_node": "Brave_Dave",
+        "to_node": "Smug_Smith",
+        "edge_name": "dislikes",
+        "value": "affair"
+    },
+    {
+        "from_node": "Filthy_Phil",
+        "to_node": "Brave_Dave",
+        "edge_name": "dislikes",
+        "value": "arrogant"
+    }
+    ,
+    {
+        "from_node": "Smug_Smith",
+        "to_node": "Brave_Dave",
+        "edge_name": "dislikes",
+        "value": "arrogant"
+    }
+    ,{
+        "from_node": "Smug_Smith",
+        "to_node": "Regal_Regis",
+        "edge_name": "dislikes",
+        "value": "arrogant"
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Smug_Smith",
+        "edge_name": "distrusts",
+        "value": "affair"
+    },{
+        "from_node": "Goblin",
+        "to_node": "Goblin_King",
+        "edge_name": "follow",
+        "value": "leader"
+    },{
+        "from_node": "Brave_Dave",
+        "to_node": "Regal_Regis",
+        "edge_name": "friends",
+        "value": "loyalty"
+    },{
+        "from_node": "Filthy_Phil",
+        "to_node": "Sly_Fry",
+        "edge_name": "friends",
+        "value": "profession"
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Brave_Dave",
+        "edge_name": "friends",
+        "value": "profession"
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Rich_Ritchie",
+        "edge_name": "friends",
+        "value": "profession"
+    },{
+        "from_node": "Rich_Ritchie",
+        "to_node": "Regal_Regis",
+        "edge_name": "friends",
+        "value": "profession"
+    },{
+        "from_node": "Rich_Ritchie",
+        "to_node": "Smug_Smith",
+        "edge_name": "friends",
+        "value": "profession"
+    },{
+        "from_node": "Filthy_Phil",
+        "to_node": "Regal_Regis",
+        "edge_name": "hates",
+        "value": "oppression"
+    },{
+        "from_node": "Filthy_Phil",
+        "to_node": "Rich_Ritchie",
+        "edge_name": "hates",
+        "value": "oppression"
+    },{
+        "from_node": "Smelly_Sally",
+        "to_node": "Regal_Regis",
+        "edge_name": "hates",
+        "value": "oppression"
+    },{
+        "from_node": "Smelly_Sally",
+        "to_node": "Rich_Ritchie",
+        "edge_name": "hates",
+        "value": "oppression"
+    },{
+        "from_node": "Sly_Fry",
+        "to_node": "Regal_Regis",
+        "edge_name": "hates",
+        "value": "oppression"
+    },{
+        "from_node": "Sly_Fry",
+        "to_node": "Rich_Ritchie",
+        "edge_name": "hates",
+        "value": "oppression"
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Fancy_Fanny",
+        "edge_name": "hates",
+        "value": "ugly"
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Sly_Fry",
+        "edge_name": "hates",
+        "value": "profession"
+    },{
+        "from_node": "Rich_Ritchie",
+        "to_node": "Sly_Fry",
+        "edge_name": "hates",
+        "value": "profession"
+    },{
+        "from_node": "Brave_Dave",
+        "to_node": "Excalibur",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Fancy_Fanny",
+        "to_node": "Golden_Mirror",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Filthy_Phil",
+        "to_node": "Dirty_Shovel",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Main_Town",
+        "to_node": "Smug_Smith",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Main_Town",
+        "to_node": "Rich_Ritchie",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Main_Town",
+        "to_node": "Sly_Fry",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Main_Town",
+        "to_node": "Brave_Dave",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Peasant_Village",
+        "to_node": "Smelly_Sally",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Peasant_Village",
+        "to_node": "Filthy_Phil",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Royal_Sceptre",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Royal_Crown",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Rich_Ritchie",
+        "to_node": "Tax_Income",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Royal_Castle",
+        "to_node": "Regal_Regis",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Royal_Castle",
+        "to_node": "Fancy_Fanny",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Goblin_City",
+        "to_node": "Goblin",
+        "edge_name": "holds",
+        "value": null        
+    },{
+        "from_node": "Goblin_City",
+        "to_node": "Goblin_King",
+        "edge_name": "holds",
+        "value": null        
+    },{
+        "from_node": "Large_Forest",
+        "to_node": "Bandits",
+        "edge_name": "holds",
+        "value": null        
+    },{
+        "from_node": "Orc_Cave",
+        "to_node": "Orc",
+        "edge_name": "holds",
+        "value": null        
+    },{
+        "from_node": "Brave_Dave",
+        "to_node": "Main_Town",
+        "edge_name": "lives",
+        "value": null
+    },{
+        "from_node": "Rich_Ritchie",
+        "to_node": "Main_Town",
+        "edge_name": "lives",
+        "value": null
+    },{
+        "from_node": "Sly_Fry",
+        "to_node": "Main_Town",
+        "edge_name": "lives",
+        "value": null
+    },{
+        "from_node": "Smug_Smith",
+        "to_node": "Main_Town",
+        "edge_name": "lives",
+        "value": null
+    },{
+        "from_node": "Filthy_Phil",
+        "to_node": "Peasant_Village",
+        "edge_name": "lives",
+        "value": null        
+    },{
+        "from_node": "Smelly_Sally",
+        "to_node": "Peasant_Village",
+        "edge_name": "lives",
+        "value": null        
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Royal_Castle",
+        "edge_name": "lives",
+        "value": null        
+    },{
+        "from_node": "Fancy_Fanny",
+        "to_node": "Royal_Castle",
+        "edge_name": "lives",
+        "value": null        
+    },{
+        "from_node": "Orc",
+        "to_node": "Orc_Cave",
+        "edge_name": "lives",
+        "value": null        
+    },{
+        "from_node": "Bandits",
+        "to_node": "Large_Forest",
+        "edge_name": "lives",
+        "value": null        
+    },{
+        "from_node": "Goblin",
+        "to_node": "Goblin_City",
+        "edge_name": "lives",
+        "value": null        
+    },{
+        "from_node": "Goblin",
+        "to_node": "Goblin_City",
+        "edge_name": "lives",
+        "value": null        
+    },{
+        "from_node": "Brave_Dave",
+        "to_node": "Fancy_Fanny",
+        "edge_name": "loves",
+        "value": "looks"        
+    },{
+        "from_node": "Fancy_Fanny",
+        "to_node": "Smug_Smith",
+        "edge_name": "loves",
+        "value": "looks"        
+    },{
+        "from_node": "Fancy_Fanny",
+        "to_node": "Brave_Dave",
+        "edge_name": "loves",
+        "value": "profession"        
+    },{
+        "from_node": "Filthy_Phil",
+        "to_node": "Smelly_Sally",
+        "edge_name": "loves",
+        "value": "personality"        
+    },{
+        "from_node": "Smelly_Sally",
+        "to_node": "Filthy_Phil",
+        "edge_name": "loves",
+        "value": "personality"        
+    },{
+        "from_node": "Sly_Fry",
+        "to_node": "Smelly_Sally",
+        "edge_name": "loves",
+        "value": "looks"        
+    },{
+        "from_node": "Smelly_Sally",
+        "to_node": "Sly_Fry",
+        "edge_name": "loves",
+        "value": "money"        
+    },{
+        "from_node": "Smug_Smith",
+        "to_node": "Fancy_Fanny",
+        "edge_name": "loves",
+        "value": "money"        
+    },{
+        "from_node": "Rich_Ritchie",
+        "to_node": "Fancy_Fanny",
+        "edge_name": "loves",
+        "value": "money"        
+    },{
+        "from_node": "Fancy_Fanny",
+        "to_node": "Regal_Regis",
+        "edge_name": "married",
+        "value": "unhappy"        
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Fancy_Fanny",
+        "edge_name": "married",
+        "value": "unhappy"        
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Royal_Sceptre",
+        "edge_name": "owns",
+        "value": "title"
+    },{
+        "from_node": "Regal_Regis",
+        "to_node": "Royal_Crown",
+        "edge_name": "owns",
+        "value": "title"
+    },{
+        "from_node": "Rich_Ritchie",
+        "to_node": "Tax_Income",
+        "edge_name": "owns",
+        "value": "title"
+    },{
+        "from_node": "Brave_Dave",
+        "to_node": "Excalibur",
+        "edge_name": "owns",
+        "value": "title"
+    },{
+        "from_node": "Fancy_Fanny",
+        "to_node": "Golden_Mirror",
+        "edge_name": "owns",
+        "value": "title"
+    },{
+        "from_node": "Filthy_Phil",
+        "to_node": "Dirty_Shovel",
+        "edge_name": "owns",
+        "value": "title"
+    }
+]

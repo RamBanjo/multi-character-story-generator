@@ -1,0 +1,240 @@
+[
+    {
+        "type": "character_object",
+        "name": "Brave_Dave",
+        "tags": {
+            "Type": "Character",
+            "Rank": "Knight",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": 50,
+            "moralbias": 0
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Smug_Smith",
+        "tags": {
+            "Type": "Character",
+            "Rank": "Lord",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": 10,
+            "moralbias": -20
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Fancy_Fanny",
+        "tags": {
+            "Type": "Character",
+            "Rank": "Queen",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": 40,
+            "moralbias": 0
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Regal_Regis",
+        "tags": {
+            "Type": "Character",
+            "Rank": "King",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": 100,
+            "moralbias": 0
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Smelly_Sally",
+        "tags": {
+            "Type": "Character",
+            "Rank": "Peasant",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": -20,
+            "moralbias": 30
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Filthy Phil",
+        "tags": {
+            "Type": "Character",
+            "Rank": "Peasant",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": -10,
+            "moralbias": 0
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Sly_Fry",
+        "tags": {
+            "Type": "Character",
+            "Rank": "Thief",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": -80,
+            "moralbias": 10
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Rich_Ritchie",
+        "tags": {
+            "Type": "Character",
+            "Rank": "Tax Collector",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": 0,
+            "moralbias": -30
+        }
+    },
+    {
+        "type":"location_object",
+        "name":"Royal_Castle",
+        "tags":{
+            "Type":"Building"
+        }
+    },
+    {
+        "type":"location_object",
+        "name":"Main_Town",
+        "tags":{
+            "Type":"Town"
+        }
+    },
+    {
+        "type":"location_object",
+        "name":"Peasant_Village",
+        "tags":{
+            "Type":"Town"
+        }
+    },
+    {
+        "type":"location_object",
+        "name":"Large_Forest",
+        "tags":{
+            "Type":"Wilderness"
+        }
+    },
+    {
+        "type":"location_object",
+        "name":"Goblin_City",
+        "tags":{
+            "Type":"Town"
+        }
+    },
+    {
+        "type":"location_object",
+        "name":"Orc_Cave",
+        "tags":{
+            "Type":"Building"
+        }
+    },
+    {
+        "type":"story_object",
+        "name":"Excalibur",
+        "tags":{
+            "Status":"Owned",
+            "Type":"Object",
+            "Value":"Priceless"
+        }
+    },
+    {
+        "type":"story_object",
+        "name":"Golden Mirror",
+        "tags":{
+            "Status":"Owned",
+            "Type":"Object",
+            "Value":"Valuable"
+        }
+    },
+    {
+        "type":"story_object",
+        "name":"Dirty Shovel",
+        "tags":{
+            "Status":"Owned",
+            "Type":"Object",
+            "Value":"Worthless"
+        }
+    },
+    {
+        "type":"story_object",
+        "name":"Tax Income",
+        "tags":{
+            "Status":"Owned",
+            "Type":"Object",
+            "Value":"Valuable"
+        }
+    },
+    {
+        "type":"story_object",
+        "name":"Royal Sceptre",
+        "tags":{
+            "Status":"Owned",
+            "Type":"Object",
+            "Value":"Priceless"
+        }
+    },
+    {
+        "type":"story_object",
+        "name":"Royal Crown",
+        "tags":{
+            "Status":"Owned",
+            "Type":"Object",
+            "Value":"Priceless"
+        }
+    },
+    {
+        "type":"story_object",
+        "name":"Goblin",
+        "tags":{
+            "Type":"Enemy",
+            "Rank":"Peon",
+            "Number":3
+        }
+    },
+    {
+        "type":"story_object",
+        "name":"Goblin_King",
+        "tags":{
+            "Type":"Enemy",
+            "Rank":"King",
+            "Number":1
+        }
+    }
+    ,
+    {
+        "type":"story_object",
+        "name":"Bandits",
+        "tags":{
+            "Type":"Enemy",
+            "Rank":"Thieves",
+            "Number":3
+        }
+    }
+    ,
+    {
+        "type":"story_object",
+        "name":"Orc",
+        "tags":{
+            "Type":"Enemy",
+            "Rank":"Soldier",
+            "Number":3
+        }
+    }
+]
