@@ -66,7 +66,7 @@
     },
     {
         "type": "character_object",
-        "name": "Filthy Phil",
+        "name": "Filthy_Phil",
         "tags": {
             "Type": "Character",
             "Rank": "Peasant",
@@ -156,7 +156,7 @@
     },
     {
         "type":"story_object",
-        "name":"Golden Mirror",
+        "name":"Golden_Mirror",
         "tags":{
             "Status":"Owned",
             "Type":"Object",
@@ -165,7 +165,7 @@
     },
     {
         "type":"story_object",
-        "name":"Dirty Shovel",
+        "name":"Dirty_Shovel",
         "tags":{
             "Status":"Owned",
             "Type":"Object",
@@ -174,7 +174,7 @@
     },
     {
         "type":"story_object",
-        "name":"Tax Income",
+        "name":"Tax_Income",
         "tags":{
             "Status":"Owned",
             "Type":"Object",
@@ -183,7 +183,7 @@
     },
     {
         "type":"story_object",
-        "name":"Royal Sceptre",
+        "name":"Royal_Sceptre",
         "tags":{
             "Status":"Owned",
             "Type":"Object",
@@ -192,7 +192,7 @@
     },
     {
         "type":"story_object",
-        "name":"Royal Crown",
+        "name":"Royal_Crown",
         "tags":{
             "Status":"Owned",
             "Type":"Object",
