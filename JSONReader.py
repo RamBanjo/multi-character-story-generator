@@ -145,12 +145,21 @@ def read_same_location_test_from_extracted_dict(data, world_state):
     return SameLocationTest(**kwargs)
 
 #Story Node will require some conversions from the test functions above
+
+def read_story_node_from_extracted_dict(data, world_state):
+    test_list = read_list_of_tests_from_json(data["condition_test_list"], world_state)
+    return StoryNode(condition_tests=test_list, **data)
+
 def read_story_node_from_json(json_file_name, world_state):
     data = read_from_json(json_file_name)
+    return read_story_node_from_extracted_dict(data, world_state)
 
-    test_list = read_list_of_tests_from_json(data["condition_test_list"], world_state)
-
-    return StoryNode(condition_tests=test_list, **data)
+def read_list_of_story_nodes_from_json(json_file_name, world_state):
+    data = read_from_json(json_file_name)
+    list_of_story_nodes = []
+    for story_node_data in data:
+        read_story_node_from_extracted_dict(story_node_data, world_state)
+    return list_of_story_nodes
 
 def read_list_of_tests_from_json(json_file_name, world_state):
 

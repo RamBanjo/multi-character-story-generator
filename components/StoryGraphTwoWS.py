@@ -81,6 +81,8 @@ class StoryGraph:
 
     def add_story_part_at_step(self, part, character, location=None, absolute_step=0, timestep=0, copy=True, targets=[]):
 
+        relevant_ws = self.make_state_at_step(stopping_step=absolute_step)
+
         char_name = None
 
         if character is not None:
@@ -94,7 +96,10 @@ class StoryGraph:
         self.add_to_story_part_dict(character_name=char_name, abs_step=absolute_step, story_part=new_part)
 
         #print(character.name, "added to", part.name)
-        new_part.add_actor(character)
+
+        character_from_ws = relevant_ws.node_dict[char_name]
+
+        new_part.add_actor(character_from_ws)
         new_part.timestep = timestep
         new_part.abs_step = absolute_step
 
@@ -102,7 +107,9 @@ class StoryGraph:
             new_part.set_location(location)
 
         for target in targets:
-            new_part.add_target(target)
+
+            target_from_ws = relevant_ws.node_dict[target.get_name()]
+            new_part.add_target(target_from_ws)
 
         self.refresh_longest_path_length()
 
@@ -147,6 +154,7 @@ class StoryGraph:
         self.refresh_longest_path_length()
 
     def insert_story_part(self, part, character, location=None, absolute_step=0, copy=True, targets=[]):
+
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
         #TODO: Also need to check whether this story part 
         char_name = None
@@ -162,7 +170,7 @@ class StoryGraph:
         character_path_length = self.get_longest_path_length_by_character(character)
 
         if absolute_step >= character_path_length:
-            self.add_story_part(part, character, location, timestep, copy)
+            self.add_story_part(part, character, location, timestep, copy, targets)
         else:
             #first, we need to move everything that comes after this part up by one
             for i in range(character_path_length-1, absolute_step-1, -1):
@@ -170,11 +178,7 @@ class StoryGraph:
                 self.add_to_story_part_dict(character_name=char_name, abs_step=i+1, story_part=move_up)
 
             #then, we add a new story part at the spot
-            new_part = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy)
-
-            #we also add the targets here
-            for target in targets:
-                new_part.add_target(target)
+            new_part = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy, targets)
 
             #finally, connect this to other nodes
             #the node that comes after,
@@ -202,6 +206,8 @@ class StoryGraph:
                 cur_loc = location_list[index]
             if targets != None:
                 cur_tar = targets[index]
+
+            #TODO: instead of using the targets directly, change it to the target from this exact timestep
 
             self.insert_story_part(item, character, cur_loc, absolute_step+index, copy, cur_tar)
 
@@ -330,7 +336,7 @@ class StoryGraph:
                     self.remove_parts_by_count(change_location, len(rule.story_condition), character)
 
                 #add the right parts
-                self.insert_multiple_parts(self.story_before_insert, character, location_list, change_location, copy=True, targets=rule.target_list)
+                self.insert_multiple_parts(rule.story_change, character, location_list, change_location, copy=True, targets=rule.target_list)
 
         else:
             print("There are no valid insert points. Rule is not applied.")

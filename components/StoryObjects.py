@@ -61,15 +61,15 @@ class ObjectNode:
             print(key, ":" ,value)
 
     #This assumes that only one thing (location or character) can hold another item at a time.
-    def get_holder(self):
-        holds_edge = self.get_incoming_edge("holds")
+    def get_holder(self, holds_rel_name = "holds"):
+        holds_edge = self.get_incoming_edge(holds_rel_name)
         return holds_edge[0].from_node
 
-    def get_list_of_things_held_by_this_item(self):
+    def get_list_of_things_held_by_this_item(self, holds_rel_name = "holds"):
         things_list = []
 
         for edge in self.outgoing_edges:
-            if edge.get_name() == "holds":
+            if edge.get_name() == holds_rel_name:
                 things_list.append(edge.to_node)
 
         return things_list
@@ -125,8 +125,8 @@ class LocationNode(ObjectNode):
     def __init__(self, name, tags={"Type": "Location"}, **kwargs):
         super().__init__(name, tags)
 
-    def get_adjacent_locations_list(self):
-        adjacencies = self.get_incoming_edge("adjacent_to")
+    def get_adjacent_locations_list(self, adjacent_rel_name = "adjacent_to"):
+        adjacencies = self.get_incoming_edge(adjacent_rel_name)
         return adjacencies
 
         

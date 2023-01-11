@@ -80,6 +80,8 @@ Joining Joint Rule!
 
 Joining Joint's base is a list of nodes for each of the character intending to join in.
 '''
+
+#TODO: Determine from here who's going to be the actor and who's going to be the target (if any)
 class JoiningJointRule(JointRule):
     def __init__(self, merge_count, base_actions, joint_node, rule_name=""):
 
@@ -95,6 +97,8 @@ Continuous Joint Rule!
 
 Cont. Joint's base is a joint itself, and then a joint would connect to it.
 '''
+
+#TODO: Determine from here who's going to be the actor and who's going to be the target (if any)
 class ContinuousJointRule(JointRule):
     def __init__(self, merge_count, base_joint, joint_node, rule_name=""):
 
@@ -108,6 +112,8 @@ Splitting Joint Rule!
 
 Splitting Joint Rule's base would be the joint node where dummy chars will go separate ways.
 '''
+
+#TODO: Determine from here who's going to be the actor and who's going to be the target in each of the nodes (if any)
 class SplittingJointRule(JointRule):
     def __init__(self, merge_count, base_joint, split_list, rule_name=""):
 

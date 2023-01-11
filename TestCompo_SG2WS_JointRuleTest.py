@@ -1,4 +1,4 @@
-from components.RewriteRuleWithWorldState import RewriteRule
+from components.RewriteRuleWithWorldState import *
 
 #Test Scenario:
 #Alice goes to Bar

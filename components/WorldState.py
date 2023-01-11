@@ -8,7 +8,7 @@ from components.StoryObjects import ObjectNode
 from components.UtilityEnums import *
 
 class WorldState:
-    def __init__(self, name, objectnodes=[], node_dict = dict()):
+    def __init__(self, name, objectnodes=[]):
 
         '''
         Graph properties
@@ -19,7 +19,7 @@ class WorldState:
         self.name = name
         self.objectnodes = objectnodes
         self.edges = []
-        self.node_dict = node_dict
+        self.node_dict = dict()
         self.make_node_dict()
 
     '''
@@ -261,7 +261,7 @@ class WorldState:
         
         return WorldState.check_items_in_same_location(list_from_this_ws)
 
-    def held_item_tag_check(self, holder_test, value_test, tag_test):
+    def held_item_tag_check(self, holder_test, value_test, tag_test=None):
         holder = self.node_dict.get(holder_test.get_name(), None)
 
         if holder is None:

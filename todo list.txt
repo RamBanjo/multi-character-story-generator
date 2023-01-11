@@ -235,3 +235,12 @@
         - Condition Test List has been Tested, need to test Story Node Reading
     - Absolutely, positively, create examples from ReGEN
         - This, too, will be done soon.
+05 Jan 2022
+    - Write a document of components
+    - Create a JSON List of Story Nodes
+    - Create a JSON List of Replacement Rules
+    - Create the Algorithm that generates story from the available information
+    - What was I doing?! I haven't even tested the Rewrite Rules or the Joint Rules???
+    - Also, we know who the characters in the joint rule are, we just don't know who will become a target? How to fix that?
+    - Oh, yeah, maaaaybe just maybe the thing that generates random grouping can also be used to pick who the target should be, given the number of appropriate target?
+        - Use this to pick among the number of valid characters
