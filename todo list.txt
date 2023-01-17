@@ -237,10 +237,14 @@
         - This, too, will be done soon.
 05 Jan 2022
     - Write a document of components
+        - Done
     - Create a JSON List of Story Nodes
     - Create a JSON List of Replacement Rules
     - Create the Algorithm that generates story from the available information
-    - What was I doing?! I haven't even tested the Rewrite Rules or the Joint Rules???
+        - This is the toughest part.
+12 Jan 2022
+    - What was I doing?! I haven't even tested the Rewrite Rules or the Joint Rules??? (Testing Done)
     - Also, we know who the characters in the joint rule are, we just don't know who will become a target? How to fix that?
-    - Oh, yeah, maaaaybe just maybe the thing that generates random grouping can also be used to pick who the target should be, given the number of appropriate target?
-        - Use this to pick among the number of valid characters
+    - Oh, yeah, maaaaybe just maybe the thing that generates random grouping can also be used to pick who the target should be, given the number of appropriate target? (Done, Untested)
+        - Use this to pick among the number of valid characters. We gotta take care of this before we can take care of the generation.
+    - I edited the thing that does the thing and now the Character Grouping Picker is now reliable. (Bad Combination Untested)

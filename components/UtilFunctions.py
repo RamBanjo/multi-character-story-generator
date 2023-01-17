@@ -1,3 +1,4 @@
+import math
 from components import Edge
 from components import StoryObjects
 from components import StoryNode
@@ -105,4 +106,28 @@ def print_all_outgoing(list_of_nodes):
         
     for edge in outgoing_edge_list:
         print(edge)
+
+def get_max_possible_grouping_count(group_size_list):
+    max_pos_groupcount = math.factorial(sum(group_size_list))
+    
+    for groupsize in group_size_list:
+        max_pos_groupcount = max_pos_groupcount / math.factorial(groupsize)
+
+    return max_pos_groupcount
+
+def get_max_possible_actor_target_count(actor_count, target_count, total_char_count):
+
+    if actor_count != -1 and target_count != -1:
+        return math.comb(total_char_count, actor_count)
+
+    if actor_count == -1 and target_count != -1:
+        return math.comb(total_char_count, target_count)
+
+    if actor_count != -1 and target_count == -1:
+        return math.comb(total_char_count, actor_count)
+
+    if actor_count == -1 and target_count == -1:
+        return math.pow(total_char_count, 2) - 2
+
+    return 0
             

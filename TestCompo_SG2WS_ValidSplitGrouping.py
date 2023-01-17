@@ -8,7 +8,7 @@ base_joint_node = StoryNode("Base Joint", None, {"Type": "Placeholder"}, -1)
 #Only characters whose Law Bias is in the positive can do Cont A
 cont_a = StoryNode("Continuation A", None, {"Type": "Placeholder"}, 1, bias_range={"lawbias": (0, 100)})
 cont_b = StoryNode("Continuation B", None, {"Type": "Placeholder"}, 1)
-cont_c = StoryNode("Continuation B", None, {"Type": "Placeholder"}, 1)
+cont_c = StoryNode("Continuation C", None, {"Type": "Placeholder"}, 1)
 
 alice = CharacterNode("Alice", biases={"moralbias": 0, "lawbias": 50})
 bob = CharacterNode("Bob", biases={"moralbias": 0, "lawbias": -40})
@@ -43,7 +43,11 @@ cont_e = StoryNode("Continuation E", None, {"Type": "Placeholder"}, 1)
 generated = basesg.generate_valid_character_grouping([cont_d, cont_e], 1, [alice, bob, charlie], [2, 1])
 
 groupno = 0
-for chargroup in generated:
-    for chara in chargroup:
-        print("Group", groupno, chara)
-    groupno += 1
+
+#print(generated)
+
+if(generated is not None):
+    for chargroup in generated:
+        for chara in chargroup:
+            print("Group", groupno, chara)
+        groupno += 1

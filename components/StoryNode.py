@@ -14,7 +14,7 @@ class StoryNode:
         #If it's an end node, it will be among the tags.
         self.tags = tags
         
-        #charcount will be 1 if it's single char node, if it's joint then it will be more than 1
+        #charcount will be 1 if it's single char node, if it's joint then it will be more than 1, equal to the number of actors expected here.
         #If the char count is -1, it means that the amount is not fixed and can by any amount.
         self.charcount = charcount
         

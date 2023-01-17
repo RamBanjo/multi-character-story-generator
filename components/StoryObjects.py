@@ -102,6 +102,9 @@ class ObjectNode:
     def __ge__(self, rhs):
         return self.get_name() >= rhs.get_name()
 
+    def __lt__(self, rhs):
+        return self.get_name() < rhs.get_name()
+
 
 class CharacterNode(ObjectNode):
 
