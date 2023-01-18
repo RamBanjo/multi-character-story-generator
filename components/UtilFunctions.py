@@ -1,7 +1,6 @@
 import math
-from components import Edge
-from components import StoryObjects
-from components import StoryNode
+import random
+import Edge
 
 #Function: Initialize Object
 #Inputs: Object, Location
@@ -130,4 +129,34 @@ def get_max_possible_actor_target_count(actor_count, target_count, total_char_co
         return math.pow(total_char_count, 2) - 2
 
     return 0
+
+def generate_grouping_from_group_size_lists(size_list, actor_count):
+
+    return_size_list = []
+
+    freesize_count = len([elem for elem in size_list if elem == -1])
+    normalsum = sum([elem for elem in size_list if elem != -1])
+
+    rand_freesize_list = generate_posint_list_that_adds_to_n(freesize_count, actor_count-normalsum)
+
+    freesize_iterator = 0
+    for size in size_list:
+        if size != -1:
+            return_size_list.append(size)
+        else:
+            return_size_list.append(rand_freesize_list[freesize_iterator])
+            freesize_iterator += 1
+
+    return return_size_list
             
+
+def generate_posint_list_that_adds_to_n(list_size, required_sum):
+    if list_size > required_sum:
+        return None
+
+    return_list = [1] * list_size
+
+    while sum(return_list) != required_sum:
+        return_list[random.randint(0, list_size-1)] += 1
+
+    return return_list

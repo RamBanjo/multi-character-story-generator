@@ -502,7 +502,7 @@ class StoryGraph:
         self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
 
     #TODO: This function, given a list of characters and a number of characters that should be a target, returns a dict of actor list and target list.
-    def generate_valid_actor_and_target_split(self, node, abs_step, character_list, targets_wanted_count=0):
+    def generate_valid_actor_and_target_split(self, node, abs_step, character_list):
 
         #Before anything is done, sum the allowed character count with the targets wanted count. If there are more characters than this sum, then it's impossible to fulfill. .
         #Of course, if either or both is a -1, this means that it's indefinite therefore no limitations.
@@ -518,7 +518,7 @@ class StoryGraph:
         state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
         found_valid_grouping = False
 
-        possible_counts = get_max_possible_actor_target_count(node.charcount, targets_wanted_count, len(character_list))
+        possible_counts = get_max_possible_actor_target_count(node.charcount, node.target_count, len(character_list))
 
         while (not found_valid_grouping):
 
@@ -532,18 +532,18 @@ class StoryGraph:
             actor_group_size = 0
             target_group_size = 0
 
-            if node.charcount == -1 and targets_wanted_count == -1:
+            if node.charcount == -1 and node.target_count == -1:
                 actor_group_size = random.randint(1, len(character_list))
                 target_group_size = len(character_list) - actor_group_size
-            elif node.charcount != -1 and targets_wanted_count == -1:
+            elif node.charcount != -1 and node.target_count == -1:
                 actor_group_size = node.charcount
                 target_group_size = len(character_list) - actor_group_size
-            elif node.charcount == -1 and targets_wanted_count != -1:
-                target_group_size = targets_wanted_count
+            elif node.charcount == -1 and node.target_count != -1:
+                target_group_size = node.target_count
                 actor_group_size = len(character_list) - target_group_size
             else:
                 actor_group_size = node.charcount
-                target_group_size = targets_wanted_count
+                target_group_size = node.target_count
 
             for iteration in range(0, len(character_list)):
 

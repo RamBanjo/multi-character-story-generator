@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biasweight, tags, charcount, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), condition_tests = [], **kwargs):
+    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), condition_tests = [], **kwargs):
         
         #the name of this action.
         self.name = name
@@ -15,8 +15,12 @@ class StoryNode:
         self.tags = tags
         
         #charcount will be 1 if it's single char node, if it's joint then it will be more than 1, equal to the number of actors expected here.
-        #If the char count is -1, it means that the amount is not fixed and can by any amount.
+        #If the char count is -1, it means that the amount is not fixed and can by any amount as long as it is a non-negative integer.
         self.charcount = charcount
+
+        #target count is the number of characters that's allowed to be the target (exact count). Non-actor targets such as locations and objects do not care about this, but actors do.
+        #Similarly to charcount, if this is -1, the amount is not fixed and can be any amount as long as it is a non-negative integer.
+        self.target_count = target_count
         
         #set of characters acting. if it's a template, then it should be blank
         self.actor = []
