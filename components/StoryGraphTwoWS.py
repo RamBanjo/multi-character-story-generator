@@ -8,7 +8,7 @@ from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
-from components.UtilFunctions import get_max_possible_actor_target_count, get_max_possible_grouping_count
+from components.UtilFunctions import generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count
 from components.UtilityEnums import GenericObjectNode, TestType
 from components.WorldState import WorldState
 
@@ -501,10 +501,11 @@ class StoryGraph:
         eligible_insertion_list = self.find_shared_base_joint_locations(characters, cont_rule, target_require)
         self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
 
-    #TODO: This function, given a list of characters and a number of characters that should be a target, returns a dict of actor list and target list.
+    #This function, given a list of characters and a number of characters that should be a target, returns a dict of actor list and target list.
+    #Whenever characters are assigned to a joint node where the target count is not 0, call this to make a split.
     def generate_valid_actor_and_target_split(self, node, abs_step, character_list):
 
-        #Before anything is done, sum the allowed character count with the targets wanted count. If there are more characters than this sum, then it's impossible to fulfill. .
+        #Before anything is done, sum the allowed character count with the targets wanted count. If there are more characters than this sum, then it's impossible to fulfill.
         #Of course, if either or both is a -1, this means that it's indefinite therefore no limitations.
 
         #If both limits are -1, then scramble freely. If one or both limits are normal integers, then take care of the integers first, with priority for targets first.
@@ -520,6 +521,7 @@ class StoryGraph:
 
         possible_counts = get_max_possible_actor_target_count(node.charcount, node.target_count, len(character_list))
 
+        #TODO: Instead of randomizing like this, we would like to randomize from a different function. Let's make this more efficient! We should be able to do this with the Permute Possible Groups function.
         while (not found_valid_grouping):
 
             unchosen_chars = []
@@ -529,21 +531,13 @@ class StoryGraph:
 
             grouping = {"actor_group":[], "target_group":[]}
 
-            actor_group_size = 0
-            target_group_size = 0
+            actor_target_split = generate_grouping_from_group_size_lists([node.charcount, node.target_count], len(character_list))
 
-            if node.charcount == -1 and node.target_count == -1:
-                actor_group_size = random.randint(1, len(character_list))
-                target_group_size = len(character_list) - actor_group_size
-            elif node.charcount != -1 and node.target_count == -1:
-                actor_group_size = node.charcount
-                target_group_size = len(character_list) - actor_group_size
-            elif node.charcount == -1 and node.target_count != -1:
-                target_group_size = node.target_count
-                actor_group_size = len(character_list) - target_group_size
-            else:
-                actor_group_size = node.charcount
-                target_group_size = node.target_count
+            if actor_target_split == None:
+                return None
+
+            actor_group_size = actor_target_split[0]
+            target_group_size = actor_target_split[1]
 
             for iteration in range(0, len(character_list)):
 
@@ -561,9 +555,11 @@ class StoryGraph:
                 if actor_or_target == "actor":
                     grouping["actor_group"].append(character_list).append(chosen_char)
                     grouping["actor_group"] = sorted(grouping["actor_group"])
+                    actor_group_size -= 1
                 elif actor_or_target == "target":
                     grouping["target_group"].append(character_list).append(chosen_char)
                     grouping["target_group"] = sorted(grouping["target_group"])
+                    target_group_size -= 1
 
             this_one_is_valid = True
 
@@ -590,6 +586,11 @@ class StoryGraph:
 
     #TODO: We need to use Set instead of List for grouping in order to let the code know that we don't care about the order, we only care about the grouping.
     def generate_valid_character_grouping(self, continuations, abs_step, character_list, grouping=[]):
+
+        #TODO: Handle cases where -1 is detected in the grouping.
+        #TODO: Since the grouping information should be in each node rather than the grouping, we should do away with the grouping.
+        #TODO: Alternatively, generate grouping before entering here?
+        #TODO: We can use the Grouping Permutator to make groupings for this thing, repeat until a good value is returned. If there are no good values, then we know this cannot work.
         
         failed_groupings = []
 
@@ -597,9 +598,10 @@ class StoryGraph:
 
         found_valid_grouping = False
 
-        #TODO: We must calculate the number of all possible groupings, somehow. Do the math, programmer.
         possible_group_count = get_max_possible_grouping_count(grouping)
 
+        #TODO: Find a way to, instead of doing the random thing every single time, create a list of all potential grouping.
+        #TODO: Tip: Permute all the characters, subdivide them with the grouping information using set, and then turn those back into list.
         while (not found_valid_grouping):
 
             unchosen_chars = []
@@ -610,7 +612,7 @@ class StoryGraph:
             current_grouping = []
 
             if len(grouping) > 0:
-                #TODO: For the list of Grouping, we expect an array of the grouping. For example, [2,3] means that we want two groups, 2 members for the first group and 3 for the second group.
+                #For the list of Grouping, we expect an array of the grouping. For example, [2,3] means that we want two groups, 2 members for the first group and 3 for the second group.
 
                 for group_size in grouping:
                     new_group = random.sample(unchosen_chars, group_size)

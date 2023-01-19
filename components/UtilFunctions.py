@@ -1,6 +1,7 @@
+import itertools
 import math
 import random
-import Edge
+from components.Edge import Edge
 
 #Function: Initialize Object
 #Inputs: Object, Location
@@ -116,6 +117,8 @@ def get_max_possible_grouping_count(group_size_list):
 
 def get_max_possible_actor_target_count(actor_count, target_count, total_char_count):
 
+    #This function's calculations are based on the Pascal Triangle's combinatorics.
+
     if actor_count != -1 and target_count != -1:
         return math.comb(total_char_count, actor_count)
 
@@ -126,6 +129,7 @@ def get_max_possible_actor_target_count(actor_count, target_count, total_char_co
         return math.comb(total_char_count, actor_count)
 
     if actor_count == -1 and target_count == -1:
+        #Minus 2 because we don't want the case where there are no actors or the case where there are no targets
         return math.pow(total_char_count, 2) - 2
 
     return 0
@@ -139,6 +143,9 @@ def generate_grouping_from_group_size_lists(size_list, actor_count):
 
     rand_freesize_list = generate_posint_list_that_adds_to_n(freesize_count, actor_count-normalsum)
 
+    if rand_freesize_list == None:
+        return None
+
     freesize_iterator = 0
     for size in size_list:
         if size != -1:
@@ -149,7 +156,6 @@ def generate_grouping_from_group_size_lists(size_list, actor_count):
 
     return return_size_list
             
-
 def generate_posint_list_that_adds_to_n(list_size, required_sum):
     if list_size > required_sum:
         return None
@@ -160,3 +166,62 @@ def generate_posint_list_that_adds_to_n(list_size, required_sum):
         return_list[random.randint(0, list_size-1)] += 1
 
     return return_list
+
+#Code taken from StackOverflow (https://stackoverflow.com/questions/18503096/python-integer-partitioning-with-given-k-partitions)
+def partitionfunc(n,k,l=1):
+    '''n is the integer to partition, k is the length of partitions, l is the min partition element size'''
+    if k < 1:
+        return
+    if k == 1:
+        if n >= l:
+            yield (n,)
+        return
+    for i in range(l,n+1):
+        for result in partitionfunc(n-i,k-1,i):
+            yield (i,)+result
+
+def permute_all_possible_groups(actor_count, group_count):
+
+    return_list = []
+
+    for grouping in partitionfunc(actor_count, group_count):
+        for tup_part in list(itertools.permutations(list(grouping))):
+            return_list.append(tup_part)
+
+    return list(set(return_list))
+
+def all_possible_actor_groupings(grouping_info, charcter_list):
+
+    permutations_of_character_list = itertools.permutations(charcter_list)
+    all_possible_grouping_list = []
+
+    for line in permutations_of_character_list:
+
+        current_line = []
+        actor_count = 0
+
+        for grouping in grouping_info:
+
+            this_group = []
+            for iteration in range(0, grouping):
+                this_group.append(line[actor_count])
+                actor_count += 1
+
+            current_line.append(this_group)
+
+        all_possible_grouping_list.append(current_line)
+
+    return all_possible_grouping_list
+
+def permute_all_possible_groups_with_ranges_and_freesize(size_list, required_sum):
+    #TODO: Given a sum, some ranges, and some amount of -1, list all possible ways to reach that sum.
+    #TODO: Integer Partition will be useful for this
+    #TODO: Divide the list into three parts, integers, ranges, and -1s
+    #TODO: First, deduct the integers from the required sum. Those are already taken care of.
+    #TODO: For the ranges, permute all possible combinations. For each permutation, deduct the sum of the ranges from (Required Sum - integers).
+    #TODO: If the subtracted sum is less than the number of freesize spots that we have, remove it (for example, if there are 2 freesize spots left but the sum we want is 1, then that's just impossible)
+    #TODO: We now have a list of all possible ranges. For each list of possible ranges, use Integer Partition after deducting the values from the ranges and integers.
+    #TODO: After we have all groups of possible Ranges and Freesizes, we need to arrange them. Refer to the original List Size to arrange them.
+    #TODO: Finally, return a list of all possible groups.
+    #TODO: Of course, doing the way that we are doing, we'll end up eliminating all the impossible cases off the list automatically.
+    pass

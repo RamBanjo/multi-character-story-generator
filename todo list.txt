@@ -224,7 +224,7 @@
         - List of Connections (DONE)
         - List of Changes
         - List of Condition Tests
-    - Need to test the JSON Functions that we wrote to see if it works (Partially Done)
+    - Need to test the JSON Functions that we wrote to see if it works (Done)
     - Determine all the JSON functions we need to write
     - Show the prof examples of nodes and objects from ReGEN in JSON Form
 22 Nov 2022
@@ -243,8 +243,13 @@
     - Create the Algorithm that generates story from the available information
         - This is the toughest part.
 12 Jan 2022
-    - What was I doing?! I haven't even tested the Rewrite Rules or the Joint Rules??? (Testing Done)
+    - What was I doing?! I haven't even tested the Rewrite Rules or the Joint Rules??? (Testing Done for Rewrite Rules, Joint Rule Untested)
     - Also, we know who the characters in the joint rule are, we just don't know who will become a target? How to fix that?
     - Oh, yeah, maaaaybe just maybe the thing that generates random grouping can also be used to pick who the target should be, given the number of appropriate target? (Done, Untested)
         - Use this to pick among the number of valid characters. We gotta take care of this before we can take care of the generation.
     - I edited the thing that does the thing and now the Character Grouping Picker is now reliable. (Bad Combination Untested)
+19 Jan 2022
+    - Should we allow tuples to be used as character count and target count?
+        - Professor suggests that would make things more flexible, therefore he recommends that this should be done.
+    - Now that we have written a lot more stuff, it would be smart to redo the program flowchart so that it contains the new functions we wrote, so that writing the main program is easier.
+        - New Flowchart should be rewritten, but keep the old flowchart to explain how each new addition solves our problems specifically.

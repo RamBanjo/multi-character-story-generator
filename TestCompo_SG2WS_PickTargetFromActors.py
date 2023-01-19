@@ -19,4 +19,4 @@ waiting = StoryNode("Waiting", biasweight=0, tags={"Type":"Waiting"})
 
 basesg = StoryGraph("Base Story Graph", [alice, bob, charlie, tyrant], [somewhere], basews)
 
-#Hint: We want 1 target for this thing, and only the tyrant qualifies as the target.
+#We want 1 target for this thing, and only the tyrant qualifies as the target.
