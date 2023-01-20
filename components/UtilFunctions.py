@@ -185,7 +185,7 @@ def permute_all_possible_groups(actor_count, group_count):
     return_list = []
 
     for grouping in partitionfunc(actor_count, group_count):
-        for tup_part in list(itertools.permutations(list(grouping))):
+        for tup_part in list(itertools.permutations(grouping)):
             return_list.append(tup_part)
 
     return list(set(return_list))
@@ -213,15 +213,149 @@ def all_possible_actor_groupings(grouping_info, charcter_list):
 
     return all_possible_grouping_list
 
-def permute_all_possible_groups_with_ranges_and_freesize(size_list, required_sum):
-    #TODO: Given a sum, some ranges, and some amount of -1, list all possible ways to reach that sum.
-    #TODO: Integer Partition will be useful for this
-    #TODO: Divide the list into three parts, integers, ranges, and -1s
-    #TODO: First, deduct the integers from the required sum. Those are already taken care of.
-    #TODO: For the ranges, permute all possible combinations. For each permutation, deduct the sum of the ranges from (Required Sum - integers).
-    #TODO: If the subtracted sum is less than the number of freesize spots that we have, remove it (for example, if there are 2 freesize spots left but the sum we want is 1, then that's just impossible)
-    #TODO: We now have a list of all possible ranges. For each list of possible ranges, use Integer Partition after deducting the values from the ranges and integers.
-    #TODO: After we have all groups of possible Ranges and Freesizes, we need to arrange them. Refer to the original List Size to arrange them.
-    #TODO: Finally, return a list of all possible groups.
-    #TODO: Of course, doing the way that we are doing, we'll end up eliminating all the impossible cases off the list automatically.
-    pass
+def permute_all_possible_groups_with_ranges_and_freesize(size_list, required_sum, verbose = False):
+    '''size_list is a list that contains the number of characters required for each of the split.
+    Putting a tuple with size 2 in the size list will allow that slot to contain any characters between that range (inclusive),
+    and putting a -1 in the size list will mark that slot as freesize and allow any positive integer in it.
+    
+    required_sum is the goal sum to add up to.'''
+    #Given a sum, some ranges, and some amount of -1, list all possible ways to reach that sum.
+    #Integer Partition will be useful for this
+    #TDivide the list into three parts, integers, ranges, and -1s
+    #First, deduct the integers from the required sum. Those are already taken care of.
+    #Next, w
+
+    #This dict will record all the items by type.
+    remaining_sum = required_sum
+
+    dict_of_items = {"integers":[], "ranges":[], "freesizes":[]}
+    for item in size_list:
+        if type(item) == tuple:
+            dict_of_items["ranges"].append(item)
+        elif item != -1:
+            dict_of_items["integers"].append(item)
+            remaining_sum -= item
+        elif item == -1:
+            dict_of_items["freesizes"].append(item)
+
+    range_count = len(dict_of_items["ranges"])
+    free_count = len(dict_of_items["freesizes"])
+
+    if range_count == 0 and free_count == 0:
+        return [size_list]
+
+    if remaining_sum - (range_count+free_count) < 0:
+        if(verbose):
+            print("There's just not enough numbers left to make this combination possible.")
+        return None
+
+    all_possible_ranges = []
+    if range_count != 0:
+        for range_combi in permute_full_range_list(range_number_to_range_list(dict_of_items["ranges"])):
+            all_possible_ranges.append(range_combi)
+
+    all_possible_freesizes = []
+    if free_count != 0:
+        for count in range(1, remaining_sum+1):
+            current_list = []
+            for x in partitionfunc(count, free_count):
+                current_list.append(x)
+            all_possible_freesizes += current_list
+
+    combinations_with_good_sum = []
+    if range_count == 0:
+        combinations_with_good_sum = [free_combi for free_combi in all_possible_freesizes if sum(free_combi) == remaining_sum]
+
+    elif free_count == 0:
+        combinations_with_good_sum = [range_combi for range_combi in all_possible_ranges if sum(range_combi) == remaining_sum]
+    else:
+        for free_combi in all_possible_freesizes:
+            for range_combi in all_possible_ranges:
+                if sum(free_combi) + sum(range_combi) == remaining_sum:
+                    combinations_with_good_sum.append({"freesizes":free_combi, "ranges":range_combi})
+
+    final_list = []
+    for good_combi in combinations_with_good_sum:
+
+        current_size_list=[]
+        current_range = 0
+        current_free = 0
+
+        for item in size_list:
+            if type(item) == tuple:
+                if free_count == 0:
+                    current_size_list.append(good_combi[current_range])
+                else:
+                    current_size_list.append(good_combi["ranges"][current_range])
+                current_range += 1
+
+            elif item != -1:
+                current_size_list.append(item)
+
+            elif item == -1:
+                if range_count == 0:
+                    current_size_list.append(good_combi[current_free])
+                else:
+                    current_size_list.append(good_combi["freesizes"][current_free])
+                current_free += 1
+
+        final_list.append(current_size_list)
+
+    return final_list
+
+                 
+
+
+        
+    # list_of_completed_ranges_and_frees = []
+
+    # for range_combi in permute_full_range_list(range_number_to_range_list(dict_of_items["ranges"])):
+    #     current_sum = remaining_sum - sum(range_combi)
+    #     possible_freesizes_for_current_sum = permute_all_possible_groups(current_sum, len(dict_of_items["freesizes"]))
+
+    #     if len(possible_freesizes_for_current_sum) > 0 or free_count == 0:
+    #         list_of_completed_ranges_and_frees.append({"range":range_combi, "freesize":possible_freesizes_for_current_sum})
+
+
+    # final_return_list = []
+
+    # for pair in list_of_completed_ranges_and_frees:
+
+        
+    #     for freesize_no in range(0, len(pair["freesize"])):
+
+    #         current_size_list = []
+    #         current_range = 0
+    #         current_free = 0
+
+    #         for item in size_list:
+    #             if type(item) == tuple:
+    #                 current_size_list.append(pair["range"][current_range])
+    #                 current_range += 1
+    #             elif item != -1:
+    #                 current_size_list.append(item)
+    #             elif item == -1:
+    #                 current_size_list.append(pair["freesize"][freesize_no][current_free])
+
+    #     final_return_list.append(current_size_list)
+
+    # return final_return_list                
+
+        
+
+def range_number_to_range_list(range_list):
+
+    full_range_list = []
+    for item in range_list:
+        full_range_list.append(list(range(item[0], item[1]+1)))
+
+    return full_range_list
+
+def permute_full_range_list(full_range_list):
+    if len(full_range_list) == 1:
+        for item in full_range_list[0]:
+            yield [item]
+    else:
+        for item in full_range_list[0]:
+            for generated_item in permute_full_range_list(full_range_list[1:]):
+                yield [item] + generated_item
