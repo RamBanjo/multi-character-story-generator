@@ -1,4 +1,4 @@
-from components.StoryGraph import StoryGraph
+from components.StoryGraph_old_2 import StoryGraph
 from components.WorldState import WorldState
 
 

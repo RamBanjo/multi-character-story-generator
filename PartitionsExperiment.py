@@ -20,14 +20,32 @@ test_range = [1, 2, -1, 5, (3,4), -1, 2, -1, (1, 2), (1, 6)]
 test_range_2 = [5, 15]
 test_range_3 = [(1, 20), (1,20)]
 test_range_4 = [-1, -1, -1]
-wanted_sum = 20
+test_range_5 = [1, 3, 1]
+wanted_sum = 5
 
-for x in permute_all_possible_groups_with_ranges_and_freesize(size_list=test_range_2, required_sum=wanted_sum):
-    print(x, sum(x))
+# for x in all_possible_actor_groupings([1, 1, 3], ["Ace", "Brent", "Chad", "Dan", "Eggs"]):
+#     print (x)
+
+# for x in all_possible_actor_groupings_with_ranges_and_freesizes(test_range_5, ["Ace", "Brent", "Chad", "Dan", "Eggs"]):
+#     print(x)
+
+# for x in permute_all_possible_groups_with_ranges_and_freesize(size_list=test_range_4, required_sum=wanted_sum):
+#     print(x, sum(x))
 
 # rangelist=[(1,2),(1,4),(1,3)]
 
 # for item in permute_full_range_list(range_number_to_range_list(rangelist)):
 #     print(item)
 
+# print(all_possible_actor_groupings_with_ranges_and_freesizes([-1, -1], ["Alice", "Bob", "Charlie"]))
 
+# print(actor_count_sum(1, 2))
+# print(actor_count_sum(-1, 2))
+# print(actor_count_sum(1, -1))
+# print(actor_count_sum((3, 6), 2))
+# print(actor_count_sum(1, (2, 4)))
+# print(actor_count_sum((3, 6), (2, 4)))
+# print(actor_count_sum((3, 6), -1))
+# print(actor_count_sum(-1, (2, 4)))
+
+# print(all_possible_actor_groupings_with_ranges_and_freesizes([-1, -1], ["A","B","C","D"]))

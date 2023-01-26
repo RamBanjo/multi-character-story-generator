@@ -1,4 +1,4 @@
-from components.RewriteRules import ContinuousJointRule, JoiningJointRule, RewriteRule, SplittingJointRule
+from components.RewriteRules_old_2 import ContinuousJointRule, JoiningJointRule, RewriteRule, SplittingJointRule
 from components.StoryGraphTwoWS import StoryGraph
 from components.StoryNode import StoryNode
 from components.StoryObjects import CharacterNode, LocationNode

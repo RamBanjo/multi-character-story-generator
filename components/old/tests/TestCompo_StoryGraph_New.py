@@ -2,10 +2,10 @@ from copy import deepcopy
 from turtle import st
 
 from numpy import place
-from components.RewriteRules import RewriteRule
+from components.RewriteRules_old_2 import RewriteRule
 from components.StoryObjects import *
 from components.WorldState import *
-from components.StoryGraph import *
+from components.StoryGraph_old_2 import *
 
 '''
 Starting Point: A->B->C

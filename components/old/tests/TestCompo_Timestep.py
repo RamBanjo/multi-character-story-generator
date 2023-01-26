@@ -3,10 +3,10 @@ from turtle import st
 from xml.dom import NO_DATA_ALLOWED_ERR
 
 from numpy import place
-from components.RewriteRules import RewriteRule
+from components.RewriteRules_old_2 import RewriteRule
 from components.StoryObjects import *
 from components.WorldState import *
-from components.StoryGraph import *
+from components.StoryGraph_old_2 import *
 
 '''
 Starting Point: 

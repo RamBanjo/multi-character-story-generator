@@ -8,7 +8,7 @@ from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
-from components.UtilFunctions import generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count
+from components.UtilFunctions import all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, permute_all_possible_groups_with_ranges_and_freesize
 from components.UtilityEnums import GenericObjectNode, TestType
 from components.WorldState import WorldState
 
@@ -269,6 +269,18 @@ class StoryGraph:
 
         return i
 
+    def get_all_path_length_with_charname(self):
+        check_list = []
+        for actor in self.character_objects:
+            check_list.append((self.get_longest_path_length_by_character(actor), actor.get_name()))
+
+        return check_list
+
+    def get_shortest_path_length_from_all(self):
+
+        check_list = self.get_all_path_length_with_charname()
+        return(min(check_list)[0])
+
     def make_latest_state(self, state_name = "Latest State"):
         #TODO: Take the initial world state and copy it.
         #TODO: Then, cycle through the list of changes, applying the changes from it.
@@ -464,6 +476,7 @@ class StoryGraph:
 
     #If you figure out one, you figure out all three
     def apply_joining_joint_rule(self, join_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
+        
 
         eligible_insertion_list = []
 
@@ -514,139 +527,94 @@ class StoryGraph:
 
         #Of course, we also need to include an exit clause in the event that all the possible combinations are already exhausted.
 
-        failed_groupings = []
+        #We do this first. Index 0 is for Actors, Index 1 is for Targets
+        list_of_charnames = [x.get_name() for x in character_list]
+        all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes([node.charcount, node.target_count], list_of_charnames)
 
         state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
         found_valid_grouping = False
 
-        possible_counts = get_max_possible_actor_target_count(node.charcount, node.target_count, len(character_list))
-
         #TODO: Instead of randomizing like this, we would like to randomize from a different function. Let's make this more efficient! We should be able to do this with the Permute Possible Groups function.
         while (not found_valid_grouping):
 
-            unchosen_chars = []
+            #Return None if we have exhausted all of the possible groupings.
+            
+            if len(all_possible_groupings) <= 0:
+                return None
 
-            for charobj in character_list:
-                unchosen_chars.append(state_at_step.node_dict[charobj.get_name()])
+            #Pick a random possible grouping from the list
+            random_grouping_from_list = random.choice(all_possible_groupings)
+            # print(len(all_possible_groupings), random_grouping_from_list)
+
+            #Remove it so it's never chosen again
+            all_possible_groupings.remove(random_grouping_from_list)
 
             grouping = {"actor_group":[], "target_group":[]}
 
-            actor_target_split = generate_grouping_from_group_size_lists([node.charcount, node.target_count], len(character_list))
+            for actor_name in random_grouping_from_list[0]:
+                grouping["actor_group"].append(state_at_step.node_dict[actor_name])
 
-            if actor_target_split == None:
-                return None
+            for target_name in random_grouping_from_list[1]:
+                grouping["target_group"].append(state_at_step.node_dict[target_name])
 
-            actor_group_size = actor_target_split[0]
-            target_group_size = actor_target_split[1]
+            
+            actor_validity = node.check_character_compatibility_for_many_characters(grouping["actor_group"])
+            target_validity = node.check_target_compatibility_for_many_characters(grouping["target_group"])
+            # print(actor_validity, target_validity)
 
-            for iteration in range(0, len(character_list)):
-
-                chosen_char = random.sample(unchosen_chars, 1)
-                unchosen_chars.remove(chosen_char[0])
-                actor_or_target = None
-
-                if actor_group_size > 0 and target_group_size > 0:
-                    actor_or_target = random.choice(["actor", "target"])
-                elif actor_group_size <= 0:
-                    actor_or_target = "target"
-                elif target_group_size <= 0:
-                    actor_or_target = "actor"
-
-                if actor_or_target == "actor":
-                    grouping["actor_group"].append(character_list).append(chosen_char)
-                    grouping["actor_group"] = sorted(grouping["actor_group"])
-                    actor_group_size -= 1
-                elif actor_or_target == "target":
-                    grouping["target_group"].append(character_list).append(chosen_char)
-                    grouping["target_group"] = sorted(grouping["target_group"])
-                    target_group_size -= 1
-
-            this_one_is_valid = True
-
-            if grouping not in failed_groupings:
-
-                    actor_validity = node.check_character_compatibility_for_many_characters[grouping["actor_group"]]
-                    target_validity = node.check_target_compatibility_for_many_characters[grouping["target_group"]]
-
-                    this_one_is_valid = actor_validity and target_validity
-            else:
-                this_one_is_valid = False
-
-            if this_one_is_valid:
+            if actor_validity and target_validity:
                 return grouping
-            else:
-                if grouping not in failed_groupings:
-                    failed_groupings.append(grouping)
-
-                #TODO: Check if the number of groupings in failed groupings is equal to or greater than the max failures. If it is, then return a fail value.
-                if len(failed_groupings) >= possible_counts:
-                    return None
 
     #Please note that Grouping is a list that is used to determine group size. For example, if it is [1, 3], this means one character in the first group and 3 characters in the second group.
 
     #TODO: We need to use Set instead of List for grouping in order to let the code know that we don't care about the order, we only care about the grouping.
     def generate_valid_character_grouping(self, continuations, abs_step, character_list, grouping=[]):
+        '''This function can accept -1 and tuple ranges.'''
 
-        #TODO: Handle cases where -1 is detected in the grouping.
-        #TODO: Since the grouping information should be in each node rather than the grouping, we should do away with the grouping.
-        #TODO: Alternatively, generate grouping before entering here?
-        #TODO: We can use the Grouping Permutator to make groupings for this thing, repeat until a good value is returned. If there are no good values, then we know this cannot work.
-        
-        failed_groupings = []
+        #If there is no grouping information, then we only want one character per continuation.
+        if grouping == []:
+            grouping = [1] * len(character_list)
+
+        #Make the grouping information here.
+        list_of_charnames = [x.get_name() for x in character_list]
+        all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes(grouping, list_of_charnames)
 
         state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
 
         found_valid_grouping = False
 
-        possible_group_count = get_max_possible_grouping_count(grouping)
-
-        #TODO: Find a way to, instead of doing the random thing every single time, create a list of all potential grouping.
-        #TODO: Tip: Permute all the characters, subdivide them with the grouping information using set, and then turn those back into list.
         while (not found_valid_grouping):
 
-            unchosen_chars = []
-
-            for charobj in character_list:
-                unchosen_chars.append(state_at_step.node_dict[charobj.get_name()])
-
             current_grouping = []
+            
+            #Return None if we have exhausted all of the possible groupings.
+            if len(all_possible_groupings) <= 0:
+                return None
 
-            if len(grouping) > 0:
-                #For the list of Grouping, we expect an array of the grouping. For example, [2,3] means that we want two groups, 2 members for the first group and 3 for the second group.
+            random_chosen_group = random.choice(all_possible_groupings)
 
-                for group_size in grouping:
-                    new_group = random.sample(unchosen_chars, group_size)
-                    new_group = sorted(new_group)
+            #Remove this so that this exact chosen combination is never chosen again.
+            all_possible_groupings.remove(random_chosen_group)
 
-                    current_grouping.append(new_group)
+            #Set up the grouping information.
+            for subgroup_charname in random_chosen_group:
+                
+                subgroup_char = []
+                
+                for charname in subgroup_charname:
+                    subgroup_char.append(state_at_step.node_dict[charname])
 
-                    for remove_char in new_group:
-                        unchosen_chars.remove(remove_char)
-
-            else:
-                #If grouping information is empty, then assume there are equal number of characters and nodes and randomly assign.
-                for iteration in range(0, len(character_list)):                
-                    chosen_char = random.sample(unchosen_chars, 1)
-                    current_grouping.append(chosen_char)
-
-                    unchosen_chars.remove(chosen_char[0])
+                current_grouping.append(subgroup_char)
 
             this_one_is_valid = True
 
-            if current_grouping not in failed_groupings: #Only check combinations that have not failed yet
-                for story_index in range(0, len(continuations)):
-                    this_one_is_valid = this_one_is_valid and continuations[story_index].check_character_compatibility_for_many_characters(current_grouping[story_index])
-            else:
-                this_one_is_valid = False #We will skip checking any combinations that we know have already failed
+            #Check validity for each of the continuations
+            for story_index in range(0, len(continuations)):
+                this_one_is_valid = this_one_is_valid and continuations[story_index].check_character_compatibility_for_many_characters(current_grouping[story_index])
 
+            #If it's valid, it can be returned. If not, find new one.
             if this_one_is_valid:
                 return current_grouping
-            else:
-                if current_grouping not in failed_groupings:
-                    failed_groupings.append(current_grouping)
-                #TODO: Check if the number of groupings in failed groupings is equal to or greater than the max failures. If it is, then return a fail value.
-                if len(failed_groupings) >= possible_group_count:
-                    return None
 
     #TODO: Maybe decide upon the split grouping before calling split continuation
     def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):

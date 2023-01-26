@@ -1,10 +1,10 @@
 from copy import deepcopy
 from turtle import st
-from components.RewriteRules import RewriteRule
+from components.RewriteRules_old_2 import RewriteRule
 from components.StoryObjects import *
 from components.Timestep import TimeStep
 from components.WorldState import *
-from components.StoryGraph import *
+from components.StoryGraph_old_2 import *
 
 sword = ObjectNode("sword")
 sword.set_tag("Price", "Expensive")

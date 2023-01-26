@@ -1,7 +1,7 @@
 from components.StoryObjects import *
 from components.StoryNode import *
-from components.RewriteRules import RewriteRule
-from components.StoryGraph import StoryGraph
+from components.RewriteRules_old_2 import RewriteRule
+from components.StoryGraph_old_2 import StoryGraph
 
 #The story is simple:
 #Bob finds a item.

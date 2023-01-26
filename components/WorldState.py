@@ -8,7 +8,7 @@ from components.StoryObjects import ObjectNode
 from components.UtilityEnums import *
 
 class WorldState:
-    def __init__(self, name, objectnodes=[]):
+    def __init__(self, name, objectnodes=[], DEFAULT_HOLD_EDGE_NAME = "holds", DEFAULT_ADJACENCY_EDGE_NAME = "connects"):
 
         '''
         Graph properties
@@ -21,6 +21,9 @@ class WorldState:
         self.edges = []
         self.node_dict = dict()
         self.make_node_dict()
+
+        self.DEFAULT_HOLD_EDGE_NAME = "holds"
+        self.DEFAULT_ADJACENCY_EDGE_NAME = "connects"
 
     '''
     Node Attributes
@@ -93,7 +96,7 @@ class WorldState:
         locations_in_dict = [loco for loco in self.node_dict.values() if ('Type', 'Location') in loco.tags.items()]
 
         for location in locations_in_dict:
-            adjacencies = self.node_dict[location.get_name()].get_adjacent_locations_list()
+            adjacencies = self.node_dict[location.get_name()].get_adjacent_locations_list(self.DEFAULT_ADJACENCY_EDGE_NAME)
 
             texttoprint = location.get_name()
             texttoprint += " -> "
@@ -267,7 +270,7 @@ class WorldState:
         if holder is None:
             return False
 
-        return holder.check_if_this_item_holds_item_with_tag(value_test, tag_test)
+        return holder.check_if_this_item_holds_item_with_tag(value_test, tag_test, self.DEFAULT_HOLD_EDGE_NAME)
 
     @staticmethod
     def check_items_in_same_location(item_checklist):

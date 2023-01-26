@@ -180,7 +180,7 @@ def partitionfunc(n,k,l=1):
         for result in partitionfunc(n-i,k-1,i):
             yield (i,)+result
 
-def permute_all_possible_groups(actor_count, group_count):
+def permute_all_possible_freesize_groups(actor_count, group_count):
 
     return_list = []
 
@@ -191,6 +191,7 @@ def permute_all_possible_groups(actor_count, group_count):
     return list(set(return_list))
 
 def all_possible_actor_groupings(grouping_info, charcter_list):
+    '''Please note that this function does not accept -1 or tuples as grouping info input. For that functionality, please use all_possible_actor_groupings_with_ranges_and_freesizes() instead.'''
 
     permutations_of_character_list = itertools.permutations(charcter_list)
     all_possible_grouping_list = []
@@ -204,14 +205,26 @@ def all_possible_actor_groupings(grouping_info, charcter_list):
 
             this_group = []
             for iteration in range(0, grouping):
-                this_group.append(line[actor_count])
+                this_group.append((line[actor_count]))
                 actor_count += 1
 
-            current_line.append(this_group)
+            this_group = sorted(list(set(this_group)))
+            current_line.append(tuple(this_group))
 
-        all_possible_grouping_list.append(current_line)
+        all_possible_grouping_list.append(tuple(current_line))
 
-    return all_possible_grouping_list
+    return sorted(list(set(all_possible_grouping_list)))
+
+def all_possible_actor_groupings_with_ranges_and_freesizes(grouping_info, character_list):
+
+    complete_list = []
+
+    list_of_possible_groupings = permute_all_possible_groups_with_ranges_and_freesize(grouping_info, len(character_list))
+    
+    for grouping in list_of_possible_groupings:
+        complete_list += all_possible_actor_groupings(grouping, character_list)
+
+    return complete_list
 
 def permute_all_possible_groups_with_ranges_and_freesize(size_list, required_sum, verbose = False):
     '''size_list is a list that contains the number of characters required for each of the split.
@@ -257,10 +270,7 @@ def permute_all_possible_groups_with_ranges_and_freesize(size_list, required_sum
     all_possible_freesizes = []
     if free_count != 0:
         for count in range(1, remaining_sum+1):
-            current_list = []
-            for x in partitionfunc(count, free_count):
-                current_list.append(x)
-            all_possible_freesizes += current_list
+            all_possible_freesizes += permute_all_possible_freesize_groups(count, free_count)
 
     combinations_with_good_sum = []
     if range_count == 0:
@@ -359,3 +369,20 @@ def permute_full_range_list(full_range_list):
         for item in full_range_list[0]:
             for generated_item in permute_full_range_list(full_range_list[1:]):
                 yield [item] + generated_item
+
+def actor_count_sum(lhs, rhs):
+
+    if lhs == -1 or rhs == -1:
+        return -1
+
+    if type(lhs) == int and type(rhs) == int:
+        return lhs + rhs
+
+    if type(lhs) == tuple and type(rhs) == tuple:
+        return tuple([lhs[x]+rhs[x] for x in range(len(lhs))])
+    elif type(lhs) == tuple and type(rhs) == int:
+        return (lhs[0]+rhs, lhs[1]+rhs)
+    elif type(lhs) == int and type(rhs) == tuple:
+        return (rhs[0]+lhs, rhs[1]+lhs)
+
+    return -1

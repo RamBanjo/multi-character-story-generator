@@ -74,8 +74,8 @@ class ObjectNode:
 
         return things_list
 
-    def check_if_this_item_holds_item_with_tag(self, tag, value):
-        held_items_list = self.get_list_of_things_held_by_this_item()
+    def check_if_this_item_holds_item_with_tag(self, tag, value, holds_rel_name = "holds"):
+        held_items_list = self.get_list_of_things_held_by_this_item(holds_rel_name)
 
         for thing in held_items_list:
             if thing.check_if_this_item_has_tag(tag, value):

@@ -1,7 +1,7 @@
 #Testing Requirement for Rewrite Rules
 
-from components.RewriteRules import RewriteRule
-from components.StoryGraph import StoryGraph
+from components.RewriteRules_old_2 import RewriteRule
+from components.StoryGraph_old_2 import StoryGraph
 from components.StoryObjects import CharacterNode, LocationNode
 
 placeholder_location = LocationNode("Place")

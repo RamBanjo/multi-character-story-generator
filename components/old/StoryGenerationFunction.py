@@ -1,11 +1,11 @@
 import random
-from components.StoryGraph import StoryNode
-from components.StoryGraph import StoryGraph
+from components.StoryGraph_old_2 import StoryNode
+from components.StoryGraph_old_2 import StoryGraph
 from components.StoryNode import StoryNode
 from components.StoryObjects import ObjectNode
 from components.StoryObjects import CharacterNode
 from components.StoryObjects import LocationNode
-from components.RewriteRules import *
+from components.RewriteRules_old_2 import *
 from components.UtilFunctions import RelationshipChange
 
 '''

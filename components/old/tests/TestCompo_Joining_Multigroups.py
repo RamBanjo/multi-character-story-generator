@@ -1,8 +1,8 @@
 from multiprocessing import dummy
 from components.StoryObjects import *
-from components.RewriteRules import *
+from components.RewriteRules_old_2 import *
 from components.StoryNode import *
-from components.StoryGraph import *
+from components.StoryGraph_old_2 import *
 
 #Example:
 #There are 5 characters: Fred, Daphne, Velma, Shaggy, and Scooby

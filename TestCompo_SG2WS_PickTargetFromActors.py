@@ -9,14 +9,23 @@ alice = CharacterNode(name = "Alice", biases={"lawbias":-30, "moralbias":50}, ta
 bob = CharacterNode(name = "Bob", biases={"lawbias":-50, "moralbias":10}, tags={"Type":"Character","Job":"Peasant"})
 charlie = CharacterNode(name = "Charlie", biases={"lawbias":-20, "moralbias":0}, tags={"Type":"Character","Job":"Peasant"})
 
-tyrant = CharacterNode(name = "Tyrant", biases={"lawbias":60, "moralbias":-100}, tags={"Type":"Character","Job":"King"})
+tyrant = CharacterNode(name = "Tyrant", biases={"lawbias":60, "moralbias":-80}, tags={"Type":"Character","Job":"King"})
 
-revolt = StoryNode(name = "Revolt", biasweight=-20, tags={"Type":"Revolution"}, charcount=-1, bias_range={"lawbias":(-100, -20)}, bias_range_target={"moralbias":(-100, -20)})
+revolt = StoryNode(name = "Revolt", biasweight=-20, tags={"Type":"Revolution"}, charcount=-1, target_count=-1, bias_range={"lawbias":(-100, -10)}, bias_range_target={"moralbias":(-90, -20)})
 
 basews = WorldState("BaseWS", [alice, bob, charlie, tyrant])
 somewhere = LocationNode("Somewhere")
-waiting = StoryNode("Waiting", biasweight=0, tags={"Type":"Waiting"})
+waiting = StoryNode("Waiting", charcount=1, biasweight=0, tags={"Type":"Waiting"})
 
 basesg = StoryGraph("Base Story Graph", [alice, bob, charlie, tyrant], [somewhere], basews)
 
 #We want 1 target for this thing, and only the tyrant qualifies as the target.
+
+basesg.add_story_part(waiting, alice, somewhere)
+basesg.add_story_part(waiting, bob, somewhere)
+basesg.add_story_part(waiting, charlie, somewhere)
+basesg.add_story_part(waiting, tyrant, somewhere)
+
+print(basesg.generate_valid_actor_and_target_split(revolt, 1, [alice, bob, charlie, tyrant]))
+
+# print(revolt.check_target_compatibility(tyrant))

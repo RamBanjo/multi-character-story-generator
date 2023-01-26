@@ -251,5 +251,16 @@
 19 Jan 2022
     - Should we allow tuples to be used as character count and target count?
         - Professor suggests that would make things more flexible, therefore he recommends that this should be done.
+        - Tuple ranges are done! We just need to do testing.
     - Now that we have written a lot more stuff, it would be smart to redo the program flowchart so that it contains the new functions we wrote, so that writing the main program is easier.
         - New Flowchart should be rewritten, but keep the old flowchart to explain how each new addition solves our problems specifically.
+        - New Flowchart has already been rewritten
+    - To Add: When given actor count and target count, do the math and convert it into range. (DONE)
+        - For example:
+            - (1, 5) and (1, 6) would add up to (2, 11)
+            - (2, 4) and 3 would add up to (5, 7)
+            - -1 and -1 would add up to -1
+            - (1, 3) and -1 would add up to -1
+            - 2 and -1 would add up to -1
+26 Jan 2022
+    - We now have the flowchart. Therefore, we can make the program, or at least, make it up to as much as we are confident with.
