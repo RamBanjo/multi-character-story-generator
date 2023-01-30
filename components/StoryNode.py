@@ -7,7 +7,7 @@ class StoryNode:
         #the name of this action.
         self.name = name
 
-        #bias weight. How much this action will affect the bias of the character performing it.
+        #bias weight. How much this action will affect the bias of the character performing it. For now, this will also affect how likely it is a character will perform this node.
         self.biasweight = biasweight
         
         #tags for searching actions of a specific type.

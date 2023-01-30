@@ -1,4 +1,6 @@
 from enum import Enum
+import math
+import statistics
 from components.StoryGraphTwoWS import StoryGraph
 from components.WorldState import WorldState
 
@@ -17,6 +19,28 @@ class RewriteRule:
         self.is_joint_rule = False
         self.remove_before_insert = remove_before_insert
         self.target_list = target_list
+
+    #Figure out how to choose the best node
+    #Maybe use the metrics?
+
+    # This is going to be a separate thing from the metrics. We'll take care of how we handle metrics later
+    # For now, this is how we will handle the story rewrite rules' character fitness values.
+    # 1. Do steps 2-4 for each of the nodes:
+    # 2. Add the raw Bias Value.
+    # 3. After we get the sum score from each node, average it.
+    # (This is a placeholder calculation formula and will be subject to change)
+    # As a failsafe, if the character is not suitable for that node, return -999 (arbitarily large negative number to put it at the bottom of the top n list)
+    def get_character_fitness_value(self, character):
+
+        total_bias_list = []
+        for story_node in self.story_change:
+
+            if story_node.check_character_compatibility(character):
+                total_bias_list.append(story_node.biasweight)
+            else:
+                return -999
+                
+        return statistics.mean(total_bias_list)
 
     #TODO: This probably is no longer needed considering that we have moved all these checks to the Nodes themselves?
     # def check_character_compatibility(self, character_node, init_world_state, list_of_changes, start_of_check):
@@ -61,19 +85,18 @@ Required Tags List, unwanted tags list, and bias range list are the same as norm
 have separate values if needs be. If a particular slot has no prerequisites, it should be an empty dict if it's tags, or None if it's a bias range.
 '''
 
-#TODO: redo this so that instead of the rules defining the required tags, this information is placed into the story node itself.
-
 class JointType(Enum):
     JOIN = 0
     CONT = 1
     SPLIT = 2
 
 class JointRule:
-    def __init__(self, merge_count, joint_type, rule_name=""):
+    def __init__(self, merge_count, joint_type, rule_name="", target_list=None):
         self.rule_name = rule_name
         self.merge_count = merge_count
         self.joint_type = joint_type
         self.is_joint_rule = True
+        self.target_list = target_list
 
 '''
 Joining Joint Rule!
@@ -81,16 +104,19 @@ Joining Joint Rule!
 Joining Joint's base is a list of nodes for each of the character intending to join in.
 '''
 
-#TODO: Determine from here who's going to be the actor and who's going to be the target (if any)
 class JoiningJointRule(JointRule):
-    def __init__(self, merge_count, base_actions, joint_node, rule_name=""):
+    def __init__(self, merge_count, base_actions, joint_node, rule_name="", target_list=None):
 
-        super().__init__(merge_count, JointType.JOIN, rule_name)
+        super().__init__(merge_count, JointType.JOIN, rule_name, target_list=target_list)
 
         self.base_actions = base_actions
         self.joint_node = joint_node
 
-    
+    def get_character_fitness_value(self, character):
+        if self.joint_node.check_character_compatibility(character):
+            return self.joint_node.biasweight
+        else:
+            return -999
 
 '''
 Continuous Joint Rule!
@@ -98,26 +124,45 @@ Continuous Joint Rule!
 Cont. Joint's base is a joint itself, and then a joint would connect to it.
 '''
 
-#TODO: Determine from here who's going to be the actor and who's going to be the target (if any)
 class ContinuousJointRule(JointRule):
-    def __init__(self, merge_count, base_joint, joint_node, rule_name=""):
+    def __init__(self, merge_count, base_joint, joint_node, rule_name="", target_list=None):
 
-        super().__init__(merge_count, JointType.CONT, rule_name)
+        super().__init__(merge_count, JointType.CONT, rule_name, target_list=target_list)
 
         self.base_joint = base_joint
         self.joint_node = joint_node
 
+    def get_character_fitness_value(self, character):
+        if self.joint_node.check_character_compatibility(character):
+            return self.joint_node.biasweight
+        else:
+            return -999
 '''
 Splitting Joint Rule!
 
 Splitting Joint Rule's base would be the joint node where dummy chars will go separate ways.
 '''
 
-#TODO: Determine from here who's going to be the actor and who's going to be the target in each of the nodes (if any)
 class SplittingJointRule(JointRule):
-    def __init__(self, merge_count, base_joint, split_list, rule_name=""):
+    def __init__(self, merge_count, base_joint, split_list, rule_name="", target_list=None):
 
-        super().__init__(merge_count, JointType.SPLIT, rule_name)
+        super().__init__(merge_count, JointType.SPLIT, rule_name, target_list=target_list)
 
         self.base_joint = base_joint
         self.split_list = split_list
+
+    def get_character_fitness_value(self, character):
+
+        eligible_list = []
+
+        for node in self.split_list:
+            if node.check_character_compatibility(character):
+                eligible_list.append(node)
+
+        if len(eligible_list) > 0:
+            biasval_list = [x.biasweight for x in eligible_list]
+            return statistics.mean(biasval_list)
+        else:
+            return -999
+
+    

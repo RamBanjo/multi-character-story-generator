@@ -49,3 +49,7 @@ wanted_sum = 5
 # print(actor_count_sum(-1, (2, 4)))
 
 # print(all_possible_actor_groupings_with_ranges_and_freesizes([-1, -1], ["A","B","C","D"]))
+
+testlist = [0,1,2,3,4,5]
+
+print(testlist[:0])

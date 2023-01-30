@@ -269,6 +269,9 @@ class StoryGraph:
 
         return i
 
+    def get_latest_story_node_from_character(self, character):
+        return self.story_parts.get((character.get_name(), self.get_longest_path_length_by_character(character)), None)
+
     def get_all_path_length_with_charname(self):
         check_list = []
         for actor in self.character_objects:
@@ -736,6 +739,31 @@ class StoryGraph:
 
         for remove_index in range(start_step, end_index+1):
             self.remove_story_part(actor, start_step)
+
+    #This function checks if there it at least one spot where the rule can be applied.
+    def check_rule_validity(self, actor, rule):
+
+        if rule.is_joint_rule:
+            for i in range(0, self.get_longest_path_length_by_character(actor)):
+                if self.check_joint_continuity_validity(joint_rule=rule, actors_to_test=[actor], targets_to_test=rule.target_list, insert_index=i):
+                    return True
+            return False
+
+        is_subgraph, subgraph_locs = self.check_for_pattern_in_storyline(rule.story_condition, actor)
+
+        if not is_subgraph:
+            return False
+        
+        purge_count = 0
+        if rule.remove_before_insert:
+            purge_count = len(rule.story_condition)
+
+        for story_index in subgraph_locs:
+            if self.check_continuation_validity(actor=actor, abs_step_to_cont_from=story_index, cont_list=rule.story_change, target_list=rule.target_list, purge_count=purge_count):
+                return True
+                
+        return False
+
 
     def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None, purge_count = 0):
         #TODO: We did the main function, but now we also need to check if the character is being a target, and pull up the requirement for being a target instead if that's the case.
