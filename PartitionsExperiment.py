@@ -50,6 +50,12 @@ wanted_sum = 5
 
 # print(all_possible_actor_groupings_with_ranges_and_freesizes([-1, -1], ["A","B","C","D"]))
 
-testlist = [0,1,2,3,4,5]
+# testlist = [0,1,2,3,4,5]
 
-print(testlist[:0])
+# print(testlist[:0])
+
+lista = permute_actor_list_for_joint_with_variable_length("A",["b","c","d","e","f"], 2,4)
+#listb = all_possible_actor_groupings_with_ranges_and_freesizes([1, 1, 2], ["A","b","c","d"])
+
+for item in lista:
+    print(item)

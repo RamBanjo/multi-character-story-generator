@@ -1,10 +1,12 @@
 import math
 from operator import truediv
 import random
+import statistics
 from time import time
 from numpy import empty
 from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest, HeldItemTagTest, SameLocationTest
 from components.RelChange import *
+from components.RewriteRuleWithWorldState import JointType
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
@@ -157,7 +159,6 @@ class StoryGraph:
     def insert_story_part(self, part, character, location=None, absolute_step=0, copy=True, targets=[]):
 
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
-        #TODO: Also need to check whether this story part 
         char_name = None
 
         if character is not None:
@@ -207,8 +208,6 @@ class StoryGraph:
                 cur_loc = location_list[index]
             if targets != None:
                 cur_tar = targets[index]
-
-            #TODO: instead of using the targets directly, change it to the target from this exact timestep
 
             self.insert_story_part(item, character, cur_loc, absolute_step+index, copy, cur_tar)
 
@@ -283,17 +282,58 @@ class StoryGraph:
 
         check_list = self.get_all_path_length_with_charname()
         return(min(check_list)[0])
+    
+    def get_characters_with_shortest_path_length(self):
+        shortest_path_length = self.get_shortest_path_length_from_all()
+        return [x[1] for x in self.get_all_path_length_with_charname() if x[0] == shortest_path_length]
+
+
+    # Input: the required character, the base node
+    # Output: A list of tuples. Each tuple is has the absolute step in index 0 and the list of character names in that node in index 1.
+    #TODO: Test this function.
+    
+    def get_joint_node_steps_from_character_storyline(self, actor, joint_node):
+        '''
+        actor: the character object of the actor whose storyline we want to check.
+        joint_node: the joint node we want to find. usually, this is the base joint.
+        eligible_actors: the list of names of actors that we want to find. usually, this is the list of actors whose storyline length is the shortest
+        this function returns a list of tuples. each tuple has the absolute step of the locations where the given joint node is found in index 0, and the list of characters in that node from both actors and targets
+        '''
+        return_list = []
+
+        actor_name = actor.get_name()
+
+        for node_index in range(0, self.get_longest_path_length_by_character(actor_name)):
+            
+            current_part = self.story_parts.get((actor_name, node_index), None)
+            if current_part is not None:
+                if current_part.get_name() == joint_node.get_name():
+                    
+                    eligible_actor_names_found_in_actors = [x.get_name() for x in joint_node.actor]
+                    eligible_actor_names_found_in_targets = [x.get_name() for x in joint_node.target]
+
+                    all_eligible_names = [actor_name]
+                    all_eligible_names += eligible_actor_names_found_in_actors
+                    all_eligible_names += eligible_actor_names_found_in_targets
+
+                    #Remove dupe names
+                    all_eligible_names = sorted(list(set(all_eligible_names)))
+
+                    tuple_to_add = (node_index, all_eligible_names)
+                    return_list.append(tuple_to_add)
+
+        return return_list
 
     def make_latest_state(self, state_name = "Latest State"):
-        #TODO: Take the initial world state and copy it.
-        #TODO: Then, cycle through the list of changes, applying the changes from it.
-        #TODO: returns the latest state
+        #Take the initial world state and copy it.
+        #Then, cycle through the list of changes, applying the changes from it.
+        #returns the latest state
 
         return self.make_state_at_step(len(self.list_of_changes), state_name)
 
     def make_state_at_step(self, stopping_step, state_name = "Traveling State"):
-        #TODO: Same as make_latest_state, but you can choose the step where to stop.
-        #TODO: In fact, make_latest_state should call this function but set the stopping step as the last step.
+        #Same as make_latest_state, but you can choose the step where to stop.
+        #In fact, make_latest_state should call this function but set the stopping step as the last step.
 
         self.update_list_of_changes()
 
@@ -306,8 +346,47 @@ class StoryGraph:
         
         return traveling_state
 
+    def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0):
+        '''Mode is an int, depending on what it is, this function will do different things:
+        mode = 0: return sum
+        mode = 1: return average
+        mode = 2: return sum, but each subsequent score is multiplied by 0.75 (first node has x1, second node has x0.75...)
+        
+        if the mode integer is not listed here it will be set to 0'''
+        score = []
+        
+        graphcopy = deepcopy(self)
+        graphcopy.insert_multiple_parts(part_list=contlist, character=actor, absolute_step=insert_index)
+
+        #TODO: Figure out the best way to calculate score. Should we:
+        # 1.) Just add up all basic node scores.
+        # 2.) Average up all the basic node scores.
+        # 3.) The value deteroiates over time. (for example, multiple x0.5 the further we get)
+
+        for current_index in range(insert_index, len(contlist)+1):
+            current_state = graphcopy.make_state_at_step(current_index)
+            current_actor = current_state.node_dict[actor.get_name()]
+            current_node = graphcopy.story_parts[(actor.get_name(), current_index)]
+            score.append(current_node.calculate_bonus_weight_score(current_actor))
+        
+        del(graphcopy)
+
+        calc_score = 0
+
+        if mode == 1:
+            calc_score = statistics.mean(score)
+        elif mode == 2:
+            for i in range (0, len(contlist)):
+                score[i] = score[i] * (0.5 ** i)
+            calc_score = statistics.mean(score)
+        else:
+            calc_score = sum(score)
+
+        return calc_score
+
+    #TODO: Test this function
     def reverse_steps(self, number_of_reverse, state_name = "Reversed State"):
-        #TODO: Returns a World State, reversing the changes for steps equal to number_of_reverse from the last state
+        #Returns a World State, reversing the changes for steps equal to number_of_reverse from the last state
 
         traveling_state = deepcopy(self.latest_ws)
         traveling_state.name = state_name
@@ -316,9 +395,8 @@ class StoryGraph:
             for change in self.list_of_changes[index]:
                 traveling_state.apply_some_change(change, reverse=True)
 
+        return traveling_state
 
-    #TODO: Redo this entire function. Since we no longer intend to include the Dummy Character
-    #TODO: We also need to redo the is subgraph function in this case
     def apply_rewrite_rule(self, rule, character, location_list = None, applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
@@ -383,14 +461,6 @@ class StoryGraph:
     There should be three of these, one for each type of Joint Rule.
     '''
 
-    #TODO: Redo all three of these, since we want to put all the target-related inputs in the story node itself
-    #TODO: We should be able to add a special continuation validity that adds one joint node to multiple character's storylines
-    #TODO: Remember, the joint continuity's location is based on the timesteps/abs step of the first character
-    #TODO: Here's how the check should be done for each of the joint rule type, but basically the procedure is to try inserting into a copy of the graph without caring about restrictions and see if it still holds:
-    #TODO: Apply Join Rule: insert the joint node after a select number of character's storylines (for example, if insert into A at 4, will also insert into B and C at 4)
-    #TODO: Apply Cont Rule: just insert the joint node after a certain joint node, using it to continue the story of the characters there (ABC at 5 -> ABC at 6)
-    #TODO: Apply Split Rule: insert the continuations for each of the character in a list, split them after joint node. (ABC at 6 -> A at 7, B at 7, C at 7)
-
     def check_joint_continuity_validity(self, joint_rule, actors_to_test, targets_to_test, insert_index):
 
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
@@ -400,35 +470,90 @@ class StoryGraph:
                 return False
         
         validity = False
-        
-        if joint_rule.joint_type == "joining" or joint_rule.joint_type == "continuous":
-            self.check_add_joint_validity(joint_rule.joint_node, actors_to_test, targets_to_test, insert_index)
-        if joint_rule.joint_type == "splitting":
-            self.check_add_split_validity(joint_rule.split_list, actors_to_test, targets_to_test, insert_index)
+
+        #Before anything else, if we're trying to test for cont or split, we must make sure that the node at the insert index fulfill the following conditions:
+        # All the actors mentioned share the same node at the given insert_index
+        # (That's it that's the only condition)
+
+        assumed_node = self.story_parts[(actors_to_test[0].get_name(), insert_index)]
+        if joint_rule.joint_type == JointType.CONT or joint_rule.joint_type == JointType.SPLIT:
+            #If the node at the insert index doesn't have the same characters as the given actors and targets: return False
+            #We just need to take the first character from the actors to test, find out what node they're in, and check it for existence of other characters
+            #(It does not matter whether they are actors or targets, as long as it's the same characters)
+            
+            for actor in actors_to_test:
+                if not assumed_node.check_if_character_exists_in_node(actor):
+                    return False
+            for target in targets_to_test:
+                if not assumed_node.check_if_character_exists_in_node(target):
+                    return False
+
+        #TODO: If we are doing the Split rule, we must validate that each of the character in actors to test and targets to test are performing nodes included in the base nodes.
+        # Before this can be done, we must decide what style of Joint Split we should be doing.
+        if joint_rule.joint_type == JointType.SPLIT:
+
+            #TODO: For each of the actors in actors_to_test and target_to_test, get the story part at the insert index for each of them
+            #Return false if any of the story parts from the step above isn't within joint_rule.base_nodes
+
+            for actor in actors_to_test:
+                assumed_node = self.story_parts[(actor.get_name(), insert_index)]
+                pass
+            for target in targets_to_test:
+                
+                pass
+            pass
+    
+        if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
+            validity = self.check_add_joint_validity(joint_rule.joint_node, actors_to_test, targets_to_test, insert_index)
+        if joint_rule.joint_type == JointType.SPLIT:
+            validity = self.check_add_split_validity(joint_rule.split_list, actors_to_test, targets_to_test, insert_index)
         
         return validity
+
+    #TODO: Test this function
+    def check_for_jointrule_location_in_storyline(self, actor, joint_rule):
+        if joint_rule.joint_type == JointType.JOIN:
+
+            #For each of the possible base action, at any point if this character is seen performing the base action then add it to the list.
+            valid_locs = []
+            for base_node in joint_rule.base_actions:
+
+                valid_locs += self.check_for_pattern_in_storyline([base_node], actor)[1]
+                return len(valid_locs) > 0, sorted(list(set(valid_locs)))
+
+            return self.check_for_pattern_in_storyline()
+        if joint_rule.joint_type == JointType.CONT or joint_rule.joint_type == JointType.SPLIT:
+            return self.check_for_pattern_in_storyline([joint_rule.base_joint], actor)
+        
+        return False, []
 
     def check_add_joint_validity(self, joint_node, actors_to_test, targets_to_test, insert_index):
 
         graphcopy = deepcopy(self)
         graphcopy.joint_continuation([insert_index], True, joint_node, actors_to_test, None, targets_to_test)
 
-        return graphcopy.check_worldstate_validity_on_own_graph(insert_index)
+        validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
+        del(graphcopy)
+
+        return validity
         
     def check_add_split_validity(self, split_list, actors_to_test, targets_to_test, insert_index, with_grouping = False):
         
         graphcopy = deepcopy(self)
         graphcopy.split_continuation(split_list, actors_to_test, insert_index, None, target_replace=targets_to_test, with_grouping=with_grouping)
 
-        return graphcopy.check_worldstate_validity_on_own_graph(insert_index)
+        validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
+        del(graphcopy)
+
+        return validity
 
     def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False, target_require=[], target_replace=[], character_grouping=[]):
 
-        if joint_rule.joint_type == "joining":
+        if joint_rule.joint_type == JointType.JOIN:
             self.apply_joining_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
-        if joint_rule.joint_type == "continuous":
+        if joint_rule.joint_type == JointType.CONT:
             self.apply_continuous_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
-        if joint_rule.joint_type == "splitting":
+        if joint_rule.joint_type == JointType.SPLIT:
             self.apply_splitting_joint_rule(joint_rule, characters, location_list, character_grouping=character_grouping, applyonce=applyonce)
         self.refresh_longest_path_length()
     
@@ -437,7 +562,7 @@ class StoryGraph:
         if pot_target in self.character_objects:
             self.add_to_story_part_dict(character_name=pot_target.get_name(), abs_step=abs_step, story_part=story_part)
 
-    def joint_continuation(self, loclist, applyonce, joint_node, actors, location, target_list):
+    def joint_continuation(self, loclist, applyonce, joint_node, actors, location=None, target_list=[]):
         insert_list = if_applyonce_choose_one(loclist, applyonce)
 
         #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
@@ -537,7 +662,6 @@ class StoryGraph:
         state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
         found_valid_grouping = False
 
-        #TODO: Instead of randomizing like this, we would like to randomize from a different function. Let's make this more efficient! We should be able to do this with the Permute Possible Groups function.
         while (not found_valid_grouping):
 
             #Return None if we have exhausted all of the possible groupings.
@@ -570,7 +694,6 @@ class StoryGraph:
 
     #Please note that Grouping is a list that is used to determine group size. For example, if it is [1, 3], this means one character in the first group and 3 characters in the second group.
 
-    #TODO: We need to use Set instead of List for grouping in order to let the code know that we don't care about the order, we only care about the grouping.
     def generate_valid_character_grouping(self, continuations, abs_step, character_list, grouping=[]):
         '''This function can accept -1 and tuple ranges.'''
 
@@ -619,7 +742,6 @@ class StoryGraph:
             if this_one_is_valid:
                 return current_grouping
 
-    #TODO: Maybe decide upon the split grouping before calling split continuation
     def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):
         
         eligible_insertion_list = self.find_shared_base_joint_locations(characters, split_rule, target_require)
@@ -655,7 +777,7 @@ class StoryGraph:
     def add_targets_to_storynode(self, node, abs_step, target_list):
         for target in target_list:
             node.add_target(target)
-            #TODO: Check if any of the targets exist in self.characters. If there is one, then make sure to add this node to that character's StoryGraph in the same step.
+            #Check if any of the targets exist in self.characters. If there is one, then make sure to add this node to that character's StoryGraph in the same step.
             self.add_story_node_to_targets_storyline(target, abs_step, node)
 
     def print_all_nodes(self):
@@ -676,16 +798,11 @@ class StoryGraph:
             print("Targets:", self.story_parts[node].get_target_names())
             print("----------")
 
-    #TODO: Need to replace this function with a better, clearer one.
-    #TODO: For example, instead of the following parameters, we need to use self instead
-    #TODO: Maybe add new function to return a normal list of story parts or a dict of story parts given a character name
-    #TODO: And then we translate the input from the rewrite rule (that will be a list) into a dict
-
     def check_for_pattern_in_storyline(self, pattern_to_test, character_to_extract):
 
         #preliminary check: check if the character exists inside of the storyline, return false if it does not
         if character_to_extract not in self.character_objects:
-            return [], False
+            return False, []
         
         #This will return the length of subgraph locs and the list of subgraph locs, just like the function above it.
         #The only difference is that we will require way, way less inputs.
@@ -734,6 +851,7 @@ class StoryGraph:
 
         return list_of_char_parts
         
+    #TODO: Test this function to make sure it's working for sure.
     def remove_parts_by_count(self, start_step, count, actor):
         end_index = start_step + count - 1
 
@@ -741,7 +859,7 @@ class StoryGraph:
             self.remove_story_part(actor, start_step)
 
     #This function checks if there it at least one spot where the rule can be applied.
-    def check_rule_validity(self, actor, rule):
+    def check_rule_validity_for_first_actor(self, actor, rule):
 
         if rule.is_joint_rule:
             for i in range(0, self.get_longest_path_length_by_character(actor)):
@@ -763,10 +881,20 @@ class StoryGraph:
                 return True
                 
         return False
+    
+    #Here, we check that there is at least one valid slot for a character in a joint node.
+    def check_if_joint_node_is_valid_at_timestep_for_actor(self, actor, joint_node, step):
+
+        #Get the character at that step
+        character_at_step = self.make_state_at_step(step).node_dict[actor.get_name()]
+
+        #This function returns if the character can fit in at least as an actor or a target.
+        return joint_node.check_actor_or_target_compatibility(character_at_step)
 
 
     def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None, purge_count = 0):
         #TODO: We did the main function, but now we also need to check if the character is being a target, and pull up the requirement for being a target instead if that's the case.
+        #This function is meant for use with only the continuation part of a normal non-joint rule. We probably should make a new function to use with the joint rules.
 
         #Preliminary: Check if the actor is found in the list, if not then it's false
         if actor not in self.character_objects:
@@ -785,18 +913,13 @@ class StoryGraph:
         graphcopy.insert_multiple_parts(cont_list, actor, None, abs_step_to_cont_from, targets=target_list)
         graphcopy.fill_in_locations_on_self()
         graphcopy.update_list_of_changes()
-
-        #TODO: A loop that goes through each of the steps, checking the story for each char and checks the Req/Unwanted Tag Lists, Bias Range
-        #TODO: and Condition Tests and check whether it's valid.
-        #TODO: If any is found out to be false then continuation_is_valid should be turned to False.
-
-        # for node in graphcopy.story_parts:
-        #     print(node)
-        #     print(graphcopy.story_parts[node])
-
         graphcopy.refresh_longest_path_length()
 
-        return graphcopy.check_worldstate_validity_on_own_graph(abs_step_to_cont_from)
+        #We delegate the checking of worldstates fo the worldstate validity function
+        validity = graphcopy.check_worldstate_validity_on_own_graph(abs_step_to_cont_from)
+        del(graphcopy)
+
+        return validity
 
     def check_worldstate_validity_on_own_graph(self, start_step):
         self.refresh_longest_path_length()
@@ -831,7 +954,6 @@ class StoryGraph:
 
                             if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
 
-                                #print(current_test_to_check)
                                 return False
         return True
 
@@ -855,13 +977,13 @@ class StoryGraph:
             self.list_of_changes.append(self.make_list_of_changes_at_step(index))
 
     def fill_in_locations_on_self(self):
-        #TODO: Make a function that checks through the storyline of each character.
-        #TODO: Assume that the first location is given.
-        #TODO: Give that Location to each of the absolute step. Until a new RelationshipChange comes up, the location would be the same
-        #TODO: When the character owning the storyline changes their location, then the location of the story changes.
-        #TODO: Repeat this for all characters.
+        #A function that checks through the storyline of each character.
+        #Assume that the first location is given.
+        #Give that Location to each of the absolute step. Until a new RelationshipChange comes up, the location would be the same
+        #When the character owning the storyline changes their location, then the location of the story changes.
+        #Repeat this for all characters.
 
-        #TODO: We will cycle through all the timesteps. Since we know that each node comes with a relChange anyways, we can pull the location information from
+        #We will cycle through all the timesteps. Since we know that each node comes with a relChange anyways, we can pull the location information from
         #the current worldstate.
 
         self.refresh_longest_path_length()

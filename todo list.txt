@@ -264,3 +264,14 @@
             - 2 and -1 would add up to -1
 26 Jan 2022
     - We now have the flowchart. Therefore, we can make the program, or at least, make it up to as much as we are confident with.
+    - Something to deal with the Bias
+        - In addition to Required and Unwanted Tags, add:
+            - Suggested Tags: This is for score calculation
+            - Function to calculate score for one node (DONE)
+            - Function to calculate score from adding a list of nodes to a character's storyline (this advances the plot and thus suitability needs to be checked from) (DONE)
+
+2 Feb 2022
+    - Consider what we have to do with Joining Joint Node
+    - Still need to do some tests.
+    - Clean up the TODOs in the code comment, and from now on only use it for uncompleted tasks because WOW we have a lot of TODOs we have already taken care of. (DONE)
+9 Feb 2022

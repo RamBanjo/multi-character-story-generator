@@ -3,6 +3,7 @@ import math
 import statistics
 from components.StoryGraphTwoWS import StoryGraph
 from components.WorldState import WorldState
+from UtilFunctions import actor_count_sum
 
 #TODO: Rewrite this class so instead of replacing things, it *inserts* things after the condition.
 
@@ -104,6 +105,11 @@ Joining Joint Rule!
 Joining Joint's base is a list of nodes for each of the character intending to join in.
 '''
 
+#TODO: Consider the JoiningJointRule. How should we treat Base Actions?
+# 1. Base Actions are immutable, and actors must be doing these exact nodes to qualify.
+# 2. Base Actions are mutable. As long as the actors are doing one of the nodes in this list, then they qualify.
+# 3. Instead of detecting what actions they are doing, use world state instead (Redundant with the condition tests in the joint node?)
+
 class JoiningJointRule(JointRule):
     def __init__(self, merge_count, base_actions, joint_node, rule_name="", target_list=None):
 
@@ -117,6 +123,9 @@ class JoiningJointRule(JointRule):
             return self.joint_node.biasweight
         else:
             return -999
+
+    def get_character_count(self):
+        return actor_count_sum(self.joint_node.charcount, self.joint_node.target_count)
 
 '''
 Continuous Joint Rule!
@@ -137,6 +146,9 @@ class ContinuousJointRule(JointRule):
             return self.joint_node.biasweight
         else:
             return -999
+
+    def get_character_count(self):
+        return actor_count_sum(self.joint_node.charcount, self.joint_node.target_count)
 '''
 Splitting Joint Rule!
 
@@ -165,4 +177,24 @@ class SplittingJointRule(JointRule):
         else:
             return -999
 
+    def get_character_count(self):
+
+        current_sum = 0
+
+        for item in self.get_split_character_count():
+            current_sum = actor_count_sum(current_sum, item)
+
+        if type(current_sum) == tuple:
+            if current_sum[1] > 999:
+                current_sum[1] = 999
+
+        return current_sum
+
+    def get_split_character_count(self):
+        list_of_cont_counts = []
+        
+        for cont in self.split_list:
+            list_of_cont_counts.append(actor_count_sum(cont.charcount, cont.target_count))
+
+        return list_of_cont_counts
     

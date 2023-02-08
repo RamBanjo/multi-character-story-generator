@@ -1,3 +1,4 @@
+import copy
 import itertools
 import math
 import random
@@ -313,10 +314,6 @@ def permute_all_possible_groups_with_ranges_and_freesize(size_list, required_sum
 
     return final_list
 
-                 
-
-
-        
     # list_of_completed_ranges_and_frees = []
 
     # for range_combi in permute_full_range_list(range_number_to_range_list(dict_of_items["ranges"])):
@@ -373,6 +370,12 @@ def permute_full_range_list(full_range_list):
 def actor_count_sum(lhs, rhs):
 
     if lhs == -1 or rhs == -1:
+
+        if type(lhs) == tuple:
+            return (lhs[0]+1, 999)
+        if type(rhs) == tuple:
+            return (rhs[0]+1, 999)
+
         return -1
 
     if type(lhs) == int and type(rhs) == int:
@@ -386,3 +389,25 @@ def actor_count_sum(lhs, rhs):
         return (rhs[0]+lhs, rhs[1]+lhs)
 
     return -1
+
+def permute_actor_list_for_joint(current_actor, other_actors, size_including_current_actor):
+
+    all_actors = copy.copy(other_actors)
+    all_actors.append(current_actor)
+
+    include_index_0 = all_possible_actor_groupings([size_including_current_actor, len(all_actors)-size_including_current_actor], all_actors)
+    
+    return [x[0] for x in include_index_0 if current_actor in x[0]]
+
+def permute_actor_list_for_joint_with_variable_length(current_actor, other_actors, min_size, max_size):
+
+    true_max = max_size
+
+    if max_size > len(other_actors) + 1:
+        true_max = len(other_actors) + 1
+
+    full_list = []
+    for i in range(min_size, true_max+1):
+        full_list += permute_actor_list_for_joint(current_actor, other_actors, i)
+
+    return full_list

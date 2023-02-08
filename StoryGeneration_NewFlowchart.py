@@ -2,18 +2,21 @@
 
 import copy
 import random
+from components.RewriteRuleWithWorldState import JointType
 
 from components.StoryGraphTwoWS import StoryGraph
 from components.StoryNode import StoryNode
+from components.UtilFunctions import permute_actor_list_for_joint, permute_actor_list_for_joint_with_variable_length
 
 DEFAULT_HOLD_EDGE_NAME = "holds"
 DEFAULT_ADJACENCY_EDGE_NAME = "connect"
 DEFAULT_WAIT_NODE = StoryNode("Wait", 0, {"Type":"Placeholder"}, 1)
 
-def generate_story_from_starter_graph(actor_list, location_list, object_list, init_storygraph: StoryGraph, list_of_storynodes, list_of_rules, required_story_length, top_n = 5):
+#TODO: In order to make life easier for myself during testing, I should convert this into multiple functions.
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5):
 
     #make a copy of the graph
-    final_story_graph = copy(init_storygraph)
+    final_story_graph = copy.copy(init_storygraph)
 
     while True:
 
@@ -24,12 +27,10 @@ def generate_story_from_starter_graph(actor_list, location_list, object_list, in
         if shortest_path_length >= required_story_length:
             #return result
             return final_story_graph
-
+    
         #Make a list of all characters' path lengths.
-        path_length_list = final_story_graph.get_all_path_length_with_charname()
-
         #Reduce this list to only the ones with the shortest path length.
-        shortest_path_character_names_list = [x[1] for x in path_length_list if x[0] == shortest_path_length]
+        shortest_path_character_names_list = final_story_graph.get_characters_with_shortest_path_length()
 
         #Randomly pick one name from that list. That will be the character we generate stories for in this step. 
         current_charname = random.choice(shortest_path_character_names_list)
@@ -70,10 +71,55 @@ def generate_story_from_starter_graph(actor_list, location_list, object_list, in
             if not chosen_rule.is_joint_rule:
                 final_story_graph.apply_rewrite_rule(chosen_rule, current_character, applyonce=True)
             else:
+
+                #Here, we are going to make all the possible character groups. First, we get all the characters who can be added to the joint node.
+
+                #TODO: WAIT WAIT WAIT WE NEED TO CLARIFY FURTHER
+                #Applicable character names should be taken from shortest path character names list, correct
+                #HOWEVER, if this is a cont rule or a split rule, then we can just simply use the characters currently sharing a node with that character.
+                #In addition to that, if this is a join rule, we should look for characters who are indeed doing the nodes specified in the join pattern and are within the shortest path.
+                #Now that I'm a bit more awake, we don't know yet where the nodes will be applied. At least, we already have the functions of the cont rule and the split rule to be only valid if the given characters are in the previous node together.
+
+                #Before we can do this, we should clarify whether we would be doing 
+                applicable_character_names = []
+                applicable_character_names += shortest_path_character_names_list
+                applicable_character_names.remove(current_charname)
+
+                #TODO: Once we have decided which characters are applicable, we need to look for spots that this rule can fit, and the list of characters whose story will be extended if we use that absolute step.
+                # For example, if we're doing a continuing joint, we must find the places where the "main character" performs the continuing joint. Then, return each absolute step with the list of characters in that joint.
+                # Like this:
+                # 
+                # [(2, ["Alice, Bob, Charlie, David"]),
+                # (6, ["Alice, Bob, Harry, Irina"])]
+                # 
+                # This allows us to instantly have a list of characters to use. We limit the possibilities 
+                #
+                # This same method can be done to determine the suitable characters and spots that the joint rule can take. However, before we can do that, we would need to determine the method that we will use for our Joining Joint.
+                # Write the function in the StoryGraph that does exactly this. We can handle the single joint node case, but for the other case we need to decide joining joint style first
+
+                list_of_possible_char_groups = []
+
+                characters_wanted_count = chosen_rule.get_character_count()
+                minimum_actor_count = 2
+
+                if chosen_rule.joint_type == JointType.SPLIT:
+                    minimum_actor_count = len(chosen_rule.split_list)
+
+                if type(characters_wanted_count) == tuple:
+                    list_of_possible_char_groups += permute_actor_list_for_joint_with_variable_length(current_charname, applicable_character_names, characters_wanted_count[0], characters_wanted_count[1])
+                elif characters_wanted_count == -1:
+                    list_of_possible_char_groups += permute_actor_list_for_joint_with_variable_length(current_charname, applicable_character_names, minimum_actor_count, characters_wanted_count[1])
+                else:
+                    list_of_possible_char_groups += permute_actor_list_for_joint(current_charname, applicable_character_names, characters_wanted_count)
+
+                #Find all locations where this rule can be applied.
+
+
+
                 pass
                 #TODO: This is the part where we check if we have enough valid characters to apply the joint rule.
-                #TODO: If we do, then apply it.
-                #TODO: If we don't, then, remove this rule from the top n acceptable rules. We'd have to choose again from the top n list.
+                #If we do, then apply it.
+                #If we don't, then, remove this rule from the top n acceptable rules. We'd have to choose again from the top n list.
 
         #Finally, we fill in the locations on self and update the list of changes.
         final_story_graph.update_list_of_changes()

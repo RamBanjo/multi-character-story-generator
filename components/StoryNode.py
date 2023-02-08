@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), condition_tests = [], **kwargs):
+    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), suggested_included_tags = dict(), suggested_excluded_tags = dict(), suggested_bias_range = dict(), condition_tests = [], **kwargs):
         
         #the name of this action.
         self.name = name
@@ -58,6 +58,14 @@ class StoryNode:
         self.unwanted_tags_list_target = unwanted_tags_list_target
         self.bias_range_target = bias_range_target
 
+        #Suggested included tags, suggested excluded tags, and suggested bias range are for weight score calculation purposes. Not fulfiling these conditions are fine, but fulfilling them makes the character lean more towards this action.
+        #TODO: Figure out if we need to use this to pick characters who share this node with another character.
+        self.suggested_included_tags = suggested_included_tags
+        self.suggested_excluded_tags = suggested_excluded_tags
+        self.suggested_bias_range = suggested_bias_range
+
+        #TODO: Figure out if we need one of these for targets for the purpose of picking targets to be in this node.
+
         #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
         self.condition_tests = condition_tests
         
@@ -89,6 +97,9 @@ class StoryNode:
     
     def remove_target(self, remove_target):
         self.target.remove(remove_target)
+
+    def check_if_character_exists_in_node(self, actor):
+        return actor in self.actor or actor in self.target
 
     def get_actor_names(self):
         actornamestring = ""
@@ -163,22 +174,22 @@ class StoryNode:
 
         compatibility = True
 
-        #TODO: Check if the character contains tags in Required Tags (not compatible if false)
+        #Check if the character contains tags in Required Tags (not compatible if false)
 
         #print("Before All Tests", compatibility)
         if self.required_tags_list is not None:
-            for tag in self.required_tags_list.values():
-                compatibility = compatibility and tag in character_node.tags.values()
+            for tag in self.required_tags_list.items():
+                compatibility = compatibility and tag in character_node.tags.items()
 
-        #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
+        #Check if character contains tags in Unwanted Tags (not compatible if true)
 
         #print("After Req Tags Test", compatibility)
         if self.unwanted_tags_list is not None:
-            for tag in self.unwanted_tags_list.values():
-                compatibility = compatibility and tag not in character_node.tags.values()
+            for tag in self.unwanted_tags_list.items():
+                compatibility = compatibility and tag not in character_node.tags.items()
         
         #print("After Unwanted Tags Test", compatibility)
-        #TODO: Check if character's bias is within the acceptable range (not compatible if false)
+        #Check if character's bias is within the acceptable range (not compatible if false)
         if self.bias_range is not None:
             for bias in self.bias_range:
                 char_bias_value = character_node.biases[bias]
@@ -201,23 +212,23 @@ class StoryNode:
         
         compatibility = True
 
-        #TODO: Check if the character contains tags in Required Tags (not compatible if false)
+        #Check if the character contains tags in Required Tags (not compatible if false)
 
         if self.required_tags_list_target is not None:
-            for tag in self.required_tags_list_target.values():
-                compatibility = compatibility and tag in character_node.tags.values()
+            for tag in self.required_tags_list_target.items():
+                compatibility = compatibility and tag in character_node.tags.items()
                 if verbose:
                     print("Result of required tags test", compatibility)
 
-        #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
+        #Check if character contains tags in Unwanted Tags (not compatible if true)
 
         if self.unwanted_tags_list_target is not None:
-            for tag in self.unwanted_tags_list_target.values():
-                compatibility = compatibility and tag not in character_node.tags.values()
+            for tag in self.unwanted_tags_list_target.items():
+                compatibility = compatibility and tag not in character_node.tags.items()
                 if verbose:
                     print("Result of unwanted tags test", compatibility)
         
-        #TODO: Check if character's bias is within the acceptable range (not compatible if false)
+        #Check if character's bias is within the acceptable range (not compatible if false)
         if self.bias_range_target is not None:
             for bias in self.bias_range_target:
                 char_bias_value = character_node.biases[bias]
@@ -241,4 +252,43 @@ class StoryNode:
 
         return compatibility
 
+    def calculate_bonus_weight_score(self, character_node):
+        
+        score = 0
 
+        if self.suggested_included_tags is not None:
+            for tag in self.suggested_included_tags.items():
+                if tag in character_node.tags.items():
+                    score += 1
+
+        if self.suggested_excluded_tags is not None:
+            for tag in self.suggested_excluded_tags.items():
+                if tag not in character_node.tags.items():
+                    score += 1
+
+        if self.suggested_bias_range is not None:
+            for bias in self.suggested_bias_range:
+                char_bias_value = character_node.biases[bias]
+                if char_bias_value >= self.suggested_bias_range[bias][0] and char_bias_value <= self.suggested_bias_range[bias][1]:
+                    score += 1
+
+        return score
+
+    def calculate_weight_score(self, character_node):
+        return self.calculate_bonus_weight_score(character_node) + self.biasweight
+    
+    #TODO: Hey, there are some instances where we'd want to slot our character into the target slot, so we need to do weight score for the target slot as well?
+
+
+    #TODO: Also, we should probably make a function that returns true if either the target compat gets approved or the actor compat gets approved, for the purposes of joint rules
+    #Use case for this: When we are testing a joint node for a character, we should test if they'd work in either slot because we don't know which slot they would go to.
+    def check_actor_or_target_compatibility(self, character_node):
+        return self.check_character_compatibility(character_node) or self.check_target_compatibility(character_node)
+    
+    def check_actor_or_target_compatibility_for_many_characters(self, list_of_chars):
+        compatibility = True
+
+        for character_node in list_of_chars:
+            compatibility = compatibility and self.check_actor_or_target_compatibility(character_node)
+
+        return compatibility
