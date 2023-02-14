@@ -271,7 +271,16 @@
             - Function to calculate score from adding a list of nodes to a character's storyline (this advances the plot and thus suitability needs to be checked from) (DONE)
 
 2 Feb 2022
-    - Consider what we have to do with Joining Joint Node
-    - Still need to do some tests.
+    - Consider what we have to do with Joining Joint Node (DONE)
+    - Still need to do some tests. (Most of these are in TODO, remove these TODO as you are done with them.)
     - Clean up the TODOs in the code comment, and from now on only use it for uncompleted tasks because WOW we have a lot of TODOs we have already taken care of. (DONE)
+    - get_joint_node_steps_from_character_storyline completed, it will help look fofr Joint Nodes in the storyline. (Done, Untested)
 9 Feb 2022
+    - Multiple node bias score are MAX by default, can set to MEAN if desired
+        - Professor suggested using only the character in the state at the start of the replacement rule for simplicity
+    - Bias Score of the Splitting Joint can be calculated from averaging all possibilities.
+    - Joining Joint Rule requires that there should be at least one of each node in the base 
+        - For example, if applying Rule WXYZ requires has the base pattern with story nodes [W, X, Y, Z], then we know that we require at least 4 characters, and that all four story nodes must appear somewhere in the base pattern.
+16 Feb 2022
+    - Testing for Calculate Score completed
+    

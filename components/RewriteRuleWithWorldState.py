@@ -1,9 +1,6 @@
 from enum import Enum
-import math
 import statistics
-from components.StoryGraphTwoWS import StoryGraph
-from components.WorldState import WorldState
-from UtilFunctions import actor_count_sum
+from components.UtilFunctions import actor_count_sum
 
 #TODO: Rewrite this class so instead of replacing things, it *inserts* things after the condition.
 
@@ -105,11 +102,7 @@ Joining Joint Rule!
 Joining Joint's base is a list of nodes for each of the character intending to join in.
 '''
 
-#TODO: Consider the JoiningJointRule. How should we treat Base Actions?
-# 1. Base Actions are immutable, and actors must be doing these exact nodes to qualify.
-# 2. Base Actions are mutable. As long as the actors are doing one of the nodes in this list, then they qualify.
-# 3. Instead of detecting what actions they are doing, use world state instead (Redundant with the condition tests in the joint node?)
-
+#Handling base action for Joining Joint Rule: All the nodes mentioned in base actions must exist in some way, though depending on the number of characters allowed in the joint node, we might allow extras.
 class JoiningJointRule(JointRule):
     def __init__(self, merge_count, base_actions, joint_node, rule_name="", target_list=None):
 

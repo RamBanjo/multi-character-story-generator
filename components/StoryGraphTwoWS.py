@@ -12,7 +12,6 @@ from components.StoryObjects import *
 from copy import deepcopy
 from components.UtilFunctions import all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, permute_all_possible_groups_with_ranges_and_freesize
 from components.UtilityEnums import GenericObjectNode, TestType
-from components.WorldState import WorldState
 
 '''
 Storygraph!
@@ -115,6 +114,19 @@ class StoryGraph:
 
         self.add_to_story_part_dict(character_name=char_name, abs_step=absolute_step, story_part=new_part)
         self.refresh_longest_path_length()
+
+        return new_part
+    
+    #TODO: Test this function
+    def add_multiple_characters_to_part(self, main_actor, other_actors, part, location=None, targets=[], abs_step=0, timestep=0, copy=True):
+
+        new_part = self.add_story_part_at_step(part=part, character=main_actor, location=location, absolute_step=abs_step, timestep=timestep, targets=targets, copy=copy)
+
+        for additional_actor in other_actors:
+            self.add_story_part_at_step(part=new_part, character=additional_actor, location=location, absolute_step=abs_step, timestep=timestep, copy=False)
+
+        for target in new_part.targets:
+            self.add_story_node_to_targets_storyline(pot_target=target, abs_step=abs_step, story_part=new_part)
 
         return new_part
 
@@ -346,43 +358,35 @@ class StoryGraph:
         
         return traveling_state
 
-    def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0):
+    def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0):
         '''Mode is an int, depending on what it is, this function will do different things:
-        mode = 0: return sum
-        mode = 1: return average
-        mode = 2: return sum, but each subsequent score is multiplied by 0.75 (first node has x1, second node has x0.75...)
+        mode = 0: return max between all the cont list.
+        mode = 1: return average between all the cont list.
         
-        if the mode integer is not listed here it will be set to 0'''
+        if the mode integer is not listed here it will default to mode 0'''
         score = []
         
         graphcopy = deepcopy(self)
-        graphcopy.insert_multiple_parts(part_list=contlist, character=actor, absolute_step=insert_index)
 
-        #TODO: Figure out the best way to calculate score. Should we:
-        # 1.) Just add up all basic node scores.
-        # 2.) Average up all the basic node scores.
-        # 3.) The value deteroiates over time. (for example, multiple x0.5 the further we get)
+        if purge_count > 0:
+            graphcopy.remove_parts_by_count(start_step=insert_index, count=purge_count, actor=actor)
+        
+        graphcopy.insert_multiple_parts(part_list=contlist, character=actor, absolute_step=insert_index)
 
         for current_index in range(insert_index, len(contlist)+1):
             current_state = graphcopy.make_state_at_step(current_index)
             current_actor = current_state.node_dict[actor.get_name()]
             current_node = graphcopy.story_parts[(actor.get_name(), current_index)]
-            score.append(current_node.calculate_bonus_weight_score(current_actor))
+            score.append(current_node.calculate_bonus_weight_score(current_actor) + current_node.biasweight)
         
         del(graphcopy)
 
-        calc_score = 0
-
         if mode == 1:
-            calc_score = statistics.mean(score)
-        elif mode == 2:
-            for i in range (0, len(contlist)):
-                score[i] = score[i] * (0.5 ** i)
-            calc_score = statistics.mean(score)
+            print(score)
+            return statistics.mean(score)
         else:
-            calc_score = sum(score)
-
-        return calc_score
+            print(score)
+            return max(score)
 
     #TODO: Test this function
     def reverse_steps(self, number_of_reverse, state_name = "Reversed State"):
@@ -509,6 +513,30 @@ class StoryGraph:
             validity = self.check_add_split_validity(joint_rule.split_list, actors_to_test, targets_to_test, insert_index)
         
         return validity
+    
+    #TODO: Test this function.
+    def check_if_abs_step_has_joint_pattern(self, required_story_nodes_list, character_name_list, absolute_step_to_search):
+        
+        dict_of_chars_with_nodename_as_key = dict()
+
+        for charname in character_name_list:
+            found_node = self.story_parts.get((charname, absolute_step_to_search), None)
+            if found_node is not None:
+                nodename = found_node.get_name()
+
+                if dict_of_chars_with_nodename_as_key.get(nodename, None) == None:
+                    dict_of_chars_with_nodename_as_key[nodename] = [charname]
+                else:
+                    dict_of_chars_with_nodename_as_key[nodename].append(charname)
+
+        found_node_names = dict_of_chars_with_nodename_as_key.keys()
+        for req_node in required_story_nodes_list:
+            req_node_name = req_node.get_name()
+
+            if req_node_name not in found_node_names:
+                return False, dict_of_chars_with_nodename_as_key
+            
+        return True, dict_of_chars_with_nodename_as_key
 
     #TODO: Test this function
     def check_for_jointrule_location_in_storyline(self, actor, joint_rule):

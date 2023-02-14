@@ -20,6 +20,8 @@ basews = WorldState("BaseWS", [alice, bob, charlie])
 
 basesg = StoryGraph("Base Story Graph", [alice, bob, charlie], [somewhere], basews)
 
+#The this function can be converted into one line some way
+#DONE! We now have add_multiple_characters_to_part function in StoryGrpahTwoWS!
 basesg.add_story_part(base_joint_node, alice, somewhere, copy=True)
 basesg.add_story_part(basesg.story_parts[("Alice", 0)], bob, somewhere, copy=False)
 basesg.add_story_part(basesg.story_parts[("Alice", 0)], charlie, somewhere, copy=False)
