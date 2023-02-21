@@ -85,9 +85,8 @@ have separate values if needs be. If a particular slot has no prerequisites, it 
 '''
 
 class JointRule:
-    def __init__(self, merge_count, joint_type, rule_name="", target_list=None):
+    def __init__(self, joint_type, rule_name="", target_list=None):
         self.rule_name = rule_name
-        self.merge_count = merge_count
         self.joint_type = joint_type
         self.is_joint_rule = True
         self.target_list = target_list
@@ -100,9 +99,9 @@ Joining Joint's base is a list of nodes for each of the character intending to j
 
 #Handling base action for Joining Joint Rule: All the nodes mentioned in base actions must exist in some way, though depending on the number of characters allowed in the joint node, we might allow extras.
 class JoiningJointRule(JointRule):
-    def __init__(self, merge_count, base_actions, joint_node, rule_name="", target_list=None):
+    def __init__(self, base_actions, joint_node, rule_name="", target_list=None):
 
-        super().__init__(merge_count, JointType.JOIN, rule_name, target_list=target_list)
+        super().__init__(JointType.JOIN, rule_name, target_list=target_list)
 
         self.base_actions = base_actions
         self.joint_node = joint_node
@@ -123,9 +122,9 @@ Cont. Joint's base is a joint itself, and then a joint would connect to it.
 '''
 
 class ContinuousJointRule(JointRule):
-    def __init__(self, merge_count, base_joint, joint_node, rule_name="", target_list=None):
+    def __init__(self, base_joint, joint_node, rule_name="", target_list=None):
 
-        super().__init__(merge_count, JointType.CONT, rule_name, target_list=target_list)
+        super().__init__(JointType.CONT, rule_name, target_list=target_list)
 
         self.base_joint = base_joint
         self.joint_node = joint_node
@@ -145,9 +144,9 @@ Splitting Joint Rule's base would be the joint node where dummy chars will go se
 '''
 
 class SplittingJointRule(JointRule):
-    def __init__(self, merge_count, base_joint, split_list, rule_name="", target_list=None):
+    def __init__(self, base_joint, split_list, rule_name="", target_list=None):
 
-        super().__init__(merge_count, JointType.SPLIT, rule_name, target_list=target_list)
+        super().__init__(JointType.SPLIT, rule_name, target_list=target_list)
 
         self.base_joint = base_joint
         self.split_list = split_list
