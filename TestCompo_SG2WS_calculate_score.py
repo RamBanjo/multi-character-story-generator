@@ -15,8 +15,8 @@ alice = CharacterNode(name="Alice", biases={"lawbias":50, "moralbias":30}, tags=
 placeholderloc = LocationNode(name="Placeholder Location")
 
 base_action_x = StoryNode(name="BaseAction X", tags={"Type":"Placeholder"}, biasweight=0, charcount=1)
-action_a = StoryNode(name="Action A", tags={"Type":"Placeholder"}, charcount=1, biasweight=3, suggested_included_tags={"Job":"Swordmaster"})
-action_b = StoryNode(name="Action B", tags={"Type":"Placeholder"}, charcount=1, biasweight=2, suggested_included_tags={"Job":"Thief"})
+action_a = StoryNode(name="Action A", tags={"Type":"Placeholder"}, charcount=1, biasweight=3, suggested_included_tags=[("Job","Swordmaster")])
+action_b = StoryNode(name="Action B", tags={"Type":"Placeholder"}, charcount=1, biasweight=2, suggested_included_tags=[("Job","Thief")])
 action_c = StoryNode(name="Action C", tags={"Type":"Placeholder"}, charcount=1, biasweight=3, suggested_bias_range={"lawbias":(0,100), "moralbias":(50,100)})
 
 starting_ws = WorldState(name="StartWS", objectnodes=[alice, placeholderloc])

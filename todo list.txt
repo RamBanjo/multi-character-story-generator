@@ -283,4 +283,13 @@
         - For example, if applying Rule WXYZ requires has the base pattern with story nodes [W, X, Y, Z], then we know that we require at least 4 characters, and that all four story nodes must appear somewhere in the base pattern.
 16 Feb 2022
     - Testing for Calculate Score completed
-    
+    - Wrote Calculate Score from Rule
+    - Will need to do testing for Calculate Score for Rules
+23 Feb 2022
+    - THE TAGS! Of course, why did I not think about the tags!
+    - Suggested include tags will only allow one key per value. I should have used tuple instead.
+        - We do not need to handle these for objects and characters because most of the tags do not overlap (Job, Wealth, Living, Wanted, etc...)
+        - We do however need to handle these for stuff like ConditionTests and StoryNode requied/unwanted tags for all unwanteds and all suggest slots (actor unwanted, target unwanted, suggest/target suggest)
+            - Actor Wanted and Target Wanted: Not needed because if two tags with the same keys are wanted, it can never be fulfilled
+            - Bias Ranges: Not needed because most actions don't have bonus for extreme on either sides (excluding neutral)
+            

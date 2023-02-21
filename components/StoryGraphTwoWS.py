@@ -10,7 +10,7 @@ from components.RewriteRuleWithWorldState import JointType
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
-from components.UtilFunctions import all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, permute_all_possible_groups_with_ranges_and_freesize
+from components.UtilFunctions import all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, list_all_good_combinations_from_joint_join_pattern, permute_all_possible_groups_with_ranges_and_freesize
 from components.UtilityEnums import GenericObjectNode, TestType
 
 '''
@@ -358,6 +358,37 @@ class StoryGraph:
         
         return traveling_state
 
+    # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
+    # Split Joint: The score is the max among all the given splits.
+
+    #TODO: Test this function with all types of rules.
+    def calculate_score_from_rule_char_and_cont(self, actor, insert_index, rule, mode=0):
+
+        #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
+
+        #If it's a normal type of rule then we can use the normal calculate score function do do this.
+        if not rule.is_joint_rule:
+            purge_count = len(rule.story_condition)
+            return self.calculate_score_from_char_and_cont(actor=actor, insert_index=insert_index, contlist=rule.story_change, mode=mode, purge_count=purge_count)
+        else:
+
+            #Get character information from the relevant step.
+            character_from_ws = self.make_state_at_step(insert_index).node_dict[actor.get_name()]
+
+            if rule.join_type == JointType.SPLIT:
+                #TODO: We need to figure out if it's a split joint. If it is, then check the max/avg among all splits depending on the mode.
+
+                list_of_split_scores = [node.calculate_weight_score(character_from_ws, mode=1) for node in rule.split_list]
+
+                if mode == 1:
+                    return statistics.mean(list_of_split_scores)
+                else:
+                    return max(list_of_split_scores)
+
+            else:
+                #If not, then max between actor slot and target slot.
+                return rule.joint_node.calculate_weight_score(character_from_ws, mode=1)
+
     def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0):
         '''Mode is an int, depending on what it is, this function will do different things:
         mode = 0: return max between all the cont list.
@@ -382,10 +413,8 @@ class StoryGraph:
         del(graphcopy)
 
         if mode == 1:
-            print(score)
             return statistics.mean(score)
         else:
-            print(score)
             return max(score)
 
     #TODO: Test this function
@@ -465,6 +494,7 @@ class StoryGraph:
     There should be three of these, one for each type of Joint Rule.
     '''
 
+    #To clarify: Targets to test are all actors.
     def check_joint_continuity_validity(self, joint_rule, actors_to_test, targets_to_test, insert_index):
 
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
@@ -492,20 +522,30 @@ class StoryGraph:
                 if not assumed_node.check_if_character_exists_in_node(target):
                     return False
 
-        #TODO: If we are doing the Split rule, we must validate that each of the character in actors to test and targets to test are performing nodes included in the base nodes.
+        # If we are doing the Split rule, we must validate that each of the character in actors to test and targets to test are performing nodes included in the base nodes.
         # Before this can be done, we must decide what style of Joint Split we should be doing.
-        if joint_rule.joint_type == JointType.SPLIT:
+        # We have decided. (See check if abs step has joint pattern)
+        if joint_rule.joint_type == JointType.JOIN:
 
-            #TODO: For each of the actors in actors_to_test and target_to_test, get the story part at the insert index for each of them
-            #Return false if any of the story parts from the step above isn't within joint_rule.base_nodes
+            # For each of the actors in actors_to_test and target_to_test, turn them into one list. Then, call the list_all_good_combinations_from_joint_join_pattern from UtilFunctions to get a list.
+            # After we get the list of all possible combinations, we then look for whether or not our specific combination of actors and targets exist in that list. If not, then return False. Otherwise continue with the check.
+
+            list_of_testing_actor_names = set()
 
             for actor in actors_to_test:
-                assumed_node = self.story_parts[(actor.get_name(), insert_index)]
-                pass
+                list_of_testing_actor_names.add(actor.get_name())
             for target in targets_to_test:
-                
-                pass
-            pass
+                list_of_testing_actor_names.add(target.get_name())
+
+            list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=list(list_of_testing_actor_names), absolute_step_to_search=insert_index))
+
+            found_exact_set = False
+            for combi in list_of_possible_combi:
+                if list_of_possible_combi == set(combi):
+                    found_exact_set = True
+
+            if not found_exact_set:
+                return False
     
         if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
             validity = self.check_add_joint_validity(joint_rule.joint_node, actors_to_test, targets_to_test, insert_index)
@@ -514,20 +554,23 @@ class StoryGraph:
         
         return validity
     
-    #TODO: Test this function.
+    #This function is for testing if an absolute step contains a pattern that is suitable for a join joint.
     def check_if_abs_step_has_joint_pattern(self, required_story_nodes_list, character_name_list, absolute_step_to_search):
         
         dict_of_chars_with_nodename_as_key = dict()
+
+        #List of valid nodes are taken from the required node list. This is taken from 
+        valid_nodename_list = [snode.get_name() for snode in required_story_nodes_list]
 
         for charname in character_name_list:
             found_node = self.story_parts.get((charname, absolute_step_to_search), None)
             if found_node is not None:
                 nodename = found_node.get_name()
-
-                if dict_of_chars_with_nodename_as_key.get(nodename, None) == None:
-                    dict_of_chars_with_nodename_as_key[nodename] = [charname]
-                else:
-                    dict_of_chars_with_nodename_as_key[nodename].append(charname)
+                if nodename in valid_nodename_list:
+                    if dict_of_chars_with_nodename_as_key.get(nodename, None) == None:
+                        dict_of_chars_with_nodename_as_key[nodename] = [charname]
+                    else:
+                        dict_of_chars_with_nodename_as_key[nodename].append(charname)
 
         found_node_names = dict_of_chars_with_nodename_as_key.keys()
         for req_node in required_story_nodes_list:
@@ -538,7 +581,6 @@ class StoryGraph:
             
         return True, dict_of_chars_with_nodename_as_key
 
-    #TODO: Test this function
     def check_for_jointrule_location_in_storyline(self, actor, joint_rule):
         if joint_rule.joint_type == JointType.JOIN:
 

@@ -411,3 +411,56 @@ def permute_actor_list_for_joint_with_variable_length(current_actor, other_actor
         full_list += permute_actor_list_for_joint(current_actor, other_actors, i)
 
     return full_list
+
+def getfirst(e):
+    return e[0]
+
+#TODO: Test this function.
+def list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes: dict, actors_wanted, current_actor_name=None):
+
+    #Turn the dict we got into a list.    
+    list_of_base_node_structures = sorted(list(dict_of_base_nodes.items()), key=getfirst)
+
+    #Get all the character names, and the count of how many characters there are.
+    all_character_names = []
+    for x in list_of_base_node_structures:
+        all_character_names += x[1]
+    entire_character_count = len(all_character_names)
+    
+    #Make a list of the lengths we want to include.
+    list_of_appropriate_lengths = []
+    if type(actors_wanted) == tuple:
+        list_of_appropriate_lengths = range_number_to_range_list(actors_wanted)
+    elif actors_wanted == -1:
+        list_of_appropriate_lengths = range_number_to_range_list(len(list_of_base_node_structures), entire_character_count)
+    else:
+        list_of_appropriate_lengths = [actors_wanted]
+
+    #Generate the baseline combinations. This will only include lists with appropriate sizes.
+    list_of_good_combi = []
+    for length in list_of_appropriate_lengths:
+        take_index_0 =  all_possible_actor_groupings([length, entire_character_count-length], all_character_names)
+
+        for group in take_index_0:
+            list_of_good_combi.append(group[0])
+
+    #Time to exclude the bad combis, then return.
+    #Exclude things whose lengths are not in the list of lengths.
+    #Exclude things that don't include the actor's name.
+    if current_actor_name is not None:
+        return [combi for combi in list_of_good_combi if current_actor_name in combi and check_if_list_contains_at_least_one_from_each_node(combi, list_of_base_node_structures)]
+    else:
+        return [combi for combi in list_of_good_combi if check_if_list_contains_at_least_one_from_each_node(combi, list_of_base_node_structures)]
+
+def check_if_list_contains_at_least_one_from_each_node(actor_name_list, list_of_base_node_structures):
+    
+    for node_info in list_of_base_node_structures:
+        count_for_node = 0
+        for actor_name in node_info[1]:
+            if actor_name in actor_name_list:
+                count_for_node += 1
+
+        if count_for_node == 0:
+            return False
+        
+    return True

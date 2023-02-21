@@ -54,8 +54,21 @@ wanted_sum = 5
 
 # print(testlist[:0])
 
-lista = permute_actor_list_for_joint_with_variable_length("A",["b","c","d","e","f"], 2,4)
-#listb = all_possible_actor_groupings_with_ranges_and_freesizes([1, 1, 2], ["A","b","c","d"])
+# lista = permute_actor_list_for_joint_with_variable_length("A",["b","c","d","e","f"], 2,4)
+# #listb = all_possible_actor_groupings_with_ranges_and_freesizes([1, 1, 2], ["A","b","c","d"])
 
-for item in lista:
-    print(item)
+# for item in lista:
+#     print(item)
+
+# def getfirst(e):
+#     return e[0]
+
+# testdict = {"NodeA" : ["A", "B", "C"], "AAAANodeB": ["D","E"]}
+# print(sorted(list(testdict.items()), key=getfirst))
+
+testdict = {"NodeA":["Alice"], "NodeB":["Bob", "Charlie"], "NodeC":["Daniel"]}
+
+print(list_all_good_combinations_from_joint_join_pattern(current_actor_name="Alice", dict_of_base_nodes=testdict, actors_wanted=3))
+
+suggested_included_tags={"Job":"Swordmaster", "Job":"Warrior", "Job":"Fighter"}
+print(suggested_included_tags)

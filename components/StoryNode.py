@@ -2,7 +2,7 @@ from numpy import character
 
 
 class StoryNode:
-    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, effects_on_next_ws = [], required_tags_list = dict(), unwanted_tags_list = dict(), bias_range = dict(), required_tags_list_target = dict(), unwanted_tags_list_target = dict(), bias_range_target = dict(), suggested_included_tags = dict(), suggested_excluded_tags = dict(), suggested_bias_range = dict(), condition_tests = [], **kwargs):
+    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, effects_on_next_ws = [], required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [], **kwargs):
         
         #the name of this action.
         self.name = name
@@ -49,6 +49,7 @@ class StoryNode:
         #Absolute Step is for the Joint Rules, so that the rules know which nodes to join together
         self.abs_step = 0
 
+        #TODO: Make the unwanteds lists of tuples instead.
         #Required Tags List, Unwanted Tags List, and Bias Range are taken from RewriteRule.
         self.required_tags_list = required_tags_list
         self.unwanted_tags_list = unwanted_tags_list
@@ -58,18 +59,23 @@ class StoryNode:
         self.unwanted_tags_list_target = unwanted_tags_list_target
         self.bias_range_target = bias_range_target
 
+        #TODO: All suggesteds are list of tuples instead of dicts.
         #Suggested included tags, suggested excluded tags, and suggested bias range are for weight score calculation purposes. Not fulfiling these conditions are fine, but fulfilling them makes the character lean more towards this action.
-        #TODO: Figure out if we need to use this to pick characters who share this node with another character.
+        #Figure out if we need to use this to pick characters who share this node with another character.
+        
         self.suggested_included_tags = suggested_included_tags
         self.suggested_excluded_tags = suggested_excluded_tags
         self.suggested_bias_range = suggested_bias_range
 
-        #TODO: Figure out if we need one of these for targets for the purpose of picking targets to be in this node.
+        # Figure out if we need one of these for targets for the purpose of picking targets to be in this node.
+        # ANS: We need this for score calculation while choosing the rule. However, since we have decided to use the "Choose one random good combi", we don't need it for when it is being chosen.
+        self.suggested_included_tags_target = suggested_included_tags_target
+        self.suggested_excluded_tags_target = suggested_excluded_tags_target
+        self.suggested_bias_range_target = suggested_bias_range_target
 
         #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
         self.condition_tests = condition_tests
         
-        #TODO: An object that defines the change in relationship for characters and objects in this story node
 
     def get_name(self):
         return self.name
@@ -178,15 +184,15 @@ class StoryNode:
 
         #print("Before All Tests", compatibility)
         if self.required_tags_list is not None:
-            for tag in self.required_tags_list.items():
-                compatibility = compatibility and tag in character_node.tags.items()
+            for tag_tuple in self.required_tags_list:
+                compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1])
 
         #Check if character contains tags in Unwanted Tags (not compatible if true)
 
         #print("After Req Tags Test", compatibility)
         if self.unwanted_tags_list is not None:
-            for tag in self.unwanted_tags_list.items():
-                compatibility = compatibility and tag not in character_node.tags.items()
+            for tag_tuple in self.unwanted_tags_list:
+                compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1])
         
         #print("After Unwanted Tags Test", compatibility)
         #Check if character's bias is within the acceptable range (not compatible if false)
@@ -215,16 +221,16 @@ class StoryNode:
         #Check if the character contains tags in Required Tags (not compatible if false)
 
         if self.required_tags_list_target is not None:
-            for tag in self.required_tags_list_target.items():
-                compatibility = compatibility and tag in character_node.tags.items()
+            for tag_tuple in self.required_tags_list_target:
+                compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1])
                 if verbose:
                     print("Result of required tags test", compatibility)
 
         #Check if character contains tags in Unwanted Tags (not compatible if true)
 
         if self.unwanted_tags_list_target is not None:
-            for tag in self.unwanted_tags_list_target.items():
-                compatibility = compatibility and tag not in character_node.tags.items()
+            for tag_tuple in self.unwanted_tags_list_target:
+                compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1])
                 if verbose:
                     print("Result of unwanted tags test", compatibility)
         
@@ -257,13 +263,13 @@ class StoryNode:
         score = 0
 
         if self.suggested_included_tags is not None:
-            for tag in self.suggested_included_tags.items():
-                if tag in character_node.tags.items():
+            for tag_tuple in self.suggested_included_tags:
+                if (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1]):
                     score += 1
 
         if self.suggested_excluded_tags is not None:
-            for tag in self.suggested_excluded_tags.items():
-                if tag not in character_node.tags.items():
+            for tag_tuple in self.suggested_excluded_tags:
+                if (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1]):
                     score += 1
 
         if self.suggested_bias_range is not None:
@@ -273,12 +279,37 @@ class StoryNode:
                     score += 1
 
         return score
-
-    def calculate_weight_score(self, character_node):
-        return self.calculate_bonus_weight_score(character_node) + self.biasweight
     
-    #TODO: Hey, there are some instances where we'd want to slot our character into the target slot, so we need to do weight score for the target slot as well?
+    def calculate_bonus_weight_score_target(self, character_node):
+        score = 0
 
+        if self.suggested_included_tags_target is not None:
+            for tag_tuple in self.suggested_included_tags_target:
+                if (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1]):
+                    score += 1
+
+        if self.suggested_excluded_tags_target is not None:
+            for tag_tuple in self.suggested_excluded_tags_target:
+                if (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1]):
+                    score += 1
+
+        if self.suggested_bias_range_target is not None:
+            for bias in self.suggested_bias_range_target:
+                char_bias_value = character_node.biases[bias]
+                if char_bias_value >= self.suggested_bias_range_target[bias][0] and char_bias_value <= self.suggested_bias_range_target[bias][1]:
+                    score += 1
+
+        return score
+
+    def calculate_weight_score(self, character_node, mode=0):
+        '''
+        If mode is set to 1, then instead of only doing the bonus weight score for the actor part, it will also calculate the target part and choose max between the two.
+        '''
+
+        if mode==1:
+            return max(self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)) + self.biasweight
+
+        return self.calculate_bonus_weight_score(character_node) + self.biasweight
 
     #TODO: Also, we should probably make a function that returns true if either the target compat gets approved or the actor compat gets approved, for the purposes of joint rules
     #Use case for this: When we are testing a joint node for a character, we should test if they'd work in either slot because we don't know which slot they would go to.

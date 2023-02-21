@@ -10,7 +10,7 @@ from components.UtilFunctions import permute_actor_list_for_joint, permute_actor
 
 DEFAULT_HOLD_EDGE_NAME = "holds"
 DEFAULT_ADJACENCY_EDGE_NAME = "connect"
-DEFAULT_WAIT_NODE = StoryNode("Wait", 0, {"Type":"Placeholder"}, 1)
+DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
 #TODO: In order to make life easier for myself during testing, I should convert this into multiple functions.
 def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5):
@@ -43,6 +43,15 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
         #Only pick the acceptable rules
         acceptable_rules = [rule for rule in list_of_rules if final_story_graph.check_rule_validity(current_character, rule)]
+
+        #Give each rule a score according to current graph state and the chosen character.
+        acceptable_rules_with_score = []
+
+        #TODO: Append score next to rule into the list acceptable rules with score. Watch out for special cases in joint rules:
+        # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
+        # Split Joint: The score is the max among all the given splits.
+        for rule in acceptable_rules:
+            pass
 
         #Sort it by biasweight. Python sorts ascending by default, so we must reverse it.
         acceptable_rules.sort(key=get_biasweight, reverse=True)
@@ -85,7 +94,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 applicable_character_names += shortest_path_character_names_list
                 applicable_character_names.remove(current_charname)
 
-                #TODO: Once we have decided which characters are applicable, we need to look for spots that this rule can fit, and the list of characters whose story will be extended if we use that absolute step.
+                # Once we have decided which characters are applicable, we need to look for spots that this rule can fit, and the list of characters whose story will be extended if we use that absolute step.
                 # For example, if we're doing a continuing joint, we must find the places where the "main character" performs the continuing joint. Then, return each absolute step with the list of characters in that joint.
                 # Like this:
                 # 
@@ -96,6 +105,10 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 #
                 # This same method can be done to determine the suitable characters and spots that the joint rule can take. However, before we can do that, we would need to determine the method that we will use for our Joining Joint.
                 # Write the function in the StoryGraph that does exactly this. We can handle the single joint node case, but for the other case we need to decide joining joint style first
+                #
+                # Update: We have completed this function in SG2WS. We just need to run SG2WS.check_if_abs_step_has_joint_pattern for all the steps in our current character's line.
+                #
+                # TODO: Additionally from that, we can use the available character information along with the required character information (actor/target) in the consecutive joint node and/or splits to determine how many actors can be applied, and prune the list of acceptable actors groups down to that.
 
                 list_of_possible_char_groups = []
 

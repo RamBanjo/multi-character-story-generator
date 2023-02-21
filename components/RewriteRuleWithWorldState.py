@@ -1,6 +1,7 @@
 from enum import Enum
 import statistics
 from components.UtilFunctions import actor_count_sum
+from components.UtilityEnums import JointType
 
 #TODO: Rewrite this class so instead of replacing things, it *inserts* things after the condition.
 
@@ -82,11 +83,6 @@ Dummy Chars: The dummies used for the purpose of replacing. Dummies are consiste
 Required Tags List, unwanted tags list, and bias range list are the same as normal rules, but written in a list so that characters can
 have separate values if needs be. If a particular slot has no prerequisites, it should be an empty dict if it's tags, or None if it's a bias range.
 '''
-
-class JointType(Enum):
-    JOIN = 0
-    CONT = 1
-    SPLIT = 2
 
 class JointRule:
     def __init__(self, merge_count, joint_type, rule_name="", target_list=None):

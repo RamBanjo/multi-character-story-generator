@@ -21,3 +21,8 @@ class TestType(Enum):
     SAME_LOCATION = 1
     HAS_EDGE = 2
     HAS_DOUBLE_EDGE = 3
+
+class JointType(Enum):
+    JOIN = 0
+    CONT = 1
+    SPLIT = 2
