@@ -10,7 +10,7 @@ from components.RewriteRuleWithWorldState import JointType
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
-from components.UtilFunctions import all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, list_all_good_combinations_from_joint_join_pattern, permute_all_possible_groups_with_ranges_and_freesize
+from components.UtilFunctions import all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, getfirst, getsecond, list_all_good_combinations_from_joint_join_pattern, permute_all_possible_groups_with_ranges_and_freesize
 from components.UtilityEnums import GenericObjectNode, TestType
 
 '''
@@ -368,8 +368,15 @@ class StoryGraph:
 
         #If it's a normal type of rule then we can use the normal calculate score function do do this.
         if not rule.is_joint_rule:
-            purge_count = len(rule.story_condition)
-            return self.calculate_score_from_char_and_cont(actor=actor, insert_index=insert_index, contlist=rule.story_change, mode=mode, purge_count=purge_count)
+            purge_count = 0
+            insert_point = insert_index
+
+            if rule.remove_before_insert:
+                purge_count = len(rule.story_condition)
+            else:
+                insert_point += len(rule.story_condition)
+
+            return self.calculate_score_from_char_and_cont(actor=actor, insert_index=insert_point, contlist=rule.story_change, mode=mode, purge_count=purge_count)
         else:
 
             #Get character information from the relevant step.
@@ -403,13 +410,16 @@ class StoryGraph:
             graphcopy.remove_parts_by_count(start_step=insert_index, count=purge_count, actor=actor)
         
         graphcopy.insert_multiple_parts(part_list=contlist, character=actor, absolute_step=insert_index)
-
-        for current_index in range(insert_index, len(contlist)+1):
+        for current_index in range(insert_index, insert_index+len(contlist)):
             current_state = graphcopy.make_state_at_step(current_index)
             current_actor = current_state.node_dict[actor.get_name()]
             current_node = graphcopy.story_parts[(actor.get_name(), current_index)]
             score.append(current_node.calculate_bonus_weight_score(current_actor) + current_node.biasweight)
-        
+
+        # print("-----")
+        # for thing in graphcopy.make_story_part_list_of_one_character(actor):
+        #     print(thing)
+
         del(graphcopy)
 
         if mode == 1:
@@ -457,13 +467,18 @@ class StoryGraph:
             subgraph_locs = if_applyonce_choose_one(subgraph_locs, applyonce)
 
             for change_location in subgraph_locs:
-                if rule.remove_before_insert:
 
+                insert_point = change_location
+
+                if rule.remove_before_insert:
                     #Remove the parts
                     self.remove_parts_by_count(change_location, len(rule.story_condition), character)
+                else:
+                    insert_point += len(rule.story_condition)
 
                 #add the right parts
-                self.insert_multiple_parts(rule.story_change, character, location_list, change_location, copy=True, targets=rule.target_list)
+                #But if we didn't purge anything, we should move our insertion point forward equal to the length of the condition we would've purged
+                self.insert_multiple_parts(rule.story_change, character, location_list, insert_point, copy=True, targets=rule.target_list)
 
         else:
             print("There are no valid insert points. Rule is not applied.")
@@ -878,6 +893,8 @@ class StoryGraph:
         #The only difference is that we will require way, way less inputs.
         character_storyline = self.make_story_part_list_of_one_character(character_to_extract)
 
+        print(character_storyline)
+
         list_of_subgraph_locs = []
 
         #The pattern can't exist in the storyline if it's longer than the storyline.
@@ -906,7 +923,7 @@ class StoryGraph:
                 list_of_subgraph_locs.append(super_index)
 
         return len(list_of_subgraph_locs) >0, list_of_subgraph_locs
-        
+
     def make_story_part_list_of_one_character(self, character_to_extract):
         
         #This function accepts an input of character and extracts parts involving that character along with the index into a dict
@@ -915,6 +932,7 @@ class StoryGraph:
         list_of_char_parts = []
 
         keys_for_this_char = [selfkey for selfkey in self.story_parts.keys() if selfkey[0] == character_to_extract.get_name()]
+        keys_for_this_char = sorted(keys_for_this_char, key=getsecond)
 
         for cur_index in range(0, len(keys_for_this_char)):
             list_of_char_parts.append(self.story_parts[keys_for_this_char[cur_index]])

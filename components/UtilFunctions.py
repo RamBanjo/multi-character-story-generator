@@ -415,6 +415,9 @@ def permute_actor_list_for_joint_with_variable_length(current_actor, other_actor
 def getfirst(e):
     return e[0]
 
+def getsecond(e):
+    return e[1]
+
 #TODO: Test this function.
 def list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes: dict, actors_wanted, current_actor_name=None):
 

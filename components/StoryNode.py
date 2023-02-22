@@ -49,7 +49,7 @@ class StoryNode:
         #Absolute Step is for the Joint Rules, so that the rules know which nodes to join together
         self.abs_step = 0
 
-        #TODO: Make the unwanteds lists of tuples instead.
+        #For consistency, all required/unwanteds are now lists of tuples instead.
         #Required Tags List, Unwanted Tags List, and Bias Range are taken from RewriteRule.
         self.required_tags_list = required_tags_list
         self.unwanted_tags_list = unwanted_tags_list
@@ -59,7 +59,6 @@ class StoryNode:
         self.unwanted_tags_list_target = unwanted_tags_list_target
         self.bias_range_target = bias_range_target
 
-        #TODO: All suggesteds are list of tuples instead of dicts.
         #Suggested included tags, suggested excluded tags, and suggested bias range are for weight score calculation purposes. Not fulfiling these conditions are fine, but fulfilling them makes the character lean more towards this action.
         #Figure out if we need to use this to pick characters who share this node with another character.
         
@@ -74,6 +73,8 @@ class StoryNode:
         self.suggested_bias_range_target = suggested_bias_range_target
 
         #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
+
+        #TODO: Do we need suggested_condition_tests to test the world state to go with the suggested stuff for actor/targets?
         self.condition_tests = condition_tests
         
 
