@@ -293,4 +293,18 @@
             - Actor Wanted and Target Wanted: Not needed because if two tags with the same keys are wanted, it can never be fulfilled
             - Bias Ranges: Not needed because most actions don't have bonus for extreme on either sides (excluding neutral)
     - Merge Count from the Joint Rules is useless and redundant, get rid of it (We can already know how many characters we want from the continuing splits/joints information, so merge count can go bye-bye. Luckily, we don't seem to be using merge_count elsewhere.)
-            
+    - Continue the testing and add the function to the main function finally.
+2 Mar 2022
+    - We should create a function when, given a story node split list and a bunch of character names, returns True and a character grouping that splits the characters properly according to the following rules. If no good grouping is found, then return False, then an empty list:
+        - Make a list of all possible groupings from the list of node. Each tuple in the list represents a node grouping.
+            - For example, if it's a non-joint node without targets, then we would expect a tuple of size one.
+            - If it's a joint node, the tuple is size two. Index 0 are actors. Index 1 are targets.
+            - If the number of actors and the number of total slots from the split list are inequal, return False, and an empty list.
+        - Assign characters to the nodes.
+        - Test for story graph and world state validity.
+            - If the test fails: remove this grouping from the list of all groupings.
+            - If the test passes: return True, and this grouping.
+        - Finally, check if there are any groupings left in the possible list.
+            - If there are, loop to beginning.
+            - If there are not, return False, and an empty list.
+    - Since world state is involved, this function should be written in WorldState. Then, it can be called from the created state by SG2WS.

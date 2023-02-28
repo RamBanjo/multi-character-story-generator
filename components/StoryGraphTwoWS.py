@@ -1,3 +1,4 @@
+import itertools
 import math
 from operator import truediv
 import random
@@ -10,7 +11,7 @@ from components.RewriteRuleWithWorldState import JointType
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
-from components.UtilFunctions import all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, getfirst, getsecond, list_all_good_combinations_from_joint_join_pattern, permute_all_possible_groups_with_ranges_and_freesize
+from components.UtilFunctions import actor_count_sum, all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, getfirst, getsecond, list_all_good_combinations_from_joint_join_pattern, permute_all_possible_groups_with_ranges_and_freesize
 from components.UtilityEnums import GenericObjectNode, TestType
 
 '''
@@ -116,19 +117,6 @@ class StoryGraph:
         self.refresh_longest_path_length()
 
         return new_part
-    
-    #TODO: Test this function
-    def add_multiple_characters_to_part(self, main_actor, other_actors, part, location=None, targets=[], abs_step=0, timestep=0, copy=True):
-
-        new_part = self.add_story_part_at_step(part=part, character=main_actor, location=location, absolute_step=abs_step, timestep=timestep, targets=targets, copy=copy)
-
-        for additional_actor in other_actors:
-            self.add_story_part_at_step(part=new_part, character=additional_actor, location=location, absolute_step=abs_step, timestep=timestep, copy=False)
-
-        for target in new_part.targets:
-            self.add_story_node_to_targets_storyline(pot_target=target, abs_step=abs_step, story_part=new_part)
-
-        return new_part
 
     def remove_story_part(self, character, absolute_step):
 
@@ -184,7 +172,7 @@ class StoryGraph:
         character_path_length = self.get_longest_path_length_by_character(character)
 
         if absolute_step >= character_path_length:
-            self.add_story_part(part, character, location, timestep, copy, targets)
+            return_node = self.add_story_part(part, character, location, timestep, copy, targets)
         else:
             #first, we need to move everything that comes after this part up by one
             for i in range(character_path_length-1, absolute_step-1, -1):
@@ -192,20 +180,22 @@ class StoryGraph:
                 self.add_to_story_part_dict(character_name=char_name, abs_step=i+1, story_part=move_up)
 
             #then, we add a new story part at the spot
-            new_part = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy, targets)
+            return_node = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy, targets)
 
             #finally, connect this to other nodes
             #the node that comes after,
-            new_part.add_next_node(self.story_parts[(char_name, absolute_step+1)], character)
+            return_node.add_next_node(self.story_parts[(char_name, absolute_step+1)], character)
 
             #and the node that comes before if it's not inserted as first node
 
             if absolute_step-1 >= 0:
                 prevnode =  self.story_parts[(char_name, absolute_step-1)]
                 prevnode.remove_next_node(character)
-                prevnode.add_next_node(new_part, character)
+                prevnode.add_next_node(return_node, character)
 
         self.refresh_longest_path_length()
+
+        return return_node
 
     def insert_multiple_parts(self, part_list, character, location_list=None, absolute_step=0, copy=True, targets=None):
 
@@ -382,10 +372,10 @@ class StoryGraph:
             #Get character information from the relevant step.
             character_from_ws = self.make_state_at_step(insert_index).node_dict[actor.get_name()]
 
-            if rule.join_type == JointType.SPLIT:
-                #TODO: We need to figure out if it's a split joint. If it is, then check the max/avg among all splits depending on the mode.
+            if rule.joint_type == JointType.SPLIT:
+                #We need to figure out if it's a split joint. If it is, then check the max/avg among all splits depending on the mode.
 
-                list_of_split_scores = [node.calculate_weight_score(character_from_ws, mode=1) for node in rule.split_list]
+                list_of_split_scores = [node.calculate_weight_score(character_from_ws, max_between_actor_target=True) for node in rule.split_list]
 
                 if mode == 1:
                     return statistics.mean(list_of_split_scores)
@@ -394,7 +384,7 @@ class StoryGraph:
 
             else:
                 #If not, then max between actor slot and target slot.
-                return rule.joint_node.calculate_weight_score(character_from_ws, mode=1)
+                return rule.joint_node.calculate_weight_score(character_from_ws, max_between_actor_target=True)
 
     def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0):
         '''Mode is an int, depending on what it is, this function will do different things:
@@ -485,18 +475,41 @@ class StoryGraph:
 
         self.refresh_longest_path_length()
 
-    def apply_joint_node (self, joint_node, character_list, location, absolute_step):
-        new_joint = deepcopy(joint_node)
-        new_joint.remove_all_actors()
+    #TODO: Remake this function so that it has basically the same arguments and functionality as add_multiple_characters_to_part because by god this is so outdated.
+    #references apply_joint_node and insert_joint_node should be fixed because apparently I fucked up in so, so many spots.
+    def insert_joint_node(self, joint_node, main_actor=None, other_actors=[], location=None, targets=[], absolute_step=0, copy=True, make_main_actor_a_target = False):
 
-        self.insert_story_part(new_joint, character_list[0], location, absolute_step, copy=False)
+        if make_main_actor_a_target:
+            targets.append(main_actor)
 
-        for other_char_index in range(1, len(character_list)):
-            self.insert_story_part(new_joint, character_list[other_char_index], location, absolute_step, copy=False)
+        if main_actor is None or make_main_actor_a_target:
+            main_actor = other_actors.pop(0)
+            
+        new_node = self.insert_story_part(part=joint_node, character=main_actor, location=location, absolute_step=absolute_step, copy=copy, targets=targets)
 
-        return new_joint
+        for additional_actor in other_actors:
+            self.add_story_part_at_step(part=new_node, character=additional_actor, location=location, absolute_step=absolute_step, timestep=new_node.timestep, copy=False)
+        
+        for target in new_node.target:
+            self.add_story_node_to_targets_storyline(pot_target=target, abs_step=absolute_step, story_part=new_node)
 
+        return new_node
 
+    #This function only adds a part to a certain step, but it doesn't change the order of other story nodes.
+    #This function is going to be deprecated
+
+    # def add_multiple_characters_to_part(self, main_actor, other_actors, part, location=None, targets=[], abs_step=0, timestep=0, copy=True):
+
+    #     new_part = self.add_story_part_at_step(part=part, character=main_actor, location=location, absolute_step=abs_step, timestep=timestep, targets=targets, copy=copy)
+
+    #     for additional_actor in other_actors:
+    #         self.add_story_part_at_step(part=new_part, character=additional_actor, location=location, absolute_step=abs_step, timestep=timestep, copy=False)
+
+    #     for target in new_part.target:
+    #         self.add_story_node_to_targets_storyline(pot_target=target, abs_step=abs_step, story_part=new_part)
+
+    #     return new_part
+    
     '''
     This function is for making the character's next node some node that already exists in another character's path.
 
@@ -653,7 +666,7 @@ class StoryGraph:
         #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
         #This is where the copy=false in the add node function comes in handy.
         for insert_loc in insert_list:
-            new_joint = self.apply_joint_node(joint_node, actors, location, insert_loc)
+            new_joint = self.insert_joint_node(joint_node=joint_node, other_actors=actors, location=location, absolute_step=insert_loc)
 
             if len(target_list) > 0:
                 self.add_targets_to_storynode(new_joint, insert_loc, target_list)
@@ -778,17 +791,26 @@ class StoryGraph:
                 return grouping
 
     #Please note that Grouping is a list that is used to determine group size. For example, if it is [1, 3], this means one character in the first group and 3 characters in the second group.
-
-    def generate_valid_character_grouping(self, continuations, abs_step, character_list, grouping=[]):
+    #TODO: make this also work with splits that also include targets.
+    def generate_valid_character_grouping(self, continuations, abs_step, character_list):
         '''This function can accept -1 and tuple ranges.'''
 
-        #If there is no grouping information, then we only want one character per continuation.
-        if grouping == []:
-            grouping = [1] * len(character_list)
+        # Grouping information is based on the continuations of the story nodes we were given.
+        #This also includes the target slots.
+        grouping = []
+
+        for node in continuations:
+            grouping.append(actor_count_sum(node.charcount, node.target_count))
+        
+        #print(grouping)
+        # #If there is no grouping information, then we only want one character per continuation.
+        # if grouping == []:
+        #     grouping = [1] * len(character_list)
 
         #Make the grouping information here.
         list_of_charnames = [x.get_name() for x in character_list]
         all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes(grouping, list_of_charnames)
+        #print(all_possible_groupings)
 
         state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
 
@@ -796,6 +818,7 @@ class StoryGraph:
 
         while (not found_valid_grouping):
 
+            grouping_with_actor_target_info = []
             current_grouping = []
             
             #Return None if we have exhausted all of the possible groupings.
@@ -819,13 +842,33 @@ class StoryGraph:
 
             this_one_is_valid = True
 
+
             #Check validity for each of the continuations
             for story_index in range(0, len(continuations)):
-                this_one_is_valid = this_one_is_valid and continuations[story_index].check_character_compatibility_for_many_characters(current_grouping[story_index])
+
+                actor_grouping = current_grouping[story_index]
+                target_grouping = []
+                actor_target_split = self.generate_valid_actor_and_target_split(node=continuations[story_index], abs_step=abs_step, character_list=current_grouping[story_index])
+                grouping_with_actor_target_info.append(actor_target_split)
+
+                if continuations[story_index].target_count != 0:
+                    #First, we need to ensure there is at least one possible actor/target divide if it just so happens that target slots are needed.
+                    if actor_target_split is not None:
+                        #In the case that a good actor/target split exists, we use the split information to split them up and put them into different groups.
+                        actor_grouping = actor_target_split["actor_group"]
+                        target_grouping = actor_target_split["target_group"]
+                    else:
+                        #In the case that there are no good splits at all, this cannot work. It's not valid and we should use a different grouping.
+                        this_one_is_valid = False
+
+                this_one_is_valid = this_one_is_valid and continuations[story_index].check_character_compatibility_for_many_characters(actor_grouping)
+                this_one_is_valid = this_one_is_valid and continuations[story_index].check_target_compatibility_for_many_characters(target_grouping)
+                #print(current_grouping, this_one_is_valid)
 
             #If it's valid, it can be returned. If not, find new one.
             if this_one_is_valid:
-                return current_grouping
+                #TODO: We might want to return a list of actor target split instead?
+                return grouping_with_actor_target_info
 
     def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):
         
@@ -842,6 +885,9 @@ class StoryGraph:
             for insert_loc in eligible_insertion_list:
                 self.split_continuation(split_rule.split_list, characters, insert_loc, location_list, target_replace, with_grouping=False)
 
+    #Where is split list from? Split List is the list of all the nodes the characters go to after this one
+    #There are two separate functions for this, because in some instances the split might not be a joint node, but still have object targets.
+    #TODO: We probably don't need with_grouping, because we can instantly determine whether a node is a joint node by checking 
     def split_continuation(self, split_list, chargroup_list, abs_step, location_list = None, target_replace = [], with_grouping = False):
         for i in range(0, len(chargroup_list)):
             new_joint = deepcopy(split_list)
@@ -882,6 +928,10 @@ class StoryGraph:
             print("Actors:", self.story_parts[node].get_actor_names())
             print("Targets:", self.story_parts[node].get_target_names())
             print("----------")
+    
+    def print_all_nodes_from_characters_storyline(self, actor):
+        for thing in self.make_story_part_list_of_one_character(character_to_extract=actor):
+            print(thing)
 
     def check_for_pattern_in_storyline(self, pattern_to_test, character_to_extract):
 
@@ -893,7 +943,7 @@ class StoryGraph:
         #The only difference is that we will require way, way less inputs.
         character_storyline = self.make_story_part_list_of_one_character(character_to_extract)
 
-        print(character_storyline)
+        #print(character_storyline)
 
         list_of_subgraph_locs = []
 
@@ -951,6 +1001,9 @@ class StoryGraph:
 
         if rule.is_joint_rule:
             for i in range(0, self.get_longest_path_length_by_character(actor)):
+
+                #TODO: AHA! There's the problem. This function only tests in the event that the current character object is the actor, but doesn't test for the case wherre the character object is the target.
+                #Need to fix this somehow.
                 if self.check_joint_continuity_validity(joint_rule=rule, actors_to_test=[actor], targets_to_test=rule.target_list, insert_index=i):
                     return True
             return False

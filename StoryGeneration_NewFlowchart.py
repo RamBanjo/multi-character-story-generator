@@ -2,7 +2,7 @@
 
 import copy
 import random
-from components.RewriteRuleWithWorldState import JointType
+from components.RewriteRuleWithWorldState import JoiningJointRule, JointType
 
 from components.StoryGraphTwoWS import StoryGraph
 from components.StoryNode import StoryNode
@@ -41,20 +41,24 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
         node_for_this_character_found = False
 
-        #Only pick the acceptable rules
+        #Only pick the acceptable rules.
+        #TODO: check_rule_validity isn't a thing in SG2WS anymore. Might need to use check_rule_validity_for_first_actor.
         acceptable_rules = [rule for rule in list_of_rules if final_story_graph.check_rule_validity(current_character, rule)]
 
         #Give each rule a score according to current graph state and the chosen character.
-        acceptable_rules_with_score = []
+        #TODO: Remember that each rule does not have the same score in all insert indexes, because the score depends on the character at that certain state.
+        acceptable_rules_with_absolute_step_and_score = []
 
-        #TODO: Append score next to rule into the list acceptable rules with score. Watch out for special cases in joint rules:
-        # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
-        # Split Joint: The score is the max among all the given splits.
+        #TODO: Append the absolute step and score next to rule into the list acceptable rules with score. Watch out for special cases in joint rules:
+        # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot. If any slot doesn't allow character placement, the score if the other allowed slot. If both slots are unallowed, the score is -999.
+        # Split Joint: The score is the max among all the given splits, excluding the split that doesn't allow the character. If none of the splits allow the character on any slots, the score is -999.
+        #
+        # Format: (Rule, Insert Index, Score)
         for rule in acceptable_rules:
             pass
 
         #Sort it by biasweight. Python sorts ascending by default, so we must reverse it.
-        acceptable_rules.sort(key=get_biasweight, reverse=True)
+        #acceptable_rules.sort(key=get_biasweight, reverse=True)
 
         #Here, we will choose from top n rules.
         top_pick_count = top_n
@@ -75,40 +79,38 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
             #From the valid options, we pick from the rule we will use randomly.
             chosen_rule = random.choice(top_n_acceptable_rules)
             top_n_acceptable_rules.remove(chosen_rule)
+            #Keep in mind that the the chosen rule is a tuple. Index 0 is the node itself, Index 1 is the location to apply to, Index 2 is the score (which we won't use here.)
 
             #If it's just a normal rewrite rule, we can instantly apply it because we don't need to check its validity with other nodes. We'll apply it to one random good spot.
-            if not chosen_rule.is_joint_rule:
+
+            #TODO: Apply rewrite rule, but we can choose the specific spot? Or maybe just use insert function here because we already did the checks above and we know the rule can be applied because it passes the tests.
+            # Maybe use the banned subgraph locs to ban everything that's not the chosen index?
+            if not chosen_rule[0].is_joint_rule:
+
+                pattern_check_result = final_story_graph.check_for_pattern_in_storyline(chosen_rule[0].story_condition, current_character)
+                banned_locs = pattern_check_result[1]
+                banned_locs.remove(chosen_rule[1])
+
                 final_story_graph.apply_rewrite_rule(chosen_rule, current_character, applyonce=True)
+                pass
             else:
 
-                #Here, we are going to make all the possible character groups. First, we get all the characters who can be added to the joint node.
-
-                #TODO: WAIT WAIT WAIT WE NEED TO CLARIFY FURTHER
-                #Applicable character names should be taken from shortest path character names list, correct
-                #HOWEVER, if this is a cont rule or a split rule, then we can just simply use the characters currently sharing a node with that character.
-                #In addition to that, if this is a join rule, we should look for characters who are indeed doing the nodes specified in the join pattern and are within the shortest path.
-                #Now that I'm a bit more awake, we don't know yet where the nodes will be applied. At least, we already have the functions of the cont rule and the split rule to be only valid if the given characters are in the previous node together.
-
-                #Before we can do this, we should clarify whether we would be doing 
                 applicable_character_names = []
                 applicable_character_names += shortest_path_character_names_list
                 applicable_character_names.remove(current_charname)
 
-                # Once we have decided which characters are applicable, we need to look for spots that this rule can fit, and the list of characters whose story will be extended if we use that absolute step.
-                # For example, if we're doing a continuing joint, we must find the places where the "main character" performs the continuing joint. Then, return each absolute step with the list of characters in that joint.
-                # Like this:
-                # 
-                # [(2, ["Alice, Bob, Charlie, David"]),
-                # (6, ["Alice, Bob, Harry, Irina"])]
-                # 
-                # This allows us to instantly have a list of characters to use. We limit the possibilities 
+                # We have our current character and we have a list of characters whose stories can be extended because they have the shortest paths. We also have the absolute step that we will build from.
+                # We would like to find out that, with the given rule, who should be in the grouping.
                 #
-                # This same method can be done to determine the suitable characters and spots that the joint rule can take. However, before we can do that, we would need to determine the method that we will use for our Joining Joint.
-                # Write the function in the StoryGraph that does exactly this. We can handle the single joint node case, but for the other case we need to decide joining joint style first
-                #
-                # Update: We have completed this function in SG2WS. We just need to run SG2WS.check_if_abs_step_has_joint_pattern for all the steps in our current character's line.
-                #
-                # TODO: Additionally from that, we can use the available character information along with the required character information (actor/target) in the consecutive joint node and/or splits to determine how many actors can be applied, and prune the list of acceptable actors groups down to that.
+                # For ContinuousJoint and SplittingJoint, the grouping is simple: just take all the actors from the actor/target slots, from the steps where the base joint is found. If no base joint is found, then the pattern is invalid and the rule should be removed from the list.
+                #   We have check_for_jointrule_location_in_storyline for this purpose to look for the base joint in the storyline. It also returns a list of the absolute step where the base joint is.
+                # For JoiningJoint is a bit more complex. We need to call check_if_abs_step_has_joint_pattern for all the steps. Then, use list_all_good_combinations_from_joint_join_pattern to make list of possible char groups.
+
+                #TODO: Since we already know what absolute step we want to add to, we just need to check if there are enough applicable characters at that step. Make the possible character grouping.
+                if type(chosen_rule) == JoiningJointRule:
+                    pass
+                else:
+                    pass
 
                 list_of_possible_char_groups = []
 

@@ -40,7 +40,7 @@ node_f = StoryNode(name="Node F", biasweight=1, tags= {"Type":"Placeholder"}, ch
 
 #The following nodes are going to be used in Joint Rules, because they may allow more than one characters to partake.
 node_x = StoryNode(name="Node X", biasweight=1, tags={"Type":"Placeholder"}, charcount=2, suggested_included_tags=[("Job","Swordmaster"), ("Job","Warrior"), ("Job","Fighter")])
-node_y = StoryNode(name="Node Y", biasweight=1, tags={"Type":"Placeholder"}, charcount=2, suggested_included_tags=[("Wealth","Average"), ("Living",True), ("Job","Fighter")])
+node_y = StoryNode(name="Node Y", biasweight=3, tags={"Type":"Placeholder"}, charcount=1, target_count=1, suggested_included_tags_target=[("Wealth","Average"), ("Living",True), ("Job","Fighter")])
 
 #These two are for splits. Max between these should be 3. Average between these should be 2.5.
 node_g = StoryNode(name="Node G", biasweight=1, tags={"Type":"Placeholder"}, charcount=1, suggested_included_tags=[("Job","Swordmaster")])
@@ -69,3 +69,13 @@ print("Graph 1 Rule 2 Index 1 Mode 0 (Expect 4)", graph_1.calculate_score_from_r
 print("Graph 1 Rule 2 Index 1 Mode 1 (Expect 3.5)", graph_1.calculate_score_from_rule_char_and_cont(actor=alice, insert_index=1, rule=rule_2, mode=1))
 
 #TODO: Continue testing the Joint Rules
+graph_2 = StoryGraph("Graph 2", [alice, bob], [somewhere], default_ws)
+graph_2.insert_multiple_parts([node_a, node_b, node_c], alice, [somewhere, somewhere, somewhere], 0)
+graph_2.insert_multiple_parts([node_a, node_b, node_c], bob, [somewhere, somewhere, somewhere], 0)
+print("Graph 2 Rule 3 Index 2 Mode 0", graph_1.calculate_score_from_rule_char_and_cont(actor=alice, insert_index=3, rule=rule_3, mode=0))
+print("Graph 2 Rule 3 Index 2 Mode 1", graph_1.calculate_score_from_rule_char_and_cont(actor=alice, insert_index=3, rule=rule_3, mode=1))
+
+#Testing the Continuous Joint Rule.
+graph_2.insert_joint_node(joint_node=node_x, main_actor=alice, other_actors=[bob], location=somewhere, absolute_step=3)
+for thing in graph_2.make_story_part_list_of_one_character(character_to_extract=alice):
+    print(thing)

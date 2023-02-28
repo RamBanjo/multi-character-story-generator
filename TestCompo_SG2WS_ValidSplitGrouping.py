@@ -20,8 +20,9 @@ basews = WorldState("BaseWS", [alice, bob, charlie])
 
 basesg = StoryGraph("Base Story Graph", [alice, bob, charlie], [somewhere], basews)
 
-#The this function can be converted into one line some way
-#DONE! We now have add_multiple_characters_to_part function in StoryGrpahTwoWS!
+# The this function can be converted into one line some way
+# DONE! We now have add_multiple_characters_to_part function in StoryGrpahTwoWS!
+# PAST RAM WHAT THE HELL YOU ALREADY HAVE THE OTHER FUNCTION! At the very least, that function is now done and can be used.
 basesg.add_story_part(base_joint_node, alice, somewhere, copy=True)
 basesg.add_story_part(basesg.story_parts[("Alice", 0)], bob, somewhere, copy=False)
 basesg.add_story_part(basesg.story_parts[("Alice", 0)], charlie, somewhere, copy=False)
@@ -61,12 +62,20 @@ cont_h = StoryNode("Continuation H", None, {"Type": "Placeholder"}, -1)
 cont_i = StoryNode("Continuation I", None, {"Type": "Placeholder"}, -1, bias_range={"lawbias": (-10, 10)})
 
 test_grouping = generate_grouping_from_group_size_lists([-1, -1], 3)
-generated = basesg.generate_valid_character_grouping([cont_h, cont_i], 1, [alice, bob, charlie], test_grouping)
+generated = basesg.generate_valid_character_grouping([cont_h, cont_i], 1, [alice, bob, charlie])
 
 groupno = 0
 print(generated)
-if(generated is not None):
-    for chargroup in generated:
-        for chara in chargroup:
-            print("Group", groupno, chara)
+if (generated is not None):
+    for actor_tar_group in generated:
+        for actor in actor_tar_group["actor_group"]:
+            print("Group", groupno, "Actor", actor)
+        for target in actor_tar_group["target_group"]:
+            print("Group", groupno, "Target", actor)
         groupno += 1
+#     
+# if(generated[0] is not None):
+#     for chargroup in generated[0]:
+#         for chara in chargroup:
+#             print("Group", groupno, chara)
+#         groupno += 1

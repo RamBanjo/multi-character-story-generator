@@ -302,12 +302,17 @@ class StoryNode:
 
         return score
 
-    def calculate_weight_score(self, character_node, mode=0):
+    def calculate_weight_score(self, character_node, max_between_actor_target=False):
         '''
-        If mode is set to 1, then instead of only doing the bonus weight score for the actor part, it will also calculate the target part and choose max between the two.
+        If max_between_actor_target is set to True AND there are slots for the target, then instead of only doing the bonus weight score for the actor part, it will also calculate the target part and choose max between the two.
         '''
 
-        if mode==1:
+        #TODO: Don't calculate bonus score for the slot that cannot be used because of incompatibility? Unsure if we need to do that.
+        #Also, maybe the target weight score would never be used at all? Why does my mind keep changing. We keep it just in case, though.
+        #
+        # Okay, so I think we need to restructure things a bit.
+
+        if max_between_actor_target and self.target_count > 0:
             return max(self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)) + self.biasweight
 
         return self.calculate_bonus_weight_score(character_node) + self.biasweight

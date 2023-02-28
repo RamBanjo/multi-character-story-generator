@@ -5,6 +5,7 @@ from components.Edge import Edge
 from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import ObjectNode
+from components.UtilFunctions import actor_count_sum, permute_all_possible_groups_with_ranges_and_freesize
 from components.UtilityEnums import *
 
 class WorldState:
@@ -287,6 +288,34 @@ class WorldState:
                 same_location = same_location and check_thing in list_of_things_at_checkloc
 
             return same_location
+        
+    # TODO:
+    # - We should create a function when, given a story node split list and a list of character names, returns True and a character grouping that splits the characters properly according to the following rules. If no good grouping is found, then return False, then an empty list:
+    #     - Make a list of all possible groupings from the list of node. Each tuple in the list represents a node grouping.
+    #         - There should be something in Utilfunctions that can help with this. If there isn't something like this yet, write a new one.
+    #         - For example, if it's a non-joint node without targets, then we would expect a tuple of size one.
+    #         - If it's a joint node, the tuple is size two. Index 0 are actors. Index 1 are targets.
+    #         - If the number of actors and the number of total slots from the split list are inequal, return False, and an empty list.
+    #     - Assign characters to the nodes.
+    #     - Test for story graph and world state validity.
+    #         - If the test fails: remove this grouping from the list of all groupings.
+    #         - If the test passes: return True, and this grouping.
+    #     - Finally, check if there are any groupings left in the possible list.
+    #         - If there are, loop to beginning.
+    #         - If there are not, return False, and an empty list.
+
+    def make_split_joint_grouping_from_current_state(self, split_nodes, potential_actor_names):
+
+        actor_count = len(potential_actor_names)
+
+        grouping_info = []
+
+        for node in split_nodes:
+            grouping_info.append(actor_count_sum(node.charcount, node.target_count))
+
+        possible_grouping_lists = permute_all_possible_groups_with_ranges_and_freesize(grouping_info, actor_count)
+
+        print(possible_grouping_lists)
 
 
 
