@@ -257,9 +257,12 @@ class StoryNode:
         for character_node in list_of_chars:
             compatibility = compatibility and self.check_target_compatibility(character_node)
 
-        return compatibility
+        return 
 
     def calculate_bonus_weight_score(self, character_node):
+
+        if not self.check_character_compatibility(character_node=character_node):
+            return -999
         
         score = 0
 
@@ -282,6 +285,10 @@ class StoryNode:
         return score
     
     def calculate_bonus_weight_score_target(self, character_node):
+
+        if not self.check_target_compatibility(character_node=character_node):
+            return -999
+
         score = 0
 
         if self.suggested_included_tags_target is not None:

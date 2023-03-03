@@ -48,6 +48,7 @@ If we use a rule that replaces b with d, e on Alice's storyline the entries will
 
 Only two world states will be kept: The starting world state and the worldstate of the latest world state.
 '''
+
 class StoryGraph:
     def __init__(self, name, character_objects, location_objects, starting_ws):
         self.name = name
@@ -351,7 +352,7 @@ class StoryGraph:
     # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
     # Split Joint: The score is the max among all the given splits.
 
-    #TODO: Test this function with all types of rules.
+    #TODO: Test this function with all types of rules. (We already tested the non-joint rule part, we should test the joint rule part)
     def calculate_score_from_rule_char_and_cont(self, actor, insert_index, rule, mode=0):
 
         #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
@@ -386,6 +387,7 @@ class StoryGraph:
                 #If not, then max between actor slot and target slot.
                 return rule.joint_node.calculate_weight_score(character_from_ws, max_between_actor_target=True)
 
+    #TODO: 
     def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0):
         '''Mode is an int, depending on what it is, this function will do different things:
         mode = 0: return max between all the cont list.
@@ -411,6 +413,10 @@ class StoryGraph:
         #     print(thing)
 
         del(graphcopy)
+
+        #Since we're looking to use this entire sequence for a character, if we get a value of -999 it means that it cannot be used so we need to return this value to signify such a case.
+        if -999 in score:
+            return -999
 
         if mode == 1:
             return statistics.mean(score)
@@ -475,8 +481,9 @@ class StoryGraph:
 
         self.refresh_longest_path_length()
 
-    #TODO: Remake this function so that it has basically the same arguments and functionality as add_multiple_characters_to_part because by god this is so outdated.
+    #Remake this function so that it has basically the same arguments and functionality as add_multiple_characters_to_part because by god this is so outdated.
     #references apply_joint_node and insert_joint_node should be fixed because apparently I fucked up in so, so many spots.
+    #This function basically works like normal insert story part if the node is not a joint node. How convenient!
     def insert_joint_node(self, joint_node, main_actor=None, other_actors=[], location=None, targets=[], absolute_step=0, copy=True, make_main_actor_a_target = False):
 
         if make_main_actor_a_target:
@@ -523,8 +530,8 @@ class StoryGraph:
     '''
 
     #To clarify: Targets to test are all actors.
+    #This function should assume that all all needed actors and targets are already given.
     def check_joint_continuity_validity(self, joint_rule, actors_to_test, targets_to_test, insert_index):
-
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
 
         for testchar in actors_to_test:
@@ -791,7 +798,8 @@ class StoryGraph:
                 return grouping
 
     #Please note that Grouping is a list that is used to determine group size. For example, if it is [1, 3], this means one character in the first group and 3 characters in the second group.
-    #TODO: make this also work with splits that also include targets.
+    #This function can now handle targets!
+    #Congratulations! This functions works as all is intended. We're all good now on this department.
     def generate_valid_character_grouping(self, continuations, abs_step, character_list):
         '''This function can accept -1 and tuple ranges.'''
 
@@ -867,7 +875,6 @@ class StoryGraph:
 
             #If it's valid, it can be returned. If not, find new one.
             if this_one_is_valid:
-                #TODO: We might want to return a list of actor target split instead?
                 return grouping_with_actor_target_info
 
     def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):
@@ -887,23 +894,33 @@ class StoryGraph:
 
     #Where is split list from? Split List is the list of all the nodes the characters go to after this one
     #There are two separate functions for this, because in some instances the split might not be a joint node, but still have object targets.
-    #TODO: We probably don't need with_grouping, because we can instantly determine whether a node is a joint node by checking 
-    def split_continuation(self, split_list, chargroup_list, abs_step, location_list = None, target_replace = [], with_grouping = False):
+    #We probably don't need with_grouping, because we can instantly determine whether a node is a joint node by checking the charcount and target_count on each split.
+    def split_continuation(self, split_list, chargroup_list, abs_step, location_list = None, additional_targets_list = []):
         for i in range(0, len(chargroup_list)):
             new_joint = deepcopy(split_list)
             new_joint.remove_all_actors()
 
-            if with_grouping and location_list != None:
-                added_joint = self.apply_joint_node(new_joint, chargroup_list[i], location_list[i], abs_step)
-            if with_grouping and location_list == None:
-                added_joint = self.apply_joint_node(new_joint, chargroup_list[i], None, abs_step)
-            if not with_grouping and location_list != None:
-                added_joint = self.insert_story_part(new_joint, chargroup_list[i], location_list[i], abs_step)
-            if not with_grouping and location_list == None:
-                added_joint = self.insert_story_part(new_joint, chargroup_list[i], None, abs_step)
+            current_location = None
+            if location_list != None:
+                current_location = location_list[i]
 
-            if len(target_replace) > 0:
-                self.add_targets_to_storynode(added_joint, abs_step, target_replace[i])
+            current_target_list = chargroup_list[i]["target_group"]
+            if additional_targets_list != None:
+                current_target_list += additional_targets_list[i]
+
+            return self.insert_joint_node(joint_node=split_list[i], main_actor=None, other_actors=chargroup_list[i]["actor_group"], location=current_location, targets=current_target_list, absolute_step=abs_step)
+
+            # if with_grouping and location_list != None:
+            #     added_joint = self.apply_joint_node(new_joint, chargroup_list[i], location_list[i], abs_step)
+            # if with_grouping and location_list == None:
+            #     added_joint = self.apply_joint_node(new_joint, chargroup_list[i], None, abs_step)
+            # if not with_grouping and location_list != None:
+            #     added_joint = self.insert_story_part(new_joint, chargroup_list[i], location_list[i], abs_step)
+            # if not with_grouping and location_list == None:
+            #     added_joint = self.insert_story_part(new_joint, chargroup_list[i], None, abs_step)
+
+            # if len(additional_targets_list) > 0:
+            #     self.add_targets_to_storynode(added_joint, abs_step, additional_targets_list[i])
 
     def add_targets_to_storynode(self, node, abs_step, target_list):
         for target in target_list:
@@ -996,32 +1013,34 @@ class StoryGraph:
         for remove_index in range(start_step, end_index+1):
             self.remove_story_part(actor, start_step)
 
+    #Deprecated function. Since we are doing validity check after the score check, we can just test validity with all the characters present in actors and targets.
     #This function checks if there it at least one spot where the rule can be applied.
-    def check_rule_validity_for_first_actor(self, actor, rule):
+    # def check_rule_validity_for_first_actor(self, actor, rule):
 
-        if rule.is_joint_rule:
-            for i in range(0, self.get_longest_path_length_by_character(actor)):
+    #     if rule.is_joint_rule:
+    #         for i in range(0, self.get_longest_path_length_by_character(actor)):
 
-                #TODO: AHA! There's the problem. This function only tests in the event that the current character object is the actor, but doesn't test for the case wherre the character object is the target.
-                #Need to fix this somehow.
-                if self.check_joint_continuity_validity(joint_rule=rule, actors_to_test=[actor], targets_to_test=rule.target_list, insert_index=i):
-                    return True
-            return False
+    #             valid_as_actor = self.check_joint_continuity_validity(joint_rule=rule, actors_to_test=[actor], targets_to_test=rule.target_list, insert_index=i)
+    #             valid_as_target = self.check_joint_continuity_validity(joint_rule=rule, actors_to_test=[])
 
-        is_subgraph, subgraph_locs = self.check_for_pattern_in_storyline(rule.story_condition, actor)
+    #             if self.check_joint_continuity_validity(joint_rule=rule, actors_to_test=[actor], targets_to_test=rule.target_list, insert_index=i):
+    #                 return True
+    #         return False
 
-        if not is_subgraph:
-            return False
+    #     is_subgraph, subgraph_locs = self.check_for_pattern_in_storyline(rule.story_condition, actor)
+
+    #     if not is_subgraph:
+    #         return False
         
-        purge_count = 0
-        if rule.remove_before_insert:
-            purge_count = len(rule.story_condition)
+    #     purge_count = 0
+    #     if rule.remove_before_insert:
+    #         purge_count = len(rule.story_condition)
 
-        for story_index in subgraph_locs:
-            if self.check_continuation_validity(actor=actor, abs_step_to_cont_from=story_index, cont_list=rule.story_change, target_list=rule.target_list, purge_count=purge_count):
-                return True
+    #     for story_index in subgraph_locs:
+    #         if self.check_continuation_validity(actor=actor, abs_step_to_cont_from=story_index, cont_list=rule.story_change, target_list=rule.target_list, purge_count=purge_count):
+    #             return True
                 
-        return False
+    #     return False
     
     #Here, we check that there is at least one valid slot for a character in a joint node.
     def check_if_joint_node_is_valid_at_timestep_for_actor(self, actor, joint_node, step):
@@ -1034,7 +1053,7 @@ class StoryGraph:
 
 
     def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None, purge_count = 0):
-        #TODO: We did the main function, but now we also need to check if the character is being a target, and pull up the requirement for being a target instead if that's the case.
+        #We did the main function, but now we also need to check if the character is being a target, and pull up the requirement for being a target instead if that's the case.
         #This function is meant for use with only the continuation part of a normal non-joint rule. We probably should make a new function to use with the joint rules.
 
         #Preliminary: Check if the actor is found in the list, if not then it's false

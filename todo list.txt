@@ -308,3 +308,14 @@
             - If there are, loop to beginning.
             - If there are not, return False, and an empty list.
     - Since world state is involved, this function should be written in WorldState. Then, it can be called from the created state by SG2WS.
+        - We already did this partially, it's in SG2WS.
+9 Mar 2022
+    - Do not need to verify rules before adding them to list, we should verify them in the loop instead, so we know the other actors that we intend to use joint rule with.
+    - The initial rule list is the entire possibility of rules, sorted by its score.
+    - When we pick Top N, do not destroy the rest of the list. We should preserve it for the case where the current rule is invalid, then we push the one that's just out of range into the choose range.
+    - Wait would happen when none of the rules in the list are valid.
+    - New setting: Extra Attempts
+        - If set as -1, the algorithm will continue to push new rules into Top N until there are no more, or until a good one is found.
+        - If set as any other integer, the algorithm will stop pushing new rules into Top N after X attempts, where X is the integer.
+        - When there are no more Top N, then the character has no valid actions and therefore has to do the wait action.
+    - Need to fix accessibility issues for future coders: Write description for each function in triple quotes.

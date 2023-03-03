@@ -58,11 +58,18 @@ print(basesg.story_parts[("Alice", 0)])
 #A scenario: cont h and cont i have no limits on the characters. cont i does not allow anyone with a law bias outside of the [-10, 10] range, meaning that only Charlie would be allowed.
 #Therefore, the only allowed setup should be: [AB][C]
 
-cont_h = StoryNode("Continuation H", None, {"Type": "Placeholder"}, -1)
-cont_i = StoryNode("Continuation I", None, {"Type": "Placeholder"}, -1, bias_range={"lawbias": (-10, 10)})
+# cont_h = StoryNode("Continuation H", None, {"Type": "Placeholder"}, -1)
+# cont_i = StoryNode("Continuation I", None, {"Type": "Placeholder"}, -1, bias_range={"lawbias": (-10, 10)})
 
-test_grouping = generate_grouping_from_group_size_lists([-1, -1], 3)
-generated = basesg.generate_valid_character_grouping([cont_h, cont_i], 1, [alice, bob, charlie])
+# test_grouping = generate_grouping_from_group_size_lists([-1, -1], 3)
+# generated = basesg.generate_valid_character_grouping([cont_h, cont_i], 1, [alice, bob, charlie])
+
+#Scenario: cont j, cont k are two nodes. cont j is a normal node that allows one character. cont k is a joint node that allows one actor and one target.
+# K's target slot just so happens to fit only Alice, so while Alice is restrained there, we should be seeing a mix of Bob and Charlie being actors of J and K.
+
+cont_j = StoryNode(name="Continuation J", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+cont_k = StoryNode(name="Continuation K", biasweight=0, tags={"Type":"Placeholder"}, charcount=1, target_count=1, bias_range_target={"lawbias":(0,100)})
+generated = basesg.generate_valid_character_grouping([cont_j, cont_k], 1, [alice, bob, charlie])
 
 groupno = 0
 print(generated)
@@ -71,7 +78,7 @@ if (generated is not None):
         for actor in actor_tar_group["actor_group"]:
             print("Group", groupno, "Actor", actor)
         for target in actor_tar_group["target_group"]:
-            print("Group", groupno, "Target", actor)
+            print("Group", groupno, "Target", target)
         groupno += 1
 #     
 # if(generated[0] is not None):
