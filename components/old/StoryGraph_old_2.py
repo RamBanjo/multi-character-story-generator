@@ -43,7 +43,7 @@ If we use a rule that replaces b with d, e on Alice's storyline the entries will
 For WorldStates, they will be kept in a list. Replacing the worldstate would be as easy as duplicating the worldstates from the rule and
 replacing it in the list. (Since we don't have to care about connections between world states here, this should be possible!)
 
-TODO: Rewrite this class entirely (all the functions) so that they can handle multiple events in one timestep
+Rewrite this class entirely (all the functions) so that they can handle multiple events in one timestep
 '''
 class StoryGraph:
     def __init__(self, name, character_objects, location_objects):
@@ -56,7 +56,7 @@ class StoryGraph:
 
     #Copy=False would be used in the case of joint.
 
-    #TODO: Add an option that allows the user to start at another point other than 0.
+    #Add an option that allows the user to start at another point other than 0.
     #Possible: Create blank nodes in order to keep all the nodes equal?
     def add_story_part(self, part, character, location, timestep, copy=True, targets=[]):
 
@@ -142,7 +142,7 @@ class StoryGraph:
 
     def insert_story_part(self, part, character, location, absolute_step, copy=True, targets=[]):
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
-        #TODO: Also need to check whether this story part 
+        #Also need to check whether this story part 
         char_name = None
 
         if character is not None:
@@ -296,7 +296,7 @@ class StoryGraph:
                 new_part = deepcopy(rule.story_change.story_parts[(rule.dummychar.get_name(), i)])
                 new_part.remove_actor(rule.dummychar)
 
-                #TODO: Add the target into this tuple
+                #Add the target into this tuple
                 new_part_and_loc_and_tar_tuple = (new_part, location_list[i], target_replacement_list[i])
                 part_and_loc_tuple_list.append(new_part_and_loc_and_tar_tuple)
             
@@ -521,8 +521,6 @@ class StoryGraph:
 
     Oh also. I want this function to return the starting points of each subgraph
 
-    ToDo: Fix this Subgraph Function
-
     def is_subgraph(self, other_graph, character):
 
         list_of_subgraph_locs = []
@@ -599,7 +597,7 @@ class StoryGraph:
         return len(list_of_subgraph_locs) > 0, list_of_subgraph_locs'''
 
     '''
-    TODO: List of Subgraph Locs should exclude parts of subgraph that overlaps two different timesteps
+    List of Subgraph Locs should exclude parts of subgraph that overlaps two different timesteps
     '''
     def is_subgraph(subgraph, supergraph, subgraph_char, supergraph_char, targets_list=[]):
 

@@ -1,7 +1,3 @@
-# TODO: Given a story node and a world state, can we use the function
-# Use the test_story_compatibility_with_storynode function to test story node compatibility.
-# Create an Object Representaiton of the tests in ConditionTest
-
 #Things that exist in the testws and can be tested:
 from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest, HeldItemTagTest, SameLocationTest
 from components.StoryObjects import CharacterNode, LocationNode, ObjectNode

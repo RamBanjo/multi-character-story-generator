@@ -173,7 +173,8 @@ class WorldState:
         if changeobject.changetype == ChangeType.TAGCHANGE:
             self.apply_tag_change(changeobject, reverse)
 
-    # TODO: Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
+    # Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
+    # Not needed: We can simply loop through the entire list and run this function for each item in the list.
     def apply_relationship_change(self, relchange_object, reverse=False):
 
         if (relchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (relchange_object.add_or_remove == ChangeAction.REMOVE and reverse):
@@ -288,21 +289,6 @@ class WorldState:
                 same_location = same_location and check_thing in list_of_things_at_checkloc
 
             return same_location
-        
-    # TODO:
-    # - We should create a function when, given a story node split list and a list of character names, returns True and a character grouping that splits the characters properly according to the following rules. If no good grouping is found, then return False, then an empty list:
-    #     - Make a list of all possible groupings from the list of node. Each tuple in the list represents a node grouping.
-    #         - There should be something in Utilfunctions that can help with this. If there isn't something like this yet, write a new one.
-    #         - For example, if it's a non-joint node without targets, then we would expect a tuple of size one.
-    #         - If it's a joint node, the tuple is size two. Index 0 are actors. Index 1 are targets.
-    #         - If the number of actors and the number of total slots from the split list are inequal, return False, and an empty list.
-    #     - Assign characters to the nodes.
-    #     - Test for story graph and world state validity.
-    #         - If the test fails: remove this grouping from the list of all groupings.
-    #         - If the test passes: return True, and this grouping.
-    #     - Finally, check if there are any groupings left in the possible list.
-    #         - If there are, loop to beginning.
-    #         - If there are not, return False, and an empty list.
 
     def make_split_joint_grouping_from_current_state(self, split_nodes, potential_actor_names):
 

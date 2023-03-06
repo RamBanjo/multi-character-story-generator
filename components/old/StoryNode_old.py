@@ -36,8 +36,6 @@ class StoryNode:
         #dict of nodes that continue from here. Each entry has character's unique ID as key and points to
         #the node that character will perform after leaving this node.
         self.next_nodes = dict()
-        
-        #TODO: An object that defines the change in relationship for characters and objects in this story node
 
     def get_name(self):
         return self.name

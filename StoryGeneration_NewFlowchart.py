@@ -91,7 +91,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
             #If it's just a normal rewrite rule, we can instantly apply it because we don't need to check its validity with other nodes. We'll apply it to one random good spot.
 
-            #TODO: Apply rewrite rule, but we can choose the specific spot? Or maybe just use insert function here because we already did the checks above and we know the rule can be applied because it passes the tests.
+            # Apply rewrite rule, but we can choose the specific spot? Or maybe just use insert function here because we already did the checks above and we know the rule can be applied because it passes the tests.
             # Maybe use the banned subgraph locs to ban everything that's not the chosen index?
             if not chosen_rule[0].is_joint_rule:
 
@@ -104,8 +104,26 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
             else:
 
                 applicable_character_names = []
-                applicable_character_names += shortest_path_character_names_list
-                applicable_character_names.remove(current_charname)
+                all_possible_character_list = []
+                character_count = chosen_rule[0].get_character_count()
+
+                if chosen_rule[0].join_type == JointType.JOIN:
+                    applicable_character_names += shortest_path_character_names_list
+                    applicable_character_names.remove(current_charname)
+
+                    all_possible_character_list += 
+                else:
+                    current_node = final_story_graph.story_parts.get((current_charname, chosen_rule[1]-1), None)
+
+                    #If the current node is None then there is nothing to continue this Joint Rule from. We need a Joint Node to use a ContinuousJoint or SplittingJoint, so this rule is not valid.
+                    if current_node == None:
+                        continue
+
+                    applicable_character_names += [actor.get_name for actor in current_node.actor]
+                    applicable_character_names += [target.get_name for target in current_node.target if target in final_story_graph.character_objects]
+                    #If we get into the else, this means the join type isn't a joinjoint therefore we just take everyone in the character's current node.
+
+                
 
                 # TODO: Most of the functions we have to write here are already taken care of in SG2WS.
 

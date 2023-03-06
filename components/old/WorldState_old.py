@@ -88,7 +88,7 @@ class WorldState:
         #If everything in self is contained in the other graph then it is a subgraph
         #To do this, we check every node and edge in this graph to see if it's contained within the other world state
 
-        #TODO: Use HashTable/Dict to optimize speed if it turns out this is super inefficient later on
+        #Use HashTable/Dict to optimize speed if it turns out this is super inefficient later on
 
         result = True
 

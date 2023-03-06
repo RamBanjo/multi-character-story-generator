@@ -13,7 +13,7 @@ class RewriteRule:
 
     These story graphs will only contain one storyline with no character assigned to them
 
-    TODO: Add a function in StoryGraph and WorldState that checks for subgraph in terms of story condition and relationship condition respectively
+    Add a function in StoryGraph and WorldState that checks for subgraph in terms of story condition and relationship condition respectively
     
     Story Change
     Relationship Change (already included in story_changes and story_condition thanks to timesteps coming pre-included with world states)
@@ -37,19 +37,19 @@ class RewriteRule:
 
         compatibility = True
 
-        #TODO: Check if the character contains tags in Required Tags (not compatible if false)
+        #Check if the character contains tags in Required Tags (not compatible if false)
 
         if self.required_tags is not None:
             for tag in self.required_tags.values():
                 compatibility = compatibility and tag in character_node.tags.values()
 
-        #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
+        #Check if character contains tags in Unwanted Tags (not compatible if true)
 
         if self.unwanted_tags is not None:
             for tag in self.unwanted_tags.values():
                 compatibility = compatibility and tag not in character_node.tags.values()
         
-        #TODO: Check if character's bias is within the acceptable range (not compatible if false)
+        #Check if character's bias is within the acceptable range (not compatible if false)
         if self.bias_range is not None:
             for bias in self.bias_range:
                 char_bias_value = character_node.biases[bias]
@@ -104,18 +104,18 @@ class JointRule:
 
         #This part below is lifted from regular rules.
         for i in range (0, len(character_list)):
-            #TODO: Check if the character contains tags in Required Tags (not compatible if false)
+            #Check if the character contains tags in Required Tags (not compatible if false)
 
             if self.required_tags_list[i] is not None:
                 for tag in self.required_tags_list[i].values():
                     compatibility = compatibility and tag in character_list[i].tags.values()
 
-            #TODO: Check if character contains tags in Unwanted Tags (not compatible if true)
+            #Check if character contains tags in Unwanted Tags (not compatible if true)
             if self.unwanted_tags_list[i] is not None:
                 for tag in self.unwanted_tags_list[i].values():
                     compatibility = compatibility and tag not in character_list[i].tags.values()
         
-            #TODO: Check if character's bias is within the acceptable range (not compatible if false)
+            #Check if character's bias is within the acceptable range (not compatible if false)
             if self.bias_range_list[i] is not None:
                 for bias in self.bias_range_list[i]:
                     char_bias_value = character_list[i].biases[bias]

@@ -30,11 +30,11 @@ testgraph.add_story_part(node_c, bob, home)
 testgraph.add_story_part(node_d, bob, home)
 testgraph.add_story_part(node_e, bob, home)
 
-# testgraph.remove_parts_by_count(1, 1, bob)
-# testgraph.insert_multiple_parts(insert_list, bob, absolute_step=1)
+testgraph.remove_parts_by_count(1, 1, bob)
+testgraph.insert_multiple_parts(insert_list, bob, absolute_step=1)
 
-# #Expercting a, x, y, z, c, d, e
-# for storypart in testgraph.story_parts:
-#     print(storypart, testgraph.story_parts[storypart])
+#Expercting a, x, y, z, c, d, e
+for storypart in testgraph.story_parts:
+    print(storypart, testgraph.story_parts[storypart])
 
 testgraph.check_continuation_validity(bob, 1, insert_list, purge_count=1)

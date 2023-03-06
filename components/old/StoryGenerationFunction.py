@@ -85,7 +85,7 @@ def generate_story_from_starting_graph(base_story, minimum_satisfy_length, rules
                 invalid_rule_coords = []
 
                 for potential_coord in current_loclist:
-                    #TODO: Replace True with a function that checks the coord's validity
+                    #Replace True with a function that checks the coord's validity
                     coord_validity = coord_validity or True
 
                     #Also, if a coord isn't valid due to it violating future world states, add it to this list.
@@ -119,7 +119,7 @@ def generate_story_from_starting_graph(base_story, minimum_satisfy_length, rules
                 else:
         
         # The location needs to be decided.
-        # TODO: Check the Potential Replacement if it's a node that changes the location.
+        # Check the Potential Replacement if it's a node that changes the location.
         # If there is, then for each one of those, pick a valid location. Then, from that point on that character's location will change.
         # To dictate this change, add a RelChange object to this node.
         # At the end of sorting out 
@@ -133,7 +133,7 @@ def generate_story_from_starting_graph(base_story, minimum_satisfy_length, rules
                         old_location = base_story.story_nodes[(current_char.get_name, shortest_route_length-1)].get_location()
                         new_location = old_location
 
-                        # TODO: List of relationship changes given the node keys and values
+                        # List of relationship changes given the node keys and values
                         # Function:
                         # Input: Input the List of NodeKey, NodeValue, and RelationshipChanges.
                         # Output: Return None if there is no Relationship Change, Return List of Relationship Change Objects if there is a Relationship Change

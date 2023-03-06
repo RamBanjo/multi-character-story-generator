@@ -40,7 +40,7 @@
     - How do I even handle targets from the perspective of the Rewrite Rules???? (DONE, TESTED)
         - Since a large portion will be replaced, do I need to list out the targets in all of those instances?
         - What do I need to do with the targets of these ones?
-        - (TODO: PAPER PLOTTING REQUIRED)
+        - (PAPER PLOTTING REQUIRED)
 25 Aug 2022 (ALL BACKLOGS COMPLETE)
     - Handle Targets for Joint Rule (DONE)
     - Test Multi-Group Splitting Rule (DONE)

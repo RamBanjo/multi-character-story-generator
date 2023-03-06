@@ -11,7 +11,7 @@ class RewriteRule:
     Story Precondition: Part of the graph.
     Relationship Precondition: Part of the graph.
 
-    TODO: Add a function in StoryGraph and WorldState that checks for subgraph in terms of story condition and relationship condition respectively
+    Add a function in StoryGraph and WorldState that checks for subgraph in terms of story condition and relationship condition respectively
     
     Story Change
     Relationship Change (already included in story_changes and story_condition thanks to timesteps coming pre-included with world states)
