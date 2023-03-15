@@ -54,16 +54,16 @@ wanted_sum = 5
 
 # print(testlist[:0])
 
-lista = permute_actor_list_for_joint_with_variable_length("A",["b","c","d","e","f"], 2,4)
-listb = all_possible_actor_groupings_with_ranges_and_freesizes([1, 1, 2], ["A","b","c","d"])
-listc = all_possible_actor_groupings_with_ranges_and_freesizes([-1, -1], ["A","b","c"])
+# lista = permute_actor_list_for_joint_with_variable_length("A",["b","c","d","e","f"], 4,4)
+# listb = all_possible_actor_groupings_with_ranges_and_freesizes([1, 1, 2], ["A","b","c","d"])
+# listc = all_possible_actor_groupings_with_ranges_and_freesizes([-1, -1], ["A","b","c"])
 
 
-for item in listc:
-    print(item)
+# for item in lista:
+#     print(item)
 
-def getfirst(e):
-    return e[0]
+# def getfirst(e):
+#     return e[0]
 
 # testdict = {"NodeA" : ["A", "B", "C"], "AAAANodeB": ["D","E"]}
 # print(sorted(list(testdict.items()), key=getfirst))
@@ -74,3 +74,19 @@ def getfirst(e):
 
 # suggested_included_tags={"Job":"Swordmaster", "Job":"Warrior", "Job":"Fighter"}
 # print(suggested_included_tags)
+
+list_d = [["a","b","c"], [], ["g","h"]]
+list_e = [["a","b","c"]]
+
+def perumute_all_combinations_from_each_list(given_list):
+
+    if len(given_list) == 1:
+        for item in given_list[0]:
+            yield [item]
+    else:
+        for item in given_list[0]:
+            for gen_item in perumute_all_combinations_from_each_list(given_list[1:]):
+                yield [item] + gen_item
+
+for x in permute_full_range_list(list_d):
+    print(x)

@@ -257,7 +257,7 @@ class StoryNode:
         for character_node in list_of_chars:
             compatibility = compatibility and self.check_target_compatibility(character_node)
 
-        return 
+        return compatibility
 
     def calculate_bonus_weight_score(self, character_node):
 

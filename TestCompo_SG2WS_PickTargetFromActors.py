@@ -28,6 +28,12 @@ basesg.add_story_part(waiting, bob, somewhere)
 basesg.add_story_part(waiting, charlie, somewhere)
 basesg.add_story_part(waiting, tyrant, somewhere)
 
-print(basesg.generate_valid_actor_and_target_split(revolt, 1, [alice, bob, charlie, tyrant]))
+act_tar_split = basesg.generate_valid_actor_and_target_split(revolt, 1, [alice, bob, charlie, tyrant])
+
+print(act_tar_split)
+for actor in act_tar_split["actor_group"]:
+    print("Group", "Actor", actor)
+for target in act_tar_split["target_group"]:
+    print("Group", "Target", target)
 
 # print(revolt.check_target_compatibility(tyrant))

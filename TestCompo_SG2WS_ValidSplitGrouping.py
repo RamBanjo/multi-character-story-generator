@@ -68,8 +68,8 @@ print(basesg.story_parts[("Alice", 0)])
 # K's target slot just so happens to fit only Alice, so while Alice is restrained there, we should be seeing a mix of Bob and Charlie being actors of J and K.
 
 cont_j = StoryNode(name="Continuation J", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
-cont_k = StoryNode(name="Continuation K", biasweight=0, tags={"Type":"Placeholder"}, charcount=1, target_count=1, bias_range_target={"lawbias":(0,100)})
-generated = basesg.generate_valid_character_grouping([cont_j, cont_k], 1, [alice, bob, charlie])
+cont_k = StoryNode(name="Continuation K", biasweight=0, tags={"Type":"Placeholder"}, charcount=1, target_count=1, bias_range_target={"lawbias":(50,100)})
+generated = basesg.pick_one_random_valid_character_grouping_from_all_valid_groupings(continuations=[cont_j, cont_k], abs_step=1, character_list=[alice, bob, charlie])
 
 groupno = 0
 print(generated)

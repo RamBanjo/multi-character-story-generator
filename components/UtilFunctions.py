@@ -390,6 +390,16 @@ def actor_count_sum(lhs, rhs):
 
     return -1
 
+def permute_actor_list_for_joint_with_range_and_freesize(current_actor, other_actors, size):
+
+    if type(size) == tuple:
+        return permute_actor_list_for_joint_with_variable_length(current_actor, other_actors, min_size=size[0], max_size=size[1])
+    
+    if size == -1:
+        return permute_actor_list_for_joint_with_variable_length(current_actor, other_actors, min_size=2, max_size=len(other_actors)+1)
+    
+    return permute_actor_list_for_joint(current_actor, other_actors, size)
+
 def permute_actor_list_for_joint(current_actor, other_actors, size_including_current_actor):
 
     all_actors = copy.copy(other_actors)

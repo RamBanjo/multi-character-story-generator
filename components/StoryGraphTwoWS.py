@@ -11,7 +11,7 @@ from components.RewriteRuleWithWorldState import JointType
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
-from components.UtilFunctions import actor_count_sum, all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, getfirst, getsecond, list_all_good_combinations_from_joint_join_pattern, permute_all_possible_groups_with_ranges_and_freesize
+from components.UtilFunctions import actor_count_sum, all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, getfirst, getsecond, list_all_good_combinations_from_joint_join_pattern, permute_all_possible_groups_with_ranges_and_freesize, permute_full_range_list
 from components.UtilityEnums import GenericObjectNode, TestType
 
 '''
@@ -440,6 +440,9 @@ class StoryGraph:
         #Check for that specific character's storyline
         #Check if Rule applies (by checking if the rule is a subgraph of this graph)
         #Check if the rule that will be applied is a valid continuation in each of the subgraph loc
+        #Should return true or false so we know whether there is at least one good insertion point.
+
+        good_insertion_found = False
 
         is_subgraph, subgraph_locs = self.check_for_pattern_in_storyline(rule.story_condition, character)
 
@@ -475,11 +478,14 @@ class StoryGraph:
                 #add the right parts
                 #But if we didn't purge anything, we should move our insertion point forward equal to the length of the condition we would've purged
                 self.insert_multiple_parts(rule.story_change, character, location_list, insert_point, copy=True, targets=rule.target_list)
+                good_insertion_found = True
 
         else:
             print("There are no valid insert points. Rule is not applied.")
 
         self.refresh_longest_path_length()
+
+        return good_insertion_found
 
     #Remake this function so that it has basically the same arguments and functionality as add_multiple_characters_to_part because by god this is so outdated.
     #references apply_joint_node and insert_joint_node should be fixed because apparently I fucked up in so, so many spots.
@@ -531,10 +537,17 @@ class StoryGraph:
 
     #To clarify: Targets to test are all actors.
     #This function should assume that all all needed actors and targets are already given.
-    def check_joint_continuity_validity(self, joint_rule, actors_to_test, targets_to_test, insert_index):
+    #TODO: Revise this function again, because it has incorrect usage of check add split validity. Check add joint validity seems fine.
+    #TODO: Another idea: We don't care about a specific continuity, we just want to know that there is at least one continuity that is valid.
+    #TODO: We'll just input the characters we want to use in this joint rule and let someone else worry about the validity. If at least one valid thing exists then we know it exists.
+    def check_joint_continuity_validity(self, joint_rule, main_character, other_character_list, insert_index):
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
 
-        for testchar in actors_to_test:
+        
+        entire_character_list = other_character_list
+        entire_character_list.append(main_character)
+
+        for testchar in entire_character_list:
             if testchar not in self.character_objects:
                 return False
         
@@ -544,18 +557,22 @@ class StoryGraph:
         # All the actors mentioned share the same node at the given insert_index
         # (That's it that's the only condition)
 
-        assumed_node = self.story_parts[(actors_to_test[0].get_name(), insert_index)]
+        assumed_node = self.story_parts[(main_character.get_name(), insert_index)]
         if joint_rule.joint_type == JointType.CONT or joint_rule.joint_type == JointType.SPLIT:
             #If the node at the insert index doesn't have the same characters as the given actors and targets: return False
             #We just need to take the first character from the actors to test, find out what node they're in, and check it for existence of other characters
             #(It does not matter whether they are actors or targets, as long as it's the same characters)
             
-            for actor in actors_to_test:
+            for actor in entire_character_list:
                 if not assumed_node.check_if_character_exists_in_node(actor):
                     return False
-            for target in targets_to_test:
-                if not assumed_node.check_if_character_exists_in_node(target):
-                    return False
+
+            # for actor in actors_to_test:
+            #     if not assumed_node.check_if_character_exists_in_node(actor):
+            #         return False
+            # for target in targets_to_test:
+            #     if not assumed_node.check_if_character_exists_in_node(target):
+            #         return False
 
         # If we are doing the Split rule, we must validate that each of the character in actors to test and targets to test are performing nodes included in the base nodes.
         # Before this can be done, we must decide what style of Joint Split we should be doing.
@@ -565,14 +582,14 @@ class StoryGraph:
             # For each of the actors in actors_to_test and target_to_test, turn them into one list. Then, call the list_all_good_combinations_from_joint_join_pattern from UtilFunctions to get a list.
             # After we get the list of all possible combinations, we then look for whether or not our specific combination of actors and targets exist in that list. If not, then return False. Otherwise continue with the check.
 
-            list_of_testing_actor_names = set()
+            # list_of_testing_actor_names = set()
 
-            for actor in actors_to_test:
-                list_of_testing_actor_names.add(actor.get_name())
-            for target in targets_to_test:
-                list_of_testing_actor_names.add(target.get_name())
+            # for actor in actors_to_test:
+            #     list_of_testing_actor_names.add(actor.get_name())
+            # for target in targets_to_test:
+            #     list_of_testing_actor_names.add(target.get_name())
 
-            list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=list(list_of_testing_actor_names), absolute_step_to_search=insert_index))
+            list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=list(entire_character_list), absolute_step_to_search=insert_index))
 
             found_exact_set = False
             for combi in list_of_possible_combi:
@@ -581,11 +598,33 @@ class StoryGraph:
 
             if not found_exact_set:
                 return False
-    
+            
+        #Might end up with a sampling method for now (Test one random combination to see if it works out). If it doesn't cause too many problems then we can do it this way.
+        #TODO: Consider: create a list of good splits and then look through to see if there is at least one good split there, if the sampling method doesn't work.
+        validity = True
+        cont_list = []
+
         if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
-            validity = self.check_add_joint_validity(joint_rule.joint_node, actors_to_test, targets_to_test, insert_index)
+            cont_list.append(joint_rule.joint_node)
         if joint_rule.joint_type == JointType.SPLIT:
-            validity = self.check_add_split_validity(joint_rule.split_list, actors_to_test, targets_to_test, insert_index)
+            cont_list += joint_rule.split_list
+
+        #TODO: Find an alternative of this line that genreates ALL valid character grouping instead
+        sampled_grouping = self.generate_valid_character_grouping(continuations=cont_list, abs_step=insert_index, character_list = entire_character_list)
+
+        if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
+            validity = validity and self.check_add_joint_validity(joint_node = joint_rule.joint_node, actors_to_test = sampled_grouping[0]["actor_group"], targets_to_test = sampled_grouping[0]["target_group"], insert_index=insert_index)
+        if joint_rule.joint_type == JointType.SPLIT:
+            
+            actor_list = []
+            target_list = []
+            
+            for test_index in range(0, len(cont_list)):
+                actor_list.append(sampled_grouping[test_index]["actor_group"])
+                target_list.append(sampled_grouping[test_index]["target_group"])
+            
+            validity = validity and self.check_add_split_validity(split_list=cont_list, actors_to_test=actor_list, targets_to_test=target_list, insert_index=insert_index)
+            #validity = validity and self.check_add_joint_validity(joint_node = cont_list[test_index], actors_to_test = sampled_grouping[test_index]["actor_group"], targets_to_test = sampled_grouping[test_index]["target_group"], insert_index=insert_index)
         
         return validity
     
@@ -636,16 +675,18 @@ class StoryGraph:
 
         graphcopy = deepcopy(self)
         graphcopy.joint_continuation([insert_index], True, joint_node, actors_to_test, None, targets_to_test)
+        graphcopy.fill_in_locations_on_self()
 
         validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
         del(graphcopy)
 
         return validity
         
-    def check_add_split_validity(self, split_list, actors_to_test, targets_to_test, insert_index, with_grouping = False):
+    def check_add_split_validity(self, split_list, actors_to_test, targets_to_test, insert_index):
         
         graphcopy = deepcopy(self)
-        graphcopy.split_continuation(split_list, actors_to_test, insert_index, None, target_replace=targets_to_test, with_grouping=with_grouping)
+        graphcopy.split_continuation(split_list, actors_to_test, insert_index, None, target_replace=targets_to_test)
+        graphcopy.fill_in_locations_on_self()
 
         validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
         del(graphcopy)
@@ -747,6 +788,32 @@ class StoryGraph:
         eligible_insertion_list = self.find_shared_base_joint_locations(characters, cont_rule, target_require)
         self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
 
+    def generate_all_valid_actor_and_target_splits(self, node, abs_step, character_list):
+        list_of_charnames = [x.get_name() for x in character_list]
+        all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes([node.charcount, node.target_count], list_of_charnames)
+        #print(all_possible_groupings)
+        state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
+
+        entire_list_of_split_dicts = []
+        for current_grouping in all_possible_groupings:
+            grouping_dict = {"actor_group":[], "target_group":[]}
+
+            for actor_name in current_grouping[0]:
+                grouping_dict["actor_group"].append(state_at_step.node_dict[actor_name])
+
+            for target_name in current_grouping[1]:
+                grouping_dict["target_group"].append(state_at_step.node_dict[target_name])
+
+            actor_validity = node.check_character_compatibility_for_many_characters(grouping_dict["actor_group"])
+            target_validity = node.check_target_compatibility_for_many_characters(grouping_dict["target_group"])
+
+            #print(current_grouping, actor_validity, target_validity)
+
+            if actor_validity and target_validity:
+                entire_list_of_split_dicts.append(grouping_dict)
+
+        return entire_list_of_split_dicts
+
     #This function, given a list of characters and a number of characters that should be a target, returns a dict of actor list and target list.
     #Whenever characters are assigned to a joint node where the target count is not 0, call this to make a split.
     def generate_valid_actor_and_target_split(self, node, abs_step, character_list):
@@ -761,47 +828,100 @@ class StoryGraph:
         #Of course, we also need to include an exit clause in the event that all the possible combinations are already exhausted.
 
         #We do this first. Index 0 is for Actors, Index 1 is for Targets
+
+        entire_approved_list = self.generate_all_valid_actor_and_target_splits(node=node, abs_step=abs_step, character_list=character_list)
+        #print(entire_approved_list)
+
+        if len(entire_approved_list) == 0:
+            return None
+        
+        random_grouping_from_list = random.choice(entire_approved_list)
+        return random_grouping_from_list
+
+
+    #TODO: Generate ALL Valid Character Grouping for use in validity testing, in order to ensure at least one valid case exists.
+    def generate_all_valid_character_grouping(self, continuations, abs_step, character_list):
+
+        grouping_size_list = []
+        for node in continuations:
+            grouping_size_list.append(actor_count_sum(node.charcount, node.target_count))
+
         list_of_charnames = [x.get_name() for x in character_list]
-        all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes([node.charcount, node.target_count], list_of_charnames)
+        all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes(grouping_size_list, list_of_charnames)
 
         state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
-        found_valid_grouping = False
 
-        while (not found_valid_grouping):
+        all_valid_groupings = []
+        for current_group in all_possible_groupings:
+            current_group_with_current_state_charnodes = []
 
-            #Return None if we have exhausted all of the possible groupings.
-            
-            if len(all_possible_groupings) <= 0:
-                return None
+            for current_subgroup in current_group:
+                subgroup_char = []
+                for charname in current_subgroup:
+                    subgroup_char.append(state_at_step.node_dict[charname])
+                current_group_with_current_state_charnodes.append(subgroup_char)
 
-            #Pick a random possible grouping from the list
-            random_grouping_from_list = random.choice(all_possible_groupings)
-            # print(len(all_possible_groupings), random_grouping_from_list)
+            list_of_possible_splits_for_each_cont = []
+            for story_index in range(0, len(continuations)):
+                current_subgroup_indexed = current_group_with_current_state_charnodes[story_index]
+                current_node = continuations[story_index]
+                list_of_all_actor_target_split_for_current_cont = self.generate_all_valid_actor_and_target_splits(node=current_node, abs_step=abs_step, character_list=current_subgroup_indexed)
+                list_of_possible_splits_for_each_cont.append(list_of_all_actor_target_split_for_current_cont)
 
-            #Remove it so it's never chosen again
-            all_possible_groupings.remove(random_grouping_from_list)
+            #In the case that there are certain nodes with characters who has no valid spots, permute full range list will not generate anything and the list will be empty
+            for item in permute_full_range_list(list_of_possible_splits_for_each_cont):
+                all_valid_groupings.append(item)
 
-            grouping = {"actor_group":[], "target_group":[]}
+        # There is no need to run this test again because generate_all_valid_actor_and_target_splits already generates the splits so that each character has a valid spot to stay
+        #
+        # for grouping_to_test in list_of_combis_to_test:
+        #     this_grouping_is_valid = True
+        #     for story_index in range(0, len(continuations)):
 
-            for actor_name in random_grouping_from_list[0]:
-                grouping["actor_group"].append(state_at_step.node_dict[actor_name])
+        #         current_subgroup_to_test = grouping_to_test[story_index]
+        #         current_node_to_test = continuations[story_index]
 
-            for target_name in random_grouping_from_list[1]:
-                grouping["target_group"].append(state_at_step.node_dict[target_name])
+        #         actor_grouping = current_subgroup_to_test["actor_group"]
+        #         target_grouping = current_subgroup_to_test["target_group"]
 
-            
-            actor_validity = node.check_character_compatibility_for_many_characters(grouping["actor_group"])
-            target_validity = node.check_target_compatibility_for_many_characters(grouping["target_group"])
-            # print(actor_validity, target_validity)
+        #         char_compatibility = current_node_to_test.check_character_compatibility_for_many_characters(actor_grouping)
+        #         target_compatibility = current_node_to_test.check_target_compatibility_for_many_characters(target_grouping)
 
-            if actor_validity and target_validity:
-                return grouping
+        #         this_grouping_is_valid = this_grouping_is_valid and char_compatibility and target_compatibility
+
+        #     #if this grouping is valid after testing all the nodes then it is valid, add it to the list of valid groupings
+        #     if this_grouping_is_valid:
+        #         all_valid_groupings.append(grouping_to_test)
+        # print(list_of_combis_to_test == all_valid_groupings)
+
+        return all_valid_groupings
+
+    def pick_one_random_valid_character_grouping_from_all_valid_groupings(self, continuations, abs_step, character_list, verbose=False):
+        entire_approved_list = self.generate_all_valid_character_grouping(continuations=continuations, abs_step=abs_step, character_list=character_list)
+        
+        if verbose:
+            groupingno = 0
+            for approved_grouping in entire_approved_list:
+                groupno = 0
+                for actor_tar_group in approved_grouping:
+                    for actor in actor_tar_group["actor_group"]:
+                        print("Grouping", groupingno, "NodeGroup", groupno, "Actor", actor)
+                    for target in actor_tar_group["target_group"]:
+                        print("Grouping", groupingno, "NodeGroup", groupno, "Target", target)
+                    groupno += 1
+                groupingno += 1
+
+        if len(entire_approved_list) == 0:
+            return None
+        
+        random_grouping_from_list = random.choice(entire_approved_list)
+        return random_grouping_from_list
+
 
     #Please note that Grouping is a list that is used to determine group size. For example, if it is [1, 3], this means one character in the first group and 3 characters in the second group.
     #This function can now handle targets!
     #Congratulations! This functions works as all is intended. We're all good now on this department.
     def generate_valid_character_grouping(self, continuations, abs_step, character_list):
-        '''This function can accept -1 and tuple ranges.'''
 
         # Grouping information is based on the continuations of the story nodes we were given.
         #This also includes the target slots.
