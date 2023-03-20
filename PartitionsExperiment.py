@@ -75,18 +75,18 @@ wanted_sum = 5
 # suggested_included_tags={"Job":"Swordmaster", "Job":"Warrior", "Job":"Fighter"}
 # print(suggested_included_tags)
 
-list_d = [["a","b","c"], [], ["g","h"]]
-list_e = [["a","b","c"]]
+# list_d = [["a","b","c"], [], ["g","h"]]
+# list_e = [["a","b","c"]]
 
-def perumute_all_combinations_from_each_list(given_list):
+# def perumute_all_combinations_from_each_list(given_list):
 
-    if len(given_list) == 1:
-        for item in given_list[0]:
-            yield [item]
-    else:
-        for item in given_list[0]:
-            for gen_item in perumute_all_combinations_from_each_list(given_list[1:]):
-                yield [item] + gen_item
+#     if len(given_list) == 1:
+#         for item in given_list[0]:
+#             yield [item]
+#     else:
+#         for item in given_list[0]:
+#             for gen_item in perumute_all_combinations_from_each_list(given_list[1:]):
+#                 yield [item] + gen_item
 
-for x in permute_full_range_list(list_d):
-    print(x)
+# for x in permute_full_range_list(list_d):
+#     print(x)

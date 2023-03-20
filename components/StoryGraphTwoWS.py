@@ -537,42 +537,40 @@ class StoryGraph:
 
     #To clarify: Targets to test are all actors.
     #This function should assume that all all needed actors and targets are already given.
-    #TODO: Revise this function again, because it has incorrect usage of check add split validity. Check add joint validity seems fine.
-    #TODO: Another idea: We don't care about a specific continuity, we just want to know that there is at least one continuity that is valid.
-    #TODO: We'll just input the characters we want to use in this joint rule and let someone else worry about the validity. If at least one valid thing exists then we know it exists.
-    def check_joint_continuity_validity(self, joint_rule, main_character, other_character_list, insert_index):
+    #TODO: A lot of checks done in the Apply Joint Rule section are redundant, because they are already done here. We might be able to deprecate the checks done in there, just apply the node if it passes the tests in here.
+    def check_joint_continuity_validity(self, joint_rule, main_character, grouping_split, insert_index):
+        
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
+        entire_character_list = []
 
-        
-        entire_character_list = other_character_list
-        entire_character_list.append(main_character)
-
-        for testchar in entire_character_list:
-            if testchar not in self.character_objects:
-                return False
-        
-        validity = False
+        for split in grouping_split:
+            for actor in split["actor_group"]:
+                if actor not in self.character_objects:
+                    return False
+                else:
+                    entire_character_list.append(actor)
+            for target in split["target_group"]:
+                if target not in self.character_objects:
+                    return False
+                else:
+                    entire_character_list.append(target)
 
         #Before anything else, if we're trying to test for cont or split, we must make sure that the node at the insert index fulfill the following conditions:
         # All the actors mentioned share the same node at the given insert_index
         # (That's it that's the only condition)
 
+        if main_character not in entire_character_list:
+            return False
+
         assumed_node = self.story_parts[(main_character.get_name(), insert_index)]
         if joint_rule.joint_type == JointType.CONT or joint_rule.joint_type == JointType.SPLIT:
+
             #If the node at the insert index doesn't have the same characters as the given actors and targets: return False
             #We just need to take the first character from the actors to test, find out what node they're in, and check it for existence of other characters
             #(It does not matter whether they are actors or targets, as long as it's the same characters)
-            
             for actor in entire_character_list:
                 if not assumed_node.check_if_character_exists_in_node(actor):
                     return False
-
-            # for actor in actors_to_test:
-            #     if not assumed_node.check_if_character_exists_in_node(actor):
-            #         return False
-            # for target in targets_to_test:
-            #     if not assumed_node.check_if_character_exists_in_node(target):
-            #         return False
 
         # If we are doing the Split rule, we must validate that each of the character in actors to test and targets to test are performing nodes included in the base nodes.
         # Before this can be done, we must decide what style of Joint Split we should be doing.
@@ -589,7 +587,12 @@ class StoryGraph:
             # for target in targets_to_test:
             #     list_of_testing_actor_names.add(target.get_name())
 
-            list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=list(entire_character_list), absolute_step_to_search=insert_index))
+            joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions)
+
+            if not joint_pattern_check[0]:
+                return False
+            
+            list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=joint_pattern_check[1], character_name_list=list(entire_character_list), absolute_step_to_search=insert_index)
 
             found_exact_set = False
             for combi in list_of_possible_combi:
@@ -609,21 +612,14 @@ class StoryGraph:
         if joint_rule.joint_type == JointType.SPLIT:
             cont_list += joint_rule.split_list
 
-        #TODO: Find an alternative of this line that genreates ALL valid character grouping instead
-        sampled_grouping = self.generate_valid_character_grouping(continuations=cont_list, abs_step=insert_index, character_list = entire_character_list)
+        # sampled_grouping = self.generate_valid_character_grouping(continuations=cont_list, abs_step=insert_index, character_list = entire_character_list)
+
+        #We already have the grouping, because our input is the grouping (duh)
 
         if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
-            validity = validity and self.check_add_joint_validity(joint_node = joint_rule.joint_node, actors_to_test = sampled_grouping[0]["actor_group"], targets_to_test = sampled_grouping[0]["target_group"], insert_index=insert_index)
+            validity = validity and self.check_add_joint_validity(joint_node = joint_rule.joint_node, actors_to_test = grouping_split[0]["actor_group"], targets_to_test = grouping_split[0]["target_group"], insert_index=insert_index)
         if joint_rule.joint_type == JointType.SPLIT:
-            
-            actor_list = []
-            target_list = []
-            
-            for test_index in range(0, len(cont_list)):
-                actor_list.append(sampled_grouping[test_index]["actor_group"])
-                target_list.append(sampled_grouping[test_index]["target_group"])
-            
-            validity = validity and self.check_add_split_validity(split_list=cont_list, actors_to_test=actor_list, targets_to_test=target_list, insert_index=insert_index)
+            validity = validity and self.check_add_split_validity(split_list=cont_list, chargroup_list=grouping_split, insert_index=insert_index)
             #validity = validity and self.check_add_joint_validity(joint_node = cont_list[test_index], actors_to_test = sampled_grouping[test_index]["actor_group"], targets_to_test = sampled_grouping[test_index]["target_group"], insert_index=insert_index)
         
         return validity
@@ -674,7 +670,7 @@ class StoryGraph:
     def check_add_joint_validity(self, joint_node, actors_to_test, targets_to_test, insert_index):
 
         graphcopy = deepcopy(self)
-        graphcopy.joint_continuation([insert_index], True, joint_node, actors_to_test, None, targets_to_test)
+        graphcopy.joint_continuation(loclist=[insert_index], joint_node=joint_node, actors=actors_to_test, target_list=targets_to_test, location=None, applyonce=True)
         graphcopy.fill_in_locations_on_self()
 
         validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
@@ -682,10 +678,11 @@ class StoryGraph:
 
         return validity
         
-    def check_add_split_validity(self, split_list, actors_to_test, targets_to_test, insert_index):
+    def check_add_split_validity(self, split_list, chargroup_list, insert_index):
         
         graphcopy = deepcopy(self)
-        graphcopy.split_continuation(split_list, actors_to_test, insert_index, None, target_replace=targets_to_test)
+        graphcopy.split_continuation(split_list=split_list, chargroup_list=chargroup_list, abs_step=insert_index)
+        # graphcopy.split_continuation(split_list, actors_to_test, insert_index, None, target_replace=targets_to_test)
         graphcopy.fill_in_locations_on_self()
 
         validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
@@ -693,100 +690,127 @@ class StoryGraph:
 
         return validity
 
-    def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False, target_require=[], target_replace=[], character_grouping=[]):
+    #TODO: Deprecate this function? Considering that we already test for graph pattern in check validity?
+    #TODO: YES I CAN DO IT!!!
+    # def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False, target_require=[], target_replace=[], character_grouping=[]):
 
-        if joint_rule.joint_type == JointType.JOIN:
-            self.apply_joining_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
-        if joint_rule.joint_type == JointType.CONT:
-            self.apply_continuous_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
-        if joint_rule.joint_type == JointType.SPLIT:
-            self.apply_splitting_joint_rule(joint_rule, characters, location_list, character_grouping=character_grouping, applyonce=applyonce)
-        self.refresh_longest_path_length()
+    #     if joint_rule.joint_type == JointType.JOIN:
+    #         self.apply_joining_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
+    #     if joint_rule.joint_type == JointType.CONT:
+    #         self.apply_continuous_joint_rule(joint_rule, characters, location_list, applyonce, target_require=target_require, target_replace=target_replace)
+    #     if joint_rule.joint_type == JointType.SPLIT:
+    #         self.apply_splitting_joint_rule(joint_rule, characters, location_list, character_grouping=character_grouping, applyonce=applyonce)
+    #     self.refresh_longest_path_length()
     
 
     def add_story_node_to_targets_storyline(self, pot_target, abs_step, story_part):
         if pot_target in self.character_objects:
             self.add_to_story_part_dict(character_name=pot_target.get_name(), abs_step=abs_step, story_part=story_part)
 
-    def joint_continuation(self, loclist, applyonce, joint_node, actors, location=None, target_list=[]):
+    def joint_continuation(self, loclist, joint_node, actors, applyonce=True, location=None, target_list=[]):
         insert_list = if_applyonce_choose_one(loclist, applyonce)
 
         #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
         #This is where the copy=false in the add node function comes in handy.
         for insert_loc in insert_list:
-            new_joint = self.insert_joint_node(joint_node=joint_node, other_actors=actors, location=location, absolute_step=insert_loc)
+            self.insert_joint_node(joint_node=joint_node, other_actors=actors, location=location, absolute_step=insert_loc, targets=target_list)
 
-            if len(target_list) > 0:
-                self.add_targets_to_storynode(new_joint, insert_loc, target_list)
+    def split_continuation(self, split_list, chargroup_list, abs_step, location_list = None, additional_targets_list = []):
+        for i in range(0, len(chargroup_list)):
+            new_joint = deepcopy(split_list)
+            new_joint.remove_all_actors()
 
-    def find_shared_base_joint_locations(self, character_list, rule, target_requirements):
+            current_location = None
+            if location_list != None:
+                current_location = location_list[i]
 
-        eligible_list = []
+            current_target_list = chargroup_list[i]["target_group"]
+            if additional_targets_list != None:
+                current_target_list += additional_targets_list[i]
 
-        for i in range(0, self.get_longest_path_length_by_character(character_list[0])):
+            return self.insert_joint_node(joint_node=split_list[i], main_actor=None, other_actors=chargroup_list[i]["actor_group"], location=current_location, targets=current_target_list, absolute_step=abs_step)
 
-            current_index_eligible = False
+            # if with_grouping and location_list != None:
+            #     added_joint = self.apply_joint_node(new_joint, chargroup_list[i], location_list[i], abs_step)
+            # if with_grouping and location_list == None:
+            #     added_joint = self.apply_joint_node(new_joint, chargroup_list[i], None, abs_step)
+            # if not with_grouping and location_list != None:
+            #     added_joint = self.insert_story_part(new_joint, chargroup_list[i], location_list[i], abs_step)
+            # if not with_grouping and location_list == None:
+            #     added_joint = self.insert_story_part(new_joint, chargroup_list[i], None, abs_step)
 
-            #First, check for the length of the first character's path
-            #Check if any nodes that character perform is the same as the first node in the join rule's requirement
-            current_first_char_node = self.story_parts.get((character_list[0].name, i), None)
-            if current_first_char_node.get_name() == rule.base_joint.get_name():
-                current_index_eligible = True
+            # if len(additional_targets_list) > 0:
+            #     self.add_targets_to_storynode(added_joint, abs_step, additional_targets_list[i])
 
-                if len(target_requirements) > 0:
-                    for target in target_requirements:
-                        current_index_eligible = current_index_eligible and target in current_first_char_node.target
+    #TODO: Evaluate whether or not we still need target requirements
+    # def find_shared_base_joint_locations(self, character_list, rule, target_requirements=[]):
 
-                #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if they are also in the joint node
-                for other_char_index in range(1, len(character_list)):
+    #     eligible_list = []
 
-                    current_index_eligible = current_index_eligible and character_list[other_char_index] in current_first_char_node.actor
+    #     for i in range(0, self.get_longest_path_length_by_character(character_list[0])):
+
+    #         current_index_eligible = False
+
+    #         #First, check for the length of the first character's path
+    #         #Check if any nodes that character perform is the same as the first node in the join rule's requirement
+    #         current_first_char_node = self.story_parts.get((character_list[0].name, i), None)
+    #         if current_first_char_node.get_name() == rule.base_joint.get_name():
+    #             current_index_eligible = True
+
+    #             if len(target_requirements) > 0:
+    #                 for target in target_requirements:
+    #                     current_index_eligible = current_index_eligible and target in current_first_char_node.target
+
+    #             #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if they are also in the joint node
+    #             for other_char_index in range(1, len(character_list)):
+
+    #                 current_index_eligible = current_index_eligible and character_list[other_char_index] in current_first_char_node.actor
                 
-                #Add to list if true
-                if current_index_eligible:
-                    eligible_list.append(i+1)
+    #             #Add to list if true
+    #             if current_index_eligible:
+    #                 eligible_list.append(i+1)
 
-        return eligible_list
+    #     return eligible_list
 
-    #If you figure out one, you figure out all three
-    def apply_joining_joint_rule(self, join_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
+    # #If you figure out one, you figure out all three
+    # def apply_joining_joint_rule(self, join_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
         
 
-        eligible_insertion_list = []
+    #     eligible_insertion_list = []
 
-        for i in range(0, self.get_longest_path_length_by_character(characters[0])):
+    #     for i in range(0, self.get_longest_path_length_by_character(characters[0])):
 
-            current_index_eligible = False
+    #         current_index_eligible = False
 
-            #First, check for the length of the first character's path
-            #Check if any nodes that character perform is the same as the first node in the join rule's requirement
-            current_first_char_node = self.story_parts.get((characters[0].name, i), None)
-            if current_first_char_node.get_name() == join_rule.base_actions[0].get_name():
+    #         #First, check for the length of the first character's path
+    #         #Check if any nodes that character perform is the same as the first node in the join rule's requirement
+    #         current_first_char_node = self.story_parts.get((characters[0].name, i), None)
+    #         if current_first_char_node.get_name() == join_rule.base_actions[0].get_name():
 
-                current_index_eligible = True
+    #             current_index_eligible = True
 
-                if len(target_require) > 0:
-                    for target in target_require[0]:
-                        current_index_eligible = current_index_eligible and target in current_first_char_node.target
+    #             if len(target_require) > 0:
+    #                 for target in target_require[0]:
+    #                     current_index_eligible = current_index_eligible and target in current_first_char_node.target
 
-                #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if it's the same as
-                #the required node
-                for other_char_index in range(1, len(characters)):
-                    current_chars_node = self.story_parts.get((characters[other_char_index].name, other_char_index), None)
-                    current_index_eligible = current_index_eligible and current_chars_node.get_name() == join_rule.base_actions[other_char_index].get_name()
-                    if len(target_require) > 0:
-                        for target in target_require[other_char_index]:
-                            current_index_eligible = current_index_eligible and target in current_chars_node.target
+    #             #If it is, check nodes performed by the 2nd character (and beyond) within the same absolute step to see if it's the same as
+    #             #the required node
+    #             for other_char_index in range(1, len(characters)):
+    #                 current_chars_node = self.story_parts.get((characters[other_char_index].name, other_char_index), None)
+    #                 current_index_eligible = current_index_eligible and current_chars_node.get_name() == join_rule.base_actions[other_char_index].get_name()
+    #                 if len(target_require) > 0:
+    #                     for target in target_require[other_char_index]:
+    #                         current_index_eligible = current_index_eligible and target in current_chars_node.target
                 
-                #Add to list if true
-                if current_index_eligible:
-                    eligible_insertion_list.append(i+1)
+    #             #Add to list if true
+    #             if current_index_eligible:
+    #                 eligible_insertion_list.append(i+1)
 
-        self.joint_continuation(eligible_insertion_list, applyonce, join_rule.joint_node, characters, location, target_replace)
+    #     self.joint_continuation(eligible_insertion_list, applyonce, join_rule.joint_node, characters, location, target_replace)
 
-    def apply_continuous_joint_rule(self, cont_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
-        eligible_insertion_list = self.find_shared_base_joint_locations(characters, cont_rule, target_require)
-        self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
+    # def apply_continuous_joint_rule(self, cont_rule, characters, location, applyonce=False, target_require=[], target_replace=[]):
+    #     eligible_insertion_list = self.find_shared_base_joint_locations(characters, cont_rule, target_require)
+    #     self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
 
     def generate_all_valid_actor_and_target_splits(self, node, abs_step, character_list):
         list_of_charnames = [x.get_name() for x in character_list]
@@ -997,50 +1021,24 @@ class StoryGraph:
             if this_one_is_valid:
                 return grouping_with_actor_target_info
 
-    def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):
+    # def apply_splitting_joint_rule(self, split_rule, characters, location_list, character_grouping=[], applyonce=False, target_require=[], target_replace=[]):
         
-        eligible_insertion_list = self.find_shared_base_joint_locations(characters, split_rule, target_require)
-        eligible_insertion_list = if_applyonce_choose_one(eligible_insertion_list, applyonce)
+    #     eligible_insertion_list = self.find_shared_base_joint_locations(characters, split_rule, target_require)
+    #     eligible_insertion_list = if_applyonce_choose_one(eligible_insertion_list, applyonce)
 
-        #Applying here is inserting the next nodes for each character in the node, splitting the characters apart. If working with more than 2 characters,
-        #It might be possible to split
+    #     #Applying here is inserting the next nodes for each character in the node, splitting the characters apart. If working with more than 2 characters,
+    #     #It might be possible to split
 
-        if len(character_grouping) > 0:
-            for insert_loc in eligible_insertion_list:
-                 self.split_continuation(split_rule.split_list, character_grouping, insert_loc, location_list, target_replace, with_grouping=True)
-        else:
-            for insert_loc in eligible_insertion_list:
-                self.split_continuation(split_rule.split_list, characters, insert_loc, location_list, target_replace, with_grouping=False)
+    #     if len(character_grouping) > 0:
+    #         for insert_loc in eligible_insertion_list:
+    #              self.split_continuation(split_rule.split_list, character_grouping, insert_loc, location_list, target_replace, with_grouping=True)
+    #     else:
+    #         for insert_loc in eligible_insertion_list:
+    #             self.split_continuation(split_rule.split_list, characters, insert_loc, location_list, target_replace, with_grouping=False)
 
     #Where is split list from? Split List is the list of all the nodes the characters go to after this one
     #There are two separate functions for this, because in some instances the split might not be a joint node, but still have object targets.
     #We probably don't need with_grouping, because we can instantly determine whether a node is a joint node by checking the charcount and target_count on each split.
-    def split_continuation(self, split_list, chargroup_list, abs_step, location_list = None, additional_targets_list = []):
-        for i in range(0, len(chargroup_list)):
-            new_joint = deepcopy(split_list)
-            new_joint.remove_all_actors()
-
-            current_location = None
-            if location_list != None:
-                current_location = location_list[i]
-
-            current_target_list = chargroup_list[i]["target_group"]
-            if additional_targets_list != None:
-                current_target_list += additional_targets_list[i]
-
-            return self.insert_joint_node(joint_node=split_list[i], main_actor=None, other_actors=chargroup_list[i]["actor_group"], location=current_location, targets=current_target_list, absolute_step=abs_step)
-
-            # if with_grouping and location_list != None:
-            #     added_joint = self.apply_joint_node(new_joint, chargroup_list[i], location_list[i], abs_step)
-            # if with_grouping and location_list == None:
-            #     added_joint = self.apply_joint_node(new_joint, chargroup_list[i], None, abs_step)
-            # if not with_grouping and location_list != None:
-            #     added_joint = self.insert_story_part(new_joint, chargroup_list[i], location_list[i], abs_step)
-            # if not with_grouping and location_list == None:
-            #     added_joint = self.insert_story_part(new_joint, chargroup_list[i], None, abs_step)
-
-            # if len(additional_targets_list) > 0:
-            #     self.add_targets_to_storynode(added_joint, abs_step, additional_targets_list[i])
 
     def add_targets_to_storynode(self, node, abs_step, target_list):
         for target in target_list:

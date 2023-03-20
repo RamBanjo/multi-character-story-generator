@@ -235,20 +235,20 @@
         - Condition Test List has been Tested, need to test Story Node Reading
     - Absolutely, positively, create examples from ReGEN
         - This, too, will be done soon.
-05 Jan 2022
+05 Jan 2023
     - Write a document of components
         - Done
     - Create a JSON List of Story Nodes
     - Create a JSON List of Replacement Rules
     - Create the Algorithm that generates story from the available information
         - This is the toughest part.
-12 Jan 2022
+12 Jan 2023
     - What was I doing?! I haven't even tested the Rewrite Rules or the Joint Rules??? (Testing Done for Rewrite Rules, Joint Rule Untested)
     - Also, we know who the characters in the joint rule are, we just don't know who will become a target? How to fix that?
     - Oh, yeah, maaaaybe just maybe the thing that generates random grouping can also be used to pick who the target should be, given the number of appropriate target? (Done, Untested)
         - Use this to pick among the number of valid characters. We gotta take care of this before we can take care of the generation.
     - I edited the thing that does the thing and now the Character Grouping Picker is now reliable. (Bad Combination Untested)
-19 Jan 2022
+19 Jan 2023
     - Should we allow tuples to be used as character count and target count?
         - Professor suggests that would make things more flexible, therefore he recommends that this should be done.
         - Tuple ranges are done! We just need to do testing.
@@ -262,7 +262,7 @@
             - -1 and -1 would add up to -1
             - (1, 3) and -1 would add up to -1
             - 2 and -1 would add up to -1
-26 Jan 2022
+26 Jan 2023
     - We now have the flowchart. Therefore, we can make the program, or at least, make it up to as much as we are confident with.
     - Something to deal with the Bias
         - In addition to Required and Unwanted Tags, add:
@@ -270,22 +270,22 @@
             - Function to calculate score for one node (DONE)
             - Function to calculate score from adding a list of nodes to a character's storyline (this advances the plot and thus suitability needs to be checked from) (DONE)
 
-2 Feb 2022
+2 Feb 20223
     - Consider what we have to do with Joining Joint Node (DONE)
     - Still need to do some tests. (Most of these are in TODO, remove these TODO as you are done with them.)
     - Clean up the TODOs in the code comment, and from now on only use it for uncompleted tasks because WOW we have a lot of TODOs we have already taken care of. (DONE)
     - get_joint_node_steps_from_character_storyline completed, it will help look fofr Joint Nodes in the storyline. (Done, Untested)
-9 Feb 2022
+9 Feb 2023
     - Multiple node bias score are MAX by default, can set to MEAN if desired
         - Professor suggested using only the character in the state at the start of the replacement rule for simplicity
     - Bias Score of the Splitting Joint can be calculated from averaging all possibilities.
     - Joining Joint Rule requires that there should be at least one of each node in the base 
         - For example, if applying Rule WXYZ requires has the base pattern with story nodes [W, X, Y, Z], then we know that we require at least 4 characters, and that all four story nodes must appear somewhere in the base pattern.
-16 Feb 2022
+16 Feb 2023
     - Testing for Calculate Score completed
     - Wrote Calculate Score from Rule
     - Will need to do testing for Calculate Score for Rules
-23 Feb 2022
+23 Feb 2023
     - THE TAGS! Of course, why did I not think about the tags!
     - Suggested include tags will only allow one key per value. I should have used tuple instead.
         - We do not need to handle these for objects and characters because most of the tags do not overlap (Job, Wealth, Living, Wanted, etc...)
@@ -294,7 +294,7 @@
             - Bias Ranges: Not needed because most actions don't have bonus for extreme on either sides (excluding neutral)
     - Merge Count from the Joint Rules is useless and redundant, get rid of it (We can already know how many characters we want from the continuing splits/joints information, so merge count can go bye-bye. Luckily, we don't seem to be using merge_count elsewhere.)
     - Continue the testing and add the function to the main function finally.
-2 Mar 2022
+2 Mar 3
     - We should create a function when, given a story node split list and a bunch of character names, returns True and a character grouping that splits the characters properly according to the following rules. If no good grouping is found, then return False, then an empty list:
         - Make a list of all possible groupings from the list of node. Each tuple in the list represents a node grouping.
             - For example, if it's a non-joint node without targets, then we would expect a tuple of size one.
@@ -309,7 +309,7 @@
             - If there are not, return False, and an empty list.
     - Since world state is involved, this function should be written in WorldState. Then, it can be called from the created state by SG2WS.
         - We already did this partially, it's in SG2WS.
-9 Mar 2022
+9 Mar 2023
     - Do not need to verify rules before adding them to list, we should verify them in the loop instead, so we know the other actors that we intend to use joint rule with.
     - The initial rule list is the entire possibility of rules, sorted by its score.
     - When we pick Top N, do not destroy the rest of the list. We should preserve it for the case where the current rule is invalid, then we push the one that's just out of range into the choose range.
@@ -319,3 +319,8 @@
         - If set as any other integer, the algorithm will stop pushing new rules into Top N after X attempts, where X is the integer.
         - When there are no more Top N, then the character has no valid actions and therefore has to do the wait action.
     - Need to fix accessibility issues for future coders: Write description for each function in triple quotes.
+
+16 Mar 2023
+    - Metrics during generation to calculate bonus score?
+    - Use REGEN's setting to generate story
+    - Complete Joint Rule Validity

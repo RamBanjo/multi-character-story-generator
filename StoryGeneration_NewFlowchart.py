@@ -132,16 +132,12 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     #If we get into the else, this means the join type isn't a joinjoint therefore we just take everyone in the character's current node.
 
                 valid_character_grouping = None
+                grouping_choose_complete = False
 
-                while valid_character_grouping == None:
-
-                    if len(all_possible_character_list) == 0:
-                        continue
+                while not grouping_choose_complete:
 
                     chosen_grouping = random.choice(all_possible_character_list)
                     all_possible_character_list.remove(chosen_grouping)
-
-                    cont_list = []
 
                     if current_rule.join_type == JointType.SPLIT:
                         chosen_grouping_split = current_rule.split_list
@@ -154,37 +150,31 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     for actor_name in chosen_grouping:
                         chosen_grouping_with_character_objects.append(current_state.node_dict[actor_name])
 
-                    chosen_grouping_split = final_story_graph.generate_valid_character_grouping(continuations=chosen_grouping_split, abs_step=current_index, character_list=chosen_grouping_with_character_objects)
+                    chosen_grouping_split = final_story_graph.pick_one_random_valid_character_grouping_from_all_valid_groupings(continuations=chosen_grouping_split, abs_step=current_index, character_list=chosen_grouping_with_character_objects)
 
                     #If there are no valid splits here at all, it's skipped.
                     if chosen_grouping_split is None:
                         continue
 
-                    #We need to test the validity for each of the 
-                    rule_validity = final_story_graph.check_joint_continuity_validity(joint_rule=chosen_rule[0], )
+                    rule_validity = final_story_graph.check_joint_continuity_validity(joint_rule=chosen_rule[0], main_character=current_character, grouping_split=chosen_grouping_split, insert_index=current_index)
 
+                    if rule_validity:
+                        valid_character_grouping = chosen_grouping_split
+                        grouping_choose_complete = True
+
+                    if len(all_possible_character_list) == 0:
+                        grouping_choose_complete = True
+
+                #If the combination is valid, then we need to apply the specified node/continuations and then mark that we have found a proper continuation.
+                if valid_character_grouping is not None:
                     
+                    #Apply the continuation based on whether the rule was a split rule.
+                    if current_rule.join_type == JointType.SPLIT:
+                        final_story_graph.split_continuation(split_list=current_rule.split_list, chargroup_list=valid_character_grouping, abs_step=current_index)
+                    else:
+                        final_story_graph.joint_continuation(loclist=[current_index], joint_node=current_rule.joint_node, actors=valid_character_grouping[0]["actor_group"], target_list=valid_character_grouping[0]["target_group"], applyonce=True)
 
-                
-
-                # TODO: Most of the functions we have to write here are already taken care of in SG2WS.
-
-                # TODO: Need to work the applicable character names further.
-                # Joining Joint: Don't modify this, it's perfect.
-                # Continuous Joint and Splitting Joint: Instead of doing this, use the names of the characters currently sharing the node with the current character at the current absolute step, ignoring their length.
-
-                # TODO: Once we have the list of characters, we test the validity here. If it's not valid we don't add anything and make this part loop again.
-                # If it's valid then it can be applied, so we should attempt to apply it.
-                # For Joining Joint: We will test validity by first creating a list of all possible character combinations. Then, we'll remove any bad character combination from this list.
-                # For Continuous Joint and Splitting Joint: There is no need to test validity because the only combination we know of is valid.
-
-                # TODO: To apply the rules, we would do the following:
-                # We can use generate_valid_actor_and_target_split for Joining Joint and Continuous Joint.
-                # We can use generate_valid_character_grouping for Splitting Joint.
-                # We will loop this until we find a valid character combination or there's no more character combinations to choose from.
-                # Both of theese functions will return None if there are not enough valid characters, so we know to not set rule_for_this_character_found to True yet and make the program look for a new rule.
-
-                # TODO: If we have found a good character combination, we'll apply it here.
+                    rule_for_this_character_found = True
             
             #If we don't find the rule to apply yet, we might need to add new rules to top_n. Suitable rules might be clogged behind invalid joint rules.
             if not rule_for_this_character_found:
