@@ -204,6 +204,11 @@
         "edge_name": "holds",
         "value": null
     },{
+        "from_node": "Main_Town",
+        "to_node": "Arthur",
+        "edge_name": "holds",
+        "value": null
+    },{
         "from_node": "Peasant_Village",
         "to_node": "Smelly_Sally",
         "edge_name": "holds",
@@ -211,6 +216,11 @@
     },{
         "from_node": "Peasant_Village",
         "to_node": "Filthy_Phil",
+        "edge_name": "holds",
+        "value": null
+    },{
+        "from_node": "Peasant_Village",
+        "to_node": "Robin_Hood",
         "edge_name": "holds",
         "value": null
     },{

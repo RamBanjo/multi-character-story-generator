@@ -1,9 +1,11 @@
+import copy
 from components.RelChange import *
 from components.StoryGraphTwoWS import StoryGraph
 from components.StoryObjects import *
 from components.ConditionTest import *
 from components.StoryNode import *
 from components.UtilityEnums import *
+from components.RewriteRuleWithWorldState import *
 
 import json
 
@@ -53,6 +55,79 @@ def read_list_of_objects_from_json(json_file_name, verbose = False):
         print("Object list is complete! List size:", str(len(obj_list_returns)))
     return obj_list_returns
 
+#TODO: Because almost all of these require inputs of object such as a list of story nodes, and we don't want to repeat ourselves every single time, then the way reading rewrite rules should work is that we call the nodes' name from the list instead:
+
+def read_rewriterule_from_json(file_name, node_dict):
+
+    data = read_from_json(file_name)
+
+    return read_rewriterule_from_extracted_dict(data, node_dict)
+
+def make_node_dict(node_list):
+    
+    node_dict = dict()
+
+    for node in node_list:
+        node_dict[node.get_name()] = node
+
+    return node_dict
+
+def read_rewriterule_from_extracted_dict(data, node_dict):
+
+    designated_condition = []
+    designated_rewrite = []
+
+    for condition_node_name in data.get("story_condition_list", []):
+        designated_condition.append(node_dict.get(condition_node_name, None))
+
+    for rewrite_node_name in data.get("story_change_list", []):
+        designated_rewrite.append(node_dict.get(rewrite_node_name, None))
+
+    if None in designated_condition or None in designated_rewrite:
+        return None
+
+    if len(condition_node_name) <= 0 or len(rewrite_node_name) <= 0:
+        return None
+
+    return RewriteRule(story_condition=designated_condition, story_change=designated_rewrite ,**data)
+
+# def read_list_of_jointrules_from_json(json_file_name, verbose=False):
+#     data = read_from_json(json_file_name)
+
+#     obj_list_returns = []
+
+#     for sub_data in data:
+#         detected_type = sub_data.get("type", "[Cannot Find Joint Rule Type]")
+#         match detected_type:
+#             case "joining_joint":
+#                 if verbose:
+#                     print("Adding Joining Joint Rule:", sub_data["name"])
+#                 obj_list_returns.append(read_joining_joint_rule(sub_data))
+#             case "cont_joint":
+#                 if verbose:
+#                     print("Adding Continuous Joint Rule:", sub_data["name"])                
+#                 obj_list_returns.append(read_cont_joint_rule(sub_data))
+#             case "splitting_joint":
+#                 if verbose:
+#                     print("Adding Splitting Joint Rule:", sub_data["name"])                
+#                 obj_list_returns.append(read_split_joint_rule(sub_data))
+#             case _:
+#                 if verbose:
+#                     print("Invalid object type, nothing added. Detected type:", detected_type)
+
+#     if verbose:
+#         print("Object list is complete! List size:", str(len(obj_list_returns)))
+#     return obj_list_returns
+
+# def read_joining_joint_rule(data, story_node_list):
+#     return JoiningJointRule(**data)
+
+# def read_cont_joint_rule(data):
+#     return ContinuousJointRule(**data)
+
+# def read_split_joint_rule(data):
+#     return SplittingJointRule(**data)
+
 #Switch Case?
 #There are so many types of Condition Tests so it might be better to break this into multiple functions
 
@@ -85,11 +160,33 @@ def read_condition_test_list_from_json(json_file_name, world_state):
 
     return data
 
+def make_object_node_dict_from_worldstate(world_state):
+
+    return_ws = copy.deepcopy(world_state.node_dict)
+    #Check if these four already exist.
+    
+    reserved_keys  = ["generic_actor","generic_location","generic_target","all_actors"]
+
+    #If it already exists, return None to show that this World State isn't valid.
+    for testkey in reserved_keys:
+        if testkey in return_ws.keys():
+            return None
+
+    #If this is what we're doing, we need to prevent these names from being used to name Nodes
+    return_ws["generic_actor"] = GenericObjectNode.GENERIC_ACTOR
+    return_ws["generic_location"] = GenericObjectNode.GENERIC_LOCATION
+    return_ws["generic_target"] = GenericObjectNode.GENERIC_TARGET
+    return_ws["all_actors"] = GenericObjectNode.ALL_ACTORS
+
+    return return_ws
+
 def read_held_item_test_from_extracted_dict(data, world_state):
 
-    designated_holder = world_state.node_dict.get(data.get("holder", None), None)
-    designated_tag = world_state.node_dict.get(data.get("tag_to_test", None), None)
-    designated_value = world_state.node_dict.get(data.get("value_to_test", None), None)
+    ws_dict = make_object_node_dict_from_worldstate(world_state)
+
+    designated_holder = ws_dict.get(data.get("holder", None), None)
+    designated_tag = ws_dict.get(data.get("tag_to_test", None), None)
+    designated_value = ws_dict.get(data.get("value_to_test", None), None)
     designated_inverse = data.get("inverse", False)
 
     if designated_holder is None or designated_tag is None:
@@ -101,8 +198,10 @@ def read_held_item_test_from_extracted_dict(data, world_state):
 
 def read_has_edge_test_from_extracted_dict(data, world_state):
 
-    designated_from_node = world_state.node_dict.get(data.get("from", None), None)
-    designated_to_node = world_state.node_dict.get(data.get("to", None), None)
+    ws_dict = make_object_node_dict_from_worldstate(world_state)
+
+    designated_from_node = ws_dict.get(data.get("from", None), None)
+    designated_to_node = ws_dict.get(data.get("to", None), None)
     designated_edge_name = data.get("edge_name", None)
     designated_value = data.get("value", None)
     desginated_soft_equal = data.get("soft_equal", False)
@@ -117,8 +216,10 @@ def read_has_edge_test_from_extracted_dict(data, world_state):
 
 def read_has_double_edge_test_from_extracted_dict(data, world_state):
 
-    designated_from_node = world_state.node_dict.get(data.get("from", None), None)
-    designated_to_node = world_state.node_dict.get(data.get("to", None), None)
+    ws_dict = make_object_node_dict_from_worldstate(world_state)
+
+    designated_from_node = ws_dict.get(data.get("from", None), None)
+    designated_to_node = ws_dict.get(data.get("to", None), None)
     designated_edge_name = data.get("edge_name", None)
     designated_value = data.get("value", None)
     desginated_soft_equal = data.get("soft_equal", False)
@@ -132,13 +233,15 @@ def read_has_double_edge_test_from_extracted_dict(data, world_state):
     return HasDoubleEdgeTest(**kwargs)
 
 def read_same_location_test_from_extracted_dict(data, world_state):
+    
+    ws_dict = make_object_node_dict_from_worldstate(world_state)
 
     list_to_test = []
 
     for char_name in data["char_name_list"]:
 
-        if world_state.node_dict.get(char_name, None) is not None:
-            list_to_test.append(world_state.node_dict[char_name])
+        if ws_dict.get(char_name, None) is not None:
+            list_to_test.append(ws_dict[char_name])
 
     kwargs = {"list_to_test":list_to_test, "inverse":data["inverse"]}
 
@@ -147,8 +250,12 @@ def read_same_location_test_from_extracted_dict(data, world_state):
 #Story Node will require some conversions from the test functions above
 
 def read_story_node_from_extracted_dict(data, world_state):
-    test_list = read_list_of_tests_from_json(data["condition_test_list"], world_state)
-    return StoryNode(condition_tests=test_list, **data)
+    test_list = read_list_of_tests_from_data(data.get("condition_test_list", []), world_state)
+
+    #TODO: Read tagchange object and relchange object
+    change_list = read_list_of_changes_from_extracted_list(data.get("changes_list", []), world_state)
+    
+    return StoryNode(condition_tests=test_list, effects_on_next_ws=change_list, **data)
 
 def read_story_node_from_json(json_file_name, world_state):
     data = read_from_json(json_file_name)
@@ -158,13 +265,12 @@ def read_list_of_story_nodes_from_json(json_file_name, world_state):
     data = read_from_json(json_file_name)
     list_of_story_nodes = []
     for story_node_data in data:
-        read_story_node_from_extracted_dict(story_node_data, world_state)
+        list_of_story_nodes.append(read_story_node_from_extracted_dict(story_node_data, world_state))
     return list_of_story_nodes
 
-def read_list_of_tests_from_json(json_file_name, world_state):
-
-    data = read_list_of_tests_from_data(json_file_name, world_state)
-    return data
+# def read_list_of_tests_from_json(json_file_name, world_state):
+#     data = read_list_of_tests_from_data(json_file_name, world_state)
+#     return data
     
 
 def read_list_of_tests_from_data(data, world_state):
@@ -206,24 +312,32 @@ def text_to_changeaction(text):
     return add_or_remove
 
 
-def make_tag_change_object_from_extracted_list(data):
+def make_tag_change_object_from_extracted_list(data, world_state):
+
+    ws_dict = make_object_node_dict_from_worldstate(world_state)
+    object_node_name = ws_dict[data["object_node_name_text"]]
+    
+    if type(object_node_name) == ObjectNode:
+        object_node_name = object_node_name.get_name()
 
     add_or_remove = text_to_changeaction(data["add_or_remove_text"])
 
     if add_or_remove == "invalid":
         return
 
-    return TagChange(add_or_remove=add_or_remove, **data)
+    return TagChange(add_or_remove=add_or_remove, object_node_name=object_node_name, **data)
 
 def make_rel_change_object_from_extracted_list(data, world_state):
 
-    add_or_remove = text_to_changeaction(data["add_or_remove"])
+    ws_dict = make_object_node_dict_from_worldstate(world_state)
+
+    add_or_remove = text_to_changeaction(data["add_or_remove_text"])
 
     if add_or_remove == "invalid":
         return
 
-    node_a = world_state.node_dict[data["node_a_name"]]
-    node_b = world_state.node_dict[data["node_b_name"]]
+    node_a = ws_dict[data["node_a_name"]]
+    node_b = ws_dict[data["node_b_name"]]
     
     return RelChange(node_a = node_a, node_b = node_b, add_or_remove=add_or_remove, **data)
 

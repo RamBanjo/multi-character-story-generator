@@ -11,13 +11,16 @@ class RewriteRule:
     # With the same logic, we don't need World State Condition either, since we can put all the conditions in the story nodes
 
 
-    def __init__(self, story_condition, story_change, name="", remove_before_insert = False, target_list = None):
+    def __init__(self, story_condition, story_change, name="", remove_before_insert = False, target_list = None, **kwargs):
         self.rule_name = name
         self.story_condition = story_condition
         self.story_change = story_change
         self.is_joint_rule = False
         self.remove_before_insert = remove_before_insert
         self.target_list = target_list
+
+    def __str__(self) -> str:
+        return self.rule_name
 
     #Figure out how to choose the best node
     #Maybe use the metrics?
@@ -99,7 +102,7 @@ Joining Joint's base is a list of nodes for each of the character intending to j
 
 #Handling base action for Joining Joint Rule: All the nodes mentioned in base actions must exist in some way, though depending on the number of characters allowed in the joint node, we might allow extras.
 class JoiningJointRule(JointRule):
-    def __init__(self, base_actions, joint_node, rule_name="", target_list=None):
+    def __init__(self, base_actions, joint_node, rule_name="", target_list=None, **kwargs):
 
         super().__init__(JointType.JOIN, rule_name, target_list=target_list)
 
@@ -122,7 +125,7 @@ Cont. Joint's base is a joint itself, and then a joint would connect to it.
 '''
 
 class ContinuousJointRule(JointRule):
-    def __init__(self, base_joint, joint_node, rule_name="", target_list=None):
+    def __init__(self, base_joint, joint_node, rule_name="", target_list=None, **kwargs):
 
         super().__init__(JointType.CONT, rule_name, target_list=target_list)
 
@@ -144,7 +147,7 @@ Splitting Joint Rule's base would be the joint node where dummy chars will go se
 '''
 
 class SplittingJointRule(JointRule):
-    def __init__(self, base_joint, split_list, rule_name="", target_list=None):
+    def __init__(self, base_joint, split_list, rule_name="", target_list=None, *kwargs):
 
         super().__init__(JointType.SPLIT, rule_name, target_list=target_list)
 

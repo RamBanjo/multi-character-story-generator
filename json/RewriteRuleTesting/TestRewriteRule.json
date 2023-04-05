@@ -1,0 +1,7 @@
+{
+    "name":"Test Rule",
+    "story_condition_list":["Node A", "Node B", "Node C"],
+    "story_change_list":["Node D"],
+    "remove_before_insert":false,
+    "target_list":null
+}

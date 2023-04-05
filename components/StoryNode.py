@@ -139,6 +139,10 @@ class StoryNode:
         return self.get_name() + " (Actors: " + self.get_actor_names() + ")"
 
     def __eq__(self, rhs):
+
+        if rhs is None:
+            return False
+
         return self.get_name() == rhs.get_name() and sorted(self.actor) == sorted(rhs.actor) and sorted(self.target) == sorted(rhs.target)
 
     def __ge__(self, rhs):

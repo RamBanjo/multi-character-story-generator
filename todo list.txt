@@ -323,4 +323,25 @@
 16 Mar 2023
     - Metrics during generation to calculate bonus score?
     - Use REGEN's setting to generate story
-    - Complete Joint Rule Validity
+    - Complete Joint Rule 
+23 Mar 2023
+    - Yay! We completed the main function!
+    - We need to do some testing, though, so we should take some things from ReGEN and as faithfully as possible, translate it to our system and run some testings to see if our story are similar to ReGEN
+        - Branching stories should be translated to 
+    - Compare between our work and ReGEN, what do we have that they don't?
+        - Multiple characters: ReGEN has only one player character, we should test multiple characters
+        - Afifinities: We should also test affinities later (ReGEN doesn't have lawbias or moral bias)
+        - Timesteps: ReGEN doesn't have a strict concept of time, because it assumes the questline goes as quickly as the player's playing speed
+    - How does time progress in our work, actually?
+        - Time should stop when it's not observed by any characters?
+        - Time should stop when it's not observed by a player or someone marked as a player?
+        - Time should stop when it's not observed by a player AND not interacted with by a player?
+        - Time should stop when it's not observed by a player, and it will move again when it's observed by the same player.
+        - Frozen Quest? Freeze only important quests?
+        - Events resolve before players can do them? Look into this after testing.
+30 Mar 2023
+    - The following things have been done since the last update:
+        - StoryGenerator is finished, but testing hasn't started yet because we haven't recreated ReGEN's Worldstate yet
+        - Generic objects added to JSON Reader
+        - Tag Changes and Rel Changes added to JSON Reader
+        - Added new characters to the REGEN JSON Objects (Player Characters to act with the NPCs)

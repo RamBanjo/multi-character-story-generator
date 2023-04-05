@@ -3,7 +3,7 @@
         "type": "character_object",
         "name": "Brave_Dave",
         "tags": {
-            "Type": "Character",
+            "Type": "NPC",
             "Rank": "Knight",
             "Alive":true
         },
@@ -16,7 +16,7 @@
         "type": "character_object",
         "name": "Smug_Smith",
         "tags": {
-            "Type": "Character",
+            "Type": "NPC",
             "Rank": "Lord",
             "Alive":true
         },
@@ -29,7 +29,7 @@
         "type": "character_object",
         "name": "Fancy_Fanny",
         "tags": {
-            "Type": "Character",
+            "Type": "NPC",
             "Rank": "Queen",
             "Alive":true
         },
@@ -42,7 +42,7 @@
         "type": "character_object",
         "name": "Regal_Regis",
         "tags": {
-            "Type": "Character",
+            "Type": "NPC",
             "Rank": "King",
             "Alive":true
         },
@@ -55,7 +55,7 @@
         "type": "character_object",
         "name": "Smelly_Sally",
         "tags": {
-            "Type": "Character",
+            "Type": "NPC",
             "Rank": "Peasant",
             "Alive":true
         },
@@ -68,7 +68,7 @@
         "type": "character_object",
         "name": "Filthy_Phil",
         "tags": {
-            "Type": "Character",
+            "Type": "NPC",
             "Rank": "Peasant",
             "Alive":true
         },
@@ -81,7 +81,7 @@
         "type": "character_object",
         "name": "Sly_Fry",
         "tags": {
-            "Type": "Character",
+            "Type": "NPC",
             "Rank": "Thief",
             "Alive":true
         },
@@ -94,13 +94,39 @@
         "type": "character_object",
         "name": "Rich_Ritchie",
         "tags": {
-            "Type": "Character",
+            "Type": "NPC",
             "Rank": "Tax Collector",
             "Alive":true
         },
         "biases": {
             "lawbias": 0,
             "moralbias": -30
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Arthur",
+        "tags": {
+            "Type": "Player",
+            "Rank": "Knight",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": 40,
+            "moralbias": 0
+        }
+    },
+    {
+        "type": "character_object",
+        "name": "Robin_Hood",
+        "tags": {
+            "Type": "Player",
+            "Rank": "Ranger",
+            "Alive":true
+        },
+        "biases": {
+            "lawbias": -40,
+            "moralbias": 0
         }
     },
     {

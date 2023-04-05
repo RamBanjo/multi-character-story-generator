@@ -1199,6 +1199,8 @@ class StoryGraph:
 
         return validity
 
+    #TODO: Help lmao I forgot if this check worldstate validity also includes itself
+    #If it does then I have no reason to add another check before adding nodes (we already check ws validity while running apply rule)
     def check_worldstate_validity_on_own_graph(self, start_step):
         self.refresh_longest_path_length()
 

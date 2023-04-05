@@ -90,3 +90,10 @@ wanted_sum = 5
 
 # for x in permute_full_range_list(list_d):
 #     print(x)
+
+testdict = {"Foo":1, "Bar":2, "Baz":3, "Honeycomb":16}
+
+print(testdict.keys())
+
+print("Foo" in testdict.keys())
+print("Brisket" in testdict.keys())

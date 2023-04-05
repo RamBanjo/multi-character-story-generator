@@ -52,3 +52,22 @@ test_sn = read_story_node_from_json("json/TestStoryNode.json", test_ws)
 print("We created a story node, now we're adding Alice to it!")
 test_sn.add_actor(test_ws.node_dict["Alice"])
 print(test_sn)
+
+print("Can we read a list of Story Nodes? Let's see if we can!")
+test_snode_list = read_list_of_story_nodes_from_json("json/RewriteRuleTesting/RRTNodeList.json", test_ws)
+
+snode_dict = make_node_dict(test_snode_list)
+print(snode_dict.items())
+
+print("Let's make a rule next")
+test_rule = read_rewriterule_from_json("json/RewriteRuleTesting/TestRewriteRule.json", snode_dict)
+print(test_rule, type(test_rule))
+
+print("We have a list of changes, can we read it?")
+
+changedata_test = [{"name":"Actor Dies","changetype":"tags","object_node_name_text":"generic_actor","tag":"Alive","value":False,"add_or_remove_text":"add"},{"name":"Remove Alice Wanted for Murder","changetype":"tags","object_node_name_text":"Alice","tag":"Wanted","value":"Murder","add_or_remove_text":"remove"},{"name":"Alice and Bob Become Friends","changetype":"rel","node_a_name":"Alice","node_b_name":"Bob","edge_name":"friends","value":"Profession","add_or_remove_text":"add"},{"name":"Location No Longer Holds Actor","changetype":"rel","node_a_name":"generic_location","node_b_name":"generic_actor","edge_name":"holds","value":"Profession","add_or_remove_text":"add"}]
+
+changelist = read_list_of_changes_from_extracted_list(data=changedata_test, world_state=test_ws)
+
+for thing in changelist:
+    print(thing.name)

@@ -12,7 +12,6 @@ DEFAULT_HOLD_EDGE_NAME = "holds"
 DEFAULT_ADJACENCY_EDGE_NAME = "connect"
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
-#TODO: In order to make life easier for myself during testing, I should convert this into multiple functions.
 def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0):
 
     #make a copy of the graph
@@ -88,7 +87,6 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
             chosen_rule = random.choice(top_n_acceptable_rules)
             top_n_acceptable_rules.remove(chosen_rule)
 
-
             current_rule = chosen_rule[0]
             current_index = chosen_rule[1]
             #Keep in mind that the the chosen rule is a tuple. Index 0 is the node itself, Index 1 is the location to apply to, Index 2 is the score (which we won't use here.)
@@ -99,14 +97,22 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
             # Maybe use the banned subgraph locs to ban everything that's not the chosen index?
             if not current_rule.is_joint_rule:
 
-                #Get the locations where this pattern can be applied, set everything as banned except the location that we want.
-                pattern_check_result = final_story_graph.check_for_pattern_in_storyline(current_rule.story_condition, current_character)
-                banned_locs = pattern_check_result[1]
-                banned_locs.remove(current_index)
+                current_purge_count = 0
 
-                #If the application of the rule is successful, then this should return true.
-                #Checking for continuation validity already exists within Apply Rewrite Rule, so we don't have to do anything extra here.
-                rule_for_this_character_found = final_story_graph.apply_rewrite_rule(chosen_rule, current_character, applyonce=True, banned_subgraph_locs=banned_locs)
+                if current_rule.remove_before_insert:
+                    current_purge_count = len(current_rule.story_condition)
+
+                nonjoint_cont_valid = final_story_graph.check_continuation_validity(actor=current_character, abs_step_to_cont_from=current_index, cont_list=current_rule.story_change, target_list=current_rule.target_list, purge_count=current_purge_count)
+
+                if nonjoint_cont_valid:
+                    #Get the locations where this pattern can be applied, set everything as banned except the location that we want.
+                    pattern_check_result = final_story_graph.check_for_pattern_in_storyline(current_rule.story_condition, current_character)
+                    banned_locs = pattern_check_result[1]
+                    banned_locs.remove(current_index)
+                    #At no point in apply rewrite rule or check for pattern in storyline does the continuation validity get checked so we need to check for continuation validity.
+                    #If the application of the rule is successful, then this should return true.
+                    #Checking for continuation validity already exists within Apply Rewrite Rule, so we don't have to do anything extra here.
+                    rule_for_this_character_found = final_story_graph.apply_rewrite_rule(chosen_rule, current_character, applyonce=True, banned_subgraph_locs=banned_locs)
             else:
 
                 applicable_character_names = []
@@ -122,11 +128,10 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     current_node = final_story_graph.story_parts.get((current_charname, current_index-1), None)
 
                     #If the current node is None then there is nothing to continue this Joint Rule from. We need a Joint Node to use a ContinuousJoint or SplittingJoint, so this rule is not valid.
-                    if current_node == None:
-                        continue
 
-                    applicable_character_names += [actor.get_name() for actor in current_node.actor]
-                    applicable_character_names += [target.get_name() for target in current_node.target if target in final_story_graph.character_objects]
+                    if current_node is not None:
+                        applicable_character_names += [actor.get_name() for actor in current_node.actor]
+                        applicable_character_names += [target.get_name() for target in current_node.target if target in final_story_graph.character_objects]
 
                     all_possible_character_list = [applicable_character_names]
                     #If we get into the else, this means the join type isn't a joinjoint therefore we just take everyone in the character's current node.
@@ -136,33 +141,34 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
                 while not grouping_choose_complete:
 
-                    chosen_grouping = random.choice(all_possible_character_list)
-                    all_possible_character_list.remove(chosen_grouping)
+                    if len(chosen_grouping > 0):
+                        chosen_grouping = random.choice(all_possible_character_list)
+                        all_possible_character_list.remove(chosen_grouping)
 
-                    if current_rule.join_type == JointType.SPLIT:
-                        chosen_grouping_split = current_rule.split_list
+                        if current_rule.join_type == JointType.SPLIT:
+                            chosen_grouping_split = current_rule.split_list
+                        else:
+                            chosen_grouping_split = [current_rule.joint_node]
+
+                        current_state = final_story_graph.make_state_at_step(current_index)
+                        chosen_grouping_with_character_objects = []
+
+                        for actor_name in chosen_grouping:
+                            chosen_grouping_with_character_objects.append(current_state.node_dict[actor_name])
+
+                        chosen_grouping_split = final_story_graph.pick_one_random_valid_character_grouping_from_all_valid_groupings(continuations=chosen_grouping_split, abs_step=current_index, character_list=chosen_grouping_with_character_objects)
+
+                        #If there are no valid splits here at all, it's skipped.
+                        if chosen_grouping_split is None:
+                            continue
+
+                        rule_validity = final_story_graph.check_joint_continuity_validity(joint_rule=chosen_rule[0], main_character=current_character, grouping_split=chosen_grouping_split, insert_index=current_index)
+
+                        if rule_validity:
+                            valid_character_grouping = chosen_grouping_split
+                            grouping_choose_complete = True
                     else:
-                        chosen_grouping_split = [current_rule.joint_node]
-
-                    current_state = final_story_graph.make_state_at_step(current_index)
-                    chosen_grouping_with_character_objects = []
-
-                    for actor_name in chosen_grouping:
-                        chosen_grouping_with_character_objects.append(current_state.node_dict[actor_name])
-
-                    chosen_grouping_split = final_story_graph.pick_one_random_valid_character_grouping_from_all_valid_groupings(continuations=chosen_grouping_split, abs_step=current_index, character_list=chosen_grouping_with_character_objects)
-
-                    #If there are no valid splits here at all, it's skipped.
-                    if chosen_grouping_split is None:
-                        continue
-
-                    rule_validity = final_story_graph.check_joint_continuity_validity(joint_rule=chosen_rule[0], main_character=current_character, grouping_split=chosen_grouping_split, insert_index=current_index)
-
-                    if rule_validity:
-                        valid_character_grouping = chosen_grouping_split
-                        grouping_choose_complete = True
-
-                    if len(all_possible_character_list) == 0:
+                        valid_character_grouping = None
                         grouping_choose_complete = True
 
                 #If the combination is valid, then we need to apply the specified node/continuations and then mark that we have found a proper continuation.
