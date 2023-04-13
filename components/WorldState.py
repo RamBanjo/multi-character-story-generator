@@ -1,4 +1,5 @@
 from cgitb import text
+from copy import deepcopy
 from numpy import true_divide
 
 from components.Edge import Edge
@@ -173,6 +174,29 @@ class WorldState:
         if changeobject.changetype == ChangeType.TAGCHANGE:
             self.apply_tag_change(changeobject, reverse)
 
+    # TODO: For each of the name found in list_of_test_object_names, find the corresponding object in this WorldState. Then, run tests given in the conditionalchange, replacing the placeholder token with the object.
+    # If all the tests are passed, apply the change, by calling apply relationship change and apply tag change from this very same worldstate. Phew!
+
+    # Note: We need to look at the state of the Previous World State, not this current world state. The changes should only be applied if and only if the previous world state passed those tests.
+
+    #TODO: Test this lol. Ram. You need to do the test with this. Raaam. Ram. Raaaaaaam...
+    def apply_conditional_change(self, condchange_object, previous_ws, reverse=False):
+
+        for item_name in condchange_object.list_of_test_object_names:
+
+            current_object = self.node_dict[item_name]
+
+            pass_test = True
+
+            for test in condchange_object.list_of_condition_tests:
+                translated_test = replace_placeholder_object_with_test_taker(test, current_object)
+                pass_test = pass_test and previous_ws.test_story_compatibility_with_conditiontest(translated_test)
+
+            if pass_test:
+                for change in condchange_object.list_of_changes:
+                    translated_change = replace_placeholder_object_with_change_haver(change, current_object)
+                    self.apply_some_change(translated_change, reverse=reverse)
+
     # Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
     # Not needed: We can simply loop through the entire list and run this function for each item in the list.
     def apply_relationship_change(self, relchange_object, reverse=False):
@@ -187,7 +211,7 @@ class WorldState:
             if relchange_object.node_b.get_name() not in self.node_dict:
                 self.node_dict[relchange_object.node_b.get_name()] = relchange_object.node_b
             #After adding nodes that don't already exist, make the connections and add it to the list of edges
-            self.connect(self.node_dict[relchange_object.node_a.get_name()], relchange_object.edge_name, self.node_dict[relchange_object.node_b.get_name()])
+            self.connect(from_node=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, to_node = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
 
         if (relchange_object.add_or_remove == ChangeAction.REMOVE and not reverse) or (relchange_object.add_or_remove == ChangeAction.ADD and reverse):
             #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
@@ -303,7 +327,87 @@ class WorldState:
 
         print(possible_grouping_lists)
 
+def replace_placeholder_object_with_test_taker(test, test_taker):
+        
+        #Check what kind of test is going to be done here
 
+        test_type = test.test_type
+
+        #TODO: Make a function to check the condition for each separate case
+        match test_type:
+            case TestType.HELD_ITEM_TAG:
+                return replace_placeholder_object_with_test_taker_holds(test, test_taker)
+            case TestType.SAME_LOCATION:
+                return replace_placeholder_object_with_test_taker_sameloc(test, test_taker)
+            case TestType.HAS_EDGE:
+                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker)
+            case TestType.HAS_DOUBLE_EDGE:
+                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker)
+            case _:
+                return None
+
+def replace_placeholder_object_with_test_taker_hasedge(test, test_taker):
+
+    if test.object_from_test is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
+        copiedtest = deepcopy(test)
+        copiedtest.object_from_test = test_taker
+        return copiedtest
+
+    if test.object_to_test is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
+        copiedtest = deepcopy(test)
+        copiedtest.object_to_test = test_taker
+        return copiedtest
+        
+    return test
+
+def replace_placeholder_object_with_test_taker_holds(test, test_taker):
+
+    if test.holder_to_test is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
+        copiedtest = deepcopy(test)
+        copiedtest.holder_to_test = test_taker
+        return copiedtest
+    
+    return test
+
+def replace_placeholder_object_with_test_taker_sameloc(test, test_taker):
+
+    if GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER in test.list_to_test:
+        copiedtest = deepcopy(test)
+        copiedtest.list_to_test.remove(GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER)
+        copiedtest.list_to_test.append(test_taker)
+        return copiedtest
+    
+def replace_placeholder_object_with_change_haver(changeobject, change_haver):
+
+    if changeobject.changetype == ChangeType.RELCHANGE:
+        return replace_placeholder_object_with_change_haver_rel(changeobject, change_haver)
+    if changeobject.changetype == ChangeType.TAGCHANGE:
+        return replace_placeholder_object_with_change_haver_tag(changeobject, change_haver)
+        
+    return changeobject
+
+def replace_placeholder_object_with_change_haver_rel(changeobject, change_haver):
+
+    if changeobject.node_a is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
+        copiedchange = deepcopy(changeobject)
+        copiedchange.node_a = change_haver
+        return copiedchange
+
+    if changeobject.node_b is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
+        copiedchange = deepcopy(changeobject)
+        copiedchange.node_b = change_haver
+        return copiedchange
+        
+    return changeobject
+
+def replace_placeholder_object_with_change_haver_tag(changeobject, change_haver):
+
+    if changeobject.object_node_name is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
+        copiedchange = deepcopy(changeobject)
+        copiedchange.object_node_name = change_haver.get_name()
+        return copiedchange
+    
+    return changeobject
 
 
             

@@ -345,3 +345,23 @@
         - Generic objects added to JSON Reader
         - Tag Changes and Rel Changes added to JSON Reader
         - Added new characters to the REGEN JSON Objects (Player Characters to act with the NPCs)
+6 Apr 2023
+    - There are things I need to handle because those were in ReGEN:
+        - Conditional Changes (If X likes Y, then X will hate Z, etc. ConditionalTagChange and ConditionalRelChange? We can probably use ConditionTest together with TagChanges)
+        - Concept:
+            - Condition: The condition that will be tested
+            - Change: The RelChange that will be applied if the Condition passes the test
+        - Concept 2:
+            - List of Tested Objects
+            - List of Tests: The test that will be checked for each object in the list. The placeholder object will be replaced with each object in the list. A tested object must pass all tests in this list to be elilgible for condition.
+            - List of Conditions to Apply: The RelChanges and TagChanges that will be applied. Note that for each of the condition, the placeholder will be where each object that passes the test will be placed before it's applied.
+        - Example of Concept 2:
+            - List of Tested Objects: All NPCs from List of Notes
+            - List of Tests: (Placeholder) is in (Generic Location) and (Placeholder) likes (Generic Target)
+            - List of Conditions to Apply: (Placeholder) hates (Generic Actor)
+13 Apr 2023
+    - Let's forget about doing the JSON reader for now, that is NOT our main focus. We just want the WorldState of ReGEN's work in a tangible form, JSON readability is for user convenience, which can come after we've gotten all the details of the core work down
+    - We should be able to make a bunch of objects in a file and then show that to professor
+    - We already have all the objects and relationships, those were defined in JSON already
+    - We just need to make up the story parts and the condition tests, which might take a bit to do
+    - Making and testing ConditionalTest is necessary for the next step.

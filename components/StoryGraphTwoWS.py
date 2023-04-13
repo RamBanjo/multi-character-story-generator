@@ -341,11 +341,18 @@ class StoryGraph:
         self.update_list_of_changes()
 
         traveling_state = deepcopy(self.starting_ws)
+
         traveling_state.name = state_name
 
         for index in range(0, stopping_step):
             for change in self.list_of_changes[index]:
-                traveling_state.apply_some_change(change)
+
+                frozen_current_state = deepcopy(traveling_state)
+
+                if change.changetype is not ChangeType.CONDCHANGE:
+                    traveling_state.apply_some_change(change)
+                else:
+                    traveling_state.apply_conditional_change(change, frozen_current_state)
         
         return traveling_state
 
@@ -424,17 +431,22 @@ class StoryGraph:
             return max(score)
 
     #TODO: Test this function
+    #TODO: Is this function necessary or used? We might be able to deprecate this if it's not used (because we can always call make state from the beginning)
+    #LOL LMAO This is basically functionally the same as making the state at the length of the timesteps minus the number of reverses
+    #Consider the following: There are 5 steps [0, 1, 2, 3, 4], and we want the step from final step reversed two times. We can either reverse twice into 2, or go forward 5-2-1 = 2 steps into 2. 
     def reverse_steps(self, number_of_reverse, state_name = "Reversed State"):
         #Returns a World State, reversing the changes for steps equal to number_of_reverse from the last state
 
-        traveling_state = deepcopy(self.latest_ws)
-        traveling_state.name = state_name
+        return self.make_state_at_step(len(self.list_of_changes) - number_of_reverse - 1, state_name=state_name)
 
-        for index in range(len(self.list_of_changes)-1, len(self.list_of_changes)-1-number_of_reverse, -1):
-            for change in self.list_of_changes[index]:
-                traveling_state.apply_some_change(change, reverse=True)
+        # traveling_state = deepcopy(self.latest_ws)
+        # traveling_state.name = state_name
 
-        return traveling_state
+        # for index in range(len(self.list_of_changes)-1, len(self.list_of_changes)-1-number_of_reverse, -1):
+        #     for change in self.list_of_changes[index]:
+        #         traveling_state.apply_some_change(change, reverse=True)
+
+        # return traveling_state
 
     def apply_rewrite_rule(self, rule, character, location_list = None, applyonce=False, banned_subgraph_locs=[]):
         #Check for that specific character's storyline
@@ -1313,6 +1325,8 @@ def if_applyonce_choose_one(loclist, applyonce):
 #Otherwise, we need to pair all the actors to all the targets and return a list of all pairs
 #Even if there is no change in relationship, return the relationship as a 1 element list anyways
 
+#TODO: Add something that translates ConditionalChange
+
 def translate_generic_change(change, populated_story_node):
 
     equivalent_changelist = []
@@ -1322,6 +1336,8 @@ def translate_generic_change(change, populated_story_node):
             equivalent_changelist = translate_generic_relchange(change, populated_story_node)
         case ChangeType.TAGCHANGE:
             equivalent_changelist = translate_generic_tagchange(change, populated_story_node)
+        case ChangeType.CONDCHANGE:
+            equivalent_changelist = translate_generic_condchange(change, populated_story_node)
         case _:
             equivalent_changelist = [change]
 
@@ -1340,15 +1356,45 @@ def translate_generic_relchange(relchange, populated_story_node):
 
     return list_of_equivalent_relchanges
 
+#TODO: Test this function
 def translate_generic_tagchange(tagchange, populated_story_node):
     list_of_equivalent_tagchanges = []
 
     objectlist = check_keyword_and_return_objectnodelist(populated_story_node, tagchange.object_node_name)
 
     for item in objectlist:
-        list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item.name, tagchange.tag, tagchange.value, tagchange.add_or_remove))
+        if type(item) == ObjectNode:
+            list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item.name, tagchange.tag, tagchange.value, tagchange.add_or_remove))
+        else:
+            list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item, tagchange.tag, tagchange.value, tagchange.add_or_remove))
 
     return list_of_equivalent_tagchanges
+
+#TODO: Test this function
+def translate_generic_condchange(change, populated_story_node):
+
+    equivalent_objects = []
+    equivalent_tests = []
+    equivalent_changes = []
+
+    found_objects = []
+    for item_name in change.list_of_test_object_names:
+        current_object = check_keyword_and_return_objectnodelist(populated_story_node, item_name)
+        found_objects.extend(current_object)
+
+    for thing in found_objects:
+        if type(thing) == ObjectNode:
+            equivalent_objects.append(thing.get_name())
+        else:
+            equivalent_objects.append(thing)
+
+    for test in change.list_of_condition_tests:
+        equivalent_tests.extend(translate_generic_test(test, populated_story_node))
+
+    for subchange in change.list_of_changes:
+        equivalent_changes.extend(translate_generic_change(subchange, populated_story_node))
+
+    return ConditionalChange(change.name, equivalent_objects, equivalent_tests, equivalent_changes)
 
 def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
     return_list = []

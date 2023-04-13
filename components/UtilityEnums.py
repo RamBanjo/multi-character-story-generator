@@ -7,6 +7,7 @@ class GenericObjectNode(Enum):
     GENERIC_LOCATION = 1
     GENERIC_TARGET = 2
     ALL_ACTORS = 3
+    CONDITION_TESTOBJECT_PLACEHOLDER = 4
 
 class ChangeAction(Enum):
     REMOVE = 0
@@ -15,6 +16,7 @@ class ChangeAction(Enum):
 class ChangeType(Enum):
     RELCHANGE = 0
     TAGCHANGE = 1
+    CONDCHANGE = 2
 
 class TestType(Enum):
     HELD_ITEM_TAG = 0

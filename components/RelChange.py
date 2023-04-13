@@ -37,3 +37,13 @@ class TagChange(SomeChange):
         self.value = value
         self.add_or_remove = add_or_remove
         self.changetype = ChangeType.TAGCHANGE
+
+class ConditionalChange(SomeChange):
+    def __init__(self, name, list_of_test_object_names, list_of_condition_tests, list_of_changes, **kwargs):
+
+        super().__init__(name)
+
+        self.list_of_test_object_names = list_of_test_object_names
+        self.list_of_condition_tests = list_of_condition_tests
+        self.list_of_changes = list_of_changes
+        self.changetype = ChangeType.CONDCHANGE
