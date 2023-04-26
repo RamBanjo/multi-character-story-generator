@@ -16,7 +16,7 @@ class SomeChange:
         self.name = name
 
 class RelChange(SomeChange):
-    def __init__(self, name, node_a, edge_name, node_b, value, add_or_remove: ChangeAction, **kwargs):
+    def __init__(self, name, node_a, edge_name, node_b, value, add_or_remove: ChangeAction, soft_equal = False, two_way = False, **kwargs):
         
         super().__init__(name)
 
@@ -25,6 +25,7 @@ class RelChange(SomeChange):
         self.node_b = node_b
         self.value = value
         self.add_or_remove = add_or_remove
+        self.soft_equal = soft_equal
         self.changetype = ChangeType.RELCHANGE
 
 class TagChange(SomeChange):

@@ -365,3 +365,56 @@
     - We already have all the objects and relationships, those were defined in JSON already
     - We just need to make up the story parts and the condition tests, which might take a bit to do
     - Making and testing ConditionalTest is necessary for the next step.
+
+Simulacra Paper from Prof.
+ChatGPT Memories
+Module that summarizes changes of character in long term
+Reflection
+Emergence -> Can simulate events, no scripting required -> Can't really control story?
+For NPCs in game? However Important NPCs might not always act rationally like ChatGPT does otherwise they may not follow the story or may be lost to players
+
+20 Apr 2023
+    - Two Way for RelChange
+    - Soft Equal for RelChange
+    - List of Current Quests?
+        - Sort by Nearby Quests, Randomized
+            - Therefore, some nearby quests will not be resolved
+        - Sort by Quest Importance, Randomized
+        - If cannot solve, increase difficulty level
+        - Aren't characters usually motivated by one main goal in the story anyways?
+        - Intended story doesn't have to be the forced order
+
+    - For side quests, generate using part of world state and make sure it doesn't change the world much
+    - Add intensity of relationships (love, hate, friendship, dislike)
+        - For example, if A kills B and C hates both A and B, C will hate A slightly less
+
+    - The Sims doesn't affect World State too much, and the stories are mostly daily lives
+    - Maybe Generative Agents have been cherrypicked?
+    - Simulacra Relevance
+        - Our work: Multiple factors drive the story to guide storywriter
+        - Their Work: Tell Agents what to do, but cannot control direction the story will go?
+        - We are Not the Same
+        - Quality might be similar in that characters play out their stories?
+        - Ours: Already have a direction, there are only expected changes
+        - Theirs: Emergence, we don't know the direction, we can predict where it will go, but there can be unexpected changes
+        - The usage is also different
+        - The world changes state in a different scale, Simulacra has very minor world state changes
+    - Large World State Changes
+        - Someone dies
+        - A ghost town is revived
+
+    - scale, use case, micro simulations may be wasteful'
+
+27 Apr 2023
+    - Facilitate the use of Tasks in SG2WS
+    - Make a Task object
+        - Task Object consists of the following properties:
+        - Task Name
+        - Task Actions: The StoryNode actions that a character with the task will performed
+        - Task Location: The location that the character must be in to complete the task. Will be blank for non location specific tasks.
+        - Task Conditions: The conditions that the task can be performed. (For example, sharing a location with someone, having an item, etc.)
+            - Note: The character who has the task must also have appropriate tags and relationship requirements within the node 
+    - Add a 
+    - Add a function that check for tasks that can be done in the current location
+    - Add a function that check if a task can be done
+    - Add a function that does tasks in SG2WS

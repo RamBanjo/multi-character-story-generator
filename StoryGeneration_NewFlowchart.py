@@ -12,6 +12,7 @@ DEFAULT_HOLD_EDGE_NAME = "holds"
 DEFAULT_ADJACENCY_EDGE_NAME = "connect"
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
+#TODO: Make Verbose, so that we can read what's going on while the generation is being done.
 def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0):
 
     #make a copy of the graph
@@ -197,6 +198,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         #Finally, we fill in the locations on self and update the list of changes.
         final_story_graph.update_list_of_changes()
         final_story_graph.fill_in_locations_on_self()
+
+
 
 def get_element_2(e):
     return e[2]

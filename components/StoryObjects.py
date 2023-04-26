@@ -1,3 +1,6 @@
+from components.CharacterTask import CharacterTask
+
+
 class ObjectNode:
     def __init__(self, name, tags={"Type": "Object"}, **kwargs):
         
@@ -123,6 +126,18 @@ class CharacterNode(ObjectNode):
         #The first timestep that this character should appear in.
         #If it's not a character, set to 0.
         self.start_timestep = start_timestep
+
+        #List of Tasks will start off as an empty dict then gradually gets populated after the character receives tasks from certain sources
+        self.list_of_task_stacks = []
+
+    def add_task_stack(self, task_stack):
+        self.list_of_tasks.append(task_stack)
+
+    def mark_task_status(self, task_name: str, task_status: bool):
+        current_task = self.list_of_tasks.get(task_name, None)
+
+        if current_task is not None:
+            current_task.task_complete_status = task_status
 
 class LocationNode(ObjectNode):
     def __init__(self, name, tags={"Type": "Location"}, **kwargs):

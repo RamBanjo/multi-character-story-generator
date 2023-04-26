@@ -55,7 +55,7 @@ def read_list_of_objects_from_json(json_file_name, verbose = False):
         print("Object list is complete! List size:", str(len(obj_list_returns)))
     return obj_list_returns
 
-#TODO: Because almost all of these require inputs of object such as a list of story nodes, and we don't want to repeat ourselves every single time, then the way reading rewrite rules should work is that we call the nodes' name from the list instead:
+#Because almost all of these require inputs of object such as a list of story nodes, and we don't want to repeat ourselves every single time, then the way reading rewrite rules should work is that we call the nodes' name from the list instead:
 
 def read_rewriterule_from_json(file_name, node_dict):
 
@@ -252,7 +252,7 @@ def read_same_location_test_from_extracted_dict(data, world_state):
 def read_story_node_from_extracted_dict(data, world_state):
     test_list = read_list_of_tests_from_data(data.get("condition_test_list", []), world_state)
 
-    #TODO: Read tagchange object and relchange object
+    #Read tagchange object and relchange object
     change_list = read_list_of_changes_from_extracted_list(data.get("changes_list", []), world_state)
     
     return StoryNode(condition_tests=test_list, effects_on_next_ws=change_list, **data)

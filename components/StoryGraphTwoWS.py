@@ -393,8 +393,7 @@ class StoryGraph:
             else:
                 #If not, then max between actor slot and target slot.
                 return rule.joint_node.calculate_weight_score(character_from_ws, max_between_actor_target=True)
-
-    #TODO: 
+            
     def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0):
         '''Mode is an int, depending on what it is, this function will do different things:
         mode = 0: return max between all the cont list.
@@ -702,8 +701,6 @@ class StoryGraph:
 
         return validity
 
-    #TODO: Deprecate this function? Considering that we already test for graph pattern in check validity?
-    #TODO: YES I CAN DO IT!!!
     # def apply_joint_rule(self, joint_rule, characters, location_list, applyonce=False, target_require=[], target_replace=[], character_grouping=[]):
 
     #     if joint_rule.joint_type == JointType.JOIN:
@@ -1295,6 +1292,29 @@ class StoryGraph:
                     location_holding_char = char_in_ws.get_holder()
                     current_step.set_location(location_holding_char)
 
+    def test_task_validity(self, task: CharacterTask, actor: CharacterNode, abs_step: int):
+        #TODO: Do all of these things:
+        # Make the world state according to the abs_step.
+        # Translate generic changes, then test the conditions in the task at the abs_step.
+        # Test if the actor is in the same location as the required location.
+        # Test if the story nodes in the task action are compatible.
+        # ...huh, how do we make it compatible with multiple characters?
+        #
+        # Something about tasks doesn't play nice with multiple characters... I need a way to manage it somehow
+        # 
+        #
+        # Return true if it passes all the test, return false if it fails even one test.
+
+        current_ws = self.make_state_at_step(abs_step)
+
+        current_loc = current_ws.node_dict.get(task.task_location_name, None)
+        if current_loc is None:
+            return False
+        
+        location_has_actor = current_ws.check_connection(node_a = current_loc, edge_name = current_ws.DEFAULT_HOLD_EDGE_NAME, node_b = actor, soft_equal = True)
+        cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=task.task_actions)
+
+        return location_has_actor and cont_valid
 
 def make_list_of_changes_from_list_of_story_nodes(story_node_list):
     changeslist = []
