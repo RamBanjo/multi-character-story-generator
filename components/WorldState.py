@@ -339,6 +339,25 @@ class WorldState:
 
         print(possible_grouping_lists)
 
+    def count_reachable_locations_from_location(self, starting_location):
+
+        seen_locations = [starting_location]
+        queue = [starting_location]
+        
+        while len(queue) > 0:
+            current_loc = self.node_dict[queue.pop().get_name()]
+            adjacent_locs = current_loc.get_adjacent_locations_list(adjacent_rel_name=self.DEFAULT_ADJACENCY_EDGE_NAME, return_as_objects=True)
+
+            #Add to Queue if the locations weren't already seen
+            queue_extend = [x for x in adjacent_locs if x not in seen_locations]
+            queue.extend(queue_extend)
+
+            #See the locations adjacent to current 
+            
+            unseen_adjacent_locs = [x for x in adjacent_locs if x not in seen_locations]
+            seen_locations.extend(unseen_adjacent_locs)
+
+        return len(seen_locations)
     #TODO: What this function should do: return one of the many possible paths to get to that location.
     # The path is formatted like [A, B, ..., C] where A is the current location and C is the destination location
     #If there's no possible path, then return None

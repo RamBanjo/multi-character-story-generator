@@ -418,3 +418,14 @@ For NPCs in game? However Important NPCs might not always act rationally like Ch
     - Add a function that check for tasks that can be done in the current location
     - Add a function that check if a task can be done
     - Add a function that does tasks in SG2WS
+    -
+    - OKAY So. Apparently the characters do not move in ReGEN, so they don't have this problem where players want to go talk to someone but they are not at the location. Hmmm how do we fix this
+        - Only player characters will move, NPCs will stand still
+        - The NPCs that can move are designed to be in specific apply_relationship_change
+        - Traveling merchants might not be core to the core story that the players 
+        
+4 May 2023
+    - Slight problem for counting the locations:
+        - The counting of seen locations in the closest node function assumes that all the locations are connected in a web. What if there are disjointed locations?
+        - This problem cannot be ignored, because sometimes games will give you quests that require going to locations that aren't locked yet. You can't do these quests until those locations are accessible at a later point in the game.
+        - Good News! We are now able to count number of locations connected with a new function called count_reachable_locations_from_location in worldstate

@@ -32,14 +32,14 @@ class ObjectNode:
         return_edge = []
         for edge in self.incoming_edges:
             if edge.name == edgename:
-                return_edge += [edge]
+                return_edge.append(edge)
         return return_edge
     
     def get_outgoing_edge(self, edgename):
         return_edge = []
         for edge in self.outgoing_edges:
             if edge.name == edgename:
-                return_edge += edge
+                return_edge.append(edge)
         return return_edge
 
     def add_incoming_edge(self, edge):
@@ -143,10 +143,13 @@ class LocationNode(ObjectNode):
     def __init__(self, name, tags={"Type": "Location"}, **kwargs):
         super().__init__(name, tags)
 
-    def get_adjacent_locations_list(self, adjacent_rel_name = "adjacent_to"):
-        adjacencies = self.get_incoming_edge(adjacent_rel_name)
-        return adjacencies
+    def get_adjacent_locations_list(self, adjacent_rel_name = "adjacent_to", return_as_objects = False):
+        adjacencies = self.get_outgoing_edge(adjacent_rel_name)
 
+        if return_as_objects:
+            return [x.to_node for x in adjacencies]
+        
+        return adjacencies
         
 #alice = StoryCharacter("Alice", {'lawbias': 0, 'moralbias': 0}, {"Race":"Human", "Job":"Spellcaster", "Life":"Alive", "Gender":"Female"}, 5)
 
