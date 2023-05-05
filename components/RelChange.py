@@ -26,6 +26,7 @@ class RelChange(SomeChange):
         self.value = value
         self.add_or_remove = add_or_remove
         self.soft_equal = soft_equal
+        self.two_way = two_way
         self.changetype = ChangeType.RELCHANGE
 
 class TagChange(SomeChange):
@@ -48,3 +49,12 @@ class ConditionalChange(SomeChange):
         self.list_of_condition_tests = list_of_condition_tests
         self.list_of_changes = list_of_changes
         self.changetype = ChangeType.CONDCHANGE
+
+class TaskChange(SomeChange):
+    def __init__(self, name, task_stack, add_or_remove):
+
+        super().__init__(name)
+
+        self.task_stack = task_stack
+        self.add_or_remove = add_or_remove
+        self.changetype = ChangeType.TASKCHANGE

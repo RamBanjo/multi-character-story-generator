@@ -47,3 +47,11 @@ print("Locations reachable from H (Expect 5):", test_ws.count_reachable_location
 print("Locations reachable from I (Expect 5):", test_ws.count_reachable_locations_from_location(district_i))
 print("Locations reachable from J (Expect 2):", test_ws.count_reachable_locations_from_location(district_j))
 print("Locations reachable from K (Expect 1):", test_ws.count_reachable_locations_from_location(district_k))
+
+print("A can reach B (True):", test_ws.test_reachability(district_a, district_b))
+print("A can reach D (False):", test_ws.test_reachability(district_a, district_d))
+print("A can reach E (False):", test_ws.test_reachability(district_a, district_e))
+print("A can reach J (False):", test_ws.test_reachability(district_a, district_j))
+print("A can reach A (True):", test_ws.test_reachability(district_a, district_a))
+print("J can reach K (True):", test_ws.test_reachability(district_j, district_k))
+print("K can reach J (False):", test_ws.test_reachability(district_k, district_j))

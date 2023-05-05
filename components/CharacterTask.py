@@ -30,17 +30,21 @@ class TaskStack:
     task_stack: The list of tasks to be performed. A task stack can have as little as 1 task.
     current_task: The index of the current task. If set as -1, this means the entire stack is complete.
     '''
-    def __init__(self, stack_name:str, task_stack:list = [], current_task:int = 0):
+    def __init__(self, stack_name:str, task_stack:list = [], current_task_index:int = 0):
         self.stack_name = stack_name
         self.task_stack = task_stack
-        self.current_task = current_task
+        self.current_task_index = current_task_index
         
     def get_current_task(self):
-        return self.task_stack[self.current_task]
+
+        if self.current_task_index == -1:
+            return None
+        
+        return self.task_stack[self.current_task_index]
     
     def mark_current_task_as_complete(self):
         self.get_current_task().task_complete_status = True
-        self.current_task += 1
+        self.current_task_index += 1
 
-        if self.current_task >= len(self.task_stack):
-            self.get_current_task = -1
+        if self.current_task_index >= len(self.task_stack):
+            self.current_task_index = -1

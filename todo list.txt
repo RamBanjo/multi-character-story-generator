@@ -429,3 +429,13 @@ For NPCs in game? However Important NPCs might not always act rationally like Ch
         - The counting of seen locations in the closest node function assumes that all the locations are connected in a web. What if there are disjointed locations?
         - This problem cannot be ignored, because sometimes games will give you quests that require going to locations that aren't locked yet. You can't do these quests until those locations are accessible at a later point in the game.
         - Good News! We are now able to count number of locations connected with a new function called count_reachable_locations_from_location in worldstate
+    - Should be able to try ReGEN world state once more now. Good Luck!
+
+11 May 2023 -> 12 May 2023
+    - We must determine how tasks will work with our current system.
+        - Tasks must be able to be added to characters, and their addition must be able to be recorded in the world state
+        - Tasks must remember when one of its actions was performed and mark it in the world state
+        - Tasks must be a viable option to undertake alongside other rewrite rules
+        - If a task can no longer be completed due to the changed world state, then the change in the worldstate must be deemed invalid and not allowed
+        - If a new task given to another conflicts with another task, then that task should not be given
+            - Alternatively: Still give the task, but update the task and skip certain actions if the things has already been completed by another character or is no longer possible to do

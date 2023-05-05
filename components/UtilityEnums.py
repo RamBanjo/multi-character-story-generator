@@ -20,6 +20,8 @@ class ChangeType(Enum):
     RELCHANGE = 0
     TAGCHANGE = 1
     CONDCHANGE = 2
+    TASKCHANGE = 3
+    TASKADVANCECHANGE = 4
 
 class TestType(Enum):
     HELD_ITEM_TAG = 0

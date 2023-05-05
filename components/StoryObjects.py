@@ -131,13 +131,25 @@ class CharacterNode(ObjectNode):
         self.list_of_task_stacks = []
 
     def add_task_stack(self, task_stack):
-        self.list_of_tasks.append(task_stack)
+        self.list_of_task_stacks.append(task_stack)
 
-    def mark_task_status(self, task_name: str, task_status: bool):
-        current_task = self.list_of_tasks.get(task_name, None)
+    def remove_task_stack(self, task_stack_name):
+        stack_to_remove = self.get_task_stack_by_name(stack_name=task_stack_name)
+        self.list_of_task_stacks.remove(stack_to_remove)
 
-        if current_task is not None:
-            current_task.task_complete_status = task_status
+    '''Returns the first task in the task stack with the same name. If none can be found, returns None'''
+    def get_task_stack_by_name(self, stack_name):
+
+        found_stacks = [x for x in self.list_of_task_stacks if x.stack_name == stack_name]
+
+        if len(found_stacks) == 0:
+            return None
+        
+        return found_stacks[0]
+
+    def advance_stack_by_name(self, stack_name):
+        found_stack = self.get_task_stack_by_name(stack_name=stack_name)
+        found_stack.mark_current_task_as_complete()
 
 class LocationNode(ObjectNode):
     def __init__(self, name, tags={"Type": "Location"}, **kwargs):

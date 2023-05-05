@@ -339,8 +339,7 @@ class WorldState:
 
         print(possible_grouping_lists)
 
-    def count_reachable_locations_from_location(self, starting_location):
-
+    def make_list_of_reachable_locations_from_location(self, starting_location):
         seen_locations = [starting_location]
         queue = [starting_location]
         
@@ -352,12 +351,80 @@ class WorldState:
             queue_extend = [x for x in adjacent_locs if x not in seen_locations]
             queue.extend(queue_extend)
 
-            #See the locations adjacent to current 
-            
+            #Mark the locations adjacent to current as seen   
             unseen_adjacent_locs = [x for x in adjacent_locs if x not in seen_locations]
             seen_locations.extend(unseen_adjacent_locs)
 
-        return len(seen_locations)
+        return seen_locations
+    
+    def count_reachable_locations_from_location(self, starting_location):
+        return len(self.make_list_of_reachable_locations_from_location(starting_location=starting_location))
+    
+    def test_reachability(self, starting_location, destination):
+
+        fixed_destination = self.node_dict[destination.get_name()]
+        seen_locations = [starting_location]
+        queue = [starting_location]
+        
+        while len(queue) > 0:
+            current_loc = self.node_dict[queue.pop().get_name()]
+            adjacent_locs = current_loc.get_adjacent_locations_list(adjacent_rel_name=self.DEFAULT_ADJACENCY_EDGE_NAME, return_as_objects=True)
+
+            #Add to Queue if the locations weren't already seen
+            queue_extend = [x for x in adjacent_locs if x not in seen_locations]
+            queue.extend(queue_extend)
+
+            #Mark the locations adjacent to current as seen
+            unseen_adjacent_locs = [x for x in adjacent_locs if x not in seen_locations]
+            seen_locations.extend(unseen_adjacent_locs)
+            if fixed_destination in seen_locations:
+                return True
+
+        return False
+    
+    def measure_distance_between_two_locations(self, starting_location, destination, verbose=False):
+
+        if starting_location == destination:
+            return 0
+        
+        if not self.test_reachability(starting_location=starting_location, destination=destination):
+            return -1
+
+        fixed_destination = self.node_dict[destination.get_name()]
+        seen_locations = [starting_location]
+        queue = [starting_location]
+        distance_dict = dict()
+        distance_dict[starting_location.get_name()] = 0
+
+        while len(queue) > 0:
+            current_loc = self.node_dict[queue.pop().get_name()]
+            adjacent_locs = current_loc.get_adjacent_locations_list(adjacent_rel_name=self.DEFAULT_ADJACENCY_EDGE_NAME, return_as_objects=True)
+
+            #Add to Queue if the locations weren't already seen
+            queue_extend = [x for x in adjacent_locs if x not in seen_locations]
+            queue.extend(queue_extend)
+
+            #Mark the locations adjacent to current as seen
+            unseen_adjacent_locs = [x for x in adjacent_locs if x not in seen_locations]
+            
+            for unseenloc in unseen_adjacent_locs:                
+                min_adjacent_distance = 1e7
+                loc_adjacents = unseenloc.get_adjacent_locations_list(adjacent_rel_name=self.DEFAULT_ADJACENCY_EDGE_NAME, return_as_objects=True)
+
+                for adj in loc_adjacents:
+                    adj_distance = distance_dict.get(adj.get_name(), None)
+                    if adj_distance != None and adj_distance < min_adjacent_distance:
+                        min_adjacent_distance = adj_distance + 1
+                if verbose:
+                    print(starting_location.get_name(),"->",unseenloc.get_name(),"=",min_adjacent_distance)
+                distance_dict[unseenloc.get_name()] = min_adjacent_distance
+            seen_locations.extend(unseen_adjacent_locs)
+
+            if fixed_destination.get_name() in distance_dict.keys():
+                return distance_dict[destination.get_name()]
+
+        return -1
+
     #TODO: What this function should do: return one of the many possible paths to get to that location.
     # The path is formatted like [A, B, ..., C] where A is the current location and C is the destination location
     #If there's no possible path, then return None
@@ -393,9 +460,9 @@ class WorldState:
     #If there are no tasks at all, return return one random reachable location, including the current location.
     #
     # (Note that some tasks don't have locations therefore cannot be located, and must be done based on )
-    def get_optimal_location_towards_task(self, actor):        
+    def get_optimal_location_towards_task(self, actor, verbose=False):        
         actor_task_stacks = actor.list_of_task_stacks
-        current_location = self.node_dict[actor.get_incoming_edge("holds").from_node]
+        current_location = self.node_dict[actor.get_incoming_edge("holds")[0].from_node.get_name()]
         
         names_of_locations_with_tasks = set()
         task_location_count_dict = dict()
@@ -403,88 +470,102 @@ class WorldState:
 
         #We're getting all the task locations from here
         for task_list in actor_task_stacks:
-            if task_list.current_task != -1:
+            if task_list.current_task_index != -1:
                 list_of_current_tasks.append(task_list.get_current_task())
 
         for task in list_of_current_tasks:
-            if task.location_name not in names_of_locations_with_tasks:
-                names_of_locations_with_tasks.add(task.location_name)
-                task_location_count_dict[task.location_name] = 1
+            if task.task_location_name is None:
+                continue
+            elif task.task_location_name not in names_of_locations_with_tasks:
+                names_of_locations_with_tasks.add(task.task_location_name)
+                task_location_count_dict[task.task_location_name] = 1
             else:
-                task_location_count_dict[task.location_name] += 1
+                task_location_count_dict[task.task_location_name] += 1
+
+        reachable_location_list = self.make_list_of_reachable_locations_from_location(current_location)
+        reachable_location_names = set([x.get_name() for x in reachable_location_list])
+
+        names_of_reachable_locations_with_tasks = names_of_locations_with_tasks.intersection(reachable_location_names)
 
         #If the current location has tasks, return the current location.
-        if current_location.get_name() in names_of_locations_with_tasks:
+        if current_location.get_name() in names_of_reachable_locations_with_tasks:
+            if verbose:
+                print("Current location has a task.")
             return current_location
         
         #If there aren't anywhere with tasks, return one random reachable location.
-        if len(names_of_locations_with_tasks) == 0:
-            valid_locations = current_location.get_adjacent_locations_list()
+        if len(names_of_reachable_locations_with_tasks) == 0:
+            valid_locations = current_location.get_adjacent_locations_list(adjacent_rel_name=self.DEFAULT_ADJACENCY_EDGE_NAME, return_as_objects=True)
             valid_locations.append(current_location)
+            if verbose:
+                print("There are no reachable locations with tasks found.")
             return random.choice(valid_locations)
         
         #If there's no tasks in the current location, look for tasks that are in adjacent locations.
-        if current_location.get_name() not in names_of_locations_with_tasks:
-            adjacent_locations = current_location.get_adjacent_locations_list()
 
-            list_of_checking_location_names = []
-            for loc in adjacent_locations:
-                list_of_checking_location_names.append(loc.get_name())
+        adjacent_locations = current_location.get_adjacent_locations_list(adjacent_rel_name=self.DEFAULT_ADJACENCY_EDGE_NAME, return_as_objects=True)
 
-            for locname in list_of_checking_location_names:
-                if locname not in names_of_locations_with_tasks:
-                    list_of_checking_location_names.remove(locname)
+        names_of_adjacent_locations = set()
+        for loc in adjacent_locations:
+            names_of_adjacent_locations.add(loc.get_name())      
 
-            if len(list_of_checking_location_names) > 0:
-                return self.node_dict[random.choice(list_of_checking_location_names)]
+        if current_location.get_name() not in names_of_reachable_locations_with_tasks:
+            names_of_adjacent_locations_with_tasks = names_of_adjacent_locations.intersection(names_of_reachable_locations_with_tasks)
+
+            if len(names_of_adjacent_locations_with_tasks) > 0:
+                if verbose:
+                    print("At least one adjacent location has a task.")
+                return self.node_dict[random.choice(list(names_of_adjacent_locations_with_tasks))]
             
         #If all previous tests fail, then we need to find the closest path towards the next task, because there certainly is one that doesn't include our own.
-        distance_from_closest_task_dict_for_each_adjnode = dict()
-        adjacent_locations = current_location.get_adjacent_locations_list()
+        adjacent_locations = current_location.get_adjacent_locations_list(adjacent_rel_name=self.DEFAULT_ADJACENCY_EDGE_NAME, return_as_objects=True)
 
-        minimum_distance = 999999999
-        all_location_set = set(self.get_all_location_names())
-        for loc in adjacent_locations:
-            distance_from_closest_task_dict_for_each_adjnode[loc.get_name()] = "infinity"
-            list_of_seen_locations = current_location.get_adjacent_locations_list()
-            list_of_seen_locations.append(current_location)
-            seen_location_names_set = set([x.get_name() for x in list_of_seen_locations])
-
-            current_check_queue = [loc]
+        #Finding distance from here and locations with task. Find distance between all adjacent nodes and all locations with tasks. For each location that's at minimum, add as candidate.
+        if verbose:
+            print("There is a task but it's not in an adjacent location. Finding closest route towards task.")
+        
+        distance_dict = dict()
+        minimum_distance = 1e7
+        for task_location_name in names_of_reachable_locations_with_tasks:
             
-            distance_count = 1
-            while len(seen_location_names_set.intersection(names_of_locations_with_tasks)) == 0:
-                current_node_adjacents = current_check_queue[0].get_adjacent_locations_list()
-                adj_node_name_set = set([x.get_name() for x in current_node_adjacents])
+            task_location = self.node_dict[task_location_name]
 
-                for seenlocname in seen_location_names_set:
-                    if seenlocname in adj_node_name_set:
-                        adj_node_name_set.remove(seenlocname)
+            distance_dict[task_location_name] = self.measure_distance_between_two_locations(current_location, task_location)
+            if distance_dict[task_location_name] < minimum_distance:
+                distance_dict[task_location_name] = minimum_distance
 
-                found_task_node = False
-                for adjloc in current_node_adjacents:
-                    if adjloc.get_name() in names_of_locations_with_tasks:
-                        found_task_node = True
+        #This line finds the locations with tasks that have the least distance between current location and the task locations
+        names_of_taskloc_with_min_distance = [x[0] for x in distance_dict.items() if x[1] == minimum_distance]
 
-                distance_from_closest_task_dict_for_each_adjnode[loc.get_name()]
-                seen_location_names_set.add(current_check_queue[0].get_name())
+        min_distance_of_adj_loc_dict = dict()
 
-                if found_task_node:
-                    distance_from_closest_task_dict_for_each_adjnode[loc.get_name()] = distance_count
+        for adjlocname in names_of_adjacent_locations:
+            min_distance_of_adj_loc_dict[adjlocname] = 1e7
 
-                if not found_task_node:
-                    current_check_queue.extend(current_node_adjacents)
-                    current_check_queue.pop(0)
-                    distance_count += 1
+        overall_min_dist_towards_task = 1e7
 
-                if len(seen_location_names_set) == len(all_location_set) and not found_task_node:
-                    break
 
-            if distance_count <= minimum_distance:
-                minimum_distance = distance_count
+        for adjlocname in names_of_adjacent_locations:
+            minimum_distance_to_find_task_from_adjloc = 1e7
 
-        next_location_candidates = [x[0] for x in distance_from_closest_task_dict_for_each_adjnode.items() if x[1] == minimum_distance]
-        return self.node_dict[random.choice(next_location_candidates)]
+            for mindisttasklocname in names_of_taskloc_with_min_distance:
+                mindistloc = self.node_dict[mindisttasklocname]
+                adjloc = self.node_dict[adjlocname]
+
+                distance = self.measure_distance_between_two_locations(adjloc, mindistloc)
+
+                if distance < minimum_distance_to_find_task_from_adjloc:
+                    minimum_distance_to_find_task_from_adjloc = distance
+
+            min_distance_of_adj_loc_dict[adjlocname] = minimum_distance_to_find_task_from_adjloc
+
+            if minimum_distance_to_find_task_from_adjloc < overall_min_dist_towards_task:
+                overall_min_dist_towards_task = minimum_distance_to_find_task_from_adjloc
+
+        #This line finds the locations adjacent to current location that have the least distance between itself and at least one of the task locations
+        next_location_candidate_names = [x[0] for x in min_distance_of_adj_loc_dict.items() if x[1] == overall_min_dist_towards_task]
+            
+        return self.node_dict[random.choice(next_location_candidate_names)]
 
 
     def get_all_locations(self):
