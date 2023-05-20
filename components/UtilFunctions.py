@@ -3,6 +3,7 @@ import itertools
 import math
 import random
 from components.Edge import Edge
+from components.UtilityEnums import ChangeType, TestType
 
 #Function: Initialize Object
 #Inputs: Object, Location
@@ -477,3 +478,102 @@ def check_if_list_contains_at_least_one_from_each_node(actor_name_list, list_of_
             return False
         
     return True
+
+#Placeholder always comes first
+def replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_tester_pair_list):
+
+    copiedtest = copy.deepcopy(test)
+
+    for thing in placeholder_tester_pair_list:
+        copiedtest = replace_placeholder_object_with_test_taker(test=copiedtest, test_taker=thing[1], placeholder_object=thing[0])
+
+    return copiedtest
+
+def replace_placeholder_object_with_test_taker(test, test_taker, placeholder_object):
+        
+        #Check what kind of test is going to be done here
+
+        test_type = test.test_type
+
+        match test_type:
+            case TestType.HELD_ITEM_TAG:
+                return replace_placeholder_object_with_test_taker_holds(test, test_taker, placeholder_object)
+            case TestType.SAME_LOCATION:
+                return replace_placeholder_object_with_test_taker_sameloc(test, test_taker, placeholder_object)
+            case TestType.HAS_EDGE:
+                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
+            case TestType.HAS_DOUBLE_EDGE:
+                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
+            case _:
+                return None
+
+def replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object):
+
+    if test.object_from_test == placeholder_object:
+        copiedtest = copy.deepcopy(test)
+        copiedtest.object_from_test = test_taker
+        return copiedtest
+
+    if test.object_to_test == placeholder_object:
+        copiedtest = copy.deepcopy(test)
+        copiedtest.object_to_test = test_taker
+        return copiedtest
+        
+    return test
+
+def replace_placeholder_object_with_test_taker_holds(test, test_taker, placeholder_object):
+
+    if test.holder_to_test == placeholder_object:
+        copiedtest = copy.deepcopy(test)
+        copiedtest.holder_to_test = test_taker
+        return copiedtest
+    
+    return test
+
+def replace_placeholder_object_with_test_taker_sameloc(test, test_taker, placeholder_object):
+
+    if placeholder_object in test.list_to_test:
+        copiedtest = copy.deepcopy(test)
+        copiedtest.list_to_test.remove(placeholder_object)
+        copiedtest.list_to_test.append(test_taker)
+        return copiedtest
+
+def replace_multiple_placeholders_with_multiple_change_havers(change, placeholder_tester_pair_list):
+    copiedchange = copy.deepcopy(change)
+
+    for thing in placeholder_tester_pair_list:
+        copiedchange = replace_placeholder_object_with_change_haver(changeobject=copiedchange, change_haver=thing[1], placeholder_object=thing[0])
+
+    return copiedchange
+
+def replace_placeholder_object_with_change_haver(changeobject, change_haver, placeholder_object):
+
+    if changeobject.changetype == ChangeType.RELCHANGE:
+        return replace_placeholder_object_with_change_haver_rel(changeobject, change_haver, placeholder_object)
+    if changeobject.changetype == ChangeType.TAGCHANGE:
+        return replace_placeholder_object_with_change_haver_tag(changeobject, change_haver, placeholder_object)
+        
+    return changeobject
+
+def replace_placeholder_object_with_change_haver_rel(changeobject, change_haver, placeholder_object):
+
+    if changeobject.node_a == placeholder_object:
+        copiedchange = copy.deepcopy(changeobject)
+        copiedchange.node_a = change_haver
+        return copiedchange
+
+    if changeobject.node_b == placeholder_object:
+        copiedchange = copy.deepcopy(changeobject)
+        copiedchange.node_b = change_haver
+        return copiedchange
+        
+    return changeobject
+
+def replace_placeholder_object_with_change_haver_tag(changeobject, change_haver, placeholder_object):
+
+    if changeobject.object_node_name == placeholder_object:
+        copiedchange = copy.deepcopy(changeobject)
+        copiedchange.object_node_name = change_haver.get_name()
+        return copiedchange
+    
+    return changeobject

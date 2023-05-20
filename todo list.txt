@@ -439,3 +439,11 @@ For NPCs in game? However Important NPCs might not always act rationally like Ch
         - If a task can no longer be completed due to the changed world state, then the change in the worldstate must be deemed invalid and not allowed
         - If a new task given to another conflicts with another task, then that task should not be given
             - Alternatively: Still give the task, but update the task and skip certain actions if the things has already been completed by another character or is no longer possible to do
+        - What do we do with tasks after we reach the required length but the the task stack isn't completed yet
+            - Calculate the length for each item in the task stack, tip weights towards not taking more tasks if it would take the story over the step requirement, while focusing on completing current tasks
+
+        - A task can be expanded on if it exists and it hasn't been completed
+        - For example, if a task was given at Absolute Step 5, it cannot be done before that step.
+        - A task can be progressed if it already passed by that step where it was assigned, the character is in the correct location to perform the task, and the other conditions for applying story nodes apply appropriately.
+            - For this reason, we added a counter to count what absolute step the quest was added.
+            - Additionally, each separate task also requires a counter when it was performed, so subsequent tasks of the same stack cannot be performed in the wrong order.

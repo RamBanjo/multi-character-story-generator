@@ -9,8 +9,7 @@ class GenericObjectNode(Enum):
     ALL_ACTORS = 3
     CONDITION_TESTOBJECT_PLACEHOLDER = 4
     TASK_GIVER = 5
-    TASK_PLACEHOLDER_ACTOR = 6
-    TASK_PLACEHOLDER_ACTOR_2 = 7
+    TASK_OWNER = 6
 
 class ChangeAction(Enum):
     REMOVE = 0

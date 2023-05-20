@@ -1,10 +1,15 @@
 import itertools
 from components.UtilFunctions import *
 from components.StoryObjects import CharacterNode
-# x = [1, 1, 2]
-# y = list(set(list(itertools.permutations(x))))
+x = ["A", "B", "C", "D", "E", "F"]
+y = all_possible_actor_groupings_with_ranges_and_freesizes([20, -1], x)
+z = [squib[0] for squib in y]
+w = []
 
-# print(y)
+for thing in z:
+    w.extend(list(itertools.permutations(thing)))
+
+print(w)
 
 # print(permute_all_possible_groups(4, 2))
 
@@ -16,12 +21,12 @@ from components.StoryObjects import CharacterNode
 # charcter_list = [("Alice", 3), ("Bob", 3), ("Charlie", 3), ("Daniel", 3)]
 # all_possible_actor_groupings((2,1,1), charcter_list)
 
-test_range = [1, 2, -1, 5, (3,4), -1, 2, -1, (1, 2), (1, 6)]
-test_range_2 = [5, 15]
-test_range_3 = [(1, 20), (1,20)]
-test_range_4 = [-1, -1, -1]
-test_range_5 = [1, 3, 1]
-wanted_sum = 5
+# test_range = [1, 2, -1, 5, (3,4), -1, 2, -1, (1, 2), (1, 6)]
+# test_range_2 = [5, 15]
+# test_range_3 = [(1, 20), (1,20)]
+# test_range_4 = [-1, -1, -1]
+# test_range_5 = [1, 3, 1]
+# wanted_sum = 5
 
 # for x in all_possible_actor_groupings([1, 1, 3], ["Ace", "Brent", "Chad", "Dan", "Eggs"]):
 #     print (x)
@@ -91,9 +96,9 @@ wanted_sum = 5
 # for x in permute_full_range_list(list_d):
 #     print(x)
 
-testdict = {"Foo":1, "Bar":2, "Baz":3, "Honeycomb":16}
+# testdict = {"Foo":1, "Bar":2, "Baz":3, "Honeycomb":16}
 
-print(testdict.keys())
+# print(testdict.keys())
 
-print("Foo" in testdict.keys())
-print("Brisket" in testdict.keys())
+# print("Foo" in testdict.keys())
+# print("Brisket" in testdict.keys())

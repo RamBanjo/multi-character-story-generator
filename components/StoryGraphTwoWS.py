@@ -1292,7 +1292,7 @@ class StoryGraph:
                     location_holding_char = char_in_ws.get_holder()
                     current_step.set_location(location_holding_char)
 
-    def test_task_validity(self, task: CharacterTask, actor: CharacterNode, abs_step: int):
+    def test_task_validity(self, task: CharacterTask, actor: CharacterNode, abs_step: int, placeholder_dict:dict):
         #TODO: Do all of these things:
         # Make the world state according to the abs_step.
         # Translate generic changes, then test the conditions in the task at the abs_step.
@@ -1305,6 +1305,8 @@ class StoryGraph:
         #
         # Return true if it passes all the test, return false if it fails even one test.
 
+        #TODO: There's also placeholder characters in play. We need to take that into account as well.
+
         current_ws = self.make_state_at_step(abs_step)
 
         current_loc = current_ws.node_dict.get(task.task_location_name, None)
@@ -1312,9 +1314,45 @@ class StoryGraph:
             return False
         
         location_has_actor = current_ws.check_connection(node_a = current_loc, edge_name = current_ws.DEFAULT_HOLD_EDGE_NAME, node_b = actor, soft_equal = True)
+
+        translated_task = []
+        for story_node in task.task_actions:
+            translated_task.append(replace_placeholders_in_story_node(story_node=story_node, placeholder_dict=placeholder_dict))
+                                   
+
         cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=task.task_actions)
 
         return location_has_actor and cont_valid
+
+    def get_task_stack_from_actor_at_absolute_step(self, task_stack_name, actor_name, abs_step):
+        
+        current_ws = self.make_state_at_step(stopping_step=abs_step)
+        character_object = current_ws.node_dict.get(actor_name, None)
+
+        if character_object is None:
+            return None
+        
+        return character_object.get_task_stack_by_name(task_stack_name)
+
+    def return_current_task_from_task_stack_for_actor(self, absolute_step, actor_name, task_stack_name):
+
+        stack = self.get_task_stack_from_actor_at_absolute_step(abs_step=absolute_step, actor_name=actor_name, task_stack_name=task_stack_name)
+
+        if stack is None:
+            return None
+        
+        return stack.get_current_task()
+
+    def perform_next_task_from_task_stack_for_actor(self, absolute_step, actor, task_stack_name):
+        #First, get the world state at the abs step
+
+        #Check if the task with this name exists at the task stack name. If not, return False.
+
+        #Check if the conditions of the task is already fulfilled, if it is, put the task advance object in this worldstate, then return True.
+        #Check if the conditions for failing the task is already fulfilled, if it is, return False.
+
+        #Check the validity of the task stack with self.test_task_validity. If it's valid, then add all the story nodes to the absolute step, then apply the task advance object in this world state. Return True.
+        pass
 
 def make_list_of_changes_from_list_of_story_nodes(story_node_list):
     changeslist = []

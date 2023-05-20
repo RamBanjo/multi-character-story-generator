@@ -8,7 +8,7 @@ from components.Edge import Edge
 from components.RelChange import *
 from components.StoryNode import *
 from components.StoryObjects import LocationNode, ObjectNode
-from components.UtilFunctions import actor_count_sum, permute_all_possible_groups_with_ranges_and_freesize
+from components.UtilFunctions import *
 from components.UtilityEnums import *
 
 class WorldState:
@@ -189,12 +189,12 @@ class WorldState:
             pass_test = True
 
             for test in condchange_object.list_of_condition_tests:
-                translated_test = replace_placeholder_object_with_test_taker(test, current_object)
+                translated_test = replace_placeholder_object_with_test_taker(test=test, test_taker=current_object, placeholder_object=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER)
                 pass_test = pass_test and previous_ws.test_story_compatibility_with_conditiontest(translated_test)
 
             if pass_test:
                 for change in condchange_object.list_of_changes:
-                    translated_change = replace_placeholder_object_with_change_haver(change, current_object)
+                    translated_change = replace_placeholder_object_with_change_haver(changeobject=change, change_haver=current_object, placeholder_object=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER)
                     self.apply_some_change(translated_change, reverse=reverse)
 
     # Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
@@ -244,6 +244,114 @@ class WorldState:
             self.node_dict[tagchange_object.object_node_name].set_tag(tagchange_object.tag, tagchange_object.value)
         if (tagchange_object.add_or_remove == ChangeAction.REMOVE and not reverse) or (tagchange_object.add_or_remove == ChangeAction.ADD and reverse):
             self.node_dict[tagchange_object.object_node_name].remove_tag(tagchange_object.tag)
+
+    #It does this for each of the placeholder listed in actor_placeholder_string_list:
+    #It cycles through (oh this again?) all the characters excluding the task giver and the task owner to put as the placeholder
+    #It will return as a list of dict with the placeholder as key and the name of the character as value (all possible dicts)
+    #This inclusion isn't final, we still need to test with the story graphs (where replacements will also be done)
+    #TODO: Do we really need this? Discuss
+    def make_list_of_possible_task_character_replacements(self, taskobject):
+
+        eligible_character_names = [x.get_name() for x in self.node_dict.value() if x.tags["Type"] == "Character"]
+
+        #The character performing this task and the character who gave this task aren't legible placeholders
+        eligible_character_names.remove(taskobject.task_owner_name)
+        eligible_character_names.remove(taskobject.task_giver_name)
+
+        #Determine how many placeholders we need to fill by measuring the length of placeholders needed
+        number_of_placeholder_chars_needed = len(taskobject.actor_placeholder_string_list)
+
+        if number_of_placeholder_chars_needed > len(eligible_character_names):
+            return []
+        
+        possible_combs = all_possible_actor_groupings_with_ranges_and_freesizes([number_of_placeholder_chars_needed, -1], eligible_character_names)
+        possible_combs = [thing[0] for thing in possible_combs]
+        permuted_possible_combs = []
+
+        for thing in possible_combs:
+            permuted_possible_combs.extend(thing)
+
+        valid_comb_dict_list = []
+        #We will replace the placeholders with the actual characters to see if they pass the condition. If they do pass the condition, they're added to valid comb list.
+        for unchecked_comb in permuted_possible_combs:
+            placeholder_charname_zip = zip(taskobject.actor_placeholder_string_list, unchecked_comb)
+            placeholder_charname_zip.append((GenericObjectNode.TASK_GIVER, taskobject.task_giver_name))
+            placeholder_charname_zip.append((GenericObjectNode.TASK_OWNER, taskobject.task_owner_name))
+            placeholder_charobj_zip = [(x[0], self.node_dict[x[1]]) for x in placeholder_charname_zip]
+
+            validity = True
+            for test in taskobject.task_requirement:
+                
+                translated_test = replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_charobj_zip)
+                validity = validity and self.test_story_compatibility_with_conditiontest(translated_test)
+
+            if validity:
+                valid_comb_dict_list.append(unchecked_comb)
+
+        return valid_comb_dict_list
+    
+    #TODO: Test this bastard too
+    def make_list_of_possible_task_stack_character_replacements(self, task_stack_object):
+
+        eligible_character_names = [x.get_name() for x in self.node_dict.value() if x.tags["Type"] == "Character"]
+
+        #The character performing this task and the character who gave this task aren't legible placeholders
+        eligible_character_names.remove(task_stack_object.stack_giver_name)
+        eligible_character_names.remove(task_stack_object.stack_owner_name)
+
+        all_placeholders = task_stack_object.make_placeholder_string_list()
+
+        #Determine how many placeholders we need to fill by measuring the length of placeholders needed
+        number_of_placeholder_chars_needed = len(all_placeholders)
+        if number_of_placeholder_chars_needed > len(eligible_character_names):
+            return []
+        
+        possible_combs = all_possible_actor_groupings_with_ranges_and_freesizes([number_of_placeholder_chars_needed, -1], eligible_character_names)
+        possible_combs = [thing[0] for thing in possible_combs]
+        permuted_possible_combs = []
+
+        for thing in possible_combs:
+            permuted_possible_combs.extend(thing)
+
+        valid_comb_dict_list = []
+        #We will replace the placeholders with the actual characters to see if they pass the condition. If they do pass the condition, they're added to valid comb list.
+        for unchecked_comb in permuted_possible_combs:
+            placeholder_charname_zip = zip(all_placeholders, unchecked_comb)
+            placeholder_charname_zip.append((GenericObjectNode.TASK_GIVER, task_stack_object.stack_giver_name))
+            placeholder_charname_zip.append((GenericObjectNode.TASK_OWNER, task_stack_object.stack_owner_name))
+            placeholder_charobj_zip = [(x[0], self.node_dict[x[1]]) for x in placeholder_charname_zip]
+
+            validity = True
+            for task in task_stack_object.task_stack:
+                for test in task.task_requirement:
+                    
+                    translated_test = replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_charobj_zip)
+                    validity = validity and self.test_story_compatibility_with_conditiontest(translated_test)
+
+            if validity:
+                valid_comb_dict_list.append(unchecked_comb)
+
+        return valid_comb_dict_list
+
+    #Not here, it will be for the SG2WS
+    # def replace_task_placeholders(self, taskobject, replacements):
+    #     pass
+
+    #TODO: Test This
+    #Reverse not Implemented
+    def apply_task_change(self, taskchange_object, abs_step = 0, reverse=False):
+
+        actor = self.node_dict[taskchange_object.actor_name]
+        task_stack = actor.add_task_stack(taskchange_object)
+        task_stack.add_step = abs_step
+
+    #TODO: Test That
+    #Reverse not Implemented
+    def apply_task_advance_change(self, taskadvancechange_object, abs_step = 0, reverse=False):
+
+        actor = self.node_dict[taskadvancechange_object]
+        task_stack = actor.get_task_stack_by_name(taskadvancechange_object.task_stack_name)
+        task_stack.mark_current_task_as_complete(abs_step)
 
     def print_all_nodes(self):
         print("=== List of Nodes in {} ===".format(self.name))
@@ -573,87 +681,6 @@ class WorldState:
     
     def get_all_location_names(self):
         return [x.get_name() for x in self.node_dict.values() if type(x) == LocationNode]
-
-def replace_placeholder_object_with_test_taker(test, test_taker):
-        
-        #Check what kind of test is going to be done here
-
-        test_type = test.test_type
-
-        match test_type:
-            case TestType.HELD_ITEM_TAG:
-                return replace_placeholder_object_with_test_taker_holds(test, test_taker)
-            case TestType.SAME_LOCATION:
-                return replace_placeholder_object_with_test_taker_sameloc(test, test_taker)
-            case TestType.HAS_EDGE:
-                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker)
-            case TestType.HAS_DOUBLE_EDGE:
-                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker)
-            case _:
-                return None
-
-def replace_placeholder_object_with_test_taker_hasedge(test, test_taker):
-
-    if test.object_from_test is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
-        copiedtest = deepcopy(test)
-        copiedtest.object_from_test = test_taker
-        return copiedtest
-
-    if test.object_to_test is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
-        copiedtest = deepcopy(test)
-        copiedtest.object_to_test = test_taker
-        return copiedtest
-        
-    return test
-
-def replace_placeholder_object_with_test_taker_holds(test, test_taker):
-
-    if test.holder_to_test is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
-        copiedtest = deepcopy(test)
-        copiedtest.holder_to_test = test_taker
-        return copiedtest
-    
-    return test
-
-def replace_placeholder_object_with_test_taker_sameloc(test, test_taker):
-
-    if GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER in test.list_to_test:
-        copiedtest = deepcopy(test)
-        copiedtest.list_to_test.remove(GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER)
-        copiedtest.list_to_test.append(test_taker)
-        return copiedtest
-    
-def replace_placeholder_object_with_change_haver(changeobject, change_haver):
-
-    if changeobject.changetype == ChangeType.RELCHANGE:
-        return replace_placeholder_object_with_change_haver_rel(changeobject, change_haver)
-    if changeobject.changetype == ChangeType.TAGCHANGE:
-        return replace_placeholder_object_with_change_haver_tag(changeobject, change_haver)
-        
-    return changeobject
-
-def replace_placeholder_object_with_change_haver_rel(changeobject, change_haver):
-
-    if changeobject.node_a is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
-        copiedchange = deepcopy(changeobject)
-        copiedchange.node_a = change_haver
-        return copiedchange
-
-    if changeobject.node_b is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
-        copiedchange = deepcopy(changeobject)
-        copiedchange.node_b = change_haver
-        return copiedchange
-        
-    return changeobject
-
-def replace_placeholder_object_with_change_haver_tag(changeobject, change_haver):
-
-    if changeobject.object_node_name is GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER:
-        copiedchange = deepcopy(changeobject)
-        copiedchange.object_node_name = change_haver.get_name()
-        return copiedchange
-    
-    return changeobject
 
 
 

@@ -132,6 +132,7 @@ class CharacterNode(ObjectNode):
 
     def add_task_stack(self, task_stack):
         self.list_of_task_stacks.append(task_stack)
+        return task_stack
 
     def remove_task_stack(self, task_stack_name):
         stack_to_remove = self.get_task_stack_by_name(stack_name=task_stack_name)

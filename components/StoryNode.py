@@ -1,4 +1,7 @@
+from copy import deepcopy
 from numpy import character
+
+from components.UtilFunctions import replace_multiple_placeholders_with_multiple_change_havers, replace_multiple_placeholders_with_multiple_test_takers
 
 
 class StoryNode:
@@ -340,3 +343,42 @@ class StoryNode:
             compatibility = compatibility and self.check_actor_or_target_compatibility(character_node)
 
         return compatibility
+    
+def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:dict):
+    #Things that must be replaced:
+    # - Actors
+    # - Targets 
+    # - Relationship Changes
+    # - Requirement Tests
+    
+    story_node_copy = deepcopy(story_node)
+
+    new_actor_list = []
+    new_target_list = []
+    new_relchange_list = []
+    new_validtest_list = []
+
+    for actor in story_node_copy.actor:
+        if actor in placeholder_dict.keys():
+            new_actor_list.append(placeholder_dict[actor])
+        else:
+            new_actor_list.append(actor)
+
+    for target in story_node_copy.target:
+        if target in placeholder_dict.keys():
+            new_target_list.append(placeholder_dict[target])
+        else:
+            new_target_list.append(target)
+
+    for test in story_node_copy.condition_tests:
+        new_relchange_list.append(replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_dict.values()))
+
+    for change in story_node_copy.effects_on_next_ws:
+        new_validtest_list.append(replace_multiple_placeholders_with_multiple_change_havers(change=change, placeholder_tester_pair_list=placeholder_dict.values()))
+
+    story_node_copy.actor = new_actor_list
+    story_node_copy.target = new_target_list
+    story_node_copy.condition_tests = new_validtest_list
+    story_node_copy.effects_on_next_ws = new_validtest_list
+
+    return story_node_copy
