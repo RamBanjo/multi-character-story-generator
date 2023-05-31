@@ -77,7 +77,7 @@ class StoryNode:
 
         #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
 
-        #TODO: Do we need suggested_condition_tests to test the world state to go with the suggested stuff for actor/targets?
+        #TODO (Extra Features): Do we need suggested_condition_tests to test the world state to go with the suggested stuff for actor/targets?
         self.condition_tests = condition_tests
         
 
@@ -321,17 +321,12 @@ class StoryNode:
         If max_between_actor_target is set to True AND there are slots for the target, then instead of only doing the bonus weight score for the actor part, it will also calculate the target part and choose max between the two.
         '''
 
-        #TODO: Don't calculate bonus score for the slot that cannot be used because of incompatibility? Unsure if we need to do that.
-        #Also, maybe the target weight score would never be used at all? Why does my mind keep changing. We keep it just in case, though.
-        #
-        # Okay, so I think we need to restructure things a bit.
-
         if max_between_actor_target and self.target_count > 0:
             return max(self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)) + self.biasweight
 
         return self.calculate_bonus_weight_score(character_node) + self.biasweight
 
-    #TODO: Also, we should probably make a function that returns true if either the target compat gets approved or the actor compat gets approved, for the purposes of joint rules
+    #Also, we should probably make a function that returns true if either the target compat gets approved or the actor compat gets approved, for the purposes of joint rules
     #Use case for this: When we are testing a joint node for a character, we should test if they'd work in either slot because we don't know which slot they would go to.
     def check_actor_or_target_compatibility(self, character_node):
         return self.check_character_compatibility(character_node) or self.check_target_compatibility(character_node)

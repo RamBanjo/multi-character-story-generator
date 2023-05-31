@@ -1,5 +1,5 @@
-#TODO: Goal States: So that we can determine whether or not a task is already completed for a character before they have a chance to. If this is true before the character acts out the task, the task is skipped.
-#TODO: Avoidance States: So that we can determine whether or not a task is impossible for a character before have a chance to complete it. If this is true before the character acts out the task, the task is failed and can no longer be continued.
+#Goal States: So that we can determine whether or not a task is already completed for a character before they have a chance to. If this is true before the character acts out the task, the task is skipped.
+#Avoidance States: So that we can determine whether or not a task is impossible for a character before have a chance to complete it. If this is true before the character acts out the task, the task is failed and can no longer be continued.
 
 class CharacterTask:
 
@@ -31,7 +31,7 @@ class CharacterTask:
     # Once a task in the stack is completed, the task moves on to the next.
     # Entire task stack is marked as complete once all tasks is complete.
 
-#TODO: Test TaskStack functions
+#TODO (Testing): Test TaskStack functions
 class TaskStack:
 
     '''
@@ -39,16 +39,16 @@ class TaskStack:
     current_task: The index of the current task. If set as -1, this means the entire stack is complete.
     add_step: The absolute step in which the TaskStack is added to a character. None of the tasks performed here may be performed chronologically before the task stack was added.
     '''
-    def __init__(self, stack_name:str, task_stack:list = [], task_stack_requirement:list = [], stack_giver_name=None, stack_owner_name=None, current_task_index:int = 0, add_step = -1):
+    def __init__(self, stack_name:str, task_stack:list = [], task_stack_requirement:list = [], stack_giver_name=None, stack_owner_name=None):
         self.stack_name = stack_name
         self.task_stack = task_stack
-        self.current_task_index = current_task_index
+        self.current_task_index = 0
         self.actor_placeholder_string_list = []
         self.task_stack_requirement = task_stack_requirement
-        self.add_step = add_step
         self.placeholder_info_dict = dict()
         self.stack_giver_name = stack_giver_name
         self.stack_owner_name = stack_owner_name
+        self.remove_from_pool = False
         
     def get_current_task(self):
 
@@ -66,6 +66,7 @@ class TaskStack:
 
         if self.current_task_index >= len(self.task_stack):
             self.current_task_index = -1
+            self.remove_from_pool = True
 
     def make_placeholder_string_list(self):
         for task in self.task_stack:

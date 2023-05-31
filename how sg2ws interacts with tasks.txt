@@ -1,0 +1,23 @@
+How does SG2WS state works?
+
+There is a First WorldState and a Final WorldState.
+To get anything between the First WorldState and the Final WorldState, we reach them by applying all changes from the list of changes
+The List of Changes is made by taking all the "effects_on_next_ws" from the StoryNodes
+
+Changes include:
+- TagChange (A tag on an object node is added or removed)
+- RelChange (A connection between two object nodes is added or removed)
+- ConditionalChange (All object nodes that pass the tests specified in the change will have changes applied to them)
+- TaskChange (A task is added to an actor's list of task and becomes a potential action for that character.)
+- TaskAdvance (The task is advanced to the next step. If this was the last step, the step is set to -1 and remove_from_pool is set to True)
+- TaskCancel (The task is cancelled, and remove_from_pool is set to True so the TaskStack isn't picked in the future.)
+
+The problem:
+- TaskChange objects do not come with a premade dict. We need a way to keep the dict information in the Task or the TaskChange object in order to keep generation consistent.
+- If we randomize the object on the add step, then it will not work because the story graph will change every single time
+
+Solution:
+- Update List of Changes will change the changelist every single time, we can't keep permanent task information there
+- We need a place outside of the List of Changes to keep the dicts so that they can be called
+- When applying a TaskChange for the first time: Make a dict and remember it
+- When applying a TaskChange subsequent times: Call from what we remember

@@ -429,7 +429,7 @@ def getfirst(e):
 def getsecond(e):
     return e[1]
 
-#TODO: Test this function.
+#TODO (Testing): Test this function.
 def list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes: dict, actors_wanted, current_actor_name=None):
 
     #Turn the dict we got into a list.    

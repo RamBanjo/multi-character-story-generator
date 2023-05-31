@@ -158,7 +158,7 @@ class WorldState:
         #If everything in self is contained in the other graph then it is a subgraph
         #To do this, we check every node and edge in this graph to see if it's contained within the other world state
 
-        #TODO: Use HashTable/Dict to optimize speed if it turns out this is super inefficient later on
+        #TODO (Extra Features): Use HashTable/Dict to optimize speed if it turns out this is super inefficient later on
 
         result = True
 
@@ -199,7 +199,7 @@ class WorldState:
 
     # Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
     # Not needed: We can simply loop through the entire list and run this function for each item in the list.
-    #TODO: Sigh, we need to test this function again, what bs
+    #TODO (Testing): Sigh, we need to test this function again, what bs
     def apply_relationship_change(self, relchange_object, reverse=False):
 
         if (relchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (relchange_object.add_or_remove == ChangeAction.REMOVE and reverse):
@@ -249,7 +249,7 @@ class WorldState:
     #It cycles through (oh this again?) all the characters excluding the task giver and the task owner to put as the placeholder
     #It will return as a list of dict with the placeholder as key and the name of the character as value (all possible dicts)
     #This inclusion isn't final, we still need to test with the story graphs (where replacements will also be done)
-    #TODO: Do we really need this? Discuss
+    #TODO (Extra Features): Do we really need this? Discuss
     def make_list_of_possible_task_character_replacements(self, taskobject):
 
         eligible_character_names = [x.get_name() for x in self.node_dict.value() if x.tags["Type"] == "Character"]
@@ -290,7 +290,7 @@ class WorldState:
 
         return valid_comb_dict_list
     
-    #TODO: Test this bastard too
+    #TODO (Testing): Test this bastard too
     def make_list_of_possible_task_stack_character_replacements(self, task_stack_object):
 
         eligible_character_names = [x.get_name() for x in self.node_dict.value() if x.tags["Type"] == "Character"]
@@ -337,21 +337,37 @@ class WorldState:
     # def replace_task_placeholders(self, taskobject, replacements):
     #     pass
 
-    #TODO: Test This
+    #TODO (Testing): Test This
     #Reverse not Implemented
-    def apply_task_change(self, taskchange_object, abs_step = 0, reverse=False):
+    def apply_task_change(self, taskchange_object):
 
+        task_stack = deepcopy(taskchange_object.task_stack)
+        possible_list = self.make_list_of_possible_task_stack_character_replacements(task_stack)
+
+        if len(possible_list) < 0:
+            return False
+        
+        #This will be assigned before coming here.
+        if task_stack.placeholder_info_dict is None:
+            return False
+        
         actor = self.node_dict[taskchange_object.actor_name]
-        task_stack = actor.add_task_stack(taskchange_object)
-        task_stack.add_step = abs_step
+        actor.add_task_stack(task_stack)
+        return True
 
-    #TODO: Test That
+    #TODO (Testing): Test That
     #Reverse not Implemented
-    def apply_task_advance_change(self, taskadvancechange_object, abs_step = 0, reverse=False):
+    def apply_task_advance_change(self, taskadvancechange_object, abs_step = 0):
 
-        actor = self.node_dict[taskadvancechange_object]
+        actor = self.node_dict[taskadvancechange_object.actor_name]
         task_stack = actor.get_task_stack_by_name(taskadvancechange_object.task_stack_name)
         task_stack.mark_current_task_as_complete(abs_step)
+
+    #TODO (Testing): Test this too
+    def apply_task_cancel_change(self, taskcancelchange_object):
+        actor = self.node_dict[taskcancelchange_object.actor_name]
+        task_stack = actor.get_task_stack_by_name(taskcancelchange_object.task_stack_name)
+        task_stack.remove_from_pool = True
 
     def print_all_nodes(self):
         print("=== List of Nodes in {} ===".format(self.name))
@@ -533,7 +549,7 @@ class WorldState:
 
         return -1
 
-    #TODO: What this function should do: return one of the many possible paths to get to that location.
+    #What this function should do: return one of the many possible paths to get to that location.
     # The path is formatted like [A, B, ..., C] where A is the current location and C is the destination location
     #If there's no possible path, then return None
     #I think this can be done using recursion?

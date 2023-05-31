@@ -7,7 +7,7 @@ regen_story_nodes = read_list_of_objects_from_json(json_file_name="json/ReGEN_Ex
 regen_ws = make_world_state_from_extracted_list_of_objects("Regen WS", regen_story_nodes)
 make_connection_from_json(json_file_name="json/ReGEN_Examples/ReGEN_Relations.json", verbose=True, world_state=regen_ws)
 
-#TODO: Make Story Parts
+#TODO (Important): Make Story Parts
 
 story_part_list = []
 
@@ -16,16 +16,21 @@ actor_target_shareloc = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC
 
 attack_by_npc = StoryNode(name="Attack Target", biasweight=0, tags={"NodeType":"Attack"}, charcount=1, target_count=1, required_tags_list=[("type","NPC"), ("alive",True)], required_tags_list_target=[("alive",True)], condition_tests=[hates_target, actor_target_shareloc])
 
-#TODO: Oh shoot---we don't have a way to ensure that the attacker is the same person who kills the target. Is the actor/target always going to be random? Maybe make players dying unwanted?
+#Oh shoot---we don't have a way to ensure that the attacker is the same person who kills the target. Is the actor/target always going to be random? Maybe make players dying unwanted?
 #Or maybe this:
 #First story node assigns the murderer with a temporary tag, second story node uses that tag to force the murderer into the actor spot, then removes the temporary tag
 #I'm a genius!
 #To have random outcome, simply don't have these tags. We want random outcomes for most cases anyways
+#
+#EDIT: This is now handled by Tasks.
 target_unalives = TagChange("Target Dies", GenericObjectNode.GENERIC_TARGET, "alive", True, ChangeAction.REMOVE)
 target_dies = TagChange("Target Dies", GenericObjectNode.GENERIC_TARGET, "alive", False, ChangeAction.ADD)
 
-#TODO: Oh shoot again---okay so. What if C hates A and B but then A kills B, would C instantly like A?
-#Intensity of reason? Values? This isn't how ReGEN works though??? Maybe we can chalk it up as ReGEN characters not being very logical? Who knows?
+# Oh shoot again---okay so. What if C hates A and B but then A kills B, would C instantly like A?
+# Intensity of reason? Values? This isn't how ReGEN works though??? Maybe we can chalk it up as ReGEN characters not being very logical? Who knows?
+#
+# EDIT: This is covered by multiple sets of condition change
+
 placeholder_share_loc_actor = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER])
 placeholder_friends_target = HasEdgeTest(object_from_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name_test="friends", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
 placeholder_hate_actor = RelChange("Placeholder Hates Actor", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="hates", node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.ADD, value="murder_of_friend")
@@ -41,7 +46,7 @@ witnesses_friends_killer_because_hate = ConditionalChange(name = "Friend Killer 
 placeholder_dislikes_target = HasEdgeTest(object_from_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name_test="dislike", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
 witnesses_friends_killer_because_dislike = ConditionalChange(name = "Friend Killer Because Hate", list_of_condition_tests=[placeholder_dislikes_target, placeholder_share_loc_actor], list_of_test_object_names=regen_story_nodes, list_of_changes=[placeholder_friends_actor])
 
-#TODO: BLAAGH MAKING ALL THESE FOR ALL THE CONDITIONS IS TEDIOUS IS THERE ANOTHER WAY AROUND THIS
+#TODO (Extra Features): BLAAGH MAKING ALL THESE FOR ALL THE CONDITIONS IS TEDIOUS IS THERE ANOTHER WAY AROUND THIS
 # I might just have to suck it up and accept this as the reality at this moment, but that might change once I talk to professor or Ami, they might be able to suggest a faster way to do this
 
 attacker_wins = StoryNode(name="Attacker Wins and Kills Target", biasweight=0, tags={"NodeType":"Murder"}, charcount=1, target_count=1, effects_on_next_ws=[target_dies, target_unalives, witnesses_hate_killer_because_friend, witnesses_friends_killer_because_dislike, witnesses_friends_killer_because_hate, witnesses_hate_killer_because_lover])

@@ -61,6 +61,12 @@ class StoryGraph:
         self.list_of_changes = []
         self.latest_ws = self.make_latest_state()
 
+        # Key: A tuple consisting of (Task Owner Name, Task Stack Name)
+        # Value: Dict that matches placeholder string to actor names
+        # Whenever a task with no preset dict found here is being added, generate a valid dict and add it here
+        # Whenever a task with a preset dict here is being added, use that preset dict as input
+        self.placeholder_dicts_of_tasks = dict()
+
     def add_to_story_part_dict(self, character_name, abs_step, story_part):
         self.story_parts[(character_name, abs_step)] = story_part
 
@@ -84,7 +90,8 @@ class StoryGraph:
 
         return new_part
 
-    def add_story_part_at_step(self, part, character, location=None, absolute_step=0, timestep=0, copy=True, targets=[]):
+    #TODO (Testing): Test this
+    def add_story_part_at_step(self, part, character, location=None, absolute_step=0, timestep=0, copy=True, targets=[], verbose=False):
 
         relevant_ws = self.make_state_at_step(stopping_step=absolute_step)
 
@@ -98,7 +105,14 @@ class StoryGraph:
         else:
             new_part = part
 
-        #print(character.name, "added to", part.name)
+        if verbose:
+            print(character.name, "added to", part.name)
+
+        for change in part.effect_on_next_ws:
+            if change.changetype == ChangeType.TASKCHANGE:
+                modded_taskobj = self.modify_taskchange_object_on_add(abs_step=absolute_step, story_node=part, taskchange_object=change)
+                if modded_taskobj[0]:
+                     change.task_object = modded_taskobj
 
         character_from_ws = relevant_ws.node_dict[char_name]
 
@@ -293,7 +307,7 @@ class StoryGraph:
 
     # Input: the required character, the base node
     # Output: A list of tuples. Each tuple is has the absolute step in index 0 and the list of character names in that node in index 1.
-    #TODO: Test this function.
+    #TODO (Testing): Test this function.
     
     def get_joint_node_steps_from_character_storyline(self, actor, joint_node):
         '''
@@ -349,17 +363,29 @@ class StoryGraph:
 
                 frozen_current_state = deepcopy(traveling_state)
 
-                if change.changetype is not ChangeType.CONDCHANGE:
-                    traveling_state.apply_some_change(change)
-                else:
-                    traveling_state.apply_conditional_change(change, frozen_current_state)
+                # TaskChange will call apply_task_change from the traveling_state
+                # (We assume that dict is already added to the TaskStack in the change when it was called)
+                # TaskAdvanceChange will call apply_task_advance_change from the traveling_state
+                # TaskCancelChange will call apply_task_cancel_change from the traveling_state
+
+                match change.changetype:
+                    case ChangeType.CONDCHANGE:
+                        traveling_state.apply_conditional_change(change, frozen_current_state)
+                    case ChangeType.TASKCHANGE:
+                        traveling_state.apply_task_change(taskchange_object=change)
+                    case ChangeType.TASKADVANCECHANGE:
+                        traveling_state.apply_task_advance_change(taskadvancechange_object=change, abs_step = index)
+                    case ChangeType.TASKCANCELCHANGE:
+                        traveling_state.apply_task_cancel_change(taskcancelchange_object=change)
+                    case _:
+                        traveling_state.apply_some_change(change)
         
         return traveling_state
 
     # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
     # Split Joint: The score is the max among all the given splits.
 
-    #TODO: Test this function with all types of rules. (We already tested the non-joint rule part, we should test the joint rule part)
+    #TODO (Testing): Test this function with all types of rules. (We already tested the non-joint rule part, we should test the joint rule part)
     def calculate_score_from_rule_char_and_cont(self, actor, insert_index, rule, mode=0):
 
         #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
@@ -429,8 +455,7 @@ class StoryGraph:
         else:
             return max(score)
 
-    #TODO: Test this function
-    #TODO: Is this function necessary or used? We might be able to deprecate this if it's not used (because we can always call make state from the beginning)
+    #Is this function necessary or used? We might be able to deprecate this if it's not used (because we can always call make state from the beginning)
     #LOL LMAO This is basically functionally the same as making the state at the length of the timesteps minus the number of reverses
     #Consider the following: There are 5 steps [0, 1, 2, 3, 4], and we want the step from final step reversed two times. We can either reverse twice into 2, or go forward 5-2-1 = 2 steps into 2. 
     def reverse_steps(self, number_of_reverse, state_name = "Reversed State"):
@@ -548,7 +573,7 @@ class StoryGraph:
 
     #To clarify: Targets to test are all actors.
     #This function should assume that all all needed actors and targets are already given.
-    #TODO: A lot of checks done in the Apply Joint Rule section are redundant, because they are already done here. We might be able to deprecate the checks done in there, just apply the node if it passes the tests in here.
+    #A lot of checks done in the Apply Joint Rule section are redundant, because they are already done here. We might be able to deprecate the checks done in there, just apply the node if it passes the tests in here.
     def check_joint_continuity_validity(self, joint_rule, main_character, grouping_split, insert_index):
         
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
@@ -614,7 +639,7 @@ class StoryGraph:
                 return False
             
         #Might end up with a sampling method for now (Test one random combination to see if it works out). If it doesn't cause too many problems then we can do it this way.
-        #TODO: Consider: create a list of good splits and then look through to see if there is at least one good split there, if the sampling method doesn't work.
+        #Consider: create a list of good splits and then look through to see if there is at least one good split there, if the sampling method doesn't work.
         validity = True
         cont_list = []
 
@@ -751,7 +776,7 @@ class StoryGraph:
             # if len(additional_targets_list) > 0:
             #     self.add_targets_to_storynode(added_joint, abs_step, additional_targets_list[i])
 
-    #TODO: Evaluate whether or not we still need target requirements
+    #Evaluate whether or not we still need target requirements
     # def find_shared_base_joint_locations(self, character_list, rule, target_requirements=[]):
 
     #     eligible_list = []
@@ -872,7 +897,7 @@ class StoryGraph:
         return random_grouping_from_list
 
 
-    #TODO: Generate ALL Valid Character Grouping for use in validity testing, in order to ensure at least one valid case exists.
+    #Generate ALL Valid Character Grouping for use in validity testing, in order to ensure at least one valid case exists.
     def generate_all_valid_character_grouping(self, continuations, abs_step, character_list):
 
         grouping_size_list = []
@@ -1133,7 +1158,7 @@ class StoryGraph:
 
         return list_of_char_parts
         
-    #TODO: Test this function to make sure it's working for sure.
+    #TODO (Testing): Test this function to make sure it's working for sure.
     def remove_parts_by_count(self, start_step, count, actor):
         end_index = start_step + count - 1
 
@@ -1208,7 +1233,7 @@ class StoryGraph:
 
         return validity
 
-    #TODO: Help lmao I forgot if this check worldstate validity also includes itself
+    #Help lmao I forgot if this check worldstate validity also includes itself
     #If it does then I have no reason to add another check before adding nodes (we already check ws validity while running apply rule)
     def check_worldstate_validity_on_own_graph(self, start_step):
         self.refresh_longest_path_length()
@@ -1292,8 +1317,8 @@ class StoryGraph:
                     location_holding_char = char_in_ws.get_holder()
                     current_step.set_location(location_holding_char)
 
-    def test_task_validity(self, task: CharacterTask, actor: CharacterNode, abs_step: int, placeholder_dict:dict):
-        #TODO: Do all of these things:
+    def test_task_validity(self, task: CharacterTask, actor: CharacterNode, abs_step: int):
+        #Do all of these things:
         # Make the world state according to the abs_step.
         # Translate generic changes, then test the conditions in the task at the abs_step.
         # Test if the actor is in the same location as the required location.
@@ -1305,7 +1330,7 @@ class StoryGraph:
         #
         # Return true if it passes all the test, return false if it fails even one test.
 
-        #TODO: There's also placeholder characters in play. We need to take that into account as well.
+        #There's also placeholder characters in play. We need to take that into account as well.
 
         current_ws = self.make_state_at_step(abs_step)
 
@@ -1314,12 +1339,18 @@ class StoryGraph:
             return False
         
         location_has_actor = current_ws.check_connection(node_a = current_loc, edge_name = current_ws.DEFAULT_HOLD_EDGE_NAME, node_b = actor, soft_equal = True)
+        
+        placeholder_charname_dict = task.placeholder_info_dict
+        placeholder_charobj_pair = [(x[0], current_ws.node_dict[x[1]]) for x in placeholder_charname_dict.items()]
+        
+        for test in task.task_requirement:
+            replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
+            task_valid = task_valid and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
 
         translated_task = []
         for story_node in task.task_actions:
-            translated_task.append(replace_placeholders_in_story_node(story_node=story_node, placeholder_dict=placeholder_dict))
+            translated_task.append(replace_placeholders_in_story_node(story_node=story_node, placeholder_dict=placeholder_charname_dict))
                                    
-
         cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=task.task_actions)
 
         return location_has_actor and cont_valid
@@ -1333,6 +1364,147 @@ class StoryGraph:
             return None
         
         return character_object.get_task_stack_by_name(task_stack_name)
+    
+    #TODO (Testing): Test this function
+    def find_last_step_of_task_stack_from_actor(self, task_stack_name, actor_name):
+
+        self.refresh_longest_path_length()
+
+        #The index of the current task in the task list.
+        last_task_step = 0
+        
+        #The absolute step that contains the latest instance of a TaskAdvance Object that affects this task.
+        last_graph_step_with_graph_update = 0
+
+        for current_index in range(0, self.longest_path_length):
+
+            current_ws = self.make_state_at_step(current_index)
+            actor_from_ws = current_ws.node_dict.get(actor_name, None)
+
+            if actor_from_ws is not None:
+                task_stack_from_ws = actor_from_ws.get_task_stack_by_name(task_stack_name)
+
+                if task_stack_from_ws is not None:
+                    new_last_task_step = task_stack_from_ws.current_task_index
+                    
+                    if new_last_task_step != last_task_step:
+                        last_graph_step_with_graph_update = current_index
+                    last_task_step = new_last_task_step
+
+        return {"last_task_step":last_task_step, "last_update_step":last_graph_step_with_graph_update}
+    
+    #In order to perform a task, it must both be incomplete and be completable. Otherwise, it's not a valid option to take.
+    def test_task_stack_advance_validity(self, task_stack_name, actor_name, abs_step):
+        #For the task advancement to be valid:
+        #The stack must already not be complete, and the task itself must not already be complete either, and must take place after the last update step
+        completeness = self.test_task_completeness(task_stack_name=task_stack_name, actor_name=actor_name, abs_step=abs_step)
+
+        if completeness != "task_step_incomplete":
+            return False, completeness
+        
+        current_ws = self.make_state_at_step(abs_step)
+        char_at_ws = current_ws.node_dict[actor_name]
+        task_stack = char_at_ws.get_task_stack_by_name(task_stack_name)
+        current_task = task_stack.get_current_task()
+
+        #The current task itself must be valid
+        return self.test_task_validity(task=current_task, actor=char_at_ws, abs_step=abs_step), completeness
+        
+    #TODO (Important): Complete This
+    def attempt_advance_task_stack(self, task_stack_name, actor_name, abs_step):
+        # Get the Task Stack Object.
+        # Use test_task_stack_advance_validity to test if task stack can be advanced here
+        #
+        # If true, advance it and add TaskAdvance to the last action of the task
+        # If false, determine the reason with the completeness output
+        # - task_stack_cleared, incompatible: Do Nothing
+        # - task_step_already_completed: Add a TaskAdvance in the action before the worldstate in abs_step
+        # - task_step_already_failed: Add a TaskCancel in the action before the worldstate in abs_step
+        #
+        pass
+    
+    #TODO (Testing): Test this
+    def test_task_completeness(self, task_stack_name, actor_name, abs_step):
+
+        #Get the current task step, see how far the task has progressed
+        last_task_step = self.find_last_step_of_task_stack_from_actor(task_stack_name=task_stack_name, actor_name=actor_name, abs_step=abs_step)
+
+        #Return "task_stack_cleared" if entire stack already completed (last task step is -1)
+        if last_task_step["last_task_step"] == -1:
+            return "task_stack_cleared"
+
+        #Return "incompatible" if the abs_step chosen is before the last update step (cannot update before the latest change)
+        if abs_step <= last_task_step["last_update_step"]:
+            return "incompatible"
+        
+        current_ws = self.make_state_at_step(abs_step)
+        actor_at_ws = current_ws.node_dict[actor_name]
+        task_stack_at_ws = actor_at_ws.get_task_stack_by_name(task_stack_name)
+
+        #Return "task_step_already_completed" if the tests in goal state all return true
+        goal_reached = True
+        placeholder_charname_dict = task_stack_at_ws.placeholder_info_dict
+        placeholder_charobj_pair = [(x[0], current_ws.node_dict[x[1]]) for x in placeholder_charname_dict.items()]
+
+        for test in task_stack_at_ws.goal_state:
+            replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
+            goal_reached = goal_reached and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
+
+        if goal_reached:
+            return "task_step_already_completed"
+        #Return "task_step_already_failed" if the tests in avoidance_state all return true
+        task_failed = True
+        for test in task_stack_at_ws.avoidance_state:
+            replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
+            
+            task_failed = task_failed and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
+
+        if task_failed:
+            return "task_step_already_failed"
+        
+        #If none of the above conditions are true, return "task_step_incomplete"
+        return "task_step_incomplete"
+    
+    #TODO (Testing): Test this Function
+    # This function will be called whenever a story node with a TaskChange object is added to the StoryGraph
+    #
+    # First, make the world state from that absolute_step
+    # Then, we need to fill in the blanks for the TaskStack in the TaskChange object
+    # - The Placeholder Dict will be blank and that has to be modified
+    #   - With the nature of how insert story part is, we will need to use self.placeholder_dicts_of_tasks to keep any dicts that we have ever created
+    #
+    # - The Stack Owner and Stack Giver names might be blank and that has to be modified
+    #   - Stack Giver is always the story node's actor
+    #   - Stack Owner is always the story node's target
+    #   - Also, we must force the nodes with have task change to have only one actor/target.
+    #
+    # After filling in these blanks, return a new TaskChange object with the modified TaskStack
+
+    #Return False and no Task Stack Object vs Return True and a Task Stack Object
+    def modify_taskchange_object_on_add(self, abs_step, story_node, taskchange_object):
+
+        current_ws = self.make_state_at_step(abs_step)
+        new_task_stack = deepcopy(taskchange_object.task_stack)
+
+        #Setting stack owner and stack giver names, according to the storynode.
+        new_task_stack.stack_giver_name = story_node.actor[0].name
+        new_task_stack.stack_owner_name = story_node.target[0].name
+
+        #We're checking here if theres already a dict here. If not then we're going to create a new one
+        task_placeholder_dict = self.placeholder_dicts_of_tasks.get((new_task_stack.stack_owner_name, new_task_stack.stack_name), None)
+
+        if task_placeholder_dict == None:
+
+            task_placeholder_list = current_ws.make_list_of_possible_task_stack_character_replacements(new_task_stack)
+            
+            if task_placeholder_list == None:
+                return False, None
+            
+            task_placeholder_dict = random.choice(task_placeholder_list)
+            self.placeholder_dicts_of_tasks[(new_task_stack.stack_owner_name, new_task_stack.stack_name)] = task_placeholder_dict
+
+        new_task_stack.placeholder_info_dict = task_placeholder_dict
+        return True, new_task_stack
 
     def return_current_task_from_task_stack_for_actor(self, absolute_step, actor_name, task_stack_name):
 
@@ -1383,8 +1555,6 @@ def if_applyonce_choose_one(loclist, applyonce):
 #Otherwise, we need to pair all the actors to all the targets and return a list of all pairs
 #Even if there is no change in relationship, return the relationship as a 1 element list anyways
 
-#TODO: Add something that translates ConditionalChange
-
 def translate_generic_change(change, populated_story_node):
 
     equivalent_changelist = []
@@ -1396,6 +1566,12 @@ def translate_generic_change(change, populated_story_node):
             equivalent_changelist = translate_generic_tagchange(change, populated_story_node)
         case ChangeType.CONDCHANGE:
             equivalent_changelist = translate_generic_condchange(change, populated_story_node)
+        case ChangeType.TASKCHANGE:
+            equivalent_changelist = translate_generic_taskchange(change, populated_story_node)
+        case ChangeType.TASKADVANCECHANGE:
+            equivalent_changelist = translate_generic_taskadvance(change, populated_story_node)
+        case ChangeType.TASKCANCELCHANGE:
+            equivalent_changelist = translate_generic_taskcancel(change, populated_story_node)
         case _:
             equivalent_changelist = [change]
 
@@ -1414,7 +1590,7 @@ def translate_generic_relchange(relchange, populated_story_node):
 
     return list_of_equivalent_relchanges
 
-#TODO: Test this function
+#TODO (Testing): Test this function
 def translate_generic_tagchange(tagchange, populated_story_node):
     list_of_equivalent_tagchanges = []
 
@@ -1428,7 +1604,7 @@ def translate_generic_tagchange(tagchange, populated_story_node):
 
     return list_of_equivalent_tagchanges
 
-#TODO: Test this function
+#TODO (Testing): Test this function
 def translate_generic_condchange(change, populated_story_node):
 
     equivalent_objects = []
@@ -1453,6 +1629,36 @@ def translate_generic_condchange(change, populated_story_node):
         equivalent_changes.extend(translate_generic_change(subchange, populated_story_node))
 
     return ConditionalChange(change.name, equivalent_objects, equivalent_tests, equivalent_changes)
+
+def translate_generic_taskchange(change, populated_story_node):
+
+    equivalent_actors = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
+
+    equivalent_changes = []
+    for item_name in equivalent_actors:
+        equivalent_changes.append(TaskChange(name=change.name, actor_name=item_name, task_stack=change.task_stack))
+
+    return equivalent_changes
+
+def translate_generic_taskadvance(change, populated_story_node):
+
+    equivalent_actors = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
+
+    equivalent_changes = []
+    for item_name in equivalent_actors:
+        equivalent_changes.append(TaskAdvance(name=change.name, actor_name=item_name, task_stack_name=change.task_stack_name))
+
+    return equivalent_changes
+
+def translate_generic_taskcancel(change, populated_story_node):
+
+    equivalent_actors = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
+
+    equivalent_changes = []
+    for item_name in equivalent_actors:
+        equivalent_changes.append(TaskCancel(name=change.name, actor_name=item_name, task_stack_name=change.task_stack_name))
+
+    return equivalent_changes
 
 def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
     return_list = []

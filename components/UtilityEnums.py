@@ -21,6 +21,7 @@ class ChangeType(Enum):
     CONDCHANGE = 2
     TASKCHANGE = 3
     TASKADVANCECHANGE = 4
+    TASKCANCELCHANGE = 5
 
 class TestType(Enum):
     HELD_ITEM_TAG = 0

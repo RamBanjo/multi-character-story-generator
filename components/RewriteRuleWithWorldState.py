@@ -3,8 +3,6 @@ import statistics
 from components.UtilFunctions import actor_count_sum
 from components.UtilityEnums import JointType
 
-#TODO: Rewrite this class so instead of replacing things, it *inserts* things after the condition.
-
 class RewriteRule:
     # ...do we really need World State Change, if all of the world state changes will be stated in the change to world states in the story parts?
     # We probably don't.
@@ -44,7 +42,7 @@ class RewriteRule:
                 
         return statistics.mean(total_bias_list)
 
-    #TODO: This probably is no longer needed considering that we have moved all these checks to the Nodes themselves?
+    #This probably is no longer needed considering that we have moved all these checks to the Nodes themselves?
     # def check_character_compatibility(self, character_node, init_world_state, list_of_changes, start_of_check):
 
     #     compatibility = True

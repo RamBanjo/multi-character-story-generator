@@ -59,8 +59,7 @@ class TaskChange(SomeChange):
         self.task_stack = task_stack
         self.add_or_remove = add_or_remove
         self.changetype = ChangeType.TASKCHANGE
-        self.task_giver_name = None
-        self.task_owner_name = None
+        self.placeholder_dict = dict()
         
 class TaskAdvance(SomeChange):
     def __init__(self, name, actor_name, task_stack_name):
@@ -69,4 +68,13 @@ class TaskAdvance(SomeChange):
 
         self.actor_name = actor_name
         self.task_stack_name = task_stack_name
-        self.changetype = ChangeType.TASKCHANGE
+        self.changetype = ChangeType.TASKADVANCECHANGE
+
+class TaskCancel(SomeChange):
+    def __init__(self, name, actor_name, task_stack_name):
+
+        super().__init__(name)
+
+        self.actor_name = actor_name
+        self.task_stack_name = task_stack_name
+        self.changetype = ChangeType.TASKCANCELCHANGE    

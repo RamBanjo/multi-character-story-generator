@@ -447,3 +447,10 @@ For NPCs in game? However Important NPCs might not always act rationally like Ch
         - A task can be progressed if it already passed by that step where it was assigned, the character is in the correct location to perform the task, and the other conditions for applying story nodes apply appropriately.
             - For this reason, we added a counter to count what absolute step the quest was added.
             - Additionally, each separate task also requires a counter when it was performed, so subsequent tasks of the same stack cannot be performed in the wrong order.
+
+20 May 2023
+    - Characters can cancel tasks that are no longer possible / Already done for them
+        - Characters should be rewarded even if the quests are already done for them
+        - It depends on the context as well, the quest requester might have specifics that cannot be ignored.
+    - Read ReGEN paper again to make more comparisions
+    - Finish the task continuation functions in SG2WS
