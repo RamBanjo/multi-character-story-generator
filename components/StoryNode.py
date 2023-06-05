@@ -339,6 +339,11 @@ class StoryNode:
 
         return compatibility
     
+    def check_if_joint_node(self):
+        
+        #If this node allows more than 1 character or allows more than 1 target which is an actor then it is a joint node.
+        return self.charcount > 1 or self.target_count > 0
+    
 def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:dict):
     #Things that must be replaced:
     # - Actors

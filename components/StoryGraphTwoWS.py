@@ -1204,7 +1204,7 @@ class StoryGraph:
         return joint_node.check_actor_or_target_compatibility(character_at_step)
 
 
-    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None, purge_count = 0):
+    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None, purge_count = 0, has_joint_in_contlist = False):
         #We did the main function, but now we also need to check if the character is being a target, and pull up the requirement for being a target instead if that's the case.
         #This function is meant for use with only the continuation part of a normal non-joint rule. We probably should make a new function to use with the joint rules.
 
@@ -1222,7 +1222,10 @@ class StoryGraph:
         if purge_count > 0:
             graphcopy.remove_parts_by_count(abs_step_to_cont_from, purge_count, actor)
 
-        graphcopy.insert_multiple_parts(cont_list, actor, None, abs_step_to_cont_from, targets=target_list)
+        if has_joint_in_contlist:
+            graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=cont_list, main_character=actor, abs_step=abs_step_to_cont_from)
+        else:
+            graphcopy.insert_multiple_parts(cont_list, actor, None, abs_step_to_cont_from, targets=target_list)
         graphcopy.fill_in_locations_on_self()
         graphcopy.update_list_of_changes()
         graphcopy.refresh_longest_path_length()
@@ -1351,7 +1354,7 @@ class StoryGraph:
         for story_node in task.task_actions:
             translated_task.append(replace_placeholders_in_story_node(story_node=story_node, placeholder_dict=placeholder_charname_dict))
                                    
-        cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=task.task_actions)
+        cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=task.task_actions, has_joint_in_contlist=True)
 
         return location_has_actor and cont_valid
 
@@ -1409,19 +1412,154 @@ class StoryGraph:
 
         #The current task itself must be valid
         return self.test_task_validity(task=current_task, actor=char_at_ws, abs_step=abs_step), completeness
+    
+    def insert_multiple_parts_with_joint_and_nonjoint(self, node_list, main_character, abs_step):
+        for index in range(0, len(node_list)):
+
+                current_story_part = node_list[index]
+                current_insert_index = abs_step+index
+
+                #If the node is a joint node, apply it like a joint node
+                #If it's not a joint node, apply it like a normal node
+                if current_story_part.check_if_joint_node():
+
+                    #To do this, we need to check whether the main character is a target or a main character
+                    actor_list = []
+                    target_list = []
+                    make_main_char_target = False
+ 
+                    if main_character in current_story_part.target:
+                        make_main_char_target = True
+
+                        actor_list = [x for x in current_story_part.actor]
+                        target_list = [x for x in current_story_part.target if x is not main_character]
+                    else:
+                        actor_list = [x for x in current_story_part.actor if x is not main_character]
+                        target_list = [x for x in current_story_part.target]                       
+                        
+                    self.insert_joint_node(joint_node=current_story_part, main_actor=main_character, other_actors=actor_list, location=current_story_part.location, targets=target_list, absolute_step=current_insert_index, make_main_actor_a_target=make_main_char_target)
+
+                else:
+                    self.insert_story_part(part=current_story_part, character=main_character, location=current_story_part.location)
         
-    #TODO (Important): Complete This
+    #TODO (Testing): Test This
     def attempt_advance_task_stack(self, task_stack_name, actor_name, abs_step):
         # Get the Task Stack Object.
+        
+        current_ws = self.make_state_at_step(abs_step)
+        actor_object = current_ws.node_dict.get(actor_name, None)
+
+        #Return False on Actor None
+        if actor_object is None:
+            return False
+        
+        #Return False on Task Stack Object None
+        task_stack_object = actor_object.get_task_stack_by_name(task_stack_name)
+        if task_stack_object is None:
+            return False    
+
         # Use test_task_stack_advance_validity to test if task stack can be advanced here
-        #
-        # If true, advance it and add TaskAdvance to the last action of the task
+
+        advance_valid = self.test_task_stack_advance_validity(task_stack_name=task_stack_name)
+
+        #Task advance is true, we will add the action from the stack's current task to the story node
+        if advance_valid[0]:
+
+            current_task = task_stack_object.get_current_task()
+            story_nodes_to_add = current_task.task_actions
+
+            #do a translation
+            translated_nodes = []
+            for node in story_nodes_to_add:
+                translated_nodes.append(replace_placeholders_in_story_node(node, self.placeholder_dicts_of_tasks[(actor_name, task_stack_name)]))
+
+            #Insert the task advance stack to the last story node
+            last_story_node = translated_nodes[-1]
+
+            task_advance_name = "task_advance_for_" + actor_name + "_" + task_stack_name
+            advance_stack_object = TaskAdvance(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
+            last_story_node.effects_on_next_ws.append(advance_stack_object)
+
+            #Now, insert each of the story nodes into the story
+
+            #We forgot to account for parts that have multiple characters here. Whoopie!
+            #We might need to check if something is a joint node then choose to either self.insert_story_part or self.insert_joint_node
+            #
+            # Fixed! We now have insert_multiple_parts_with_joint_and_nonjoint which we also use for task validation
+
+            #self.insert_multiple_parts(part_list=translated_nodes, character=actor_object, absolute_step=abs_step, copy=True)
+
+            self.insert_multiple_parts_with_joint_and_nonjoint(node_list=translated_nodes, main_character=actor_object, abs_step=abs_step)
+            # for index in range(0, len(translated_nodes)):
+
+            #     current_story_part = translated_nodes[index]
+            #     current_insert_index = abs_step+index
+
+            #     #If the node is a joint node, apply it like a joint node
+            #     #If it's not a joint node, apply it like a normal node
+            #     if current_story_part.check_if_joint_node():
+
+            #         #To do this, we need to check whether the main character is a target or a main character
+            #         actor_list = []
+            #         target_list = []
+            #         make_main_char_target = False
+ 
+            #         if actor_object in current_story_part.target:
+            #             make_main_char_target = True
+
+            #             actor_list = [x for x in current_story_part.actor]
+            #             target_list = [x for x in current_story_part.target if x is not actor_object]
+            #         else:
+            #             actor_list = [x for x in current_story_part.actor if x is not actor_object]
+            #             target_list = [x for x in current_story_part.target]                       
+                        
+            #         self.insert_joint_node(joint_node=current_story_part, main_actor=actor_object, other_actors=actor_list, location=current_story_part.location, targets=target_list, absolute_step=current_insert_index, make_main_actor_a_target=make_main_char_target)
+
+            #     else:
+            #         self.insert_story_part(part=current_story_part, character=actor_object, location=current_story_part.location, absolute_step=current_insert_index, targets=current_story_part.target)
+
+            return True
+        else:
+
+            previous_story_node = self.story_parts.get((actor_name, abs_step-1))
+            match advance_valid[1]:
+
+                # WS 0 -> Step 0 -> WS 1 -> Step 1 -> WS 2 (Final)...
+                #
+                # When we're saying that a WorldState is already in a completed state, can something in the past change it so that the quest isn't complete?
+                #
+                # The quest is for Alice to kill Bob
+                # Bob died due to unrelated reasons
+                # Alice arrives to see Bob die from unrelated reasons, considers the quest complete
+                # Bob gets revived before Alice arrives
+                # Quest turns out to be incomplete?!
+                # TODO (Important): Discuss this with Prof later
+                #
+                # TODO (Extra Features): By technicality there shouldn't be anyone with already a task in WS0, but we can think of a way to handle that later.
+                #Get the story node before this step and add task_advance to it
+                case "task_step_already_completed":
+                    task_advance_name = "task_advance_for_" + actor_name + "_" + task_stack_name
+                    advance_stack_object = TaskAdvance(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
+                    previous_story_node.effects_on_next_ws.append(advance_stack_object)
+                    return True
+                
+                #Get the story node at this step and add task_cancel to it
+                case "task_step_already_failed":
+                    task_advance_name = "task_cancel_for_" + actor_name + "_" + task_stack_name
+                    cancel_stack_object = TaskCancel(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
+                    previous_story_node.effects_on_next_ws.append(cancel_stack_object)
+                    return True
+                
+                #Nothing is modified because the task cannot be advanced here
+                case _:
+                    return False
+
+        # If true, advance it and add TaskAdvance to the last action of the task. Return True.
         # If false, determine the reason with the completeness output
         # - task_stack_cleared, incompatible: Do Nothing
         # - task_step_already_completed: Add a TaskAdvance in the action before the worldstate in abs_step
         # - task_step_already_failed: Add a TaskCancel in the action before the worldstate in abs_step
-        #
-        pass
+        # Return False if it's task_stack_cleared or incompatible. Otherwise, return True.
     
     #TODO (Testing): Test this
     def test_task_completeness(self, task_stack_name, actor_name, abs_step):
