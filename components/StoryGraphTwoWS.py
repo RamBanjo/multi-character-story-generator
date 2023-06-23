@@ -49,6 +49,8 @@ If we use a rule that replaces b with d, e on Alice's storyline the entries will
 Only two world states will be kept: The starting world state and the worldstate of the latest world state.
 '''
 
+DEFAULT_INVALID_SCORE = -999
+
 class StoryGraph:
     def __init__(self, name, character_objects, location_objects, starting_ws):
         self.name = name
@@ -420,7 +422,40 @@ class StoryGraph:
                 #If not, then max between actor slot and target slot.
                 return rule.joint_node.calculate_weight_score(character_from_ws, max_between_actor_target=True)
             
-    def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0):
+    #TODO (Testing):Test this function!
+    def calculate_score_from_next_task_in_task_stack(self, actor_name, task_stack_name, task_perform_index, mode=0):
+
+        #First we must recognize if the task is already completed or not
+        #If it's not already completed at the given task_perform_index, then get the appropriate task actions then calculate that cont
+
+        completeness = self.test_task_completeness(task_stack_name=task_stack_name, actor_name=actor_name, task_perform_index=task_perform_index)
+        
+        # Advance Task -> 0 or Equivalent to Completing Task By Ourself?
+        # Cancel Task -> DEFAULT_INVALID_SCORE
+
+        match completeness:
+            case "task_step_incomplete":
+                current_ws = self.make_state_at_step(task_perform_index)
+                actor = current_ws.node_dict[actor_name]
+
+                self.find_last_step_of_task_stack_from_actor
+
+                task_stack_obj = actor.get_task_stack_by_name(task_stack_name)
+                current_task = task_stack_obj.get_current_task()
+
+                task_actions = current_task.task_actions
+                translated_nodes = []
+                for node in task_actions:
+                    translated_nodes.append(replace_placeholders_in_story_node(story_node=node, placeholder_dict=self.placeholder_dicts_of_task[(actor_name, task_stack_name)])) 
+
+                return self.calculate_score_from_char_and_cont(actor=actor, insert_index=task_perform_index, contlist=translated_nodes, has_joint_in_contlist=True)
+            case "task_step_already_completed":
+                return 0
+            case _:
+                return DEFAULT_INVALID_SCORE
+            
+    #TODO (Important): Since we might be using joint/nonjoint for this in certain cases, we also need to edit this
+    def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0, has_joint_in_contlist = False):
         '''Mode is an int, depending on what it is, this function will do different things:
         mode = 0: return max between all the cont list.
         mode = 1: return average between all the cont list.
@@ -432,8 +467,10 @@ class StoryGraph:
 
         if purge_count > 0:
             graphcopy.remove_parts_by_count(start_step=insert_index, count=purge_count, actor=actor)
-        
-        graphcopy.insert_multiple_parts(part_list=contlist, character=actor, absolute_step=insert_index)
+        if has_joint_in_contlist:
+            graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=contlist, main_character=actor, abs_step=insert_index)
+        else:
+            graphcopy.insert_multiple_parts(part_list=contlist, character = actor, absolute_step=insert_index)        
         for current_index in range(insert_index, insert_index+len(contlist)):
             current_state = graphcopy.make_state_at_step(current_index)
             current_actor = current_state.node_dict[actor.get_name()]
@@ -447,8 +484,8 @@ class StoryGraph:
         del(graphcopy)
 
         #Since we're looking to use this entire sequence for a character, if we get a value of -999 it means that it cannot be used so we need to return this value to signify such a case.
-        if -999 in score:
-            return -999
+        if DEFAULT_INVALID_SCORE in score:
+            return DEFAULT_INVALID_SCORE
 
         if mode == 1:
             return statistics.mean(score)
@@ -1368,8 +1405,28 @@ class StoryGraph:
         
         return character_object.get_task_stack_by_name(task_stack_name)
     
+    #TODO (Testing): Test this function!
+    def get_list_of_task_stack_names_from_latest_step(self, actor_name):
+
+        last_ws = self.make_latest_state()
+        current_actor = last_ws.node_dict[actor_name]
+
+        task_stack_name_list = []
+        for task_stack in current_actor.list_of_task_stacks:
+            task_stack_name_list.append(task_stack.stack_name)
+
+        return task_stack_name_list
+    
     #TODO (Testing): Test this function
+
+    '''
+    Returns a dict with the following information:
+
+    "last_task_step": The current step of the taskstack. If the value is -1, the task stack is completed.
+    "last_update_step": The last step that the task got updated, meaning that the next step of the task advancing should be after this step.
+    '''
     def find_last_step_of_task_stack_from_actor(self, task_stack_name, actor_name):
+        
 
         self.refresh_longest_path_length()
 
@@ -1395,7 +1452,7 @@ class StoryGraph:
                     last_task_step = new_last_task_step
 
         return {"last_task_step":last_task_step, "last_update_step":last_graph_step_with_graph_update}
-    
+
     #In order to perform a task, it must both be incomplete and be completable. Otherwise, it's not a valid option to take.
     def test_task_stack_advance_validity(self, task_stack_name, actor_name, abs_step):
         #For the task advancement to be valid:
@@ -1533,9 +1590,14 @@ class StoryGraph:
                 # Alice arrives to see Bob die from unrelated reasons, considers the quest complete
                 # Bob gets revived before Alice arrives
                 # Quest turns out to be incomplete?!
-                # TODO (Important): Discuss this with Prof later
                 #
-                # TODO (Extra Features): By technicality there shouldn't be anyone with already a task in WS0, but we can think of a way to handle that later.
+                # We need to prevent such scenarios from being violated from the first place. We could technically add a "Realize Quest step" which has certain requirements
+                # So that when something that would modify the story to be invalid happens before the quest is realized, it can be seen as invalid?
+                # Alternatively: Just stuff it in with the node that travels to that location
+                #
+                #Add a condition check to the location where we also add the Task Advance stack
+                #
+                #TODO (Extra Features): By technicality there shouldn't be anyone with already a task in WS0, but we can think of a way to handle that later.
                 #Get the story node before this step and add task_advance to it
                 case "task_step_already_completed":
                     task_advance_name = "task_advance_for_" + actor_name + "_" + task_stack_name
@@ -1564,8 +1626,15 @@ class StoryGraph:
     #TODO (Testing): Test this
     def test_task_completeness(self, task_stack_name, actor_name, abs_step):
 
+        #Check the last worldstate if they have this task at all. If it doesn't exist in the last world state, then if it doesn't exist in the final world state, return "not_exist"
+
+        latest_ws = self.make_latest_state()
+        latest_actor = latest_ws.node_dict[actor_name]
+        if latest_actor.get_task_stack_by_name(task_stack_name) is None:
+            return "not_exist"
+
         #Get the current task step, see how far the task has progressed
-        last_task_step = self.find_last_step_of_task_stack_from_actor(task_stack_name=task_stack_name, actor_name=actor_name, abs_step=abs_step)
+        last_task_step = self.find_last_step_of_task_stack_from_actor(task_stack_name=task_stack_name, actor_name=actor_name)
 
         #Return "task_stack_cleared" if entire stack already completed (last task step is -1)
         if last_task_step["last_task_step"] == -1:
@@ -1578,6 +1647,12 @@ class StoryGraph:
         current_ws = self.make_state_at_step(abs_step)
         actor_at_ws = current_ws.node_dict[actor_name]
         task_stack_at_ws = actor_at_ws.get_task_stack_by_name(task_stack_name)
+
+        #Return "wrong_location" if the character in the current state isn't in the right location for the task step.
+        character_current_location_name = current_ws.get_actor_current_location(actor_at_ws)
+        
+        if last_task_step.task_location_name != character_current_location_name:
+            return "wrong_location"
 
         #Return "task_step_already_completed" if the tests in goal state all return true
         goal_reached = True
@@ -1653,7 +1728,7 @@ class StoryGraph:
         
         return stack.get_current_task()
 
-    def perform_next_task_from_task_stack_for_actor(self, absolute_step, actor, task_stack_name):
+    # def perform_next_task_from_task_stack_for_actor(self, absolute_step, actor, task_stack_name):
         #First, get the world state at the abs step
 
         #Check if the task with this name exists at the task stack name. If not, return False.

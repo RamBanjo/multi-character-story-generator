@@ -7,7 +7,7 @@ regen_story_nodes = read_list_of_objects_from_json(json_file_name="json/ReGEN_Ex
 regen_ws = make_world_state_from_extracted_list_of_objects("Regen WS", regen_story_nodes)
 make_connection_from_json(json_file_name="json/ReGEN_Examples/ReGEN_Relations.json", verbose=True, world_state=regen_ws)
 
-#TODO (Important): Make Story Parts
+#TODO (Important): Make Story Parts for ReGEN
 
 story_part_list = []
 

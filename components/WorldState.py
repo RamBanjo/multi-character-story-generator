@@ -583,10 +583,14 @@ class WorldState:
     #If the current location does not have tasks and adjacent locations don't have tasks either, continue looking for tasks, recording the distance towards nearest task. When a task is found, attempt to pick a location with the lowest number..
     #If there are no tasks at all, return return one random reachable location, including the current location.
     #
-    # (Note that some tasks don't have locations therefore cannot be located, and must be done based on )
+    # (Note that some tasks don't have locations therefore cannot be located, and must be done based on other conditions)
+
+    def get_actor_current_location(self, actor):
+        return self.node_dict[actor.get_incoming_edge(self.DEFAULT_HOLD_EDGE_NAME)[0].from_node.get_name()]
+    
     def get_optimal_location_towards_task(self, actor, verbose=False):        
         actor_task_stacks = actor.list_of_task_stacks
-        current_location = self.node_dict[actor.get_incoming_edge("holds")[0].from_node.get_name()]
+        current_location = self.get_actor_current_location(actor=actor)
         
         names_of_locations_with_tasks = set()
         task_location_count_dict = dict()
