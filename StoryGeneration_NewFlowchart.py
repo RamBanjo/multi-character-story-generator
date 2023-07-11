@@ -14,7 +14,6 @@ DEFAULT_HOLD_EDGE_NAME = "holds"
 DEFAULT_ADJACENCY_EDGE_NAME = "connect"
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
-#TODO (Important): Plot details about how to implement tasks into this function, then add compatibility with the tasks here according to the plot
 #TODO (Extra Features): Make Verbose, so that we can read what's going on while the generation is being done.
 def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0):
 
@@ -179,8 +178,11 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         #If the list of available tasks is empty, then insert "Advance Towards Task Location" into the Top 5
         #Here, we will choose from top n rules.
         #Also, if none of these actions are valid, we either advance towards task location or wait. 1/2 chance for either one.
-        #TODO (Important): No Valid Actions will essentially never happen because Move Towards Task Location is always valid. :thinking:
-        
+        # TODO (Important): No Valid Actions will essentially never happen because Move Towards Task Location is always valid. :thinking:
+        # You know what, I'm fine with this. We can make characters move around if there are no valid actions, with staying and waiting being the "last resort" option in the event that there are no possible actions.
+        #
+        # Sometimes, characters 
+
         sorted_list_of_valid_actions = sorted(list_of_valid_actions, key=get_element_2, reverse=True)
         top_pick_count = top_n
         if len(list_of_valid_actions) < top_n:
@@ -205,7 +207,6 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         # if len()
         extra_attempts_left = extra_attempts        
 
-        #TODO (Important): Edit this entire loop to make it work with Task Advancements
         while not action_for_character_found:
 
             # #Check the length of the list now. Do we have enough? If this is blank, we must make our character wait.

@@ -453,4 +453,9 @@ For NPCs in game? However Important NPCs might not always act rationally like Ch
         - Characters should be rewarded even if the quests are already done for them
         - It depends on the context as well, the quest requester might have specifics that cannot be ignored.
     - Read ReGEN paper again to make more comparisions
-    - Finish the task continuation functions in SG2WS
+    - Finish the task continuation functions in 
+    
+23 June 2023
+    - Write Testing Scheme to standardize testing, so that the knowledge can be passed
+    - We definitely have to include metrics to show concretely that our work is an improvement from previous works
+    - We might not have to include all the metrics, only include ones relevant to our work

@@ -11,7 +11,7 @@ from components.RewriteRuleWithWorldState import JointType
 from components.StoryNode import *
 from components.StoryObjects import *
 from copy import deepcopy
-from components.UtilFunctions import actor_count_sum, all_possible_actor_groupings_with_ranges_and_freesizes, generate_grouping_from_group_size_lists, get_max_possible_actor_target_count, get_max_possible_grouping_count, getfirst, getsecond, list_all_good_combinations_from_joint_join_pattern, permute_all_possible_groups_with_ranges_and_freesize, permute_full_range_list
+from components.UtilFunctions import *
 from components.UtilityEnums import GenericObjectNode, TestType
 
 '''
@@ -422,7 +422,7 @@ class StoryGraph:
                 #If not, then max between actor slot and target slot.
                 return rule.joint_node.calculate_weight_score(character_from_ws, max_between_actor_target=True)
             
-    #TODO (Testing):Test this function!
+    #TODO (Testing): Test this function!
     def calculate_score_from_next_task_in_task_stack(self, actor_name, task_stack_name, task_perform_index, mode=0):
 
         #First we must recognize if the task is already completed or not
@@ -454,7 +454,6 @@ class StoryGraph:
             case _:
                 return DEFAULT_INVALID_SCORE
             
-    #TODO (Important): Since we might be using joint/nonjoint for this in certain cases, we also need to edit this
     def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0, has_joint_in_contlist = False):
         '''Mode is an int, depending on what it is, this function will do different things:
         mode = 0: return max between all the cont list.
@@ -1700,8 +1699,15 @@ class StoryGraph:
         new_task_stack = deepcopy(taskchange_object.task_stack)
 
         #Setting stack owner and stack giver names, according to the storynode.
-        new_task_stack.stack_giver_name = story_node.actor[0].name
-        new_task_stack.stack_owner_name = story_node.target[0].name
+        #TODO (Extra Features): There is a case where instead of getting a task from another character (being a target) the character gains a task by interacting with some objects
+        #In that case, we change this function below
+        #Actually---would it be better to use placeholder objects. It would, wouldn't it?
+
+        #We will disallow multiple characters getting tasks at once, which means task changes can only be used on nodes with 1 or 2 actors.
+        equivalent_taskchange = translate_generic_taskchange(taskchange_object, story_node)
+
+        new_task_stack.stack_giver_name = equivalent_taskchange[0].task_giver_name
+        new_task_stack.stack_owner_name = equivalent_taskchange[0].task_owner_name
 
         #We're checking here if theres already a dict here. If not then we're going to create a new one
         task_placeholder_dict = self.placeholder_dicts_of_tasks.get((new_task_stack.stack_owner_name, new_task_stack.stack_name), None)
@@ -1761,196 +1767,3 @@ def if_applyonce_choose_one(loclist, applyonce):
         
     return loclist
 
-# Put in a generalized relchange with "actor"
-
-#This method should return a list of relationshp changes
-#If there's only one actor and target, then the list should only be 1 element long
-#Otherwise, we need to pair all the actors to all the targets and return a list of all pairs
-#Even if there is no change in relationship, return the relationship as a 1 element list anyways
-
-def translate_generic_change(change, populated_story_node):
-
-    equivalent_changelist = []
-
-    match change.changetype:
-        case ChangeType.RELCHANGE:
-            equivalent_changelist = translate_generic_relchange(change, populated_story_node)
-        case ChangeType.TAGCHANGE:
-            equivalent_changelist = translate_generic_tagchange(change, populated_story_node)
-        case ChangeType.CONDCHANGE:
-            equivalent_changelist = translate_generic_condchange(change, populated_story_node)
-        case ChangeType.TASKCHANGE:
-            equivalent_changelist = translate_generic_taskchange(change, populated_story_node)
-        case ChangeType.TASKADVANCECHANGE:
-            equivalent_changelist = translate_generic_taskadvance(change, populated_story_node)
-        case ChangeType.TASKCANCELCHANGE:
-            equivalent_changelist = translate_generic_taskcancel(change, populated_story_node)
-        case _:
-            equivalent_changelist = [change]
-
-    return equivalent_changelist
-
-def translate_generic_relchange(relchange, populated_story_node):
-    lhs_list = check_keyword_and_return_objectnodelist(populated_story_node, relchange.node_a)
-    rhs_list = check_keyword_and_return_objectnodelist(populated_story_node, relchange.node_b)
-
-    list_of_equivalent_relchanges = []
-
-    for lhs_item in lhs_list:
-        for rhs_item in rhs_list:
-            newchange = RelChange(relchange.name, lhs_item, relchange.edge_name, rhs_item, relchange.value, relchange.add_or_remove)
-            list_of_equivalent_relchanges.append(newchange)
-
-    return list_of_equivalent_relchanges
-
-#TODO (Testing): Test this function
-def translate_generic_tagchange(tagchange, populated_story_node):
-    list_of_equivalent_tagchanges = []
-
-    objectlist = check_keyword_and_return_objectnodelist(populated_story_node, tagchange.object_node_name)
-
-    for item in objectlist:
-        if type(item) == ObjectNode:
-            list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item.name, tagchange.tag, tagchange.value, tagchange.add_or_remove))
-        else:
-            list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item, tagchange.tag, tagchange.value, tagchange.add_or_remove))
-
-    return list_of_equivalent_tagchanges
-
-#TODO (Testing): Test this function
-def translate_generic_condchange(change, populated_story_node):
-
-    equivalent_objects = []
-    equivalent_tests = []
-    equivalent_changes = []
-
-    found_objects = []
-    for item_name in change.list_of_test_object_names:
-        current_object = check_keyword_and_return_objectnodelist(populated_story_node, item_name)
-        found_objects.extend(current_object)
-
-    for thing in found_objects:
-        if type(thing) == ObjectNode:
-            equivalent_objects.append(thing.get_name())
-        else:
-            equivalent_objects.append(thing)
-
-    for test in change.list_of_condition_tests:
-        equivalent_tests.extend(translate_generic_test(test, populated_story_node))
-
-    for subchange in change.list_of_changes:
-        equivalent_changes.extend(translate_generic_change(subchange, populated_story_node))
-
-    return ConditionalChange(change.name, equivalent_objects, equivalent_tests, equivalent_changes)
-
-def translate_generic_taskchange(change, populated_story_node):
-
-    equivalent_actors = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
-
-    equivalent_changes = []
-    for item_name in equivalent_actors:
-        equivalent_changes.append(TaskChange(name=change.name, actor_name=item_name, task_stack=change.task_stack))
-
-    return equivalent_changes
-
-def translate_generic_taskadvance(change, populated_story_node):
-
-    equivalent_actors = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
-
-    equivalent_changes = []
-    for item_name in equivalent_actors:
-        equivalent_changes.append(TaskAdvance(name=change.name, actor_name=item_name, task_stack_name=change.task_stack_name))
-
-    return equivalent_changes
-
-def translate_generic_taskcancel(change, populated_story_node):
-
-    equivalent_actors = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
-
-    equivalent_changes = []
-    for item_name in equivalent_actors:
-        equivalent_changes.append(TaskCancel(name=change.name, actor_name=item_name, task_stack_name=change.task_stack_name))
-
-    return equivalent_changes
-
-def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
-    return_list = []
-
-    match objnode_to_check:
-        case GenericObjectNode.GENERIC_ACTOR:
-            return_list.append(storynode.actor[0])
-        case GenericObjectNode.GENERIC_LOCATION:
-            return_list.append(storynode.location)
-        case GenericObjectNode.GENERIC_TARGET:
-            return_list.extend(storynode.target)
-        case GenericObjectNode.ALL_ACTORS:
-            return_list.extend(storynode.actor)
-        case _:
-            return_list.append(objnode_to_check)
-
-    return return_list
-
-#We'll use this to translate tests with generic tags instead of node here
-def translate_generic_test(condtest, populated_story_node):
-
-    list_of_equivalent_condtests = []
-
-    match condtest.test_type:
-        case TestType.HELD_ITEM_TAG:
-            list_of_equivalent_condtests = translate_generic_held_item_test(condtest, populated_story_node)
-        case TestType.SAME_LOCATION:
-            list_of_equivalent_condtests = translate_generic_same_location_test(condtest, populated_story_node)
-        case TestType.HAS_EDGE:
-            list_of_equivalent_condtests = translate_generic_has_edge_test(condtest, populated_story_node)
-        case TestType.HAS_DOUBLE_EDGE:
-            list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
-        case _:
-            list_of_equivalent_condtests = [condtest]
-        
-    return list_of_equivalent_condtests
-
-def translate_generic_held_item_test(test, node):
-
-    list_of_equivalent_tests = []
-
-    objectlist = check_keyword_and_return_objectnodelist(node, test.holder_to_test)
-
-    for item in objectlist:
-        list_of_equivalent_tests.append(HeldItemTagTest(item, test.tag_to_test, test.value_to_test, inverse=test.inverse))
-
-    return list_of_equivalent_tests
-
-def translate_generic_same_location_test(test, node):
-
-    objectlist = []
-
-    for item in test.list_to_test:
-        objectlist.extend(check_keyword_and_return_objectnodelist(node, item))
-
-    return [SameLocationTest(objectlist, inverse=test.inverse)]
-
-def translate_generic_has_edge_test(test, node):
-
-    list_of_equivalent_tests = []
-
-    from_node = check_keyword_and_return_objectnodelist(node, test.object_from_test)
-    to_node = check_keyword_and_return_objectnodelist(node, test.object_to_test)
-
-    for lhs_item in from_node:
-        for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
-
-    return list_of_equivalent_tests
-
-def translate_generic_has_doubleedge_test(test, node):
-    
-    list_of_equivalent_tests = []
-
-    from_node = check_keyword_and_return_objectnodelist(node, test.object_from_test)
-    to_node = check_keyword_and_return_objectnodelist(node, test.object_to_test)
-
-    for lhs_item in from_node:
-        for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
-
-    return list_of_equivalent_tests

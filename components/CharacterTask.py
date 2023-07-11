@@ -69,5 +69,8 @@ class TaskStack:
             self.remove_from_pool = True
 
     def make_placeholder_string_list(self):
+
+        self.actor_placeholder_string_list.clear()
+
         for task in self.task_stack:
             self.actor_placeholder_string_list.extend(task.actor_placeholder_string_list)

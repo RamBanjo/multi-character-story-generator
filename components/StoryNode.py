@@ -5,7 +5,7 @@ from components.UtilFunctions import replace_multiple_placeholders_with_multiple
 
 
 class StoryNode:
-    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, effects_on_next_ws = [], required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [], **kwargs):
+    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [], **kwargs):
         
         #the name of this action.
         self.name = name
@@ -26,10 +26,10 @@ class StoryNode:
         self.target_count = target_count
         
         #set of characters acting. if it's a template, then it should be blank
-        self.actor = []
+        self.actor = actor
         
         #set of targets of this action. if it's a template, then it should be blank.
-        self.target = []
+        self.target = target
 
         #the location where this story happens. If it's a template, then it should be None.
         self.location = None

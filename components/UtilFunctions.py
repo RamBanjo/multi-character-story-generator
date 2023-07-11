@@ -2,8 +2,11 @@ import copy
 import itertools
 import math
 import random
+from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest, HeldItemTagTest, SameLocationTest
 from components.Edge import Edge
-from components.UtilityEnums import ChangeType, TestType
+from components.RelChange import ConditionalChange, RelChange, TagChange, TaskAdvance, TaskCancel, TaskChange
+from components.StoryObjects import ObjectNode
+from components.UtilityEnums import ChangeType, GenericObjectNode, TestType
 
 #Function: Initialize Object
 #Inputs: Object, Location
@@ -513,7 +516,7 @@ def replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeho
         copiedtest = copy.deepcopy(test)
         copiedtest.object_from_test = test_taker
         return copiedtest
-
+    
     if test.object_to_test == placeholder_object:
         copiedtest = copy.deepcopy(test)
         copiedtest.object_to_test = test_taker
@@ -577,3 +580,219 @@ def replace_placeholder_object_with_change_haver_tag(changeobject, change_haver,
         return copiedchange
     
     return changeobject
+
+# Put in a generalized relchange with "actor"
+
+#This method should return a list of relationshp changes
+#If there's only one actor and target, then the list should only be 1 element long
+#Otherwise, we need to pair all the actors to all the targets and return a list of all pairs
+#Even if there is no change in relationship, return the relationship as a 1 element list anyways
+
+def translate_generic_change(change, populated_story_node):
+
+    equivalent_changelist = []
+
+    match change.changetype:
+        case ChangeType.RELCHANGE:
+            equivalent_changelist = translate_generic_relchange(change, populated_story_node)
+        case ChangeType.TAGCHANGE:
+            equivalent_changelist = translate_generic_tagchange(change, populated_story_node)
+        case ChangeType.CONDCHANGE:
+            equivalent_changelist = translate_generic_condchange(change, populated_story_node)
+        case ChangeType.TASKCHANGE:
+            equivalent_changelist = translate_generic_taskchange(change, populated_story_node)
+        case ChangeType.TASKADVANCECHANGE:
+            equivalent_changelist = translate_generic_taskadvance(change, populated_story_node)
+        case ChangeType.TASKCANCELCHANGE:
+            equivalent_changelist = translate_generic_taskcancel(change, populated_story_node)
+        case _:
+            equivalent_changelist = [change]
+
+    return equivalent_changelist
+
+def translate_generic_relchange(relchange, populated_story_node):
+    lhs_list = check_keyword_and_return_objectnodelist(populated_story_node, relchange.node_a)
+    rhs_list = check_keyword_and_return_objectnodelist(populated_story_node, relchange.node_b)
+
+    list_of_equivalent_relchanges = []
+
+    for lhs_item in lhs_list:
+        for rhs_item in rhs_list:
+            newchange = RelChange(relchange.name, lhs_item, relchange.edge_name, rhs_item, relchange.value, relchange.add_or_remove)
+            list_of_equivalent_relchanges.append(newchange)
+
+    return list_of_equivalent_relchanges
+
+#TODO (Testing): Test this function
+def translate_generic_tagchange(tagchange, populated_story_node):
+    list_of_equivalent_tagchanges = []
+
+    objectlist = check_keyword_and_return_objectnodelist(populated_story_node, tagchange.object_node_name)
+
+    for item in objectlist:
+        if type(item) == ObjectNode:
+            list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item.name, tagchange.tag, tagchange.value, tagchange.add_or_remove))
+        else:
+            list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item, tagchange.tag, tagchange.value, tagchange.add_or_remove))
+
+    return list_of_equivalent_tagchanges
+
+#TODO (Testing): Test this function
+def translate_generic_condchange(change, populated_story_node):
+
+    equivalent_objects = []
+    equivalent_tests = []
+    equivalent_changes = []
+
+    found_objects = []
+    for item_name in change.list_of_test_object_names:
+        current_object = check_keyword_and_return_objectnodelist(populated_story_node, item_name)
+        found_objects.extend(current_object)
+
+    for thing in found_objects:
+        if type(thing) == ObjectNode:
+            equivalent_objects.append(thing.get_name())
+        else:
+            equivalent_objects.append(thing)
+
+    for test in change.list_of_condition_tests:
+        equivalent_tests.extend(translate_generic_test(test, populated_story_node))
+
+    for subchange in change.list_of_changes:
+        equivalent_changes.extend(translate_generic_change(subchange, populated_story_node))
+
+    return ConditionalChange(change.name, equivalent_objects, equivalent_tests, equivalent_changes)
+
+def translate_generic_taskchange(change, populated_story_node):
+
+    equivalent_givers = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
+    equivalent_owners = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
+
+    equivalent_changes = []
+    for giver_name in equivalent_givers:
+        for owner_name in equivalent_owners:
+
+            giver_name_adjusted = giver_name
+            owner_name_adjusted = owner_name
+
+            if type(giver_name_adjusted) == ObjectNode:
+                giver_name_adjusted = giver_name.get_name()
+
+            if type(owner_name_adjusted) == ObjectNode:
+                owner_name_adjusted = owner_name.get_name()
+
+            equivalent_changes.append(TaskChange(name=change.name, task_giver_name=giver_name_adjusted, task_owner_name=owner_name_adjusted, task_stack=change.task_stack))
+
+    return equivalent_changes
+
+def translate_generic_taskadvance(change, populated_story_node):
+
+    equivalent_actors = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
+
+    equivalent_changes = []
+    for item_name in equivalent_actors:
+
+        item_name_adjusted = item_name
+        if type(item_name_adjusted) == ObjectNode:
+            item_name_adjusted = item_name.get_name()
+
+        equivalent_changes.append(TaskAdvance(name=change.name, actor_name=item_name_adjusted, task_stack_name=change.task_stack_name))
+
+    return equivalent_changes
+
+def translate_generic_taskcancel(change, populated_story_node):
+
+    equivalent_actors = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
+
+    equivalent_changes = []
+    for item_name in equivalent_actors:
+
+        item_name_adjusted = item_name
+        if type(item_name_adjusted) == ObjectNode:
+            item_name_adjusted = item_name.get_name()
+
+        equivalent_changes.append(TaskCancel(name=change.name, actor_name=item_name_adjusted, task_stack_name=change.task_stack_name))
+
+    return equivalent_changes
+
+def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
+    return_list = []
+
+    match objnode_to_check:
+        case GenericObjectNode.GENERIC_ACTOR:
+            return_list.append(storynode.actor[0])
+        case GenericObjectNode.GENERIC_LOCATION:
+            return_list.append(storynode.location)
+        case GenericObjectNode.GENERIC_TARGET:
+            return_list.extend(storynode.target)
+        case GenericObjectNode.ALL_ACTORS:
+            return_list.extend(storynode.actor)
+        case _:
+            return_list.append(objnode_to_check)
+
+    return return_list
+
+#We'll use this to translate tests with generic tags instead of node here
+def translate_generic_test(condtest, populated_story_node):
+
+    list_of_equivalent_condtests = []
+
+    match condtest.test_type:
+        case TestType.HELD_ITEM_TAG:
+            list_of_equivalent_condtests = translate_generic_held_item_test(condtest, populated_story_node)
+        case TestType.SAME_LOCATION:
+            list_of_equivalent_condtests = translate_generic_same_location_test(condtest, populated_story_node)
+        case TestType.HAS_EDGE:
+            list_of_equivalent_condtests = translate_generic_has_edge_test(condtest, populated_story_node)
+        case TestType.HAS_DOUBLE_EDGE:
+            list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
+        case _:
+            list_of_equivalent_condtests = [condtest]
+        
+    return list_of_equivalent_condtests
+
+def translate_generic_held_item_test(test, node):
+
+    list_of_equivalent_tests = []
+
+    objectlist = check_keyword_and_return_objectnodelist(node, test.holder_to_test)
+
+    for item in objectlist:
+        list_of_equivalent_tests.append(HeldItemTagTest(item, test.tag_to_test, test.value_to_test, inverse=test.inverse))
+
+    return list_of_equivalent_tests
+
+def translate_generic_same_location_test(test, node):
+
+    objectlist = []
+
+    for item in test.list_to_test:
+        objectlist.extend(check_keyword_and_return_objectnodelist(node, item))
+
+    return [SameLocationTest(objectlist, inverse=test.inverse)]
+
+def translate_generic_has_edge_test(test, node):
+
+    list_of_equivalent_tests = []
+
+    from_node = check_keyword_and_return_objectnodelist(node, test.object_from_test)
+    to_node = check_keyword_and_return_objectnodelist(node, test.object_to_test)
+
+    for lhs_item in from_node:
+        for rhs_item in to_node:
+            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
+
+    return list_of_equivalent_tests
+
+def translate_generic_has_doubleedge_test(test, node):
+    
+    list_of_equivalent_tests = []
+
+    from_node = check_keyword_and_return_objectnodelist(node, test.object_from_test)
+    to_node = check_keyword_and_return_objectnodelist(node, test.object_to_test)
+
+    for lhs_item in from_node:
+        for rhs_item in to_node:
+            list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
+
+    return list_of_equivalent_tests

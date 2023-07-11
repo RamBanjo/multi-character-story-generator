@@ -51,13 +51,14 @@ class ConditionalChange(SomeChange):
         self.changetype = ChangeType.CONDCHANGE
 
 class TaskChange(SomeChange):
-    def __init__(self, name, actor_name, task_stack, add_or_remove):
+    def __init__(self, name, task_giver_name, task_owner_name, task_stack):
 
         super().__init__(name)
 
-        self.actor_name = actor_name
+        self.task_giver_name = task_giver_name
+        self.task_owner_name = task_owner_name
         self.task_stack = task_stack
-        self.add_or_remove = add_or_remove
+        self.add_or_remove = ChangeAction.ADD
         self.changetype = ChangeType.TASKCHANGE
         self.placeholder_dict = dict()
         

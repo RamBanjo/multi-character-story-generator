@@ -2,7 +2,7 @@ from cgitb import text
 from copy import deepcopy
 import random
 from numpy import true_divide
-from components.CharacterTask import CharacterTask
+from components.CharacterTask import CharacterTask, TaskStack
 
 from components.Edge import Edge
 from components.RelChange import *
@@ -199,7 +199,6 @@ class WorldState:
 
     # Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
     # Not needed: We can simply loop through the entire list and run this function for each item in the list.
-    #TODO (Testing): Sigh, we need to test this function again, what bs
     def apply_relationship_change(self, relchange_object, reverse=False):
 
         if (relchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (relchange_object.add_or_remove == ChangeAction.REMOVE and reverse):
@@ -214,9 +213,9 @@ class WorldState:
             #After adding nodes that don't already exist, make the connections and add it to the list of edges
 
             if relchange_object.two_way:
-                self.doubleconnect(from_node=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, to_node = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
+                self.doubleconnect(nodeA=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, nodeB = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
             else:
-                self.connect(from_node=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, to_node = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
+                self.connect(nodeA=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, nodeB = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
 
         if (relchange_object.add_or_remove == ChangeAction.REMOVE and not reverse) or (relchange_object.add_or_remove == ChangeAction.ADD and reverse):
             #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
@@ -252,7 +251,7 @@ class WorldState:
     #TODO (Extra Features): Do we really need this? Discuss
     def make_list_of_possible_task_character_replacements(self, taskobject):
 
-        eligible_character_names = [x.get_name() for x in self.node_dict.value() if x.tags["Type"] == "Character"]
+        eligible_character_names = [x.get_name() for x in self.node_dict.values() if x.tags["Type"] == "Character"]
 
         #The character performing this task and the character who gave this task aren't legible placeholders
         eligible_character_names.remove(taskobject.task_owner_name)
@@ -290,19 +289,22 @@ class WorldState:
 
         return valid_comb_dict_list
     
-    #TODO (Testing): Test this bastard too
-    def make_list_of_possible_task_stack_character_replacements(self, task_stack_object):
+    #TODO (Testing): This function works for the case where there's only one task and one right answer. We should test it when there are more than one task.
+    def make_list_of_possible_task_stack_character_replacements(self, task_stack_object: TaskStack):
 
-        eligible_character_names = [x.get_name() for x in self.node_dict.value() if x.tags["Type"] == "Character"]
+        eligible_character_names = [x.get_name() for x in self.node_dict.values() if x.tags["Type"] == "Character"]
+        
 
         #The character performing this task and the character who gave this task aren't legible placeholders
         eligible_character_names.remove(task_stack_object.stack_giver_name)
         eligible_character_names.remove(task_stack_object.stack_owner_name)
-
-        all_placeholders = task_stack_object.make_placeholder_string_list()
+        
+        
+        task_stack_object.make_placeholder_string_list()
 
         #Determine how many placeholders we need to fill by measuring the length of placeholders needed
-        number_of_placeholder_chars_needed = len(all_placeholders)
+        number_of_placeholder_chars_needed = len(task_stack_object.actor_placeholder_string_list)
+
         if number_of_placeholder_chars_needed > len(eligible_character_names):
             return []
         
@@ -311,25 +313,82 @@ class WorldState:
         permuted_possible_combs = []
 
         for thing in possible_combs:
-            permuted_possible_combs.extend(thing)
+            permuted_possible_combs.append(thing)
 
         valid_comb_dict_list = []
         #We will replace the placeholders with the actual characters to see if they pass the condition. If they do pass the condition, they're added to valid comb list.
+
         for unchecked_comb in permuted_possible_combs:
-            placeholder_charname_zip = zip(all_placeholders, unchecked_comb)
+
+            placeholder_charname_zip = list(zip(task_stack_object.actor_placeholder_string_list, unchecked_comb))
+
             placeholder_charname_zip.append((GenericObjectNode.TASK_GIVER, task_stack_object.stack_giver_name))
             placeholder_charname_zip.append((GenericObjectNode.TASK_OWNER, task_stack_object.stack_owner_name))
+
+            return_dict = dict(placeholder_charname_zip)
+
             placeholder_charobj_zip = [(x[0], self.node_dict[x[1]]) for x in placeholder_charname_zip]
 
             validity = True
-            for task in task_stack_object.task_stack:
-                for test in task.task_requirement:
+
+            for stack_require_test in task_stack_object.task_stack_requirement:
+                translated_test = replace_multiple_placeholders_with_multiple_test_takers(test=stack_require_test, placeholder_tester_pair_list=placeholder_charobj_zip)
+                validity = validity and self.test_story_compatibility_with_conditiontest(translated_test)
+            #TODO (Important): Some steps in the task will require you to be in different locations while doing tasks---therefore the validity might also include the location
+            # Some requirements in the tasks also depend on the previous task steps---they should not be tested like this
+            # 
+            # For the testing of each of the steps in the task, assume that the things in the previous step has already happened
+            # We do this by moving the character to the correct location and make it so that everything in the past task steps have already been done
+            # Should Task Validity assume things about the previous worldstates?
+            #
+            # NO! They should not (we should put things that are dependent on previous worldstates in the story nodes instead, this is for general conditions to do tasks.)
+            #
+            # We must put a warning that users do not add location-dependent tests nor do they add previous task dependent tests into the requirement.
+            #
+            # Solidifying this --- since we only have placeholders for the parts/tasks we can't exactly simulate them here.
+            # We might be able to simulate them if we run replacements on the effects on next ws...
+            
+            #Editing this to take into account changes in World State and moving characters to proper locations
+
+            simulated_ws = deepcopy(self)
+
+            for task_index in range(0, len(task_stack_object.task_stack)):
+                #We will do the movement of character / transformation of world state / testing validity with the simulated WS so it doesn't affect the main WS
+
+                #First we move our current character to the correct task location if they aren't already there
+                task_object = task_stack_object.task_stack[task_index]
+                task_owner_object = simulated_ws.node_dict[task_stack_object.stack_owner_name]
+                current_location = simulated_ws.get_actor_current_location(task_owner_object)
+                task_location = simulated_ws.node_dict[task_object.task_location_name]
+
+                if current_location != task_location:
+                    simulated_ws.disconnect(from_node=current_location, edge_name=self.DEFAULT_HOLD_EDGE_NAME, to_node=task_owner_object)
+                    simulated_ws.connect(from_node=task_location, edge_name=self.DEFAULT_HOLD_EDGE_NAME, to_node=task_owner_object)
+
+                frozen_current_state = deepcopy(simulated_ws)
+
+                if task_index > 0:
+                    for story_node in task_stack_object.task_stack[task_index-1].task_actions:
+                        for change in story_node.effects_on_next_ws:
+                            equivalent_change = translate_generic_change(change=change, populated_story_node=story_node)
+
+                            for equiv_change in equivalent_change:
+                                translated_change = replace_multiple_placeholders_with_multiple_change_havers(change=equiv_change, placeholder_tester_pair_list=placeholder_charobj_zip)
+                                match change.changetype:
+                                    case ChangeType.CONDCHANGE:
+                                        simulated_ws.apply_conditional_change(translated_change, frozen_current_state)
+                                    case _:
+                                        simulated_ws.apply_some_change(translated_change)
+
+                #Finally, run all the tests that apply to the current world state.
+                for test in task_stack_object.task_stack[task_index].task_requirement:
                     
                     translated_test = replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_charobj_zip)
                     validity = validity and self.test_story_compatibility_with_conditiontest(translated_test)
 
+
             if validity:
-                valid_comb_dict_list.append(unchecked_comb)
+                valid_comb_dict_list.append(return_dict)
 
         return valid_comb_dict_list
 
@@ -337,13 +396,13 @@ class WorldState:
     # def replace_task_placeholders(self, taskobject, replacements):
     #     pass
 
-    #TODO (Testing): Test This
+    #TODO (Testing): Test this with a dict.
     #Reverse not Implemented
     def apply_task_change(self, taskchange_object):
 
         task_stack = deepcopy(taskchange_object.task_stack)
+     
         possible_list = self.make_list_of_possible_task_stack_character_replacements(task_stack)
-
         if len(possible_list) < 0:
             return False
         
@@ -351,11 +410,13 @@ class WorldState:
         if task_stack.placeholder_info_dict is None:
             return False
         
-        actor = self.node_dict[taskchange_object.actor_name]
+        actor = self.node_dict[taskchange_object.task_owner_name]
         actor.add_task_stack(task_stack)
         return True
 
-    #TODO (Testing): Test That
+    #This is going to be a problem---because we call all the changes from the same function, there's no way to call this properly...
+    #There is no need to make modifications here because SG2WS already takes into account the extra arg. Wooh yeah!
+
     #Reverse not Implemented
     def apply_task_advance_change(self, taskadvancechange_object, abs_step = 0):
 
@@ -363,7 +424,6 @@ class WorldState:
         task_stack = actor.get_task_stack_by_name(taskadvancechange_object.task_stack_name)
         task_stack.mark_current_task_as_complete(abs_step)
 
-    #TODO (Testing): Test this too
     def apply_task_cancel_change(self, taskcancelchange_object):
         actor = self.node_dict[taskcancelchange_object.actor_name]
         task_stack = actor.get_task_stack_by_name(taskcancelchange_object.task_stack_name)

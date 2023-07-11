@@ -100,6 +100,10 @@ class ObjectNode:
         return self.get_name()
 
     def __eq__(self, rhs) -> bool:
+
+        if type(self) != type(rhs):
+            return False
+
         return self.name == rhs.name
 
     def __ge__(self, rhs):
