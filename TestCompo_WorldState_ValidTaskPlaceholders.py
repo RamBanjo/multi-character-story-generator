@@ -106,9 +106,9 @@ know_information_by_target = TagChange(name="Target Learns Info", object_node_na
 extract_info_from_enemy = StoryNode(name="Extract Info", charcount=1, target_count=1, biasweight=0, tags={"Type":"Investigate"}, effects_on_next_ws=[know_information_by_actor], actor=[GenericObjectNode.TASK_OWNER], target=["information_extract_target"])
 give_info_to_ally = StoryNode(name="Give Info", charcount=1, target_count=1, biasweight=0, tags={"Type":"Conversation"}, effects_on_next_ws=[know_information_by_target], actor=[GenericObjectNode.TASK_OWNER], target=["information_getter"])
 
-extract_info_task = CharacterTask(task_name="Extract Info Task", task_actions=[extract_info_from_enemy], task_location_name="Castle", task_requirement=[], actor_placeholder_string_list=["information_extract_target"])
-give_info_task = CharacterTask(task_name="Give Info Task", task_actions=[give_info_to_ally], task_location_name="Pub", task_requirement=[], actor_placeholder_string_list=["information_getter"])
-get_info_and_report_taskstack = TaskStack(stack_name="Get Info and Report", stack_owner_name="Alice", stack_giver_name="Bob", task_stack=[extract_info_task, give_info_task], task_stack_requirement=[task_giver_friend_with_information_getter, task_giver_enemies_with_information_extract_target])
+extract_info_task = CharacterTask(task_name="Extract Info Task", task_actions=[extract_info_from_enemy], task_location_name="Castle", actor_placeholder_string_list=["information_extract_target"], task_requirement = [task_giver_enemies_with_information_extract_target])
+give_info_task = CharacterTask(task_name="Give Info Task", task_actions=[give_info_to_ally], task_location_name="Pub", actor_placeholder_string_list=["information_getter"], task_requirement = [task_giver_friend_with_information_getter])
+get_info_and_report_taskstack = TaskStack(stack_name="Get Info and Report", stack_owner_name="Alice", stack_giver_name="Bob", task_stack=[extract_info_task, give_info_task], task_stack_requirement=[ ])
 
 list_of_pos_replacements = test_ws.make_list_of_possible_task_stack_character_replacements(get_info_and_report_taskstack)
 

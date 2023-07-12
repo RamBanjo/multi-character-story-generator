@@ -289,7 +289,6 @@ class WorldState:
 
         return valid_comb_dict_list
     
-    #TODO (Testing): This function works for the case where there's only one task and one right answer. We should test it when there are more than one task.
     def make_list_of_possible_task_stack_character_replacements(self, task_stack_object: TaskStack):
 
         eligible_character_names = [x.get_name() for x in self.node_dict.values() if x.tags["Type"] == "Character"]
