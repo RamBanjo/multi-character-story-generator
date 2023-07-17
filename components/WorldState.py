@@ -312,13 +312,12 @@ class WorldState:
         permuted_possible_combs = []
 
         for thing in possible_combs:
-            permuted_possible_combs.append(thing)
+            permuted_possible_combs.extend(list(itertools.permutations(thing)))
 
         valid_comb_dict_list = []
         #We will replace the placeholders with the actual characters to see if they pass the condition. If they do pass the condition, they're added to valid comb list.
 
         for unchecked_comb in permuted_possible_combs:
-
             placeholder_charname_zip = list(zip(task_stack_object.actor_placeholder_string_list, unchecked_comb))
 
             placeholder_charname_zip.append((GenericObjectNode.TASK_GIVER, task_stack_object.stack_giver_name))
@@ -333,20 +332,7 @@ class WorldState:
             for stack_require_test in task_stack_object.task_stack_requirement:
                 translated_test = replace_multiple_placeholders_with_multiple_test_takers(test=stack_require_test, placeholder_tester_pair_list=placeholder_charobj_zip)
                 validity = validity and self.test_story_compatibility_with_conditiontest(translated_test)
-            #TODO (Important): Some steps in the task will require you to be in different locations while doing tasks---therefore the validity might also include the location
-            # Some requirements in the tasks also depend on the previous task steps---they should not be tested like this
-            # 
-            # For the testing of each of the steps in the task, assume that the things in the previous step has already happened
-            # We do this by moving the character to the correct location and make it so that everything in the past task steps have already been done
-            # Should Task Validity assume things about the previous worldstates?
-            #
-            # NO! They should not (we should put things that are dependent on previous worldstates in the story nodes instead, this is for general conditions to do tasks.)
-            #
-            # We must put a warning that users do not add location-dependent tests nor do they add previous task dependent tests into the requirement.
-            #
-            # Solidifying this --- since we only have placeholders for the parts/tasks we can't exactly simulate them here.
-            # We might be able to simulate them if we run replacements on the effects on next ws...
-            
+                #print(translated_test, validity)
             #Editing this to take into account changes in World State and moving characters to proper locations
 
             simulated_ws = deepcopy(self)
@@ -395,22 +381,29 @@ class WorldState:
     # def replace_task_placeholders(self, taskobject, replacements):
     #     pass
 
-    #TODO (Testing): Test this with a dict.
-    #Reverse not Implemented
-    def apply_task_change(self, taskchange_object):
+    # Reverse not Implemented
+    #
+    # Actually...yeah I think we need to test the change in world state with the Story Graph. Oof.
+    def apply_task_change(self, taskchange_object, verbose=False):
 
         task_stack = deepcopy(taskchange_object.task_stack)
      
         possible_list = self.make_list_of_possible_task_stack_character_replacements(task_stack)
-        if len(possible_list) < 0:
+        if len(possible_list) <= 0:
+            if verbose:
+                print("There are no possible combs! Returning False")
             return False
         
         #This will be assigned before coming here.
         if task_stack.placeholder_info_dict is None:
+            if verbose:
+                print("There is no dict assigned! Returning False")
             return False
         
         actor = self.node_dict[taskchange_object.task_owner_name]
         actor.add_task_stack(task_stack)
+        if verbose:
+            print("Nothing is wrong---task stack is added. Returning True.")
         return True
 
     #This is going to be a problem---because we call all the changes from the same function, there's no way to call this properly...

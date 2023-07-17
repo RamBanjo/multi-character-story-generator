@@ -2,12 +2,12 @@ import itertools
 from components.UtilFunctions import *
 from components.StoryObjects import CharacterNode
 x = ["A", "B", "C", "D", "E", "F"]
-y = all_possible_actor_groupings_with_ranges_and_freesizes([20, -1], x)
-z = [squib[0] for squib in y]
+# y = all_possible_actor_groupings_with_ranges_and_freesizes([20, -1], x)
+# z = [squib[0] for squib in y]
 w = []
 
-for thing in z:
-    w.extend(list(itertools.permutations(thing)))
+
+w.extend(list(itertools.permutations(x)))
 
 print(w)
 
