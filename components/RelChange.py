@@ -29,6 +29,9 @@ class RelChange(SomeChange):
         self.two_way = two_way
         self.changetype = ChangeType.RELCHANGE
 
+    def __str__(self):
+        return "RelChange: " + str(self.node_a) + " --(" + str(self.edge_name) + ")--> " + str(self.node_b) + " (Value: " + str(self.value) +", TwoWay: " + str(self.two_way) + ", SoftEqual: " + str(self.soft_equal) + ", ChangeAction: " + str(self.add_or_remove) + ")"
+
 class TagChange(SomeChange):
     def __init__(self, name, object_node_name, tag, value, add_or_remove: ChangeAction, **kwargs):
         
@@ -39,6 +42,9 @@ class TagChange(SomeChange):
         self.value = value
         self.add_or_remove = add_or_remove
         self.changetype = ChangeType.TAGCHANGE
+
+    def __str__(self):
+        return "TagChange: " + self.object_node_name + " " + str(self.add_or_remove) + " (" + self.tag + ": " + self.value + ")"
 
 class ConditionalChange(SomeChange):
     def __init__(self, name, list_of_test_object_names, list_of_condition_tests, list_of_changes, **kwargs):

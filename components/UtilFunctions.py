@@ -432,7 +432,6 @@ def getfirst(e):
 def getsecond(e):
     return e[1]
 
-#TODO (Testing): Test this function.
 def list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes: dict, actors_wanted, current_actor_name=None):
 
     #Turn the dict we got into a list.    
@@ -630,10 +629,10 @@ def translate_generic_tagchange(tagchange, populated_story_node):
     objectlist = check_keyword_and_return_objectnodelist(populated_story_node, tagchange.object_node_name)
 
     for item in objectlist:
-        if type(item) == ObjectNode:
-            list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item.name, tagchange.tag, tagchange.value, tagchange.add_or_remove))
+        if issubclass(type(item), ObjectNode):
+            list_of_equivalent_tagchanges.append(TagChange(name=tagchange.name, object_node_name=item.name, tag=tagchange.tag, value=tagchange.value, add_or_remove=tagchange.add_or_remove))
         else:
-            list_of_equivalent_tagchanges.append(TagChange(tagchange.name, item, tagchange.tag, tagchange.value, tagchange.add_or_remove))
+            list_of_equivalent_tagchanges.append(TagChange(name=tagchange.name, object_node_name=item, tag=tagchange.tag, value=tagchange.value, add_or_remove=tagchange.add_or_remove))
 
     return list_of_equivalent_tagchanges
 
@@ -650,7 +649,7 @@ def translate_generic_condchange(change, populated_story_node):
         found_objects.extend(current_object)
 
     for thing in found_objects:
-        if type(thing) == ObjectNode:
+        if issubclass(type(thing), ObjectNode):
             equivalent_objects.append(thing.get_name())
         else:
             equivalent_objects.append(thing)
@@ -675,10 +674,10 @@ def translate_generic_taskchange(change, populated_story_node):
             giver_name_adjusted = giver_name
             owner_name_adjusted = owner_name
 
-            if type(giver_name_adjusted) == ObjectNode:
+            if issubclass(type(giver_name_adjusted), ObjectNode):
                 giver_name_adjusted = giver_name.get_name()
 
-            if type(owner_name_adjusted) == ObjectNode:
+            if issubclass(type(owner_name_adjusted), ObjectNode):
                 owner_name_adjusted = owner_name.get_name()
 
             equivalent_changes.append(TaskChange(name=change.name, task_giver_name=giver_name_adjusted, task_owner_name=owner_name_adjusted, task_stack=change.task_stack))
@@ -693,7 +692,7 @@ def translate_generic_taskadvance(change, populated_story_node):
     for item_name in equivalent_actors:
 
         item_name_adjusted = item_name
-        if type(item_name_adjusted) == ObjectNode:
+        if issubclass(type(item_name_adjusted), ObjectNode):
             item_name_adjusted = item_name.get_name()
 
         equivalent_changes.append(TaskAdvance(name=change.name, actor_name=item_name_adjusted, task_stack_name=change.task_stack_name))
@@ -708,7 +707,7 @@ def translate_generic_taskcancel(change, populated_story_node):
     for item_name in equivalent_actors:
 
         item_name_adjusted = item_name
-        if type(item_name_adjusted) == ObjectNode:
+        if issubclass(type(item_name_adjusted), ObjectNode):
             item_name_adjusted = item_name.get_name()
 
         equivalent_changes.append(TaskCancel(name=change.name, actor_name=item_name_adjusted, task_stack_name=change.task_stack_name))

@@ -317,7 +317,7 @@ def make_tag_change_object_from_extracted_list(data, world_state):
     ws_dict = make_object_node_dict_from_worldstate(world_state)
     object_node_name = ws_dict[data["object_node_name_text"]]
     
-    if type(object_node_name) == ObjectNode:
+    if issubclass(type(object_node_name, ObjectNode)):
         object_node_name = object_node_name.get_name()
 
     add_or_remove = text_to_changeaction(data["add_or_remove_text"])

@@ -1,15 +1,15 @@
 import itertools
 from components.UtilFunctions import *
 from components.StoryObjects import CharacterNode
-x = ["A", "B", "C", "D", "E", "F"]
-# y = all_possible_actor_groupings_with_ranges_and_freesizes([20, -1], x)
-# z = [squib[0] for squib in y]
-w = []
+# x = ["A", "B", "C", "D", "E", "F"]
+# # y = all_possible_actor_groupings_with_ranges_and_freesizes([20, -1], x)
+# # z = [squib[0] for squib in y]
+# w = []
 
 
-w.extend(list(itertools.permutations(x)))
+# w.extend(list(itertools.permutations(x)))
 
-print(w)
+# print(w)
 
 # print(permute_all_possible_groups(4, 2))
 
@@ -73,9 +73,8 @@ print(w)
 # testdict = {"NodeA" : ["A", "B", "C"], "AAAANodeB": ["D","E"]}
 # print(sorted(list(testdict.items()), key=getfirst))
 
-# testdict = {"NodeA":["Alice"], "NodeB":["Bob", "Charlie"], "NodeC":["Daniel"]}
-
-# print(list_all_good_combinations_from_joint_join_pattern(current_actor_name="Alice", dict_of_base_nodes=testdict, actors_wanted=3))
+testdict = {"NodeA":["Alice", "Eve"], "NodeB":["Bob", "Charlie"], "NodeC":["Daniel", "Frankie"]}
+print(list_all_good_combinations_from_joint_join_pattern(current_actor_name=None, dict_of_base_nodes=testdict, actors_wanted=3))
 
 # suggested_included_tags={"Job":"Swordmaster", "Job":"Warrior", "Job":"Fighter"}
 # print(suggested_included_tags)
