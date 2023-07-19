@@ -31,7 +31,6 @@ class CharacterTask:
     # Once a task in the stack is completed, the task moves on to the next.
     # Entire task stack is marked as complete once all tasks is complete.
 
-#TODO (Testing): Test TaskStack functions
 class TaskStack:
 
     '''

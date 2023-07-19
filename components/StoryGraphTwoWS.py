@@ -92,7 +92,7 @@ class StoryGraph:
 
         return new_part
 
-    #TODO (Testing): Test this
+    #TODO (Testing): Test this in the context of a modify taskchange object
     def add_story_part_at_step(self, part, character, location=None, absolute_step=0, timestep=0, copy=True, targets=[], verbose=False):
 
         relevant_ws = self.make_state_at_step(stopping_step=absolute_step)
@@ -110,7 +110,7 @@ class StoryGraph:
         if verbose:
             print(character.name, "added to", part.name)
 
-        for change in part.effect_on_next_ws:
+        for change in part.effects_on_next_ws:
             if change.changetype == ChangeType.TASKCHANGE:
                 modded_taskobj = self.modify_taskchange_object_on_add(abs_step=absolute_step, story_node=part, taskchange_object=change)
                 if modded_taskobj[0]:
@@ -347,7 +347,6 @@ class StoryGraph:
         #Take the initial world state and copy it.
         #Then, cycle through the list of changes, applying the changes from it.
         #returns the latest state
-
         return self.make_state_at_step(len(self.list_of_changes), state_name)
 
     def make_state_at_step(self, stopping_step, state_name = "Traveling State"):
@@ -1194,7 +1193,6 @@ class StoryGraph:
 
         return list_of_char_parts
         
-    #TODO (Testing): Test this function to make sure it's working for sure.
     def remove_parts_by_count(self, start_step, count, actor):
         end_index = start_step + count - 1
 
@@ -1404,7 +1402,6 @@ class StoryGraph:
         
         return character_object.get_task_stack_by_name(task_stack_name)
     
-    #TODO (Testing): Test this function!
     def get_list_of_task_stack_names_from_latest_step(self, actor_name):
 
         last_ws = self.make_latest_state()
@@ -1677,7 +1674,7 @@ class StoryGraph:
         #If none of the above conditions are true, return "task_step_incomplete"
         return "task_step_incomplete"
     
-    #TODO (Testing): Test this Function
+    #TODO (Testing): Test this Function to see if it can modify taskchange objects
     # This function will be called whenever a story node with a TaskChange object is added to the StoryGraph
     #
     # First, make the world state from that absolute_step

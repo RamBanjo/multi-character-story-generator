@@ -622,7 +622,6 @@ def translate_generic_relchange(relchange, populated_story_node):
 
     return list_of_equivalent_relchanges
 
-#TODO (Testing): Test this function
 def translate_generic_tagchange(tagchange, populated_story_node):
     list_of_equivalent_tagchanges = []
 
@@ -636,7 +635,6 @@ def translate_generic_tagchange(tagchange, populated_story_node):
 
     return list_of_equivalent_tagchanges
 
-#TODO (Testing): Test this function
 def translate_generic_condchange(change, populated_story_node):
 
     equivalent_objects = []
@@ -664,8 +662,8 @@ def translate_generic_condchange(change, populated_story_node):
 
 def translate_generic_taskchange(change, populated_story_node):
 
-    equivalent_givers = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
-    equivalent_owners = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.actor_name)
+    equivalent_givers = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.task_giver_name)
+    equivalent_owners = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.task_owner_name)
 
     equivalent_changes = []
     for giver_name in equivalent_givers:
