@@ -1,4 +1,5 @@
 from copy import deepcopy
+from statistics import mean
 from numpy import character
 
 from components.UtilFunctions import replace_multiple_placeholders_with_multiple_change_havers, replace_multiple_placeholders_with_multiple_test_takers
@@ -316,12 +317,25 @@ class StoryNode:
 
         return score
 
-    def calculate_weight_score(self, character_node, max_between_actor_target=False):
+    def calculate_weight_score(self, character_node, involve_target=False, mode=0):
         '''
         If max_between_actor_target is set to True AND there are slots for the target, then instead of only doing the bonus weight score for the actor part, it will also calculate the target part and choose max between the two.
         '''
 
-        if max_between_actor_target and self.target_count > 0:
+        if involve_target and self.target_count > 0:
+
+            if self.calculate_bonus_weight_score(character_node) == -999 and self.calculate_bonus_weight_score_target(character_node) == -999:
+                return -999
+            
+            if self.calculate_bonus_weight_score(character_node) == -999:
+                return self.calculate_bonus_weight_score_target(character_node) + self.biasweight
+            
+            if self.calculate_bonus_weight_score_target(character_node) == -999:
+                return self.calculate_bonus_weight_score(character_node) + self.biasweight
+
+            if mode == 1:
+                return mean([self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)]) + self.biasweight
+            
             return max(self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)) + self.biasweight
 
         return self.calculate_bonus_weight_score(character_node) + self.biasweight

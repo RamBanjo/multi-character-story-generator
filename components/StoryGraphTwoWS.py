@@ -386,7 +386,6 @@ class StoryGraph:
     # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
     # Split Joint: The score is the max among all the given splits.
 
-    #TODO (Testing): Test this function with all types of rules. (We already tested the non-joint rule part, we should test the joint rule part)
     def calculate_score_from_rule_char_and_cont(self, actor, insert_index, rule, mode=0):
 
         #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
@@ -410,7 +409,7 @@ class StoryGraph:
             if rule.joint_type == JointType.SPLIT:
                 #We need to figure out if it's a split joint. If it is, then check the max/avg among all splits depending on the mode.
 
-                list_of_split_scores = [node.calculate_weight_score(character_from_ws, max_between_actor_target=True) for node in rule.split_list]
+                list_of_split_scores = [node.calculate_weight_score(character_from_ws, involve_target=True) for node in rule.split_list]
 
                 if mode == 1:
                     return statistics.mean(list_of_split_scores)
@@ -419,7 +418,7 @@ class StoryGraph:
 
             else:
                 #If not, then max between actor slot and target slot.
-                return rule.joint_node.calculate_weight_score(character_from_ws, max_between_actor_target=True)
+                return rule.joint_node.calculate_weight_score(character_from_ws, involve_target=True, mode=mode)
             
     #TODO (Testing): Test this function!
     def calculate_score_from_next_task_in_task_stack(self, actor_name, task_stack_name, task_perform_index, mode=0):
