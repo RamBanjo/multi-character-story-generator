@@ -104,8 +104,7 @@ Generic Object Nodes: There are certain times that we would like to apply tests 
 - TASK_OWNER: For use in CharacterTask and TaskStack. The placeholder will be replaced by the character who owns the task, i.e., the character responsible for performing the task.
 
 Task Stack: In order to simulate quests in a role playing game, characters will be able to assign task stacks to each other. Each Task Stack contains the list of tasks that must be done. Each Task Stack comes with a list of tests that has to be passed in order for the task to be valid. For each Task Stack, there will be a dict that act as a placeholder dict as well, for characters who may appear in the task. These placeholders do not fall into Generic Object Nodes and are string placeholders, except for the Task Giver and the Task Owner, who will appear in every task.
-
-For example, the Task Stack requires that the Task Owner
+For example, the Task Stack describes a questline where the Task Giver requests the Task Owner to kill a character that the Task Giver hates. We use the string "kill_target" to use as placeholder for the target in this task, and use conditionals to test for whether or not the Task Giver hates "kill_target".
 
 Character Task: A subunit of the Task Stack. Each Character Task has a list of StoryNodes that will be performed once the task is performed, and the location where this task could be performed. Each Character Task comes with a list of tests that has to be passed in order for the task to be valid.
 
