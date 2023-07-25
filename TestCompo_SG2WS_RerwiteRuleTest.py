@@ -34,7 +34,7 @@ current_loc_not_hold_character = RelChange(name="CurLoc Not Hold Character", nod
 character_hold_sword = RelChange(name="Character Hold Target", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, value=None, add_or_remove=ChangeAction.ADD)
 current_loc_not_hold_sword = RelChange(name="CurLoc Not Hold Target", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, value=None, add_or_remove=ChangeAction.REMOVE)
 
-current_loc_adjacent_shop = HasDoubleEdgeTest(GenericObjectNode.GENERIC_LOCATION, "connects", shop, None, soft_equal=True, inverse=False)
+current_loc_adjacent_shop = HasEdgeTest(GenericObjectNode.GENERIC_LOCATION, "connects", shop, None, soft_equal=True, inverse=False, two_way=True)
 same_location_sword = SameLocationTest([GenericObjectNode.GENERIC_TARGET, GenericObjectNode.GENERIC_ACTOR])
 
 go_to_shop = StoryNode(name="Go to Shop", biasweight=None, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[shop_hold_character, current_loc_not_hold_character], condition_tests=[current_loc_adjacent_shop])

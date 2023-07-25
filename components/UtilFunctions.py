@@ -2,7 +2,7 @@ import copy
 import itertools
 import math
 import random
-from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest, HeldItemTagTest, SameLocationTest
+from components.ConditionTest import HasEdgeTest, HeldItemTagTest, SameLocationTest
 from components.Edge import Edge
 from components.RelChange import ConditionalChange, RelChange, TagChange, TaskAdvance, TaskCancel, TaskChange
 from components.StoryObjects import ObjectNode
@@ -504,8 +504,8 @@ def replace_placeholder_object_with_test_taker(test, test_taker, placeholder_obj
                 return replace_placeholder_object_with_test_taker_sameloc(test, test_taker, placeholder_object)
             case TestType.HAS_EDGE:
                 return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
-            case TestType.HAS_DOUBLE_EDGE:
-                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
+            # case TestType.HAS_DOUBLE_EDGE:
+            #     return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
             case _:
                 return None
 
@@ -741,8 +741,8 @@ def translate_generic_test(condtest, populated_story_node):
             list_of_equivalent_condtests = translate_generic_same_location_test(condtest, populated_story_node)
         case TestType.HAS_EDGE:
             list_of_equivalent_condtests = translate_generic_has_edge_test(condtest, populated_story_node)
-        case TestType.HAS_DOUBLE_EDGE:
-            list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
+        # case TestType.HAS_DOUBLE_EDGE:
+        #     list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
         case _:
             list_of_equivalent_condtests = [condtest]
         
@@ -777,19 +777,19 @@ def translate_generic_has_edge_test(test, node):
 
     for lhs_item in from_node:
         for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
+            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, two_way=test.two_way, inverse=test.inverse))    
 
     return list_of_equivalent_tests
 
-def translate_generic_has_doubleedge_test(test, node):
+# def translate_generic_has_doubleedge_test(test, node):
     
-    list_of_equivalent_tests = []
+#     list_of_equivalent_tests = []
 
-    from_node = check_keyword_and_return_objectnodelist(node, test.object_from_test)
-    to_node = check_keyword_and_return_objectnodelist(node, test.object_to_test)
+#     from_node = check_keyword_and_return_objectnodelist(node, test.object_from_test)
+#     to_node = check_keyword_and_return_objectnodelist(node, test.object_to_test)
 
-    for lhs_item in from_node:
-        for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
+#     for lhs_item in from_node:
+#         for rhs_item in to_node:
+#             list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
 
-    return list_of_equivalent_tests
+#     return list_of_equivalent_tests

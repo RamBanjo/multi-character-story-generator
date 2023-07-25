@@ -3,7 +3,7 @@
 #However, we would like to fill in a step where Bob goes to another place, talks to Charlie, before heading to Alice's house.
 
 from typing import Generic
-from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest, SameLocationTest, HeldItemTagTest
+from components.ConditionTest import HasEdgeTest, SameLocationTest, HeldItemTagTest
 from components.RelChange import RelChange
 from components.StoryGraphTwoWS import StoryGraph
 from components.StoryNode import StoryNode
@@ -27,7 +27,7 @@ init_ws.doubleconnect(alicehouse, "adjacent_to", shop)
 
 move_to_shop = RelChange("move_towards_shop", shop, "holds", GenericObjectNode.GENERIC_ACTOR, ChangeAction.ADD)
 move_away = RelChange("move_away_from_cur_loc", GenericObjectNode.GENERIC_LOCATION, "holds", GenericObjectNode.GENERIC_ACTOR, ChangeAction.REMOVE)
-double_edge_shop = HasDoubleEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", shop)
+double_edge_shop = HasEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", shop, two_way=True)
 
 go_shop = StoryNode("Go to Shop", None, {"Type": "movement"}, 1, effects_on_next_ws=[move_away, move_to_shop], condition_tests=[double_edge_shop])
 
@@ -38,7 +38,7 @@ actor_in_same_room_as_present = SameLocationTest([GenericObjectNode.GENERIC_ACTO
 get_present = StoryNode("Get Present", None, {"Type" "item_pickup"}, 1, effects_on_next_ws=[present_pickup_add, present_pickup_rem], condition_tests=[actor_in_same_room_as_present])
 
 move_to_alicehouse = RelChange("move_towards_ahouse", alicehouse, "holds", GenericObjectNode.GENERIC_ACTOR, ChangeAction.ADD)
-double_edge_alicehouse = HasDoubleEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", alicehouse)
+double_edge_alicehouse = HasEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", alicehouse, two_way=True)
 
 go_to_alicehouse = StoryNode("Go to Alicehouse", None, {"Type": "movement"}, 1, effects_on_next_ws=[move_to_alicehouse, move_away], condition_tests=[double_edge_alicehouse])
 
@@ -70,7 +70,7 @@ charlie = CharacterNode("Charlie")
 park = LocationNode("Park")
 
 move_to_park = RelChange("move_towards_shop", shop, "holds", GenericObjectNode.GENERIC_ACTOR, ChangeAction.ADD)
-double_edge_park = HasDoubleEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", park)
+double_edge_park = HasEdgeTest(GenericObjectNode.GENERIC_LOCATION, "adjacent_to", park, two_way=True)
 
 go_park = StoryNode("Go to Park", None, {"Type": "movement"}, 1, effects_on_next_ws=[move_away, move_to_park], condition_tests=[double_edge_park])
 

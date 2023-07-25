@@ -25,7 +25,7 @@
 # (Wait NVM these will be tested in the World State. Oops!)
 
 from components.CharacterTask import CharacterTask, TaskStack
-from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest
+from components.ConditionTest import HasEdgeTest
 from components.RelChange import RelChange, TagChange, TaskChange
 from components.StoryNode import StoryNode
 from components.StoryObjects import CharacterNode, LocationNode, ObjectNode
@@ -69,7 +69,7 @@ actor_loses_present = RelChange(name = "Actor Loses Present",  node_a=GenericObj
 target_gains_present = RelChange(name = "Target Gains Present", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="holds", value = None, node_b=present, add_or_remove=ChangeAction.ADD)
 
 thief_hates_task_giver = HasEdgeTest(object_from_test="thief", edge_name_test="hates", object_to_test=GenericObjectNode.TASK_GIVER, soft_equal=True)
-receiver_friends_task_giver = HasDoubleEdgeTest(object_from_test="present_receiver", edge_name_test="friend_of", object_to_test= GenericObjectNode.TASK_GIVER, soft_equal=True)
+receiver_friends_task_giver = HasEdgeTest(object_from_test="present_receiver", edge_name_test="friend_of", object_to_test= GenericObjectNode.TASK_GIVER, soft_equal=True, two_way=True)
 tstack_req = [thief_hates_task_giver, receiver_friends_task_giver]
 
 list_of_change_actor_give_target_present = [actor_loses_present, target_gains_present]

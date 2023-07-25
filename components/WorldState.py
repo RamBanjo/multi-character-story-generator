@@ -71,7 +71,6 @@ class WorldState:
 
     def check_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None, edge_value=None, soft_equal=False):
 
-
         node_a_retrieved = self.node_dict.get(node_a.get_name(), None)
         node_b_retrieved = self.node_dict.get(node_b.get_name(), None)
 
@@ -453,13 +452,16 @@ class WorldState:
         
         match test_type:
             case TestType.HELD_ITEM_TAG:
-                test_result = self.held_item_tag_check(test.holder_to_test, test.tag_to_test, test.value_to_test)
+                test_result = self.held_item_tag_check(holder_test=test.holder_to_test, value_test=test.tag_to_test, tag_test=test.value_to_test)
             case TestType.SAME_LOCATION:
-                test_result = self.same_location_check(test.list_to_test)
+                test_result = self.same_location_check(check_list=test.list_to_test)
             case TestType.HAS_EDGE:
-                test_result = self.check_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
-            case TestType.HAS_DOUBLE_EDGE:
-                test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
+                if test.two_way:
+                    test_result = self.check_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
+                else:
+                    test_result = self.doubleconnect(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
+            # case TestType.HAS_DOUBLE_EDGE:
+            #     test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
             case _:
                 test_result = False
 

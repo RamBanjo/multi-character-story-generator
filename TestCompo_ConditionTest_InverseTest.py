@@ -44,8 +44,8 @@ print("Test that Charlie does not like Bob (Expect False):", test_ws.test_story_
 #Has Double Edge Inverse
 #Test that Alice House is not Double adjacent_to Charlie House: True
 #Test that Alice House is not Double adjacent_to Town Square: False
-inverse_double_a = HasDoubleEdgeTest(alice_house, "adjacent_to", charlie_house, inverse=True)
-inverse_double_b = HasDoubleEdgeTest(alice_house, "adjacent_to", town_square, inverse=True)
+inverse_double_a = HasEdgeTest(alice_house, "adjacent_to", charlie_house, inverse=True, two_way=True)
+inverse_double_b = HasEdgeTest(alice_house, "adjacent_to", town_square, inverse=True, two_way=True)
 
 print("Test that Alice House is not Double adjacent_to Charlie House (Expect True):", test_ws.test_story_compatibility_with_conditiontest(inverse_double_a))
 print("Test that Alice House is not Double adjacent_to Town Square (Expect False):", test_ws.test_story_compatibility_with_conditiontest(inverse_double_b))

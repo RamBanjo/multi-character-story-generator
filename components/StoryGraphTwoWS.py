@@ -5,7 +5,7 @@ import random
 import statistics
 from time import time
 from numpy import empty
-from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest, HeldItemTagTest, SameLocationTest
+from components.ConditionTest import HasEdgeTest, HeldItemTagTest, SameLocationTest
 from components.RelChange import *
 from components.RewriteRuleWithWorldState import JointType
 from components.StoryNode import *
@@ -310,6 +310,7 @@ class StoryGraph:
     # Input: the required character, the base node
     # Output: A list of tuples. Each tuple is has the absolute step in index 0 and the list of character names in that node in index 1.
     #TODO (Testing): Test this function.
+    # ...where is this function used again?
     
     def get_joint_node_steps_from_character_storyline(self, actor, joint_node):
         '''
@@ -608,6 +609,8 @@ class StoryGraph:
     #To clarify: Targets to test are all actors.
     #This function should assume that all all needed actors and targets are already given.
     #A lot of checks done in the Apply Joint Rule section are redundant, because they are already done here. We might be able to deprecate the checks done in there, just apply the node if it passes the tests in here.
+    
+    #TODO (Testing): ...hey, we haven't tested this yet. What the hell Ram.
     def check_joint_continuity_validity(self, joint_rule, main_character, grouping_split, insert_index):
         
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
@@ -657,12 +660,12 @@ class StoryGraph:
             # for target in targets_to_test:
             #     list_of_testing_actor_names.add(target.get_name())
 
-            joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions)
+            joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=list(entire_character_list), absolute_step_to_search=insert_index)
 
             if not joint_pattern_check[0]:
                 return False
             
-            list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=joint_pattern_check[1], character_name_list=list(entire_character_list), absolute_step_to_search=insert_index)
+            list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=joint_pattern_check[1], actors_wanted=-1, current_actor_name=main_character.get_name())
 
             found_exact_set = False
             for combi in list_of_possible_combi:

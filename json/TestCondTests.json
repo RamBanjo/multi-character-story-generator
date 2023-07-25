@@ -9,13 +9,14 @@
         "inverse": false
     },
     {
-        "test_type": "has_double_edge_test",
+        "test_type": "has_edge_test",
         "from": "Alice",
         "to": "Bob",
         "edge_name": "likes",
         "value": "friendship",
         "soft_equal": false,
-        "inverse": false
+        "inverse": false,
+        "two_way": true
     },
     {
         "test_type": "held_item_tag_test",

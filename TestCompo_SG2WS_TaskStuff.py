@@ -1,6 +1,6 @@
 from components.StoryGraphTwoWS import *
 from components.CharacterTask import CharacterTask, TaskStack
-from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest
+from components.ConditionTest import HasEdgeTest
 from components.RelChange import RelChange, TagChange, TaskChange
 from components.StoryNode import StoryNode
 from components.StoryObjects import CharacterNode, LocationNode, ObjectNode
@@ -62,3 +62,9 @@ test_sg.refresh_longest_path_length()
 
 test_sg.make_latest_state()
 print("Alice Task Stack Names (After adding Story Parts)", test_sg.get_list_of_task_stack_names_from_latest_step("Alice"))
+
+# Test these things as well
+# find_last_step_of_task_stack_from_actor
+# attempt_advance_task_stack
+# test_task_completeness
+# calculate_score_from_next_task_in_task_stack

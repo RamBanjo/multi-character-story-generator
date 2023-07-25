@@ -1,5 +1,5 @@
 #Things that exist in the testws and can be tested:
-from components.ConditionTest import HasDoubleEdgeTest, HasEdgeTest, HeldItemTagTest, SameLocationTest
+from components.ConditionTest import HasEdgeTest, HeldItemTagTest, SameLocationTest
 from components.StoryObjects import CharacterNode, LocationNode, ObjectNode
 from components.WorldState import WorldState
 
@@ -53,13 +53,13 @@ test_charlie_likes_bob = HasEdgeTest(charlie, "likes", bob)
 test_library_holds_charlie = HasEdgeTest(library, "holds", charlie)
 
 #Has Double Edge Tests that should be true:
-test_houses_doubleconnected = HasDoubleEdgeTest(alicehouse, "adjacent_to", bobhouse)
+test_houses_doubleconnected = HasEdgeTest(alicehouse, "adjacent_to", bobhouse, two_way=True)
 
 #Has Double Edge Tests that should be false:
-test_alibob_doubleconnected = HasDoubleEdgeTest(alice, "loves", bob)
-test_alicharlie_doubleconnected = HasDoubleEdgeTest(alice, "loves", charlie)
-test_charliebob_doubleconnected = HasDoubleEdgeTest(charlie, "loves", bob)
-test_charliesword_doubleconnected = HasDoubleEdgeTest(charlie, "loves", sword)
+test_alibob_doubleconnected = HasEdgeTest(alice, "loves", bob, two_way=True)
+test_alicharlie_doubleconnected = HasEdgeTest(alice, "loves", charlie, two_way=True)
+test_charliebob_doubleconnected = HasEdgeTest(charlie, "loves", bob, two_way=True)
+test_charliesword_doubleconnected = HasEdgeTest(charlie, "loves", sword, two_way=True)
 
 print("Same Location Tests:")
 print("Testing if Alice and Door is in the same location, expected True:", testws.test_story_compatibility_with_conditiontest(test_alice_and_door_same_loc))

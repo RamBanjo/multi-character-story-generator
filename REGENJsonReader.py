@@ -54,7 +54,7 @@ attacker_wins = StoryNode(name="Attacker Wins and Kills Target", biasweight=0, t
 #Okay, so I know this was originally an NPC asking the player to break an allyship for them, but I'm taking creative decision to not have the players involved.
 #Okay something's up here. There's absolutely no reason for someone to break an allyship, the request to break/the breaking of allyship just happens randomly as a quest. What???
 
-actor_allied_target_test = HasDoubleEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="allies", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
+actor_allied_target_test = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="allies", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True)
 actor_target_break_ally = RelChange("Actor Target Unfriend", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="allies", node_b=GenericObjectNode.GENERIC_TARGET, value=None, add_or_remove=ChangeAction.REMOVE, soft_equal=True, two_way=True)
 actor_target_become_enemies = RelChange("Actor Target Enemies", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="enemies", node_b=GenericObjectNode.GENERIC_TARGET, value="broken_ally", add_or_remove=ChangeAction.REMOVE, two_way=True)
 
@@ -80,7 +80,7 @@ actor_request_fight_monster_quest = StoryNode(name="Actor Request Fight Quest", 
 
 #Forge Allies is the same as break ally, but in the reverse. Still, there's no reason for someone to suddenly forge ally other than graph conditioning.
 
-actor_enemies_target_test = HasDoubleEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="enemies", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
+actor_enemies_target_test = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="enemies", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True)
 actor_target_break_enemies = RelChange("Actor Target Unenemies", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="enemies", node_b=GenericObjectNode.GENERIC_TARGET, value=None, add_or_remove=ChangeAction.REMOVE, soft_equal=True, two_way=True)
 actor_target_become_allies = RelChange("Actor Target Allies", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="enemies", node_b=GenericObjectNode.GENERIC_TARGET, value="broken_ally", add_or_remove=ChangeAction.REMOVE, two_way=True)
 

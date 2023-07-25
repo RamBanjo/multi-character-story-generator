@@ -142,8 +142,8 @@ def read_condition_test_from_extracted_dict(data, world_state):
             return read_held_item_test_from_extracted_dict(data, world_state)
         case "has_edge_test":
             return read_has_edge_test_from_extracted_dict(data, world_state)
-        case "has_double_edge_test":
-            return read_has_double_edge_test_from_extracted_dict(data, world_state)
+        # case "has_double_edge_test":
+        #     return read_has_double_edge_test_from_extracted_dict(data, world_state)
         case "same_location_test": 
             read_same_location_test_from_extracted_dict(data, world_state)
         case _:
@@ -206,31 +206,32 @@ def read_has_edge_test_from_extracted_dict(data, world_state):
     designated_value = data.get("value", None)
     desginated_soft_equal = data.get("soft_equal", False)
     designated_inverse = data.get("inverse", False)
+    designated_two_way = data.get("two_way", False)
 
     if designated_from_node is None or designated_to_node is None:
         return None
 
-    kwargs = {"object_from_test":designated_from_node, "object_to_test":designated_to_node, "edge_name_test":designated_edge_name, "value_test":designated_value, "soft_equal":desginated_soft_equal, "inverse":designated_inverse}
+    kwargs = {"object_from_test":designated_from_node, "object_to_test":designated_to_node, "edge_name_test":designated_edge_name, "value_test":designated_value, "soft_equal":desginated_soft_equal, "inverse":designated_inverse, "two_way":designated_two_way}
 
     return HasEdgeTest(**kwargs)
 
-def read_has_double_edge_test_from_extracted_dict(data, world_state):
+# def read_has_double_edge_test_from_extracted_dict(data, world_state):
 
-    ws_dict = make_object_node_dict_from_worldstate(world_state)
+#     ws_dict = make_object_node_dict_from_worldstate(world_state)
 
-    designated_from_node = ws_dict.get(data.get("from", None), None)
-    designated_to_node = ws_dict.get(data.get("to", None), None)
-    designated_edge_name = data.get("edge_name", None)
-    designated_value = data.get("value", None)
-    desginated_soft_equal = data.get("soft_equal", False)
-    designated_inverse = data.get("inverse", False)
+#     designated_from_node = ws_dict.get(data.get("from", None), None)
+#     designated_to_node = ws_dict.get(data.get("to", None), None)
+#     designated_edge_name = data.get("edge_name", None)
+#     designated_value = data.get("value", None)
+#     desginated_soft_equal = data.get("soft_equal", False)
+#     designated_inverse = data.get("inverse", False)
 
-    if designated_from_node is None or designated_to_node is None:
-        return None
+#     if designated_from_node is None or designated_to_node is None:
+#         return None
 
-    kwargs = {"object_from_test":designated_from_node, "object_to_test":designated_to_node, "edge_name_test":designated_edge_name, "value_test":designated_value, "soft_equal":desginated_soft_equal, "inverse":designated_inverse}
+#     kwargs = {"object_from_test":designated_from_node, "object_to_test":designated_to_node, "edge_name_test":designated_edge_name, "value_test":designated_value, "soft_equal":desginated_soft_equal, "inverse":designated_inverse}
     
-    return HasDoubleEdgeTest(**kwargs)
+#     return HasDoubleEdgeTest(**kwargs)
 
 def read_same_location_test_from_extracted_dict(data, world_state):
     
