@@ -17,7 +17,6 @@ Write Abstract for Proposal
 - Metrics and Evaluation
 - Progress -> Program is complete and is in the testing phase
 
-
 Abstract
 Our goal is to create a storytelling tool to aid video game story writers by visualizing potential interactions in a storyboard format. We intend to base our work on Artificial Folklore for Simulated Religions [1] and ReGEN [2]. This tool will allow the simulation of characters interacting with each other and the world, and output the actions as a graph, which human writers can use to base their stories off of.
 
@@ -60,6 +59,9 @@ Story Nodes: The nodes consisting of actions performed by characters. Each Story
 - Effects on next WS: The Change Objects representing the changes that will happen once this Story Node has been performed.
 
 TODO (Important): Discuss with Professor what to do with these things. Why are some tests baked into the Story Node and some tests have their own object. Shouldn't we make things consistent? Why did I notice this just now?
+
+ANSWER: We should. We should worry about this after the Mini Paper, though.
+
 - Required Tags List: Tags that must exist on a Character object in order for them to be able to be an Actor in this node.
 - Unwanted Tags List: Tags that must NOT exist on a Character object in order for them to be able to be an Actor in this node.
 - Bias Range: The bias range that a Character must fall in in order for them to be able to be an Actor in this node.
@@ -73,7 +75,7 @@ TODO (Important): Discuss with Professor what to do with these things. Why are s
 - Suggested Excluded Tags List Target: Tags that must NOT exist on a Character object in order for them to be able to be an Target in this node.
 - Suggested Bias Range Target: The bias range that a Character must fall in in order for them to be able to be an Target in this node.
 
-- Condition Tests: The list of ConditionTests that this node must satisfy in order to be used.
+- Condition Tests: The list of ConditionTests that this node must satisfy in order to be used. More information in the Condition Test section.
 
 Condition Test: This class of objects represents the conditional test that must be satisfied in order for a Story Node to be valid within a Story Graph. The test is passed when the condition specified in the test is met, unless it is an Inverse Test, in which the test is passed when the condition is not met. There are three types of Condition Tests, they are as follow:
 - HasEdgeTest: This tests whether or not a certain relationship between two objects exist. It can test for value as well as edge name, can use Soft Equal (ignores value), and can test for two-way relationships.
@@ -106,12 +108,19 @@ Generic Object Nodes: There are certain times that we would like to apply tests 
 Task Stack: In order to simulate quests in a role playing game, characters will be able to assign task stacks to each other. Each Task Stack contains the list of tasks that must be done. Each Task Stack comes with a list of tests that has to be passed in order for the task to be valid. For each Task Stack, there will be a dict that act as a placeholder dict as well, for characters who may appear in the task. These placeholders do not fall into Generic Object Nodes and are string placeholders, except for the Task Giver and the Task Owner, who will appear in every task.
 For example, the Task Stack describes a questline where the Task Giver requests the Task Owner to kill a character that the Task Giver hates. We use the string "kill_target" to use as placeholder for the target in this task, and use conditionals to test for whether or not the Task Giver hates "kill_target".
 
+A task stack is usually advanced as the individual tasks within the stack are completed, but they can also be advanced without completing steps if the condiitons to complete a task is already set. For example, Alice gets a task from Bob to kill Charlie, and once Alice arrives at the location to kill Charlie, Charlie is already dead. Alice would then be able to move onto the next step of the task where she claims a reward from Bob for Charlie's death.
+
+Tasks can also br cancelled if the conditions to complete the task is no lnger there. For example, Bob wants Alice to deliver a letter from himself to Daniel. However, this task cannot be completed if Daniel is dead, and it should be cancelled.
+
 Character Task: A subunit of the Task Stack. Each Character Task has a list of StoryNodes that will be performed once the task is performed, and the location where this task could be performed. Each Character Task comes with a list of tests that has to be passed in order for the task to be valid.
 
-
-
-
 Algorithm:
+The algorithm used to generate a Story Graph is as follow:
+[Image description: Flowchart.]
 
-Currently, the program is mostly complete, and we are currently in the testing phase to ensure all parts are working correctly and can generate story graphs as intended. After this step is complete, we will begin setting up for testing with metrics.
+Example Story Graph:
+A story graph generated by this algorithm might appear as follow:
+[Image description: Story Graph, alternating between a shared world state containing information of the world and story nodes performed by characters.]
 
+Current Progress:
+Currently, the program is mostly complete, and we are currently in the testing phase to ensure all parts are working correctly and can generate story graphs as intended. After this step is complete, we will begin setting up for testing with metrics, as well as testing with human users to test user friendliness and the effectiveness in generating story graphs.
