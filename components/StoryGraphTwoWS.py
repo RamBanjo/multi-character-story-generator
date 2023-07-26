@@ -1414,8 +1414,6 @@ class StoryGraph:
             task_stack_name_list.append(task_stack.stack_name)
 
         return task_stack_name_list
-    
-    #TODO (Testing): Test this function
 
     '''
     Returns a dict with the following information:
@@ -1423,7 +1421,7 @@ class StoryGraph:
     "last_task_step": The current step of the taskstack. If the value is -1, the task stack is completed.
     "last_update_step": The last step that the task got updated, meaning that the next step of the task advancing should be after this step.
     '''
-    def find_last_step_of_task_stack_from_actor(self, task_stack_name, actor_name):
+    def find_last_step_of_task_stack_from_actor(self, task_stack_name, actor_name, verbose=False):
         
 
         self.refresh_longest_path_length()
@@ -1434,7 +1432,7 @@ class StoryGraph:
         #The absolute step that contains the latest instance of a TaskAdvance Object that affects this task.
         last_graph_step_with_graph_update = 0
 
-        for current_index in range(0, self.longest_path_length):
+        for current_index in range(0, self.longest_path_length+1):
 
             current_ws = self.make_state_at_step(current_index)
             actor_from_ws = current_ws.node_dict.get(actor_name, None)
@@ -1443,6 +1441,8 @@ class StoryGraph:
                 task_stack_from_ws = actor_from_ws.get_task_stack_by_name(task_stack_name)
 
                 if task_stack_from_ws is not None:
+                    if verbose:
+                        print("current task index at index ", current_index, "is", task_stack_from_ws.current_task_index)
                     new_last_task_step = task_stack_from_ws.current_task_index
                     
                     if new_last_task_step != last_task_step:
