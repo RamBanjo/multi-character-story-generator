@@ -48,6 +48,21 @@ class TaskStack:
         self.stack_giver_name = stack_giver_name
         self.stack_owner_name = stack_owner_name
         self.remove_from_pool = False
+
+    def copy_all_attributes(self, ts):
+
+        if type(ts) != TaskStack:
+            return
+        
+        self.stack_name = ts.stack_name
+        self.task_stack = ts.task_stack
+        self.current_task_index = ts.current_task_index
+        self.actor_placeholder_string_list = ts.actor_placeholder_string_list
+        self.task_stack_requirement = ts.task_stack_requirement
+        self.placeholder_info_dict = ts.placeholder_info_dict
+        self.stack_giver_name = ts.stack_giver_name
+        self.stack_owner_name = ts.stack_owner_name
+        self.remove_from_pool = ts.remove_from_pool
         
     def get_current_task(self):
 

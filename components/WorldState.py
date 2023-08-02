@@ -294,6 +294,7 @@ class WorldState:
         
 
         #The character performing this task and the character who gave this task aren't legible placeholders
+
         eligible_character_names.remove(task_stack_object.stack_giver_name)
         eligible_character_names.remove(task_stack_object.stack_owner_name)
         
@@ -314,6 +315,7 @@ class WorldState:
             permuted_possible_combs.extend(list(itertools.permutations(thing)))
 
         valid_comb_dict_list = []
+
         #We will replace the placeholders with the actual characters to see if they pass the condition. If they do pass the condition, they're added to valid comb list.
 
         for unchecked_comb in permuted_possible_combs:
@@ -331,6 +333,7 @@ class WorldState:
             for stack_require_test in task_stack_object.task_stack_requirement:
                 translated_test = replace_multiple_placeholders_with_multiple_test_takers(test=stack_require_test, placeholder_tester_pair_list=placeholder_charobj_zip)
                 validity = validity and self.test_story_compatibility_with_conditiontest(translated_test)
+
                 #print(translated_test, validity)
             #Editing this to take into account changes in World State and moving characters to proper locations
 
@@ -456,10 +459,10 @@ class WorldState:
             case TestType.SAME_LOCATION:
                 test_result = self.same_location_check(check_list=test.list_to_test)
             case TestType.HAS_EDGE:
-                if test.two_way:
+                if not test.two_way:
                     test_result = self.check_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
                 else:
-                    test_result = self.doubleconnect(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
+                    test_result = self.check_double_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
             # case TestType.HAS_DOUBLE_EDGE:
             #     test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
             case _:

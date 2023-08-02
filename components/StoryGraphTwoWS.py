@@ -92,7 +92,6 @@ class StoryGraph:
 
         return new_part
 
-    #TODO (Testing): Test this in the context of a modify taskchange object
     def add_story_part_at_step(self, part, character, location=None, absolute_step=0, timestep=0, copy=True, targets=[], verbose=False):
 
         relevant_ws = self.make_state_at_step(stopping_step=absolute_step)
@@ -107,20 +106,14 @@ class StoryGraph:
         else:
             new_part = part
 
-        if verbose:
-            print(character.name, "added to", part.name)
-
-        for change in part.effects_on_next_ws:
-            if change.changetype == ChangeType.TASKCHANGE:
-                modded_taskobj = self.modify_taskchange_object_on_add(abs_step=absolute_step, story_node=part, taskchange_object=change)
-                if modded_taskobj[0]:
-                     change.task_object = modded_taskobj
-
         character_from_ws = relevant_ws.node_dict[char_name]
 
         new_part.add_actor(character_from_ws)
         new_part.timestep = timestep
         new_part.abs_step = absolute_step
+
+        if verbose:
+            print(character.name, "added to", part.name)
 
         if location is not None:
             new_part.set_location(location)
@@ -130,8 +123,29 @@ class StoryGraph:
             target_from_ws = relevant_ws.node_dict[target.get_name()]
             new_part.add_target(target_from_ws)
 
+        new_part.effects_on_next_ws = []
+
+        for change in part.effects_on_next_ws:
+            if change.changetype == ChangeType.TASKCHANGE:
+                modded_taskobj = self.modify_taskchange_object_on_add(abs_step=absolute_step, story_node=new_part, taskchange_object=change)
+                if modded_taskobj[0]:
+                    change.task_object = modded_taskobj[1]
+
+
+            change_copy = deepcopy(change)
+            new_part.effects_on_next_ws.append(change_copy)
+
+            #Look I don't know why these have to be assigned again but apparently they do. Sue me.
+
+        for i in range(0, len(new_part.effects_on_next_ws)):
+            if new_part.effects_on_next_ws[i].changetype == ChangeType.TASKCHANGE:
+                new_part.effects_on_next_ws[i].task_stack.copy_all_attributes(modded_taskobj[1])
+
+
         self.add_to_story_part_dict(character_name=char_name, abs_step=absolute_step, story_part=new_part)
+
         self.refresh_longest_path_length()
+
 
         return new_part
 
@@ -348,7 +362,9 @@ class StoryGraph:
         #Take the initial world state and copy it.
         #Then, cycle through the list of changes, applying the changes from it.
         #returns the latest state
-        return self.make_state_at_step(len(self.list_of_changes), state_name)
+        
+        self.refresh_longest_path_length()
+        return self.make_state_at_step(self.longest_path_length, state_name)
 
     def make_state_at_step(self, stopping_step, state_name = "Traveling State"):
         #Same as make_latest_state, but you can choose the step where to stop.
@@ -568,7 +584,7 @@ class StoryGraph:
 
         if main_actor is None or make_main_actor_a_target:
             main_actor = other_actors.pop(0)
-            
+        
         new_node = self.insert_story_part(part=joint_node, character=main_actor, location=location, absolute_step=absolute_step, copy=copy, targets=targets)
 
         for additional_actor in other_actors:
@@ -1675,8 +1691,7 @@ class StoryGraph:
         
         #If none of the above conditions are true, return "task_step_incomplete"
         return "task_step_incomplete"
-    
-    #TODO (Testing): Test this Function to see if it can modify taskchange objects
+
     # This function will be called whenever a story node with a TaskChange object is added to the StoryGraph
     #
     # First, make the world state from that absolute_step
@@ -1703,6 +1718,7 @@ class StoryGraph:
         #Actually---would it be better to use placeholder objects. It would, wouldn't it?
 
         #We will disallow multiple characters getting tasks at once, which means task changes can only be used on nodes with 1 or 2 actors.
+
         equivalent_taskchange = translate_generic_taskchange(taskchange_object, story_node)
 
         new_task_stack.stack_giver_name = equivalent_taskchange[0].task_giver_name
@@ -1714,14 +1730,15 @@ class StoryGraph:
         if task_placeholder_dict == None:
 
             task_placeholder_list = current_ws.make_list_of_possible_task_stack_character_replacements(new_task_stack)
-            
-            if task_placeholder_list == None:
+
+            if len(task_placeholder_list) <= 0:
                 return False, None
             
             task_placeholder_dict = random.choice(task_placeholder_list)
             self.placeholder_dicts_of_tasks[(new_task_stack.stack_owner_name, new_task_stack.stack_name)] = task_placeholder_dict
 
         new_task_stack.placeholder_info_dict = task_placeholder_dict
+
         return True, new_task_stack
 
     def return_current_task_from_task_stack_for_actor(self, absolute_step, actor_name, task_stack_name):
