@@ -403,6 +403,7 @@ class StoryGraph:
     # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
     # Split Joint: The score is the max among all the given splits.
 
+    #TODO (Testing): Test the new Scoring Function.
     def calculate_score_from_rule_char_and_cont(self, actor, insert_index, rule, mode=0):
 
         #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
@@ -421,12 +422,25 @@ class StoryGraph:
         else:
 
             #Get character information from the relevant step.
-            character_from_ws = self.make_state_at_step(insert_index).node_dict[actor.get_name()]
+            current_ws = self.make_state_at_step(insert_index)
+            character_from_ws = current_ws.node_dict[actor.get_name()]
 
             if rule.joint_type == JointType.SPLIT:
                 #We need to figure out if it's a split joint. If it is, then check the max/avg among all splits depending on the mode.
 
-                list_of_split_scores = [node.calculate_weight_score(character_from_ws, involve_target=True) for node in rule.split_list]
+                list_of_split_scores = []
+
+                for node in rule.split_list:
+                    target_populated_node = deepcopy(node)
+                    target_populated_node.target.append(character_from_ws)
+
+                    actor_populated_node = deepcopy(node)
+                    actor_populated_node.actor.append(character_from_ws)
+
+                    actor_score = current_ws.get_score_from_story_node(actor_populated_node)
+                    target_score = current_ws.get_score_from_story_node(target_populated_node)
+
+                    list_of_split_scores.append(max(actor_score, target_score))
 
                 if mode == 1:
                     return statistics.mean(list_of_split_scores)
@@ -435,7 +449,20 @@ class StoryGraph:
 
             else:
                 #If not, then max between actor slot and target slot.
-                return rule.joint_node.calculate_weight_score(character_from_ws, involve_target=True, mode=mode)
+
+                target_populated_node = deepcopy(rule.joint_node)
+                target_populated_node.target.append(character_from_ws)
+
+                actor_populated_node = deepcopy(rule.joint_node)
+                actor_populated_node.actor.append(character_from_ws)
+
+                actor_score = current_ws.get_score_from_story_node(actor_populated_node)
+                target_score = current_ws.get_score_from_story_node(target_populated_node)
+
+                if mode == 1:
+                    return statistics.mean([actor_score, target_score])
+                else:
+                    return max([actor_score, target_score])
             
     #TODO (Testing): Test this function!
     def calculate_score_from_next_task_in_task_stack(self, actor_name, task_stack_name, task_perform_index, mode=0):
@@ -468,7 +495,8 @@ class StoryGraph:
                 return 0
             case _:
                 return DEFAULT_INVALID_SCORE
-            
+
+    #TODO (Testing): Test the new Scoring Function.
     def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0, has_joint_in_contlist = False):
         '''Mode is an int, depending on what it is, this function will do different things:
         mode = 0: return max between all the cont list.
@@ -489,7 +517,11 @@ class StoryGraph:
             current_state = graphcopy.make_state_at_step(current_index)
             current_actor = current_state.node_dict[actor.get_name()]
             current_node = graphcopy.story_parts[(actor.get_name(), current_index)]
-            score.append(current_node.calculate_bonus_weight_score(current_actor) + current_node.biasweight)
+
+            node_with_actor_info = deepcopy(current_node)
+            node_with_actor_info.actor.append(current_actor)
+
+            score.append(current_state.get_score_from_story_node(node_with_actor_info) + current_node.biasweight)
 
         # print("-----")
         # for thing in graphcopy.make_story_part_list_of_one_character(actor):
@@ -899,6 +931,7 @@ class StoryGraph:
     #     eligible_insertion_list = self.find_shared_base_joint_locations(characters, cont_rule, target_require)
     #     self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
 
+    #TODO (Testing): Test the new Valid Actor/Target Function.
     def generate_all_valid_actor_and_target_splits(self, node, abs_step, character_list):
         list_of_charnames = [x.get_name() for x in character_list]
         all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes([node.charcount, node.target_count], list_of_charnames)
@@ -915,12 +948,13 @@ class StoryGraph:
             for target_name in current_grouping[1]:
                 grouping_dict["target_group"].append(state_at_step.node_dict[target_name])
 
-            actor_validity = node.check_character_compatibility_for_many_characters(grouping_dict["actor_group"])
-            target_validity = node.check_target_compatibility_for_many_characters(grouping_dict["target_group"])
+            populated_node = deepcopy(node)
+            populated_node.actor.extend(grouping_dict["actor_group"])
+            populated_node.actor.extend(grouping_dict["target_group"])
 
-            #print(current_grouping, actor_validity, target_validity)
+            state_at_step.test_story_compatibility_with_storynode(populated_node)
 
-            if actor_validity and target_validity:
+            if state_at_step.test_story_compatibility_with_storynode(populated_node):
                 entire_list_of_split_dicts.append(grouping_dict)
 
         return entire_list_of_split_dicts
@@ -1307,15 +1341,16 @@ class StoryGraph:
                     if (current_char_at_current_step not in current_step.actor) and (current_char_at_current_step not in current_step.target):
                         return False
 
-                    if current_char_at_current_step in current_step.actor:
-                        if not current_step.check_character_compatibility(current_char_at_current_step):
-                            return False
+                    #These two are outdated, because character compatibility and target compatibility are already merged into test_story_compatibility_with_conditiontest 
+                    # if current_char_at_current_step in current_step.actor:
+                    #     if not current_step.check_character_compatibility(current_char_at_current_step):
+                    #         return False
 
-                    if current_char_at_current_step in current_step.target:
-                        if not current_step.check_target_compatibility(current_char_at_current_step):
-                            return False
+                    # if current_char_at_current_step in current_step.target:
+                    #     if not current_step.check_target_compatibility(current_char_at_current_step):
+                    #         return False
 
-                    for current_test_to_convert in current_step.condition_tests:
+                    for current_test_to_convert in current_step.required_test_list:
 
                         equivalent_tests = translate_generic_test(current_test_to_convert, current_step)
 

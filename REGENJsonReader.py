@@ -14,7 +14,7 @@ story_part_list = []
 hates_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="hates", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
 actor_target_shareloc = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, GenericObjectNode.GENERIC_TARGET])
 
-attack_by_npc = StoryNode(name="Attack Target", biasweight=0, tags={"NodeType":"Attack"}, charcount=1, target_count=1, required_tags_list=[("type","NPC"), ("alive",True)], required_tags_list_target=[("alive",True)], condition_tests=[hates_target, actor_target_shareloc])
+attack_by_npc = StoryNode(name="Attack Target", biasweight=0, tags={"NodeType":"Attack"}, charcount=1, target_count=1, required_tags_list=[("type","NPC"), ("alive",True)], required_tags_list_target=[("alive",True)], required_test_list=[hates_target, actor_target_shareloc])
 
 #Oh shoot---we don't have a way to ensure that the attacker is the same person who kills the target. Is the actor/target always going to be random? Maybe make players dying unwanted?
 #Or maybe this:
@@ -58,7 +58,7 @@ actor_allied_target_test = HasEdgeTest(object_from_test=GenericObjectNode.GENERI
 actor_target_break_ally = RelChange("Actor Target Unfriend", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="allies", node_b=GenericObjectNode.GENERIC_TARGET, value=None, add_or_remove=ChangeAction.REMOVE, soft_equal=True, two_way=True)
 actor_target_become_enemies = RelChange("Actor Target Enemies", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="enemies", node_b=GenericObjectNode.GENERIC_TARGET, value="broken_ally", add_or_remove=ChangeAction.REMOVE, two_way=True)
 
-break_friendship = StoryNode(name = "Break Ally", biasweight=0, charcount=1, target_count=1, condition_tests=[actor_target_shareloc, actor_allied_target_test], effects_on_next_ws=[actor_target_break_ally, actor_target_become_enemies])
+break_friendship = StoryNode(name = "Break Ally", biasweight=0, charcount=1, target_count=1, required_test_list=[actor_target_shareloc, actor_allied_target_test], effects_on_next_ws=[actor_target_break_ally, actor_target_become_enemies])
 
 #Fight her! I hardly knew her!
 #How to assign what monster to fight? It just says there is at least one thing tagged as enemy in the world, but how do we make sure of the type of monster being fought?
@@ -84,7 +84,7 @@ actor_enemies_target_test = HasEdgeTest(object_from_test=GenericObjectNode.GENER
 actor_target_break_enemies = RelChange("Actor Target Unenemies", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="enemies", node_b=GenericObjectNode.GENERIC_TARGET, value=None, add_or_remove=ChangeAction.REMOVE, soft_equal=True, two_way=True)
 actor_target_become_allies = RelChange("Actor Target Allies", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="enemies", node_b=GenericObjectNode.GENERIC_TARGET, value="broken_ally", add_or_remove=ChangeAction.REMOVE, two_way=True)
 
-forge_allyship = StoryNode(name = "Forge Ally", biasweight=0, charcount=1, target_count=1, condition_tests=[actor_target_shareloc, actor_enemies_target_test], effects_on_next_ws=[actor_target_break_enemies, actor_target_become_allies])
+forge_allyship = StoryNode(name = "Forge Ally", biasweight=0, charcount=1, target_count=1, required_test_list=[actor_target_shareloc, actor_enemies_target_test], effects_on_next_ws=[actor_target_break_enemies, actor_target_become_allies])
 
 #Give Blackmail Letter works on the same logic as Fight Monster: We need knowledge of the world's path and the current location of the target to resolve quest. Unless the characters are already in the same location?
 #I'm skipping anything that requires the world path and knowledge of target's location for now.

@@ -7,7 +7,7 @@ from components.CharacterTask import CharacterTask, TaskStack
 from components.Edge import Edge
 from components.RelChange import *
 from components.StoryNode import *
-from components.StoryObjects import LocationNode, ObjectNode
+from components.StoryObjects import CharacterNode, LocationNode, ObjectNode
 from components.UtilFunctions import *
 from components.UtilityEnums import *
 
@@ -439,12 +439,36 @@ class WorldState:
 
         compatibility_result = True
         
-        test_condition_list = story_node.condition_tests
+        test_list = []
 
-        for condtest in test_condition_list:
+        for test in story_node.required_test_list:
+            equivalent_test = translate_generic_test(test, story_node)
+            test_list.extend(equivalent_test)
+
+        for condtest in test_list:
             compatibility_result = compatibility_result and self.test_story_compatibility_with_conditiontest(condtest)
 
         return compatibility_result
+
+    #TODO (Testing): Test This Score-Related Function
+    def get_score_from_story_node(self, story_node):
+        test_list = []
+
+        for test in story_node.suggested_test_list:
+            equivalent_test = translate_generic_test(test, story_node)
+            test_list.extend(equivalent_test)
+
+        return self.get_score_from_list_of_test(test_list)
+
+    #TODO (Testing): Test This Score-Related Function
+    def get_score_from_list_of_test(self, list_of_tests):
+        score = 0
+
+        for test in list_of_tests:
+            if self.test_story_compatibility_with_conditiontest(test):
+                score += test.score
+
+        return score
 
     def test_story_compatibility_with_conditiontest(self, test):
 
@@ -463,13 +487,18 @@ class WorldState:
                     test_result = self.check_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
                 else:
                     test_result = self.check_double_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
+            case TestType.HAS_TAG:
+                test_result = self.has_tag_test(object_to_test=test.object_to_test, tag=test.tag, value=test.value, soft_equal=test.soft_equal)
+            case TestType.IN_BIAS_RANGE:
+                test_result = self.bias_range_check(object_to_test=test.object_to_test, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept)
+            
             # case TestType.HAS_DOUBLE_EDGE:
             #     test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
             case _:
                 test_result = False
 
         if test.inverse:
-            test_result = not test_result
+            return not test_result
             
         return test_result
 
@@ -483,13 +512,32 @@ class WorldState:
         
         return WorldState.check_items_in_same_location(list_from_this_ws)
 
-    def held_item_tag_check(self, holder_test, value_test, tag_test=None):
+    def held_item_tag_check(self, holder_test, tag_test, soft_equal, value_test=None):
         holder = self.node_dict.get(holder_test.get_name(), None)
 
         if holder is None:
             return False
 
-        return holder.check_if_this_item_holds_item_with_tag(value_test, tag_test, self.DEFAULT_HOLD_EDGE_NAME)
+        return holder.check_if_this_item_holds_item_with_tag(tag=tag_test, value=value_test, soft_equal=soft_equal, holds_rel_name=self.DEFAULT_HOLD_EDGE_NAME)
+
+    def bias_range_check(self, object_to_test, bias_axis, min_accept, max_accept):
+        object_node = self.node_dict.get(object_to_test.get_name(), None)
+
+        if object_node is None:
+            return False
+        
+        if type(object_node) != CharacterNode:
+            return False
+        
+        return object_node.check_bias_range(bias_axis=bias_axis, min_accept=min_accept, max_accept=max_accept)
+    
+    def has_tag_test(self, object_to_test, tag, value, soft_equal):
+        object_node = self.node_dict.get(object_to_test.get_name(), None)
+
+        if object_node is None:
+            return False
+        
+        return object_node.check_if_this_item_has_tag(tag=tag, value=value, soft_equal=soft_equal)
 
     @staticmethod
     def check_items_in_same_location(item_checklist):
@@ -729,7 +777,6 @@ class WorldState:
 
         overall_min_dist_towards_task = 1e7
 
-
         for adjlocname in names_of_adjacent_locations:
             minimum_distance_to_find_task_from_adjloc = 1e7
 
@@ -751,7 +798,6 @@ class WorldState:
         next_location_candidate_names = [x[0] for x in min_distance_of_adj_loc_dict.items() if x[1] == overall_min_dist_towards_task]
             
         return self.node_dict[random.choice(next_location_candidate_names)]
-
 
     def get_all_locations(self):
         return [x for x in self.node_dict.values() if type(x) == LocationNode]

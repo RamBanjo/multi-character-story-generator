@@ -4,9 +4,9 @@ from numpy import character
 
 from components.UtilFunctions import replace_multiple_placeholders_with_multiple_change_havers, replace_multiple_placeholders_with_multiple_test_takers
 
-
+#, required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_test_list = [], suggested_test_list = [], required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [],
 class StoryNode:
-    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [], **kwargs):
+    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_test_list = [], suggested_test_list = [], **kwargs):
         
         #the name of this action.
         self.name = name
@@ -53,33 +53,39 @@ class StoryNode:
         #Absolute Step is for the Joint Rules, so that the rules know which nodes to join together
         self.abs_step = 0
 
+        #TODO (Important): Reduce all these into the following two properties: Required Tests and Suggested Tests.
+        #
+        #
         #For consistency, all required/unwanteds are now lists of tuples instead.
         #Required Tags List, Unwanted Tags List, and Bias Range are taken from RewriteRule.
-        self.required_tags_list = required_tags_list
-        self.unwanted_tags_list = unwanted_tags_list
-        self.bias_range = bias_range
+        self.required_test_list = required_test_list
+        self.suggested_test_list = suggested_test_list
 
-        self.required_tags_list_target = required_tags_list_target
-        self.unwanted_tags_list_target = unwanted_tags_list_target
-        self.bias_range_target = bias_range_target
+        # self.required_tags_list = required_tags_list
+        # self.unwanted_tags_list = unwanted_tags_list
+        # self.bias_range = bias_range
 
-        #Suggested included tags, suggested excluded tags, and suggested bias range are for weight score calculation purposes. Not fulfiling these conditions are fine, but fulfilling them makes the character lean more towards this action.
-        #Figure out if we need to use this to pick characters who share this node with another character.
+        # self.required_tags_list_target = required_tags_list_target
+        # self.unwanted_tags_list_target = unwanted_tags_list_target
+        # self.bias_range_target = bias_range_target
+
+        # #Suggested included tags, suggested excluded tags, and suggested bias range are for weight score calculation purposes. Not fulfiling these conditions are fine, but fulfilling them makes the character lean more towards this action.
+        # #Figure out if we need to use this to pick characters who share this node with another character.
         
-        self.suggested_included_tags = suggested_included_tags
-        self.suggested_excluded_tags = suggested_excluded_tags
-        self.suggested_bias_range = suggested_bias_range
+        # self.suggested_included_tags = suggested_included_tags
+        # self.suggested_excluded_tags = suggested_excluded_tags
+        # self.suggested_bias_range = suggested_bias_range
 
-        # Figure out if we need one of these for targets for the purpose of picking targets to be in this node.
-        # ANS: We need this for score calculation while choosing the rule. However, since we have decided to use the "Choose one random good combi", we don't need it for when it is being chosen.
-        self.suggested_included_tags_target = suggested_included_tags_target
-        self.suggested_excluded_tags_target = suggested_excluded_tags_target
-        self.suggested_bias_range_target = suggested_bias_range_target
+        # # Figure out if we need one of these for targets for the purpose of picking targets to be in this node.
+        # # ANS: We need this for score calculation while choosing the rule. However, since we have decided to use the "Choose one random good combi", we don't need it for when it is being chosen.
+        # self.suggested_included_tags_target = suggested_included_tags_target
+        # self.suggested_excluded_tags_target = suggested_excluded_tags_target
+        # self.suggested_bias_range_target = suggested_bias_range_target
 
-        #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
+        # #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
 
-        #TODO (Extra Features): Do we need suggested_condition_tests to test the world state to go with the suggested stuff for actor/targets?
-        self.condition_tests = condition_tests
+        # #TODO (Extra Features): Do we need suggested_condition_tests to test the world state to go with the suggested stuff for actor/targets?
+        # self.condition_tests = condition_tests
         
 
     def get_name(self):
@@ -185,173 +191,175 @@ class StoryNode:
         del next_node.previous_nodes[char_name]
         del self.next_nodes[char_name]
 
-    def check_character_compatibility(self, character_node):
+    # This will test the tests in the required_tests that feature the character's name after replacing all actor placeholders with the character themself.
+    # Deprecation of this function???
+    # def check_character_compatibility(self, character_node):
 
-        compatibility = True
+    #     compatibility = True
 
-        #Check if the character contains tags in Required Tags (not compatible if false)
+    #     #Check if the character contains tags in Required Tags (not compatible if false)
 
-        #print("Before All Tests", compatibility)
-        if self.required_tags_list is not None:
-            for tag_tuple in self.required_tags_list:
-                compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1])
+    #     #print("Before All Tests", compatibility)
+    #     # if self.required_tags_list is not None:
+    #     #     for tag_tuple in self.required_tags_list:
+    #     #         compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1])
 
-        #Check if character contains tags in Unwanted Tags (not compatible if true)
+    #     # #Check if character contains tags in Unwanted Tags (not compatible if true)
 
-        #print("After Req Tags Test", compatibility)
-        if self.unwanted_tags_list is not None:
-            for tag_tuple in self.unwanted_tags_list:
-                compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1])
+    #     # #print("After Req Tags Test", compatibility)
+    #     # if self.unwanted_tags_list is not None:
+    #     #     for tag_tuple in self.unwanted_tags_list:
+    #     #         compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1])
         
-        #print("After Unwanted Tags Test", compatibility)
-        #Check if character's bias is within the acceptable range (not compatible if false)
-        if self.bias_range is not None:
-            for bias in self.bias_range:
-                char_bias_value = character_node.biases[bias]
-                compatibility = compatibility and char_bias_value >= self.bias_range[bias][0]
-                compatibility = compatibility and char_bias_value <= self.bias_range[bias][1]
+    #     # #print("After Unwanted Tags Test", compatibility)
+    #     # #Check if character's bias is within the acceptable range (not compatible if false)
+    #     # if self.bias_range is not None:
+    #     #     for bias in self.bias_range:
+    #     #         char_bias_value = character_node.biases[bias]
+    #     #         compatibility = compatibility and char_bias_value >= self.bias_range[bias][0]
+    #     #         compatibility = compatibility and char_bias_value <= self.bias_range[bias][1]
         
-        #print("After Bias Range Test", compatibility)
-        #If the character passes all three tests, then return true. Otherwise, return false
-        return compatibility
+    #     #print("After Bias Range Test", compatibility)
+    #     #If the character passes all three tests, then return true. Otherwise, return false
+    #     return compatibility
         
-    def check_character_compatibility_for_many_characters(self, list_of_chars):
-        compatibility = True
+    # def check_character_compatibility_for_many_characters(self, list_of_chars):
+    #     compatibility = True
 
-        for character_node in list_of_chars:
-            compatibility = compatibility and self.check_character_compatibility(character_node)
+    #     for character_node in list_of_chars:
+    #         compatibility = compatibility and self.check_character_compatibility(character_node)
 
-        return compatibility
+    #     return compatibility
 
-    def check_target_compatibility(self, character_node, verbose = False):
+    # def check_target_compatibility(self, character_node, verbose = False):
         
-        compatibility = True
+    #     compatibility = True
 
-        #Check if the character contains tags in Required Tags (not compatible if false)
+    #     #Check if the character contains tags in Required Tags (not compatible if false)
 
-        if self.required_tags_list_target is not None:
-            for tag_tuple in self.required_tags_list_target:
-                compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1])
-                if verbose:
-                    print("Result of required tags test", compatibility)
+    #     if self.required_tags_list_target is not None:
+    #         for tag_tuple in self.required_tags_list_target:
+    #             compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1])
+    #             if verbose:
+    #                 print("Result of required tags test", compatibility)
 
-        #Check if character contains tags in Unwanted Tags (not compatible if true)
+    #     #Check if character contains tags in Unwanted Tags (not compatible if true)
 
-        if self.unwanted_tags_list_target is not None:
-            for tag_tuple in self.unwanted_tags_list_target:
-                compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1])
-                if verbose:
-                    print("Result of unwanted tags test", compatibility)
+    #     if self.unwanted_tags_list_target is not None:
+    #         for tag_tuple in self.unwanted_tags_list_target:
+    #             compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1])
+    #             if verbose:
+    #                 print("Result of unwanted tags test", compatibility)
         
-        #Check if character's bias is within the acceptable range (not compatible if false)
-        if self.bias_range_target is not None:
-            for bias in self.bias_range_target:
-                char_bias_value = character_node.biases[bias]
-                compatibility = compatibility and char_bias_value >= self.bias_range_target[bias][0]
-                if verbose:
-                    print("Result of lower bound bias test", compatibility)
-                    print(compatibility)
-                compatibility = compatibility and char_bias_value <= self.bias_range_target[bias][1]
-                if verbose:
-                    print("Result of upper bound bias test", compatibility)
-                    print(compatibility)
+    #     #Check if character's bias is within the acceptable range (not compatible if false)
+    #     if self.bias_range_target is not None:
+    #         for bias in self.bias_range_target:
+    #             char_bias_value = character_node.biases[bias]
+    #             compatibility = compatibility and char_bias_value >= self.bias_range_target[bias][0]
+    #             if verbose:
+    #                 print("Result of lower bound bias test", compatibility)
+    #                 print(compatibility)
+    #             compatibility = compatibility and char_bias_value <= self.bias_range_target[bias][1]
+    #             if verbose:
+    #                 print("Result of upper bound bias test", compatibility)
+    #                 print(compatibility)
 
-        #If the character passes all three tests, then return true. Otherwise, return false
-        return compatibility 
+    #     #If the character passes all three tests, then return true. Otherwise, return false
+    #     return compatibility 
 
-    def check_target_compatibility_for_many_characters(self, list_of_chars):
-        compatibility = True
+    # def check_target_compatibility_for_many_characters(self, list_of_chars):
+    #     compatibility = True
 
-        for character_node in list_of_chars:
-            compatibility = compatibility and self.check_target_compatibility(character_node)
+    #     for character_node in list_of_chars:
+    #         compatibility = compatibility and self.check_target_compatibility(character_node)
 
-        return compatibility
+    #     return compatibility
 
-    def calculate_bonus_weight_score(self, character_node):
+    # def calculate_bonus_weight_score(self, character_node):
 
-        if not self.check_character_compatibility(character_node=character_node):
-            return -999
+    #     if not self.check_character_compatibility(character_node=character_node):
+    #         return -999
         
-        score = 0
+    #     score = 0
 
-        if self.suggested_included_tags is not None:
-            for tag_tuple in self.suggested_included_tags:
-                if (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1]):
-                    score += 1
+    #     if self.suggested_included_tags is not None:
+    #         for tag_tuple in self.suggested_included_tags:
+    #             if (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1]):
+    #                 score += 1
 
-        if self.suggested_excluded_tags is not None:
-            for tag_tuple in self.suggested_excluded_tags:
-                if (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1]):
-                    score += 1
+    #     if self.suggested_excluded_tags is not None:
+    #         for tag_tuple in self.suggested_excluded_tags:
+    #             if (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1]):
+    #                 score += 1
 
-        if self.suggested_bias_range is not None:
-            for bias in self.suggested_bias_range:
-                char_bias_value = character_node.biases[bias]
-                if char_bias_value >= self.suggested_bias_range[bias][0] and char_bias_value <= self.suggested_bias_range[bias][1]:
-                    score += 1
+    #     if self.suggested_bias_range is not None:
+    #         for bias in self.suggested_bias_range:
+    #             char_bias_value = character_node.biases[bias]
+    #             if char_bias_value >= self.suggested_bias_range[bias][0] and char_bias_value <= self.suggested_bias_range[bias][1]:
+    #                 score += 1
 
-        return score
+    #     return score
     
-    def calculate_bonus_weight_score_target(self, character_node):
+    # def calculate_bonus_weight_score_target(self, character_node):
 
-        if not self.check_target_compatibility(character_node=character_node):
-            return -999
+    #     if not self.check_target_compatibility(character_node=character_node):
+    #         return -999
 
-        score = 0
+    #     score = 0
 
-        if self.suggested_included_tags_target is not None:
-            for tag_tuple in self.suggested_included_tags_target:
-                if (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1]):
-                    score += 1
+    #     if self.suggested_included_tags_target is not None:
+    #         for tag_tuple in self.suggested_included_tags_target:
+    #             if (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1]):
+    #                 score += 1
 
-        if self.suggested_excluded_tags_target is not None:
-            for tag_tuple in self.suggested_excluded_tags_target:
-                if (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1]):
-                    score += 1
+    #     if self.suggested_excluded_tags_target is not None:
+    #         for tag_tuple in self.suggested_excluded_tags_target:
+    #             if (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1]):
+    #                 score += 1
 
-        if self.suggested_bias_range_target is not None:
-            for bias in self.suggested_bias_range_target:
-                char_bias_value = character_node.biases[bias]
-                if char_bias_value >= self.suggested_bias_range_target[bias][0] and char_bias_value <= self.suggested_bias_range_target[bias][1]:
-                    score += 1
+    #     if self.suggested_bias_range_target is not None:
+    #         for bias in self.suggested_bias_range_target:
+    #             char_bias_value = character_node.biases[bias]
+    #             if char_bias_value >= self.suggested_bias_range_target[bias][0] and char_bias_value <= self.suggested_bias_range_target[bias][1]:
+    #                 score += 1
 
-        return score
+    #     return score
 
-    def calculate_weight_score(self, character_node, involve_target=False, mode=0):
-        '''
-        If max_between_actor_target is set to True AND there are slots for the target, then instead of only doing the bonus weight score for the actor part, it will also calculate the target part and choose max between the two.
-        '''
+    # def calculate_weight_score(self, character_node, involve_target=False, mode=0):
+    #     '''
+    #     If max_between_actor_target is set to True AND there are slots for the target, then instead of only doing the bonus weight score for the actor part, it will also calculate the target part and choose max between the two.
+    #     '''
 
-        if involve_target and self.target_count > 0:
+    #     if involve_target and self.target_count > 0:
 
-            if self.calculate_bonus_weight_score(character_node) == -999 and self.calculate_bonus_weight_score_target(character_node) == -999:
-                return -999
+    #         if self.calculate_bonus_weight_score(character_node) == -999 and self.calculate_bonus_weight_score_target(character_node) == -999:
+    #             return -999
             
-            if self.calculate_bonus_weight_score(character_node) == -999:
-                return self.calculate_bonus_weight_score_target(character_node) + self.biasweight
+    #         if self.calculate_bonus_weight_score(character_node) == -999:
+    #             return self.calculate_bonus_weight_score_target(character_node) + self.biasweight
             
-            if self.calculate_bonus_weight_score_target(character_node) == -999:
-                return self.calculate_bonus_weight_score(character_node) + self.biasweight
+    #         if self.calculate_bonus_weight_score_target(character_node) == -999:
+    #             return self.calculate_bonus_weight_score(character_node) + self.biasweight
 
-            if mode == 1:
-                return mean([self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)]) + self.biasweight
+    #         if mode == 1:
+    #             return mean([self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)]) + self.biasweight
             
-            return max(self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)) + self.biasweight
+    #         return max(self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)) + self.biasweight
 
-        return self.calculate_bonus_weight_score(character_node) + self.biasweight
+    #     return self.calculate_bonus_weight_score(character_node) + self.biasweight
 
-    #Also, we should probably make a function that returns true if either the target compat gets approved or the actor compat gets approved, for the purposes of joint rules
-    #Use case for this: When we are testing a joint node for a character, we should test if they'd work in either slot because we don't know which slot they would go to.
-    def check_actor_or_target_compatibility(self, character_node):
-        return self.check_character_compatibility(character_node) or self.check_target_compatibility(character_node)
+    # #Also, we should probably make a function that returns true if either the target compat gets approved or the actor compat gets approved, for the purposes of joint rules
+    # #Use case for this: When we are testing a joint node for a character, we should test if they'd work in either slot because we don't know which slot they would go to.
+    # def check_actor_or_target_compatibility(self, character_node):
+    #     return self.check_character_compatibility(character_node) or self.check_target_compatibility(character_node)
     
-    def check_actor_or_target_compatibility_for_many_characters(self, list_of_chars):
-        compatibility = True
+    # def check_actor_or_target_compatibility_for_many_characters(self, list_of_chars):
+    #     compatibility = True
 
-        for character_node in list_of_chars:
-            compatibility = compatibility and self.check_actor_or_target_compatibility(character_node)
+    #     for character_node in list_of_chars:
+    #         compatibility = compatibility and self.check_actor_or_target_compatibility(character_node)
 
-        return compatibility
+    #     return compatibility
     
     def check_if_joint_node(self):
         
@@ -369,8 +377,11 @@ def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:di
 
     new_actor_list = []
     new_target_list = []
-    new_relchange_list = []
-    new_validtest_list = []
+
+    new_ws_effect_list = []
+
+    new_req_test_list = []
+    new_suggest_test_list = []
 
     for actor in story_node_copy.actor:
         if actor in placeholder_dict.keys():
@@ -384,15 +395,20 @@ def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:di
         else:
             new_target_list.append(target)
 
-    for test in story_node_copy.condition_tests:
-        new_relchange_list.append(replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_dict.values()))
+    
+    for test in story_node_copy.required_test_list:
+        new_req_test_list.append(replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_dict.values()))
+
+    for test in story_node_copy.suggested_test_list:
+        new_suggest_test_list.append(replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_dict.values()))
 
     for change in story_node_copy.effects_on_next_ws:
-        new_validtest_list.append(replace_multiple_placeholders_with_multiple_change_havers(change=change, placeholder_tester_pair_list=placeholder_dict.values()))
+        new_ws_effect_list.append(replace_multiple_placeholders_with_multiple_change_havers(change=change, placeholder_tester_pair_list=placeholder_dict.values()))
 
     story_node_copy.actor = new_actor_list
     story_node_copy.target = new_target_list
-    story_node_copy.condition_tests = new_validtest_list
-    story_node_copy.effects_on_next_ws = new_validtest_list
+    story_node_copy.required_test_list = new_req_test_list
+    story_node_copy.suggested_test_list = new_suggest_test_list
+    story_node_copy.effects_on_next_ws = new_ws_effect_list
 
     return story_node_copy

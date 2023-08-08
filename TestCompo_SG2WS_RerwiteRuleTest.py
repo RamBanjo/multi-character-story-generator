@@ -37,9 +37,9 @@ current_loc_not_hold_sword = RelChange(name="CurLoc Not Hold Target", node_a=Gen
 current_loc_adjacent_shop = HasEdgeTest(GenericObjectNode.GENERIC_LOCATION, "connects", shop, None, soft_equal=True, inverse=False, two_way=True)
 same_location_sword = SameLocationTest([GenericObjectNode.GENERIC_TARGET, GenericObjectNode.GENERIC_ACTOR])
 
-go_to_shop = StoryNode(name="Go to Shop", biasweight=None, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[shop_hold_character, current_loc_not_hold_character], condition_tests=[current_loc_adjacent_shop])
-take_sword = StoryNode(name="Take Item", biasweight=None, tags={"Type":"Take Item"}, charcount=1, effects_on_next_ws=[character_hold_sword, current_loc_not_hold_sword], condition_tests=[same_location_sword])
-steal_sword = StoryNode(name="Steal Item", biasweight=5, tags={"Type":"Take Item"}, charcount=1, effects_on_next_ws=[character_hold_sword, current_loc_not_hold_sword], condition_tests=[same_location_sword], bias_range={"lawbias":(-100,-30)})
+go_to_shop = StoryNode(name="Go to Shop", biasweight=None, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[shop_hold_character, current_loc_not_hold_character], required_test_list=[current_loc_adjacent_shop])
+take_sword = StoryNode(name="Take Item", biasweight=None, tags={"Type":"Take Item"}, charcount=1, effects_on_next_ws=[character_hold_sword, current_loc_not_hold_sword], required_test_list=[same_location_sword])
+steal_sword = StoryNode(name="Steal Item", biasweight=5, tags={"Type":"Take Item"}, charcount=1, effects_on_next_ws=[character_hold_sword, current_loc_not_hold_sword], required_test_list=[same_location_sword], bias_range={"lawbias":(-100,-30)})
 
 if_unlawful_then_steal = RewriteRule(story_condition=[deepcopy(take_sword)], story_change=[deepcopy(steal_sword)], name="Unlawful Theft", remove_before_insert=True, target_list=[[excalibur]])
 

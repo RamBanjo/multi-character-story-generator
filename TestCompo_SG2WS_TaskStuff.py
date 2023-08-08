@@ -61,10 +61,51 @@ test_sg.add_story_part(part=snode5, character=alice, location=town)
 test_sg.refresh_longest_path_length()
 
 test_sg.make_latest_state()
-print("Alice Task Stack Names (After adding Story Parts)", test_sg.get_list_of_task_stack_names_from_latest_step("Alice"))
+# print("Alice Task Stack Names (After adding Story Parts)", test_sg.get_list_of_task_stack_names_from_latest_step("Alice"))
 
 # Test these things as well
-# find_last_step_of_task_stack_from_actor
 # attempt_advance_task_stack
 # test_task_completeness
 # calculate_score_from_next_task_in_task_stack
+
+# Okay, here we're testing Task Stack 7, and how complete this task is.
+# We will need to test that all the testcases are working. Aha.
+#
+# not_exist: Task Stack doesn't Exist. We will call a name that's not Test Stack 7 to test this.
+# task_stack_cleared: The task stack is already complete. We will call Test Stack 7 after it has been marked complete to test this.
+# incompatible: The task stack is trying to test for completeness at the point before the last update step, where the task can't be updated. We will advance Test Stack 7 then test the abs step before that update to test this.
+# wrong_location: The task is not in the correct location. We will move Alex to the Castle where the task is not to test this.
+# task_step_already_completed: The task is already completed according to the goal state given in the task.
+# task_step_already_failed: The task is already failed according to the fail state given in the task.
+# task_step_incomplete: None of the other conditions above applies.
+
+#Here's a new world state, story graph, and an entirely new premise to consider upon
+
+alex = CharacterNode("Alex")
+bonnie = CharacterNode("Bonnie")
+carol = CharacterNode("Carol")
+diane = CharacterNode("Diane")
+edgar = CharacterNode("Edgar")
+
+village = LocationNode("Village")
+castle = LocationNode("Castle")
+
+snodea = StoryNode(name="Action A", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+snodeb = StoryNode(name="Action B", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+snodec = StoryNode(name="Action C", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+snoded = StoryNode(name="Action D", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+snodee = StoryNode(name="Action E", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+snodef = StoryNode(name="Action F", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+
+# Situation: Bonnie wants Alex to do some matchmaking.
+# Task is complete if Carol and Diane loves each other.
+# Task is failed if Carol hates Diane or if Diane hates Carol
+
+carol_loves_diane_two_way = HasEdgeTest(object_from_test=carol, edge_name_test="loves", object_to_test=diane, soft_equal=True, two_way=True)
+carol_hates_diane = HasEdgeTest(object_from_test=carol, edge_name_test="hates", object_to_test=diane, soft_equal=True)
+diane_hates_carol = HasEdgeTest(object_from_test=carol, edge_name_test="hates", object_to_test=diane, soft_equal=True)
+
+test_task_1 = CharacterTask(task_name="Test Task 1", task_actions=[snodea, snodeb], task_location_name="Village")
+test_task_2 = CharacterTask(task_name="Test Task 2", task_actions=[snodec, snoded], task_location_name="Village")
+test_task_3 = CharacterTask(task_name="Test Task #", task_actions=[snodee, snodef], task_location_name="Village")
+test_stack_7 = TaskStack(stack_name="Test Stack 7", task_stack=[], task_stack_requirement=[], stack_giver_name="Bonnie", stack_owner_name="Alex")

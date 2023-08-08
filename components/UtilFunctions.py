@@ -2,7 +2,7 @@ import copy
 import itertools
 import math
 import random
-from components.ConditionTest import HasEdgeTest, HeldItemTagTest, SameLocationTest
+from components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, SameLocationTest
 from components.Edge import Edge
 from components.RelChange import ConditionalChange, RelChange, TagChange, TaskAdvance, TaskCancel, TaskChange
 from components.StoryObjects import ObjectNode
@@ -506,6 +506,10 @@ def replace_placeholder_object_with_test_taker(test, test_taker, placeholder_obj
                 return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
             # case TestType.HAS_DOUBLE_EDGE:
             #     return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
+            case TestType.HAS_TAG:
+                return replace_placeholder_object_with_test_taker_hastag(test, test_taker, placeholder_object)
+            case TestType.IN_BIAS_RANGE:
+                return replace_placeholder_object_with_test_taker_biasrange(test, test_taker, placeholder_object)
             case _:
                 return None
 
@@ -539,6 +543,24 @@ def replace_placeholder_object_with_test_taker_sameloc(test, test_taker, placeho
         copiedtest.list_to_test.remove(placeholder_object)
         copiedtest.list_to_test.append(test_taker)
         return copiedtest
+    
+def replace_placeholder_object_with_test_taker_hastag(test, test_taker, placeholder_object):
+
+    if test.object_to_test == placeholder_object:
+        copiedtest = copy.deepcopy(test)
+        copiedtest.object_to_test = test_taker
+        return copiedtest
+    
+    return test
+    
+def replace_placeholder_object_with_test_taker_biasrange(test, test_taker, placeholder_object):
+
+    if test.object_to_test == placeholder_object:
+        copiedtest = copy.deepcopy(test)
+        copiedtest.object_to_test = test_taker
+        return copiedtest
+    
+    return test
 
 def replace_multiple_placeholders_with_multiple_change_havers(change, placeholder_tester_pair_list):
     copiedchange = copy.deepcopy(change)
@@ -730,17 +752,22 @@ def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
     return return_list
 
 #We'll use this to translate tests with generic tags instead of node here
+#TODO (Testing): Test interactions with these if the Generic Object Nodes call for something that don't exist, that will come up a lot during compatibility tests.
 def translate_generic_test(condtest, populated_story_node):
 
     list_of_equivalent_condtests = []
 
     match condtest.test_type:
         case TestType.HELD_ITEM_TAG:
-            list_of_equivalent_condtests = translate_generic_held_item_test(condtest, populated_story_node)
+            list_of_equivalent_condtests = translate_generic_held_item_test(test=condtest, node=populated_story_node)
         case TestType.SAME_LOCATION:
-            list_of_equivalent_condtests = translate_generic_same_location_test(condtest, populated_story_node)
+            list_of_equivalent_condtests = translate_generic_same_location_test(test=condtest, node=populated_story_node)
         case TestType.HAS_EDGE:
-            list_of_equivalent_condtests = translate_generic_has_edge_test(condtest, populated_story_node)
+            list_of_equivalent_condtests = translate_generic_has_edge_test(test=condtest, node=populated_story_node)
+        case TestType.HAS_TAG:
+            list_of_equivalent_condtests = translate_has_tag_test(test=condtest, node=populated_story_node)
+        case TestType.IN_BIAS_RANGE:
+            list_of_equivalent_condtests = translate_in_bias_range_test(test=condtest, node=populated_story_node)
         # case TestType.HAS_DOUBLE_EDGE:
         #     list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
         case _:
@@ -778,6 +805,28 @@ def translate_generic_has_edge_test(test, node):
     for lhs_item in from_node:
         for rhs_item in to_node:
             list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, two_way=test.two_way, inverse=test.inverse))    
+
+    return list_of_equivalent_tests
+
+def translate_has_tag_test(test, node):
+
+    list_of_equivalent_tests = []
+
+    object_list = check_keyword_and_return_objectnodelist(storynode=node, objnode_to_check=test.object_to_test)
+
+    for item in object_list:
+        list_of_equivalent_tests.append(HasTagTest(object_to_test=item, tag=test.tag, value=test.value, soft_equal=test.soft_equal, inverse=test.inverse))
+
+    return list_of_equivalent_tests
+
+def translate_in_bias_range_test(test, node):
+
+    list_of_equivalent_tests = []
+
+    object_list = check_keyword_and_return_objectnodelist(storynode=node, objnode_to_check=test.object_to_test)
+
+    for item in object_list:
+        list_of_equivalent_tests.append(InBiasRangeTest(object_to_test=item, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept, inverse=test.inverse))
 
     return list_of_equivalent_tests
 

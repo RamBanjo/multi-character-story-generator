@@ -77,20 +77,20 @@ class ObjectNode:
 
         return things_list
 
-    def check_if_this_item_holds_item_with_tag(self, tag, value, holds_rel_name = "holds"):
+    def check_if_this_item_holds_item_with_tag(self, tag, value, soft_equal, holds_rel_name = "holds"):
         held_items_list = self.get_list_of_things_held_by_this_item(holds_rel_name)
 
         for thing in held_items_list:
-            if thing.check_if_this_item_has_tag(tag, value):
+            if thing.check_if_this_item_has_tag(tag=tag, value=value, soft_equal=soft_equal):
                 return True
 
         return False
 
-    #If both tag and value are given, both must match.
-    #If only tag is given and value is None, then only the tag has to exist.
-    def check_if_this_item_has_tag(self, tag, value=None):
+    #If soft_equal is False, both must match.
+    #If if soft_equal is True, then only the tag has to exist.
+    def check_if_this_item_has_tag(self, tag, value, soft_equal = False):
 
-        if value == None:
+        if soft_equal:
             return tag in self.tags.keys()
         else:
             return (tag, value) in self.tags.items()
@@ -155,6 +155,18 @@ class CharacterNode(ObjectNode):
     def advance_stack_by_name(self, stack_name):
         found_stack = self.get_task_stack_by_name(stack_name=stack_name)
         found_stack.mark_current_task_as_complete()
+
+    def check_bias_range(self, bias_axis, min_accept, max_accept):
+        bias_value = self.biases.get(bias_axis, None)
+
+        if bias_value is None:
+            return False
+        
+        if bias_value < min_accept or bias_value > max_accept:
+            return False
+        
+        return True
+
 
 class LocationNode(ObjectNode):
     def __init__(self, name, tags={"Type": "Location"}, **kwargs):

@@ -251,12 +251,13 @@ def read_same_location_test_from_extracted_dict(data, world_state):
 #Story Node will require some conversions from the test functions above
 
 def read_story_node_from_extracted_dict(data, world_state):
-    test_list = read_list_of_tests_from_data(data.get("condition_test_list", []), world_state)
+    req_test_list = read_list_of_tests_from_data(data.get("required_test_list", []), world_state)
+    suggested_test_list = read_list_of_tests_from_data(data.get("suggested_test_list", []), world_state)
 
     #Read tagchange object and relchange object
     change_list = read_list_of_changes_from_extracted_list(data.get("changes_list", []), world_state)
     
-    return StoryNode(condition_tests=test_list, effects_on_next_ws=change_list, **data)
+    return StoryNode(required_test_list=req_test_list, suggested_test_list=suggested_test_list, effects_on_next_ws=change_list, **data)
 
 def read_story_node_from_json(json_file_name, world_state):
     data = read_from_json(json_file_name)

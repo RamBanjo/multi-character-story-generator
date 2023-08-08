@@ -30,17 +30,17 @@ class RewriteRule:
     # 3. After we get the sum score from each node, average it.
     # (This is a placeholder calculation formula and will be subject to change)
     # As a failsafe, if the character is not suitable for that node, return -999 (arbitarily large negative number to put it at the bottom of the top n list)
-    def get_character_fitness_value(self, character):
+    # def get_character_fitness_value(self, character):
 
-        total_bias_list = []
-        for story_node in self.story_change:
+    #     total_bias_list = []
+    #     for story_node in self.story_change:
 
-            if story_node.check_character_compatibility(character):
-                total_bias_list.append(story_node.biasweight)
-            else:
-                return -999
+    #         if story_node.check_character_compatibility(character):
+    #             total_bias_list.append(story_node.biasweight)
+    #         else:
+    #             return -999
                 
-        return statistics.mean(total_bias_list)
+    #     return statistics.mean(total_bias_list)
 
     #This probably is no longer needed considering that we have moved all these checks to the Nodes themselves?
     # def check_character_compatibility(self, character_node, init_world_state, list_of_changes, start_of_check):
@@ -107,11 +107,11 @@ class JoiningJointRule(JointRule):
         self.base_actions = base_actions
         self.joint_node = joint_node
 
-    def get_character_fitness_value(self, character):
-        if self.joint_node.check_character_compatibility(character):
-            return self.joint_node.biasweight
-        else:
-            return -999
+    # def get_character_fitness_value(self, character):
+    #     if self.joint_node.check_character_compatibility(character):
+    #         return self.joint_node.biasweight
+    #     else:
+    #         return -999
 
     def get_character_count(self):
         return actor_count_sum(self.joint_node.charcount, self.joint_node.target_count)
@@ -130,11 +130,11 @@ class ContinuousJointRule(JointRule):
         self.base_joint = base_joint
         self.joint_node = joint_node
 
-    def get_character_fitness_value(self, character):
-        if self.joint_node.check_character_compatibility(character):
-            return self.joint_node.biasweight
-        else:
-            return -999
+    # def get_character_fitness_value(self, character):
+    #     if self.joint_node.check_character_compatibility(character):
+    #         return self.joint_node.biasweight
+    #     else:
+    #         return -999
 
     def get_character_count(self):
         return actor_count_sum(self.joint_node.charcount, self.joint_node.target_count)
@@ -152,19 +152,19 @@ class SplittingJointRule(JointRule):
         self.base_joint = base_joint
         self.split_list = split_list
 
-    def get_character_fitness_value(self, character):
+    # def get_character_fitness_value(self, character):
 
-        eligible_list = []
+    #     eligible_list = []
 
-        for node in self.split_list:
-            if node.check_character_compatibility(character):
-                eligible_list.append(node)
+    #     for node in self.split_list:
+    #         if node.check_character_compatibility(character):
+    #             eligible_list.append(node)
 
-        if len(eligible_list) > 0:
-            biasval_list = [x.biasweight for x in eligible_list]
-            return statistics.mean(biasval_list)
-        else:
-            return -999
+    #     if len(eligible_list) > 0:
+    #         biasval_list = [x.biasweight for x in eligible_list]
+    #         return statistics.mean(biasval_list)
+    #     else:
+    #         return -999
 
     def get_character_count(self):
 

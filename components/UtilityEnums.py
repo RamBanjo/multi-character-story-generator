@@ -27,6 +27,8 @@ class TestType(Enum):
     HELD_ITEM_TAG = 0
     SAME_LOCATION = 1
     HAS_EDGE = 2
+    HAS_TAG = 3
+    IN_BIAS_RANGE = 4
 
 class JointType(Enum):
     JOIN = 0
