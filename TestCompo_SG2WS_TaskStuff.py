@@ -75,9 +75,11 @@ test_sg.make_latest_state()
 # task_stack_cleared: The task stack is already complete. We will call Test Stack 7 after it has been marked complete to test this.
 # incompatible: The task stack is trying to test for completeness at the point before the last update step, where the task can't be updated. We will advance Test Stack 7 then test the abs step before that update to test this.
 # wrong_location: The task is not in the correct location. We will move Alex to the Castle where the task is not to test this.
-# task_step_already_completed: The task is already completed according to the goal state given in the task.
-# task_step_already_failed: The task is already failed according to the fail state given in the task.
-# task_step_incomplete: None of the other conditions above applies.
+# (DONE) task_step_already_completed: The task is already completed according to the goal state given in the task.
+# (DONE) task_step_already_failed: The task is already failed according to the fail state given in the task.
+# (DONE) task_step_can_advance: None of the other conditions above applies.
+
+#TODO (Testing): Continue testing here when reaching lab.
 
 #Here's a new world state, story graph, and an entirely new premise to consider upon
 
@@ -90,12 +92,25 @@ edgar = CharacterNode("Edgar")
 village = LocationNode("Village")
 castle = LocationNode("Castle")
 
+test_ws_2 = WorldState(name="Test WS 2", objectnodes=[alex, bonnie, carol, diane, edgar, village, castle])
+
+test_ws_2.connect(from_node=village, edge_name="holds", to_node=alex)
+test_ws_2.connect(from_node=village, edge_name="holds", to_node=bonnie)
+test_ws_2.connect(from_node=village, edge_name="holds", to_node=carol)
+test_ws_2.connect(from_node=village, edge_name="holds", to_node=diane)
+test_ws_2.connect(from_node=village, edge_name="holds", to_node=edgar)
+
 snodea = StoryNode(name="Action A", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
 snodeb = StoryNode(name="Action B", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
 snodec = StoryNode(name="Action C", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
 snoded = StoryNode(name="Action D", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
 snodee = StoryNode(name="Action E", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
 snodef = StoryNode(name="Action F", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+
+snodex = StoryNode(name="Action X", biasweight=0, tags={"Type":"Placeholder"}, charcount=1)
+
+advance_stack_7 = TaskAdvance(name="Advance Task 7 on Alex", actor_name="Alex", task_stack_name="Task Stack 7")
+snodey = StoryNode(name="Action Y", biasweight=0, tags={"Type":"Placeholder"}, charcount=1, effects_on_next_ws=[advance_stack_7])
 
 # Situation: Bonnie wants Alex to do some matchmaking.
 # Task is complete if Carol and Diane loves each other.
@@ -105,7 +120,30 @@ carol_loves_diane_two_way = HasEdgeTest(object_from_test=carol, edge_name_test="
 carol_hates_diane = HasEdgeTest(object_from_test=carol, edge_name_test="hates", object_to_test=diane, soft_equal=True)
 diane_hates_carol = HasEdgeTest(object_from_test=carol, edge_name_test="hates", object_to_test=diane, soft_equal=True)
 
-test_task_1 = CharacterTask(task_name="Test Task 1", task_actions=[snodea, snodeb], task_location_name="Village")
-test_task_2 = CharacterTask(task_name="Test Task 2", task_actions=[snodec, snoded], task_location_name="Village")
-test_task_3 = CharacterTask(task_name="Test Task #", task_actions=[snodee, snodef], task_location_name="Village")
-test_stack_7 = TaskStack(stack_name="Test Stack 7", task_stack=[], task_stack_requirement=[], stack_giver_name="Bonnie", stack_owner_name="Alex")
+test_task_1 = CharacterTask(task_name="Test Task 1", task_actions=[snodea, snodeb], task_location_name="Village", goal_state=[carol_loves_diane_two_way], avoidance_state=[carol_hates_diane, diane_hates_carol])
+test_task_2 = CharacterTask(task_name="Test Task 2", task_actions=[snodec, snoded], task_location_name="Village", goal_state=[carol_loves_diane_two_way], avoidance_state=[carol_hates_diane, diane_hates_carol])
+test_task_3 = CharacterTask(task_name="Test Task 3", task_actions=[snodee, snodef], task_location_name="Village", goal_state=[carol_loves_diane_two_way], avoidance_state=[carol_hates_diane, diane_hates_carol])
+test_stack_7 = TaskStack(stack_name="Test Stack 7", task_stack=[test_task_1, test_task_2, test_task_3], task_stack_requirement=[], stack_giver_name="Bonnie", stack_owner_name="Alex")
+
+alex.add_task_stack(test_stack_7)
+
+test_sg_2 = StoryGraph("Test SG 2", character_objects=[alex, bonnie, carol, diane, edgar], location_objects=[village, castle], starting_ws=test_ws_2)
+
+test_sg_2.add_story_part(snodex, character=alex, location=village, timestep=0)
+
+print("Task Stack Info", test_sg_2.find_last_step_of_task_stack_from_actor(task_stack_name="Test Stack 7", actor_name="Alex", verbose=True))
+print("The task should be able to be advanced because there's no other condition:", test_sg_2.test_task_completeness(task_stack_name="Test Stack 7", actor_name="Alex", abs_step=1))
+
+#Here, we will change the world state and make the task already complete / already failed
+test_ws_2.doubleconnect(nodeA=carol, edge_name="loves", nodeB=diane)
+print("Condition is already complete, so we should see task_already_completed:", test_sg_2.test_task_completeness(task_stack_name="Test Stack 7", actor_name="Alex", abs_step=1))
+
+test_ws_2.disconnect(from_node=carol, edge_name="loves", to_node=diane, soft_equal=True)
+test_ws_2.connect(from_node=carol, edge_name="hates", to_node=diane)
+
+print("Since they hate each other, now the task is already failed:", test_sg_2.test_task_completeness(task_stack_name="Test Stack 7", actor_name="Alex", abs_step=1))
+
+#But what if the task doesn't exist???
+test_ws_2.disconnect(from_node=diane, edge_name="loves", to_node=carol, soft_equal=True)
+test_ws_2.disconnect(from_node=carol, edge_name="hates", to_node=diane, soft_equal=True)
+print("This task name doesn't exist:", test_sg_2.test_task_completeness(task_stack_name="Weird Task", actor_name="Alex", abs_step=1))

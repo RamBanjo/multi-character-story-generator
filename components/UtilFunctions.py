@@ -752,7 +752,7 @@ def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
     return return_list
 
 #We'll use this to translate tests with generic tags instead of node here
-#TODO (Testing): Test interactions with these if the Generic Object Nodes call for something that don't exist, that will come up a lot during compatibility tests.
+#Since it cycles between all of the valid objects, whenever a slot is unassigned the tests don't show up. We can use this to our advantage.
 def translate_generic_test(condtest, populated_story_node):
 
     list_of_equivalent_condtests = []

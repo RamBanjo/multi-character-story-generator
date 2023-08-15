@@ -476,7 +476,7 @@ class StoryGraph:
         # Cancel Task -> DEFAULT_INVALID_SCORE
 
         match completeness:
-            case "task_step_incomplete":
+            case "task_step_can_advance":
                 current_ws = self.make_state_at_step(task_perform_index)
                 actor = current_ws.node_dict[actor_name]
 
@@ -496,7 +496,6 @@ class StoryGraph:
             case _:
                 return DEFAULT_INVALID_SCORE
 
-    #TODO (Testing): Test the new Scoring Function.
     def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0, has_joint_in_contlist = False):
         '''Mode is an int, depending on what it is, this function will do different things:
         mode = 0: return max between all the cont list.
@@ -507,21 +506,27 @@ class StoryGraph:
         
         graphcopy = deepcopy(self)
 
+        #This is the part where nodes are removed/inserted from the Graph Copy. If this is correct, it won't have to be changed.
         if purge_count > 0:
             graphcopy.remove_parts_by_count(start_step=insert_index, count=purge_count, actor=actor)
         if has_joint_in_contlist:
             graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=contlist, main_character=actor, abs_step=insert_index)
         else:
-            graphcopy.insert_multiple_parts(part_list=contlist, character = actor, absolute_step=insert_index)        
+            graphcopy.insert_multiple_parts(part_list=contlist, character = actor, absolute_step=insert_index)
+
+        #This is the part where score calculations are done.
+        #Since we already added actor information when calling insert_multiple_parts and insert_multiple_parts_with_joint_and_nonjoint we don't have to add actor information here again.
         for current_index in range(insert_index, insert_index+len(contlist)):
             current_state = graphcopy.make_state_at_step(current_index)
-            current_actor = current_state.node_dict[actor.get_name()]
             current_node = graphcopy.story_parts[(actor.get_name(), current_index)]
 
-            node_with_actor_info = deepcopy(current_node)
-            node_with_actor_info.actor.append(current_actor)
+            #By default the score is invalid, but if all the nodes are valid then this score will be replaced by an actual biasweight score.
+            score_to_append = DEFAULT_INVALID_SCORE
 
-            score.append(current_state.get_score_from_story_node(node_with_actor_info) + current_node.biasweight)
+            if current_state.test_story_compatibility_with_storynode(current_node):
+                score_to_append = current_state.get_score_from_story_node(current_node) + current_node.biasweight
+            
+            score.append(score_to_append)
 
         # print("-----")
         # for thing in graphcopy.make_story_part_list_of_one_character(actor):
@@ -1508,7 +1513,7 @@ class StoryGraph:
         #The stack must already not be complete, and the task itself must not already be complete either, and must take place after the last update step
         completeness = self.test_task_completeness(task_stack_name=task_stack_name, actor_name=actor_name, abs_step=abs_step)
 
-        if completeness != "task_step_incomplete":
+        if completeness != "task_step_can_advance":
             return False, completeness
         
         current_ws = self.make_state_at_step(abs_step)
@@ -1698,9 +1703,10 @@ class StoryGraph:
         task_stack_at_ws = actor_at_ws.get_task_stack_by_name(task_stack_name)
 
         #Return "wrong_location" if the character in the current state isn't in the right location for the task step.
-        character_current_location_name = current_ws.get_actor_current_location(actor_at_ws)
+        character_current_location_name = current_ws.get_actor_current_location(actor_at_ws).name
         
-        if last_task_step.task_location_name != character_current_location_name:
+        current_task = task_stack_at_ws.task_stack[last_task_step["last_task_step"]]
+        if current_task.task_location_name != character_current_location_name:
             return "wrong_location"
 
         #Return "task_step_already_completed" if the tests in goal state all return true
@@ -1708,7 +1714,8 @@ class StoryGraph:
         placeholder_charname_dict = task_stack_at_ws.placeholder_info_dict
         placeholder_charobj_pair = [(x[0], current_ws.node_dict[x[1]]) for x in placeholder_charname_dict.items()]
 
-        for test in task_stack_at_ws.goal_state:
+        #TODO (Important): Ah yeah. Priorities. What should take priority first if the task happens to both reach the fail condition and the completion condition at the same time?
+        for test in current_task.goal_state:
             replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
             goal_reached = goal_reached and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
 
@@ -1716,7 +1723,7 @@ class StoryGraph:
             return "task_step_already_completed"
         #Return "task_step_already_failed" if the tests in avoidance_state all return true
         task_failed = True
-        for test in task_stack_at_ws.avoidance_state:
+        for test in current_task.avoidance_state:
             replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
             
             task_failed = task_failed and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
@@ -1724,8 +1731,8 @@ class StoryGraph:
         if task_failed:
             return "task_step_already_failed"
         
-        #If none of the above conditions are true, return "task_step_incomplete"
-        return "task_step_incomplete"
+        #If none of the above conditions are true, return "task_step_can_advance"
+        return "task_step_can_advance"
 
     # This function will be called whenever a story node with a TaskChange object is added to the StoryGraph
     #

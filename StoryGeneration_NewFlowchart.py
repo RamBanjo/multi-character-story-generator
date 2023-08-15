@@ -142,7 +142,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                             action_chosen = "Cancel"
                             default_task_score = -999
                             cancel_count += 1
-                        case 'task_step_incomplete':
+                        case 'task_step_can_advance':
                             action_chosen = "Perform"
                             default_task_score = final_story_graph.calculate_score_from_next_task_in_task_stack(actor_name=current_charname, task_stack_name=task_name, task_perform_index=attempt_index, mode=score_mode)
                         case _:

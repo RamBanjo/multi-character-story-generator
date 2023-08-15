@@ -450,7 +450,6 @@ class WorldState:
 
         return compatibility_result
 
-    #TODO (Testing): Test This Score-Related Function
     def get_score_from_story_node(self, story_node):
         test_list = []
 
@@ -460,7 +459,6 @@ class WorldState:
 
         return self.get_score_from_list_of_test(test_list)
 
-    #TODO (Testing): Test This Score-Related Function
     def get_score_from_list_of_test(self, list_of_tests):
         score = 0
 

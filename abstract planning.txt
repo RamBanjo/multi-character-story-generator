@@ -20,6 +20,14 @@ Write Abstract for Proposal
 Abstract
 Our goal is to create a storytelling tool to aid video game story writers by visualizing potential interactions in a storyboard format. We intend to base our work on Artificial Folklore for Simulated Religions [1] and ReGEN [2]. This tool will allow the simulation of characters interacting with each other and the world, and output the actions as a graph, which human writers can use to base their stories off of.
 
+Abstract (Submission Version)
+A game story contains interactions between characters and other characters, as well as the game world. Certain genre of games such as Visual Novels and RPG Games that are story-heavy are dependant on the story in order to draw in players. If the story can be played from various points of view with multiple characters, then the players can explore the game's story from different points of view, thus get more invested and immersed into the game's story.
+
+Previous researches in the field of story generation include several algorithms that can generate stories, although there has not been generators with support for multiple main characters where each main character has their own storyline.
+
+Our goal is to create a storytelling tool to aid video game story writers by visualizing potential interactions in a storyboard format. This tool will allow the simulation of multiple main characters interacting with each other and the world, and output the actions as a graph, which human writers can then adapt.
+
+
 The features we intend to include in our work include:
 - Multiple Main Characters with Parallel Stories: At least two main, non-trivial characters can have storylines that are independent from each other.
 - Constraint Controls: Users can create rules and conditions for the game world, and characters must act according to those rules.
