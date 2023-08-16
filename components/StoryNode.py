@@ -2,7 +2,7 @@ from copy import deepcopy
 from statistics import mean
 from numpy import character
 
-from components.UtilFunctions import replace_multiple_placeholders_with_multiple_change_havers, replace_multiple_placeholders_with_multiple_test_takers
+from components.UtilFunctions import get_actor_object_from_list_with_actor_name, replace_multiple_placeholders_with_multiple_change_havers, replace_multiple_placeholders_with_multiple_test_takers, replace_pair_value_with_actual_actors
 
 #, required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_test_list = [], suggested_test_list = [], required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [],
 class StoryNode:
@@ -366,7 +366,7 @@ class StoryNode:
         #If this node allows more than 1 character or allows more than 1 target which is an actor then it is a joint node.
         return self.charcount > 1 or self.target_count > 0
     
-def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:dict):
+def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:dict, list_of_actor_objects=[]):
     #Things that must be replaced:
     # - Actors
     # - Targets 
@@ -385,25 +385,28 @@ def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:di
 
     for actor in story_node_copy.actor:
         if actor in placeholder_dict.keys():
-            new_actor_list.append(placeholder_dict[actor])
+            new_actor = get_actor_object_from_list_with_actor_name(actor_name=placeholder_dict[actor], actor_list=list_of_actor_objects)
+            new_actor_list.append(new_actor)
         else:
             new_actor_list.append(actor)
 
     for target in story_node_copy.target:
         if target in placeholder_dict.keys():
-            new_target_list.append(placeholder_dict[target])
+            new_actor = get_actor_object_from_list_with_actor_name(actor_name=placeholder_dict[target], actor_list=list_of_actor_objects)
+            new_target_list.append(new_actor)
         else:
             new_target_list.append(target)
 
-    
+    replaced_kv = replace_pair_value_with_actual_actors(kv_pair_list=placeholder_dict.items(), actor_list=list_of_actor_objects)
+
     for test in story_node_copy.required_test_list:
-        new_req_test_list.append(replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_dict.values()))
+        new_req_test_list.append(replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=replaced_kv))
 
     for test in story_node_copy.suggested_test_list:
-        new_suggest_test_list.append(replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=placeholder_dict.values()))
+        new_suggest_test_list.append(replace_multiple_placeholders_with_multiple_test_takers(test=test, placeholder_tester_pair_list=replaced_kv))
 
     for change in story_node_copy.effects_on_next_ws:
-        new_ws_effect_list.append(replace_multiple_placeholders_with_multiple_change_havers(change=change, placeholder_tester_pair_list=placeholder_dict.values()))
+        new_ws_effect_list.append(replace_multiple_placeholders_with_multiple_change_havers(change=change, placeholder_tester_pair_list=replaced_kv))
 
     story_node_copy.actor = new_actor_list
     story_node_copy.target = new_target_list

@@ -830,6 +830,26 @@ def translate_in_bias_range_test(test, node):
 
     return list_of_equivalent_tests
 
+def get_actor_object_from_list_with_actor_name(actor_name:str, actor_list=[]):
+
+    for actor in actor_list:
+        if actor.get_name() == actor_name:
+            return actor
+        
+    return None
+
+def replace_pair_value_with_actual_actors(kv_pair_list=[], actor_list=[]):
+    return_list = []
+
+    for kv_pair in kv_pair_list:
+        new_val = get_actor_object_from_list_with_actor_name(actor_name=kv_pair[1], actor_list=actor_list)
+        if new_val != None:
+            return_list.append((kv_pair[0], new_val))
+        else:
+            return_list.append(kv_pair)
+    return return_list
+
+
 # def translate_generic_has_doubleedge_test(test, node):
     
 #     list_of_equivalent_tests = []

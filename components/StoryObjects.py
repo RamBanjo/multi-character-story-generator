@@ -145,7 +145,11 @@ class CharacterNode(ObjectNode):
     '''Returns the first task in the task stack with the same name. If none can be found, returns None'''
     def get_task_stack_by_name(self, stack_name):
 
+        # for thing in self.list_of_task_stacks:
+        #    print("Stack Name", thing.stack_name)
         found_stacks = [x for x in self.list_of_task_stacks if x.stack_name == stack_name]
+        # for thing in found_stacks:
+        #    print("Found Stack", thing.stack_name)
 
         if len(found_stacks) == 0:
             return None

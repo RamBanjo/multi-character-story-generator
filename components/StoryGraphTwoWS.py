@@ -378,7 +378,6 @@ class StoryGraph:
 
         for index in range(0, stopping_step):
             for change in self.list_of_changes[index]:
-
                 frozen_current_state = deepcopy(traveling_state)
 
                 # TaskChange will call apply_task_change from the traveling_state
@@ -488,7 +487,7 @@ class StoryGraph:
                 task_actions = current_task.task_actions
                 translated_nodes = []
                 for node in task_actions:
-                    translated_nodes.append(replace_placeholders_in_story_node(story_node=node, placeholder_dict=self.placeholder_dicts_of_task[(actor_name, task_stack_name)])) 
+                    translated_nodes.append(replace_placeholders_in_story_node(story_node=node, placeholder_dict=self.placeholder_dicts_of_task[(actor_name, task_stack_name)], list_of_actor_objects=self.character_objects)) 
 
                 return self.calculate_score_from_char_and_cont(actor=actor, insert_index=task_perform_index, contlist=translated_nodes, has_joint_in_contlist=True)
             case "task_step_already_completed":
@@ -1444,9 +1443,9 @@ class StoryGraph:
 
         translated_task = []
         for story_node in task.task_actions:
-            translated_task.append(replace_placeholders_in_story_node(story_node=story_node, placeholder_dict=placeholder_charname_dict))
-                                   
-        cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=task.task_actions, has_joint_in_contlist=True)
+            translated_task.append(replace_placeholders_in_story_node(story_node=story_node, placeholder_dict=placeholder_charname_dict, list_of_actor_objects=self.character_objects))
+                                                          
+        cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=translated_task, has_joint_in_contlist=True)
 
         return location_has_actor and cont_valid
 
@@ -1551,7 +1550,7 @@ class StoryGraph:
                     self.insert_joint_node(joint_node=current_story_part, main_actor=main_character, other_actors=actor_list, location=current_story_part.location, targets=target_list, absolute_step=current_insert_index, make_main_actor_a_target=make_main_char_target)
 
                 else:
-                    self.insert_story_part(part=current_story_part, character=main_character, location=current_story_part.location)
+                    self.insert_story_part(part=current_story_part, character=main_character, location=current_story_part.location, absolute_step=current_insert_index)
         
     #TODO (Testing): Test This
     def attempt_advance_task_stack(self, task_stack_name, actor_name, abs_step):
@@ -1571,7 +1570,7 @@ class StoryGraph:
 
         # Use test_task_stack_advance_validity to test if task stack can be advanced here
 
-        advance_valid = self.test_task_stack_advance_validity(task_stack_name=task_stack_name)
+        advance_valid = self.test_task_stack_advance_validity(task_stack_name=task_stack_name, actor_name=actor_name, abs_step=abs_step)
 
         #Task advance is true, we will add the action from the stack's current task to the story node
         if advance_valid[0]:
@@ -1582,7 +1581,10 @@ class StoryGraph:
             #do a translation
             translated_nodes = []
             for node in story_nodes_to_add:
-                translated_nodes.append(replace_placeholders_in_story_node(node, self.placeholder_dicts_of_tasks[(actor_name, task_stack_name)]))
+
+                #TODO (Important): Hey, it looks like self.placeholder_dict_of_tasks is returning string instead of the actual proper character object. Oops!
+                #print(self.placeholder_dicts_of_tasks[(actor_name, task_stack_name)])
+                translated_nodes.append(replace_placeholders_in_story_node(story_node=node, placeholder_dict=self.placeholder_dicts_of_tasks[(actor_name, task_stack_name)], list_of_actor_objects=self.character_objects))
 
             #Insert the task advance stack to the last story node
             last_story_node = translated_nodes[-1]
@@ -1714,7 +1716,6 @@ class StoryGraph:
         placeholder_charname_dict = task_stack_at_ws.placeholder_info_dict
         placeholder_charobj_pair = [(x[0], current_ws.node_dict[x[1]]) for x in placeholder_charname_dict.items()]
 
-        #TODO (Important): Ah yeah. Priorities. What should take priority first if the task happens to both reach the fail condition and the completion condition at the same time?
         for test in current_task.goal_state:
             replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
             goal_reached = goal_reached and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
@@ -1780,6 +1781,9 @@ class StoryGraph:
             self.placeholder_dicts_of_tasks[(new_task_stack.stack_owner_name, new_task_stack.stack_name)] = task_placeholder_dict
 
         new_task_stack.placeholder_info_dict = task_placeholder_dict
+
+        for task in new_task_stack.task_stack:
+            task.placeholder_info_dict = task_placeholder_dict
 
         return True, new_task_stack
 
