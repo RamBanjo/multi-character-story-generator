@@ -739,7 +739,9 @@ def check_keyword_and_return_objectnodelist(storynode, objnode_to_check):
 
     match objnode_to_check:
         case GenericObjectNode.GENERIC_ACTOR:
-            return_list.append(storynode.actor[0])
+            if storynode.actor is not None:
+                if len(storynode.actor) > 0:
+                    return_list.append(storynode.actor[0])
         case GenericObjectNode.GENERIC_LOCATION:
             return_list.append(storynode.location)
         case GenericObjectNode.GENERIC_TARGET:

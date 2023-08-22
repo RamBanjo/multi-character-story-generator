@@ -366,11 +366,11 @@ def attempt_apply_task(task_tuple, target_story_graph, current_character):
     task_action = task_tuple[3]
 
     #Since the action is already determined by the function within SG2WS, theres no need to split this into three like I thought I had to.
-    #TODO (Testing): HOWEVER we need to ensure that this function works as intended. Test this.
+    # TODO (Testing): HOWEVER we need to ensure that this function works as intended. Test this.
     advance_success = target_story_graph.attempt_advance_task_stack(task_stack_name=task_stack_name, actor_name=current_character.get_name(), abs_step=attempt_index)
     return advance_success
 
-#TODO (Testing): Test this function
+# TODO (Testing): Test this function
 # Will return True if changes are made and False if not.
 def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character, movement_index):
 

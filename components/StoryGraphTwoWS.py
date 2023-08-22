@@ -323,7 +323,7 @@ class StoryGraph:
 
     # Input: the required character, the base node
     # Output: A list of tuples. Each tuple is has the absolute step in index 0 and the list of character names in that node in index 1.
-    #TODO (Testing): Test this function.
+    # TODO (Extra Features, Testing): Test this function. (There is no need to test this because it's not used. We can return to testing if we end up using this.)
     # ...where is this function used again?
     
     def get_joint_node_steps_from_character_storyline(self, actor, joint_node):
@@ -402,7 +402,6 @@ class StoryGraph:
     # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
     # Split Joint: The score is the max among all the given splits.
 
-    #TODO (Testing): Test the new Scoring Function.
     def calculate_score_from_rule_char_and_cont(self, actor, insert_index, rule, mode=0):
 
         #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
@@ -430,40 +429,20 @@ class StoryGraph:
                 list_of_split_scores = []
 
                 for node in rule.split_list:
-                    target_populated_node = deepcopy(node)
-                    target_populated_node.target.append(character_from_ws)
-
-                    actor_populated_node = deepcopy(node)
-                    actor_populated_node.actor.append(character_from_ws)
-
-                    actor_score = current_ws.get_score_from_story_node(actor_populated_node)
-                    target_score = current_ws.get_score_from_story_node(target_populated_node)
-
-                    list_of_split_scores.append(max(actor_score, target_score))
+                    max_of_joint = calculate_score_from_char_and_unpopulated_node_with_both_slots(actor=character_from_ws, node=node, world_state=current_ws)
+                    list_of_split_scores.append(max_of_joint)
 
                 if mode == 1:
                     return statistics.mean(list_of_split_scores)
+                
                 else:
                     return max(list_of_split_scores)
 
             else:
-                #If not, then max between actor slot and target slot.
+                #If not, then max between actor slot and target slot for the only joint node.
+                return calculate_score_from_char_and_unpopulated_node_with_both_slots(actor=character_from_ws, node=rule.joint_node, world_state=current_ws, mode=mode)
 
-                target_populated_node = deepcopy(rule.joint_node)
-                target_populated_node.target.append(character_from_ws)
-
-                actor_populated_node = deepcopy(rule.joint_node)
-                actor_populated_node.actor.append(character_from_ws)
-
-                actor_score = current_ws.get_score_from_story_node(actor_populated_node)
-                target_score = current_ws.get_score_from_story_node(target_populated_node)
-
-                if mode == 1:
-                    return statistics.mean([actor_score, target_score])
-                else:
-                    return max([actor_score, target_score])
-            
-    #TODO (Testing): Test this function!
+    # TODO (Testing): Test this function!
     def calculate_score_from_next_task_in_task_stack(self, actor_name, task_stack_name, task_perform_index, mode=0):
 
         #First we must recognize if the task is already completed or not
@@ -662,7 +641,7 @@ class StoryGraph:
     #This function should assume that all all needed actors and targets are already given.
     #A lot of checks done in the Apply Joint Rule section are redundant, because they are already done here. We might be able to deprecate the checks done in there, just apply the node if it passes the tests in here.
     
-    #TODO (Testing): ...hey, we haven't tested this yet. What the hell Ram.
+    # TODO (Testing): ...hey, we haven't tested this yet. What the hell Ram.
     def check_joint_continuity_validity(self, joint_rule, main_character, grouping_split, insert_index):
         
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
@@ -935,7 +914,6 @@ class StoryGraph:
     #     eligible_insertion_list = self.find_shared_base_joint_locations(characters, cont_rule, target_require)
     #     self.joint_continuation(eligible_insertion_list, applyonce, cont_rule.joint_node, characters, location, target_replace)
 
-    #TODO (Testing): Test the new Valid Actor/Target Function.
     def generate_all_valid_actor_and_target_splits(self, node, abs_step, character_list):
         list_of_charnames = [x.get_name() for x in character_list]
         all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes([node.charcount, node.target_count], list_of_charnames)
@@ -955,8 +933,6 @@ class StoryGraph:
             populated_node = deepcopy(node)
             populated_node.actor.extend(grouping_dict["actor_group"])
             populated_node.actor.extend(grouping_dict["target_group"])
-
-            state_at_step.test_story_compatibility_with_storynode(populated_node)
 
             if state_at_step.test_story_compatibility_with_storynode(populated_node):
                 entire_list_of_split_dicts.append(grouping_dict)
@@ -989,7 +965,7 @@ class StoryGraph:
 
 
     #Generate ALL Valid Character Grouping for use in validity testing, in order to ensure at least one valid case exists.
-    def generate_all_valid_character_grouping(self, continuations, abs_step, character_list):
+    def generate_all_valid_character_grouping_for_splitting(self, continuations, abs_step, character_list):
 
         grouping_size_list = []
         for node in continuations:
@@ -1046,7 +1022,7 @@ class StoryGraph:
         return all_valid_groupings
 
     def pick_one_random_valid_character_grouping_from_all_valid_groupings(self, continuations, abs_step, character_list, verbose=False):
-        entire_approved_list = self.generate_all_valid_character_grouping(continuations=continuations, abs_step=abs_step, character_list=character_list)
+        entire_approved_list = self.generate_all_valid_character_grouping_for_splitting(continuations=continuations, abs_step=abs_step, character_list=character_list)
         
         if verbose:
             groupingno = 0
@@ -1546,13 +1522,17 @@ class StoryGraph:
                     else:
                         actor_list = [x for x in current_story_part.actor if x is not main_character]
                         target_list = [x for x in current_story_part.target]                       
-                        
+                    
+                    #We need to reset the character slots when adding story parts, because they already come with translated story nodes.
+                    current_story_part.actor = []
+                    current_story_part.target = []
                     self.insert_joint_node(joint_node=current_story_part, main_actor=main_character, other_actors=actor_list, location=current_story_part.location, targets=target_list, absolute_step=current_insert_index, make_main_actor_a_target=make_main_char_target)
 
                 else:
+                    #We need to reset the character slots when adding story parts, because they already come with translated story nodes.
+                    current_story_part.actor = []
                     self.insert_story_part(part=current_story_part, character=main_character, location=current_story_part.location, absolute_step=current_insert_index)
         
-    #TODO (Testing): Test This
     def attempt_advance_task_stack(self, task_stack_name, actor_name, abs_step):
         # Get the Task Stack Object.
         
@@ -1582,7 +1562,6 @@ class StoryGraph:
             translated_nodes = []
             for node in story_nodes_to_add:
 
-                #TODO (Important): Hey, it looks like self.placeholder_dict_of_tasks is returning string instead of the actual proper character object. Oops!
                 #print(self.placeholder_dicts_of_tasks[(actor_name, task_stack_name)])
                 translated_nodes.append(replace_placeholders_in_story_node(story_node=node, placeholder_dict=self.placeholder_dicts_of_tasks[(actor_name, task_stack_name)], list_of_actor_objects=self.character_objects))
 
@@ -1679,7 +1658,6 @@ class StoryGraph:
         # - task_step_already_failed: Add a TaskCancel in the action before the worldstate in abs_step
         # Return False if it's task_stack_cleared or incompatible. Otherwise, return True.
     
-    #TODO (Testing): Test this
     def test_task_completeness(self, task_stack_name, actor_name, abs_step):
 
         #Check the last worldstate if they have this task at all. If it doesn't exist in the last world state, then if it doesn't exist in the final world state, return "not_exist"
@@ -1697,7 +1675,7 @@ class StoryGraph:
             return "task_stack_cleared"
 
         #Return "incompatible" if the abs_step chosen is before the last update step (cannot update before the latest change)
-        if abs_step <= last_task_step["last_update_step"]:
+        if abs_step < last_task_step["last_update_step"]:
             return "incompatible"
         
         current_ws = self.make_state_at_step(abs_step)
@@ -1828,4 +1806,33 @@ def if_applyonce_choose_one(loclist, applyonce):
             loclist = [random.choice(loclist)]
         
     return loclist
+
+def calculate_score_from_char_and_unpopulated_node_with_both_slots(actor, node, world_state, mode=0):
+
+    # If one of the slots is BAD, then return the good slot.
+    # If BOTH slots are bad, return Default Invalid Value
+
+    target_populated_node = deepcopy(node)
+    target_populated_node.target.append(actor)
+
+    actor_populated_node = deepcopy(node)
+    actor_populated_node.actor.append(actor)
+
+    calculate_list = []
+
+    if world_state.test_story_compatibility_with_storynode(actor_populated_node):
+        calculate_list.append(world_state.get_score_from_story_node(actor_populated_node))
+
+    if world_state.test_story_compatibility_with_storynode(target_populated_node):
+        calculate_list.append(world_state.get_score_from_story_node(target_populated_node))
+
+    if len(calculate_list) <= 0:
+        return DEFAULT_INVALID_SCORE
+
+    if mode == 1:
+        return statistics.mean(calculate_list) + node.biasweight
+    
+    else:
+        return max(calculate_list) + node.biasweight
+    
 

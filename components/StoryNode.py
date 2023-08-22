@@ -6,7 +6,7 @@ from components.UtilFunctions import get_actor_object_from_list_with_actor_name,
 
 #, required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_test_list = [], suggested_test_list = [], required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [],
 class StoryNode:
-    def __init__(self, name, biasweight, tags, charcount, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_test_list = [], suggested_test_list = [], **kwargs):
+    def __init__(self, name, biasweight=0, tags={"Type":"Placeholder"}, charcount=1, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_test_list = [], suggested_test_list = [], **kwargs):
         
         #the name of this action.
         self.name = name
@@ -53,40 +53,10 @@ class StoryNode:
         #Absolute Step is for the Joint Rules, so that the rules know which nodes to join together
         self.abs_step = 0
 
-        #TODO (Important): Reduce all these into the following two properties: Required Tests and Suggested Tests.
-        #
-        #
         #For consistency, all required/unwanteds are now lists of tuples instead.
         #Required Tags List, Unwanted Tags List, and Bias Range are taken from RewriteRule.
         self.required_test_list = required_test_list
         self.suggested_test_list = suggested_test_list
-
-        # self.required_tags_list = required_tags_list
-        # self.unwanted_tags_list = unwanted_tags_list
-        # self.bias_range = bias_range
-
-        # self.required_tags_list_target = required_tags_list_target
-        # self.unwanted_tags_list_target = unwanted_tags_list_target
-        # self.bias_range_target = bias_range_target
-
-        # #Suggested included tags, suggested excluded tags, and suggested bias range are for weight score calculation purposes. Not fulfiling these conditions are fine, but fulfilling them makes the character lean more towards this action.
-        # #Figure out if we need to use this to pick characters who share this node with another character.
-        
-        # self.suggested_included_tags = suggested_included_tags
-        # self.suggested_excluded_tags = suggested_excluded_tags
-        # self.suggested_bias_range = suggested_bias_range
-
-        # # Figure out if we need one of these for targets for the purpose of picking targets to be in this node.
-        # # ANS: We need this for score calculation while choosing the rule. However, since we have decided to use the "Choose one random good combi", we don't need it for when it is being chosen.
-        # self.suggested_included_tags_target = suggested_included_tags_target
-        # self.suggested_excluded_tags_target = suggested_excluded_tags_target
-        # self.suggested_bias_range_target = suggested_bias_range_target
-
-        # #condition_tests is a list of ConditionTest objects. In order to perform this story node, the world state must fulfil all the conditions in it.
-
-        # #TODO (Extra Features): Do we need suggested_condition_tests to test the world state to go with the suggested stuff for actor/targets?
-        # self.condition_tests = condition_tests
-        
 
     def get_name(self):
         return self.name

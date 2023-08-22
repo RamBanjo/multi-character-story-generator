@@ -66,7 +66,7 @@ Story Nodes: The nodes consisting of actions performed by characters. Each Story
 - Absolute Step: The Absolute Step that this node is.
 - Effects on next WS: The Change Objects representing the changes that will happen once this Story Node has been performed.
 
-TODO (Important): Discuss with Professor what to do with these things. Why are some tests baked into the Story Node and some tests have their own object.
+Discuss with Professor what to do with these things. Why are some tests baked into the Story Node and some tests have their own object.
 Shouldn't we make things consistent? Why did I notice this just now?
 
 ANSWER: We should. We should worry about this after the Mini Paper, though.

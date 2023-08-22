@@ -72,14 +72,12 @@ from components.WorldState import WorldState
 # We will need to test that all the testcases are working. Aha.
 #
 # (DONE) not_exist: Task Stack doesn't Exist. We will call a name that's not Test Stack 7 to test this.
-# task_stack_cleared: The task stack is already complete. We will call Test Stack 7 after it has been marked complete to test this.
-# incompatible: The task stack is trying to test for completeness at the point before the last update step, where the task can't be updated. We will advance Test Stack 7 then test the abs step before that update to test this.
+# (DONE) task_stack_cleared: The task stack is already complete. We will call Test Stack 7 after it has been marked complete to test this.
+# (DONE) incompatible: The task stack is trying to test for completeness at the point before the last update step, where the task can't be updated. We will advance Test Stack 7 then test the abs step before that update to test this.
 # (DONE) wrong_location: The task is not in the correct location. We will move Alex to the Castle where the task is not to test this.
 # (DONE) task_step_already_completed: The task is already completed according to the goal state given in the task.
 # (DONE) task_step_already_failed: The task is already failed according to the fail state given in the task.
 # (DONE) task_step_can_advance: None of the other conditions above applies.
-
-#TODO (Testing): Continue testing here when reaching lab.
 
 #Here's a new world state, story graph, and an entirely new premise to consider upon
 
@@ -174,8 +172,6 @@ test_ws_2.disconnect(from_node=castle, edge_name="holds", to_node=alex, soft_equ
 # for thing in alex_1.list_of_task_stacks:
 #     print("SG2", thing.stack_name)
 
-# #TODO (Important): Fix this bug. It looks like Alex gets added twice for some reason.
-# #TODO (Important): Also, we still need to find out why we can't attempt to advance task after doing it once?
 # sg2test = test_sg_2.make_state_at_step(stopping_step=3)
 # alex_1 = sg2test.node_dict["Alex"]
 # for thing in alex_1.list_of_task_stacks:
@@ -189,8 +185,12 @@ test_sg_2.print_all_node_beautiful_format()
 print("But we've already advanced task on Step 2!:", test_sg_2.test_task_completeness(task_stack_name="Test Stack 7", actor_name="Alex", abs_step=0))
 
 # #Okay, but what if we want to advance a task stack that's already cleared
+
+#Hey, I think this means attempt_advance_task_stack works as intended so we don't have to test it anymore. Wahehey!
 test_sg_2.attempt_advance_task_stack(task_stack_name="Test Stack 7", actor_name="Alex", abs_step=3)
+test_sg_2.print_all_node_beautiful_format()
 test_sg_2.attempt_advance_task_stack(task_stack_name="Test Stack 7", actor_name="Alex", abs_step=5)
 test_sg_2.add_story_part(part=snodey, character=alex, location=village)
 test_sg_2.print_all_node_beautiful_format()
+
 print("Whoops! Looks like this task stack is already completed:", test_sg_2.test_task_completeness(task_stack_name="Test Stack 7", actor_name="Alex", abs_step=3))
