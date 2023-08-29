@@ -369,7 +369,6 @@ class StoryGraph:
     def make_state_at_step(self, stopping_step, state_name = "Traveling State"):
         #Same as make_latest_state, but you can choose the step where to stop.
         #In fact, make_latest_state should call this function but set the stopping step as the last step.
-
         self.update_list_of_changes()
 
         traveling_state = deepcopy(self.starting_ws)
@@ -442,13 +441,12 @@ class StoryGraph:
                 #If not, then max between actor slot and target slot for the only joint node.
                 return calculate_score_from_char_and_unpopulated_node_with_both_slots(actor=character_from_ws, node=rule.joint_node, world_state=current_ws, mode=mode)
 
-    # TODO (Testing): Test this function!
     def calculate_score_from_next_task_in_task_stack(self, actor_name, task_stack_name, task_perform_index, mode=0):
 
         #First we must recognize if the task is already completed or not
         #If it's not already completed at the given task_perform_index, then get the appropriate task actions then calculate that cont
 
-        completeness = self.test_task_completeness(task_stack_name=task_stack_name, actor_name=actor_name, task_perform_index=task_perform_index)
+        completeness = self.test_task_completeness(task_stack_name=task_stack_name, actor_name=actor_name, abs_step=task_perform_index)
         
         # Advance Task -> 0 or Equivalent to Completing Task By Ourself?
         # Cancel Task -> DEFAULT_INVALID_SCORE
@@ -465,10 +463,11 @@ class StoryGraph:
 
                 task_actions = current_task.task_actions
                 translated_nodes = []
+                
                 for node in task_actions:
-                    translated_nodes.append(replace_placeholders_in_story_node(story_node=node, placeholder_dict=self.placeholder_dicts_of_task[(actor_name, task_stack_name)], list_of_actor_objects=self.character_objects)) 
-
-                return self.calculate_score_from_char_and_cont(actor=actor, insert_index=task_perform_index, contlist=translated_nodes, has_joint_in_contlist=True)
+                    translated_nodes.append(replace_placeholders_in_story_node(story_node=node, placeholder_dict=self.placeholder_dicts_of_tasks[(actor_name, task_stack_name)], list_of_actor_objects=self.character_objects)) 
+                    
+                return self.calculate_score_from_char_and_cont(actor=actor, insert_index=task_perform_index, contlist=translated_nodes, has_joint_in_contlist=True, mode=mode)
             case "task_step_already_completed":
                 return 0
             case _:
@@ -642,31 +641,46 @@ class StoryGraph:
     #A lot of checks done in the Apply Joint Rule section are redundant, because they are already done here. We might be able to deprecate the checks done in there, just apply the node if it passes the tests in here.
     
     # TODO (Testing): ...hey, we haven't tested this yet. What the hell Ram.
-    def check_joint_continuity_validity(self, joint_rule, main_character, grouping_split, insert_index):
+    def check_joint_continuity_validity(self, joint_rule, main_character, grouping_split, insert_index, verbose=False):
         
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
         entire_character_list = []
+        entire_character_name_list = []
 
         for split in grouping_split:
             for actor in split["actor_group"]:
                 if actor not in self.character_objects:
+                    if verbose:
+                        print(actor, ": This actor is not found!")
                     return False
                 else:
                     entire_character_list.append(actor)
+                    entire_character_name_list.append(actor.get_name())
             for target in split["target_group"]:
                 if target not in self.character_objects:
+                    if verbose:
+                        print(actor, ": This target is not found!")
                     return False
                 else:
                     entire_character_list.append(target)
+                    entire_character_name_list.append(target.get_name())
 
         #Before anything else, if we're trying to test for cont or split, we must make sure that the node at the insert index fulfill the following conditions:
         # All the actors mentioned share the same node at the given insert_index
         # (That's it that's the only condition)
 
         if main_character not in entire_character_list:
+            if verbose:
+                print("Main character is not among the character list!")
             return False
 
-        assumed_node = self.story_parts[(main_character.get_name(), insert_index)]
+        assumed_node = self.story_parts.get((main_character.get_name(), insert_index-1), None)
+        #Oh yeah---to follow a rule there has to be a base graph, therefore, logically there has to be a "previous node". Failing that means there is none graph!
+        if assumed_node is None:
+            if verbose:
+                print("Rule cannot be applied because there is no previous node!")
+            return False
+
         if joint_rule.joint_type == JointType.CONT or joint_rule.joint_type == JointType.SPLIT:
 
             #If the node at the insert index doesn't have the same characters as the given actors and targets: return False
@@ -674,6 +688,8 @@ class StoryGraph:
             #(It does not matter whether they are actors or targets, as long as it's the same characters)
             for actor in entire_character_list:
                 if not assumed_node.check_if_character_exists_in_node(actor):
+                    if verbose:
+                        print(actor, ": This actor is not in the joint story node!")
                     return False
 
         # If we are doing the Split rule, we must validate that each of the character in actors to test and targets to test are performing nodes included in the base nodes.
@@ -691,9 +707,12 @@ class StoryGraph:
             # for target in targets_to_test:
             #     list_of_testing_actor_names.add(target.get_name())
 
-            joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=list(entire_character_list), absolute_step_to_search=insert_index)
+
+            joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=entire_character_name_list, absolute_step_to_search=insert_index)
 
             if not joint_pattern_check[0]:
+                if verbose:
+                    print("The absolute step doesn't match joint pattern!")
                 return False
             
             list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=joint_pattern_check[1], actors_wanted=-1, current_actor_name=main_character.get_name())
@@ -704,6 +723,8 @@ class StoryGraph:
                     found_exact_set = True
 
             if not found_exact_set:
+                if verbose:
+                    print("This joint pattern is impossible!")
                 return False
             
         #Might end up with a sampling method for now (Test one random combination to see if it works out). If it doesn't cause too many problems then we can do it this way.
@@ -721,11 +742,14 @@ class StoryGraph:
         #We already have the grouping, because our input is the grouping (duh)
 
         if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
+            if verbose:
+                print("Validity is based on Add Joint Validity function")
             validity = validity and self.check_add_joint_validity(joint_node = joint_rule.joint_node, actors_to_test = grouping_split[0]["actor_group"], targets_to_test = grouping_split[0]["target_group"], insert_index=insert_index)
         if joint_rule.joint_type == JointType.SPLIT:
+            if verbose:
+                print("Validity is based on Add Split Validity function")
             validity = validity and self.check_add_split_validity(split_list=cont_list, chargroup_list=grouping_split, insert_index=insert_index)
             #validity = validity and self.check_add_joint_validity(joint_node = cont_list[test_index], actors_to_test = sampled_grouping[test_index]["actor_group"], targets_to_test = sampled_grouping[test_index]["target_group"], insert_index=insert_index)
-        
         return validity
     
     #This function is for testing if an absolute step contains a pattern that is suitable for a join joint.
@@ -781,7 +805,7 @@ class StoryGraph:
         del(graphcopy)
 
         return validity
-        
+    
     def check_add_split_validity(self, split_list, chargroup_list, insert_index):
         
         graphcopy = deepcopy(self)
@@ -1690,7 +1714,10 @@ class StoryGraph:
             return "wrong_location"
 
         #Return "task_step_already_completed" if the tests in goal state all return true
+
+        #If there are no goals, then it should return false by default.
         goal_reached = True
+
         placeholder_charname_dict = task_stack_at_ws.placeholder_info_dict
         placeholder_charobj_pair = [(x[0], current_ws.node_dict[x[1]]) for x in placeholder_charname_dict.items()]
 
@@ -1698,14 +1725,23 @@ class StoryGraph:
             replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
             goal_reached = goal_reached and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
 
+        if len(current_task.goal_state) == 0:
+            goal_reached = False
+
         if goal_reached:
             return "task_step_already_completed"
+        
         #Return "task_step_already_failed" if the tests in avoidance_state all return true
+        #This can never be True if there are no conditions to fail the task.
         task_failed = True
+
         for test in current_task.avoidance_state:
             replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
             
             task_failed = task_failed and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
+
+        if len(current_task.avoidance_state) == 0:
+            task_failed = False
 
         if task_failed:
             return "task_step_already_failed"

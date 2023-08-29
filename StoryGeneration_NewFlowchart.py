@@ -371,7 +371,7 @@ def attempt_apply_task(task_tuple, target_story_graph, current_character):
     return advance_success
 
 # TODO (Testing): Test this function
-# Will return True if changes are made and False if not.
+# Will return True if changes are made to the story graph and False if not.
 def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character, movement_index):
 
     current_ws = target_story_graph.make_state_at_step(movement_index)

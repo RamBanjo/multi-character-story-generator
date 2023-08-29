@@ -639,7 +639,7 @@ def translate_generic_relchange(relchange, populated_story_node):
 
     for lhs_item in lhs_list:
         for rhs_item in rhs_list:
-            newchange = RelChange(relchange.name, lhs_item, relchange.edge_name, rhs_item, relchange.value, relchange.add_or_remove)
+            newchange = RelChange(name = relchange.name, node_a=lhs_item, edge_name=relchange.edge_name, node_b=rhs_item, value=relchange.value, add_or_remove=relchange.add_or_remove, soft_equal=relchange.soft_equal)
             list_of_equivalent_relchanges.append(newchange)
 
     return list_of_equivalent_relchanges
@@ -784,7 +784,7 @@ def translate_generic_held_item_test(test, node):
     objectlist = check_keyword_and_return_objectnodelist(node, test.holder_to_test)
 
     for item in objectlist:
-        list_of_equivalent_tests.append(HeldItemTagTest(item, test.tag_to_test, test.value_to_test, inverse=test.inverse))
+        list_of_equivalent_tests.append(HeldItemTagTest(item, test.tag_to_test, test.value_to_test, inverse=test.inverse, soft_equal=test.soft_equal, score=test.score))
 
     return list_of_equivalent_tests
 
@@ -795,7 +795,7 @@ def translate_generic_same_location_test(test, node):
     for item in test.list_to_test:
         objectlist.extend(check_keyword_and_return_objectnodelist(node, item))
 
-    return [SameLocationTest(objectlist, inverse=test.inverse)]
+    return [SameLocationTest(objectlist, inverse=test.inverse, score=test.score)]
 
 def translate_generic_has_edge_test(test, node):
 
@@ -806,7 +806,7 @@ def translate_generic_has_edge_test(test, node):
 
     for lhs_item in from_node:
         for rhs_item in to_node:
-            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, two_way=test.two_way, inverse=test.inverse))    
+            list_of_equivalent_tests.append(HasEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, two_way=test.two_way, inverse=test.inverse, score=test.score))    
 
     return list_of_equivalent_tests
 
@@ -817,7 +817,7 @@ def translate_has_tag_test(test, node):
     object_list = check_keyword_and_return_objectnodelist(storynode=node, objnode_to_check=test.object_to_test)
 
     for item in object_list:
-        list_of_equivalent_tests.append(HasTagTest(object_to_test=item, tag=test.tag, value=test.value, soft_equal=test.soft_equal, inverse=test.inverse))
+        list_of_equivalent_tests.append(HasTagTest(object_to_test=item, tag=test.tag, value=test.value, soft_equal=test.soft_equal, inverse=test.inverse, score=test.score))
 
     return list_of_equivalent_tests
 
@@ -828,7 +828,7 @@ def translate_in_bias_range_test(test, node):
     object_list = check_keyword_and_return_objectnodelist(storynode=node, objnode_to_check=test.object_to_test)
 
     for item in object_list:
-        list_of_equivalent_tests.append(InBiasRangeTest(object_to_test=item, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept, inverse=test.inverse))
+        list_of_equivalent_tests.append(InBiasRangeTest(object_to_test=item, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept, inverse=test.inverse, score=test.score))
 
     return list_of_equivalent_tests
 

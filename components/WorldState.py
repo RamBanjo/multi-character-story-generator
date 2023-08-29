@@ -454,6 +454,7 @@ class WorldState:
         test_list = []
 
         for test in story_node.suggested_test_list:
+            
             equivalent_test = translate_generic_test(test, story_node)
             test_list.extend(equivalent_test)
 

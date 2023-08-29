@@ -65,6 +65,9 @@ class HasTagTest(ConditionTest):
         self.soft_equal = soft_equal
         self.test_type = TestType.HAS_TAG
 
+    def __str__(self):
+        return self.name + " (" + str(self.object_to_test) + " " + str(self.tag) + " " + str(self.value) + ", " + "inverse = " + str(self.inverse) + ")"
+
 class InBiasRangeTest(ConditionTest):
     def __init__(self, object_to_test, bias_axis, min_accept=-100, max_accept=100, inverse=False, score=1):
         super().__init__(name="In Bias Range Test", inverse=inverse, score=score)
