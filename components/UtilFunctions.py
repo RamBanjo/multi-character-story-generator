@@ -446,9 +446,10 @@ def list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes: dict,
     #Make a list of the lengths we want to include.
     list_of_appropriate_lengths = []
     if type(actors_wanted) == tuple:
-        list_of_appropriate_lengths = range_number_to_range_list(actors_wanted)
+        list_of_appropriate_lengths = range_number_to_range_list([actors_wanted])[0]
     elif actors_wanted == -1:
-        list_of_appropriate_lengths = range_number_to_range_list(len(list_of_base_node_structures), entire_character_count)
+        full_range = (len(list_of_base_node_structures), entire_character_count)
+        list_of_appropriate_lengths = range_number_to_range_list([full_range])[0]
     else:
         list_of_appropriate_lengths = [actors_wanted]
 

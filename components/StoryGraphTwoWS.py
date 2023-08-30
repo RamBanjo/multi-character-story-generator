@@ -707,9 +707,8 @@ class StoryGraph:
             # for target in targets_to_test:
             #     list_of_testing_actor_names.add(target.get_name())
 
-
-            joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=entire_character_name_list, absolute_step_to_search=insert_index)
-
+            joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=entire_character_name_list, absolute_step_to_search=insert_index-1)
+            
             if not joint_pattern_check[0]:
                 if verbose:
                     print("The absolute step doesn't match joint pattern!")
@@ -753,6 +752,7 @@ class StoryGraph:
         return validity
     
     #This function is for testing if an absolute step contains a pattern that is suitable for a join joint.
+    # Returns true if all of the characters in the soecific timestep are performing 
     def check_if_abs_step_has_joint_pattern(self, required_story_nodes_list, character_name_list, absolute_step_to_search):
         
         dict_of_chars_with_nodename_as_key = dict()
@@ -761,6 +761,7 @@ class StoryGraph:
         valid_nodename_list = [snode.get_name() for snode in required_story_nodes_list]
 
         for charname in character_name_list:
+            found_actor_in_invalid_node = False
             found_node = self.story_parts.get((charname, absolute_step_to_search), None)
             if found_node is not None:
                 nodename = found_node.get_name()
@@ -770,10 +771,19 @@ class StoryGraph:
                     else:
                         dict_of_chars_with_nodename_as_key[nodename].append(charname)
 
+                # Case where one of the required characters are seen doing a node
+                # that's not one of the valid nodes
+                else:
+                    found_actor_in_invalid_node = True
+
+        if  found_actor_in_invalid_node:
+            return False, dict_of_chars_with_nodename_as_key
+
         found_node_names = dict_of_chars_with_nodename_as_key.keys()
         for req_node in required_story_nodes_list:
             req_node_name = req_node.get_name()
 
+            #Case where we don't find any characters in one of the required nodes
             if req_node_name not in found_node_names:
                 return False, dict_of_chars_with_nodename_as_key
             
@@ -843,7 +853,7 @@ class StoryGraph:
 
     def split_continuation(self, split_list, chargroup_list, abs_step, location_list = None, additional_targets_list = []):
         for i in range(0, len(chargroup_list)):
-            new_joint = deepcopy(split_list)
+            new_joint = deepcopy(split_list[i])
             new_joint.remove_all_actors()
 
             current_location = None
@@ -851,7 +861,7 @@ class StoryGraph:
                 current_location = location_list[i]
 
             current_target_list = chargroup_list[i]["target_group"]
-            if additional_targets_list != None:
+            if additional_targets_list != None and len(additional_targets_list) != 0:
                 current_target_list += additional_targets_list[i]
 
             return self.insert_joint_node(joint_node=split_list[i], main_actor=None, other_actors=chargroup_list[i]["actor_group"], location=current_location, targets=current_target_list, absolute_step=abs_step)
