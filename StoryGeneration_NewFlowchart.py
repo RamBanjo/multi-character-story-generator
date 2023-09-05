@@ -1,6 +1,6 @@
 #We will write this story generation function based on the new flowchart.
 
-import copy
+from copy import deepcopy
 import random
 from components.RelChange import RelChange
 from components.RewriteRuleWithWorldState import JoiningJointRule, JointType
@@ -11,14 +11,19 @@ from components.UtilFunctions import permute_actor_list_for_joint, permute_actor
 from components.UtilityEnums import ChangeAction, GenericObjectNode
 
 DEFAULT_HOLD_EDGE_NAME = "holds"
-DEFAULT_ADJACENCY_EDGE_NAME = "connect"
+DEFAULT_ADJACENCY_EDGE_NAME = "connects"
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
+#Actually yeah making Verbose would make testing this way, way easier than it needs to be. So we're going to make Verbose
+#...head in hands. This is so bad. This is a bad system I have created.
+#Like for real for real there's no way I can realistically test this without a Verbose letting us know what's going on where.
 #TODO (Extra Features): Make Verbose, so that we can read what's going on while the generation is being done.
-def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0):
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False):
 
     #make a copy of the graph
-    final_story_graph = copy.copy(init_storygraph)
+    if verbose:
+        print("Creating a copy of the Storygraph")
+    final_story_graph = deepcopy(init_storygraph)
 
     while True:
 
@@ -28,21 +33,28 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         #If the path length is equal to or greater than the required length, we're done
         if shortest_path_length >= required_story_length:
             #return result
+            if verbose:
+                print("Shortest path of story has reached desired length, terminating generation and returning result.")
             return final_story_graph
     
         #Make a list of all characters' path lengths.
         #Reduce this list to only the ones with the shortest path length.
+        if verbose:
+            print("Getting the names of characters with shortest path...")    
         shortest_path_character_names_list = final_story_graph.get_characters_with_shortest_path_length()
 
         #Randomly pick one name from that list. That will be the character we generate stories for in this step. 
         current_charname = random.choice(shortest_path_character_names_list)
-
+        if verbose:
+            print("Chosen current character:", current_charname)
         latest_state = final_story_graph.make_latest_state()
 
         current_character = latest_state.node_dict[current_charname]
 
         action_for_character_found = False
 
+        if verbose:
+            print("Making list of Acceptable Rules")
         #acceptable_rules = [r ulefor rule in list_of_rules if final_story_graph.check_rule_validity(current_character, rule)]
         acceptable_rules = [rule for rule in list_of_rules]
 
@@ -100,6 +112,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         # Split Joint: The score is the max among all the given splits, excluding the split that doesn't allow the character. If none of the splits allow the character on any slots, the score is -999.
         #
         # Format: (Rule, Insert Index, Score)
+        if verbose:
+            print("Checking for acceptable actions...")
         for rule in acceptable_rules:
             for rule_insert_index in range(0, final_story_graph.get_longest_path_length_by_character(current_character)):
                 rule_score = final_story_graph.calculate_score_from_rule_char_and_cont(actor=current_character, insert_index=rule_insert_index, score_mode=0)
@@ -111,6 +125,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     acceptable_rules_with_absolute_step_and_score.append((rule, rule_insert_index, rule_score))
 
         acceptable_rules_with_absolute_step_and_score = sorted(acceptable_rules_with_absolute_step_and_score, key=get_element_2, reverse=True)
+        if verbose:
+            print("Acceptable rules found:", len(acceptable_rules_with_absolute_step_and_score))
 
         #Sort it by biasweight. Python sorts ascending by default, so we must reverse it.
         #acceptable_rules.sort(key=get_biasweight, reverse=True)
@@ -152,6 +168,10 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                         task_tuple = (task_name, attempt_index, default_task_score, action_chosen)
                         list_of_available_tasks.append(task_tuple)
 
+        if verbose:
+            print("Acceptable task-related actions found:", len(list_of_available_tasks))
+
+
         #Fill in this list with valid actions to take, pointing towards either the acceptable rules or the tasks that can be advanced
         list_of_valid_actions = []
         for rule_tuple in acceptable_rules:
@@ -166,12 +186,20 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
         #So if there is not a task or if everything is a cancel, we add a move towards quest action
         if len(list_of_available_tasks) < 0 or task_count == cancel_count:
+            if verbose:
+                print("No valid tasks found. We will add a move towards task location action to Top N.")
+                print("We will also add a wait action.")
             force_move_towards_quest_into_top_n = True
         
         if len(list_of_available_tasks) > 0:
+            if verbose:
+                print("Some tasks are found. We will add task actions to the list of valid actions.")            
             for task_tuple in list_of_available_tasks:
                 action_tuple = ("Apply Task", task_tuple, task_tuple[2])
                 list_of_valid_actions.append(action_tuple)
+
+        if verbose:
+            print("Acceptable total actions found:", len(list_of_valid_actions))                
 
         #Modify the following part so that it picks top 5 from both the acceptable rules and the available tasks instead.
         #
@@ -180,12 +208,12 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         #Also, if none of these actions are valid, we either advance towards task location or wait. 1/2 chance for either one.
         # TODO (Important): No Valid Actions will essentially never happen because Move Towards Task Location is always valid. :thinking:
         # You know what, I'm fine with this. We can make characters move around if there are no valid actions, with staying and waiting being the "last resort" option in the event that there are no possible actions.
-        #
-        # Sometimes, characters 
 
         sorted_list_of_valid_actions = sorted(list_of_valid_actions, key=get_element_2, reverse=True)
         top_pick_count = top_n
         if len(list_of_valid_actions) < top_n:
+            if verbose:
+                print("Picking Top", top_n, "Actions...")            
             top_pick_count = len(sorted_list_of_valid_actions)
 
         top_n_valid_actions = sorted_list_of_valid_actions[:top_pick_count]
@@ -196,7 +224,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         if force_move_towards_quest_into_top_n:
             top_n_valid_actions.append(("Move Towards Task Location", None, 0))
 
-        
+        if verbose:
+            print("Top N Total (This number will be 1 more than Top N if Move Towards Task Loc exists):", len(top_n_valid_actions))     
 
         # if len(acceptable_rules_with_absolute_step_and_score) < top_n:
         #     top_pick_count = len(acceptable_rules_with_absolute_step_and_score)
@@ -209,7 +238,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
         while not action_for_character_found:
 
-            # #Check the length of the list now. Do we have enough? If this is blank, we must make our character wait.
+            # #Check the length of the list now. Do we have enough? If this is blank or if we're out of attempts, we must make our character wait.
             if len(top_n_valid_actions) == 0 or extra_attempts_left == 0:
                  latest_action = final_story_graph.get_latest_story_node_from_character()
                  final_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=latest_action.timestep)
@@ -232,6 +261,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     #Let's do it in the function
 
                     action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character)
+                case "Wait":
+                    pass
                 case _:
                     pass
             
@@ -414,6 +445,12 @@ def cycle_attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_c
         if attempt_move_towards_task_loc(target_story_graph=target_story_graph, current_character=current_character, movement_index=chosen_loc):
             return True
         #Pick a random thing from the possible insert locs, remove it
+
+def perform_wait_action(target_story_graph:StoryGraph, current_character):
+    latest_action = target_story_graph.get_latest_story_node_from_character()
+    target_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=latest_action.timestep)
+    
+    return True
     
     
     

@@ -640,7 +640,6 @@ class StoryGraph:
     #This function should assume that all all needed actors and targets are already given.
     #A lot of checks done in the Apply Joint Rule section are redundant, because they are already done here. We might be able to deprecate the checks done in there, just apply the node if it passes the tests in here.
     
-    # TODO (Testing): ...hey, we haven't tested this yet. What the hell Ram.
     def check_joint_continuity_validity(self, joint_rule, main_character, grouping_split, insert_index, verbose=False):
         
         #First, we must check a few prerequisites. If any characters mentioned in actors_to_test don't exist in the storyline, then we definitely cannot continue the storyline.
@@ -669,6 +668,8 @@ class StoryGraph:
         # All the actors mentioned share the same node at the given insert_index
         # (That's it that's the only condition)
 
+        # for thing in entire_character_list:
+        #     print(thing, main_character, main_character == thing)
         if main_character not in entire_character_list:
             if verbose:
                 print("Main character is not among the character list!")
@@ -695,7 +696,7 @@ class StoryGraph:
         # If we are doing the Split rule, we must validate that each of the character in actors to test and targets to test are performing nodes included in the base nodes.
         # Before this can be done, we must decide what style of Joint Split we should be doing.
         # We have decided. (See check if abs step has joint pattern)
-        if joint_rule.joint_type == JointType.JOIN:
+        if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
 
             # For each of the actors in actors_to_test and target_to_test, turn them into one list. Then, call the list_all_good_combinations_from_joint_join_pattern from UtilFunctions to get a list.
             # After we get the list of all possible combinations, we then look for whether or not our specific combination of actors and targets exist in that list. If not, then return False. Otherwise continue with the check.
@@ -707,24 +708,28 @@ class StoryGraph:
             # for target in targets_to_test:
             #     list_of_testing_actor_names.add(target.get_name())
 
-            joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=entire_character_name_list, absolute_step_to_search=insert_index-1)
+            if joint_rule.joint_type == JointType.JOIN:
+                joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=entire_character_name_list, absolute_step_to_search=insert_index-1)
+            else:
+                joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=[joint_rule.base_joint], character_name_list=entire_character_name_list, absolute_step_to_search=insert_index-1)
             
             if not joint_pattern_check[0]:
                 if verbose:
                     print("The absolute step doesn't match joint pattern!")
                 return False
             
-            list_of_possible_combi = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=joint_pattern_check[1], actors_wanted=-1, current_actor_name=main_character.get_name())
+            list_of_possible_combis = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=joint_pattern_check[1], actors_wanted=joint_rule.joint_node.charcount, current_actor_name=main_character.get_name())
+            # print(list_of_possible_combi)
 
             found_exact_set = False
-            for combi in list_of_possible_combi:
-                if list_of_possible_combi == set(combi):
-                    found_exact_set = True
+            for combi in list_of_possible_combis:
+                if set(combi) == set(entire_character_name_list):
+                     found_exact_set = True
 
             if not found_exact_set:
-                if verbose:
-                    print("This joint pattern is impossible!")
-                return False
+                 if verbose:
+                     print("This joint pattern is impossible!")
+                 return False
             
         #Might end up with a sampling method for now (Test one random combination to see if it works out). If it doesn't cause too many problems then we can do it this way.
         #Consider: create a list of good splits and then look through to see if there is at least one good split there, if the sampling method doesn't work.
@@ -735,20 +740,26 @@ class StoryGraph:
             cont_list.append(joint_rule.joint_node)
         if joint_rule.joint_type == JointType.SPLIT:
             cont_list += joint_rule.split_list
+        
 
         # sampled_grouping = self.generate_valid_character_grouping(continuations=cont_list, abs_step=insert_index, character_list = entire_character_list)
 
         #We already have the grouping, because our input is the grouping (duh)
+        #For some reason check add joint validity and check add split validity consumes actor input. I'm making a copy here to prevent that.
 
+        copy_of_split = deepcopy(grouping_split)
+        
         if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
             if verbose:
                 print("Validity is based on Add Joint Validity function")
-            validity = validity and self.check_add_joint_validity(joint_node = joint_rule.joint_node, actors_to_test = grouping_split[0]["actor_group"], targets_to_test = grouping_split[0]["target_group"], insert_index=insert_index)
+            validity = validity and self.check_add_joint_validity(joint_node = joint_rule.joint_node, actors_to_test = copy_of_split[0]["actor_group"], targets_to_test = copy_of_split[0]["target_group"], insert_index=insert_index)
         if joint_rule.joint_type == JointType.SPLIT:
             if verbose:
                 print("Validity is based on Add Split Validity function")
-            validity = validity and self.check_add_split_validity(split_list=cont_list, chargroup_list=grouping_split, insert_index=insert_index)
+            validity = validity and self.check_add_split_validity(split_list=cont_list, chargroup_list=copy_of_split, insert_index=insert_index)
             #validity = validity and self.check_add_joint_validity(joint_node = cont_list[test_index], actors_to_test = sampled_grouping[test_index]["actor_group"], targets_to_test = sampled_grouping[test_index]["target_group"], insert_index=insert_index)
+        
+        del(copy_of_split)
         return validity
     
     #This function is for testing if an absolute step contains a pattern that is suitable for a join joint.
