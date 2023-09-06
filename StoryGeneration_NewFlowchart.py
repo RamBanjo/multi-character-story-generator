@@ -116,7 +116,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
             print("Checking for acceptable actions...")
         for rule in acceptable_rules:
             for rule_insert_index in range(0, final_story_graph.get_longest_path_length_by_character(current_character)):
-                rule_score = final_story_graph.calculate_score_from_rule_char_and_cont(actor=current_character, insert_index=rule_insert_index, score_mode=0)
+                rule_score = final_story_graph.calculate_score_from_rule_char_and_cont(actor=current_character, insert_index=rule_insert_index, rule = rule, mode=0)
 
                 #We can use the rule score itself to test whether or not a rule is suitable.
                 #In the event of a normal rule, if one node is invalid the entire sequence will return -999, which lets us know the rule isn't valid.
@@ -174,7 +174,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
         #Fill in this list with valid actions to take, pointing towards either the acceptable rules or the tasks that can be advanced
         list_of_valid_actions = []
-        for rule_tuple in acceptable_rules:
+        for rule_tuple in acceptable_rules_with_absolute_step_and_score:
             action_tuple = ("Apply Rule", rule_tuple, rule_tuple[2])
             list_of_valid_actions.append(action_tuple)
 
@@ -240,7 +240,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
             # #Check the length of the list now. Do we have enough? If this is blank or if we're out of attempts, we must make our character wait.
             if len(top_n_valid_actions) == 0 or extra_attempts_left == 0:
-                 latest_action = final_story_graph.get_latest_story_node_from_character()
+                 latest_action = final_story_graph.get_latest_story_node_from_character(current_character)
                  final_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=latest_action.timestep)
                  action_for_character_found = True
 
@@ -259,13 +259,15 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
                     #We can make a list of index and randomly pick from it until it gives us a positive result
                     #Let's do it in the function
+                    #Actually, I think it would be better to always call this function from the latest step.
 
-                    action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character)
+                    final_abs_step = final_story_graph.get_longest_path_length_by_character(character=current_character) -1
+                    action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character, movement_index=final_abs_step)
                 case "Wait":
                     pass
                 case _:
                     pass
-            
+
             #If we don't find the rule to apply yet, we might need to add new rules to top_n. Suitable rules might be clogged behind invalid joint rules.
             if not action_for_character_found:
                 if extra_attempts_left == -1 or extra_attempts > 0:
@@ -287,6 +289,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 def get_element_2(e):
     return e[2]
 
+#TODO (Testing): Test this function to see if it really works because WOW I think it's broken. We have valid rules that didn't get applied!
 def attempt_apply_rule(chosen_rule, target_story_graph, character_object, shortest_path_charname_list):
 
     apply_rule_success = False

@@ -302,7 +302,7 @@ class StoryGraph:
         return i
 
     def get_latest_story_node_from_character(self, character):
-        return self.story_parts.get((character.get_name(), self.get_longest_path_length_by_character(character)), None)
+        return self.story_parts.get((character.get_name(), self.get_longest_path_length_by_character(character)-1), None)
 
     def get_all_path_length_with_charname(self):
         check_list = []
