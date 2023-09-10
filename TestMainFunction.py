@@ -22,7 +22,7 @@
 # Rules, characters, and objects are based of ReGEN. There are two main characters, Alice and Bob.
 # All the rules specify that they can only be done by Main Characters, so other characters will do a lot of waiting.
 
-from StoryGeneration_NewFlowchart import generate_story_from_starter_graph
+from StoryGeneration_NewFlowchart import attempt_apply_rule, generate_story_from_starter_graph
 from components.ConditionTest import HasTagTest
 from components.RewriteRuleWithWorldState import RewriteRule
 from components.StoryGraphTwoWS import StoryGraph
@@ -51,21 +51,23 @@ town = LocationNode(name = "Town")
 state_1 = WorldState(name="State 1", objectnodes=[alice, town])
 state_1.connect(from_node=town, edge_name="holds", to_node=alice)
 
-graph_1 = StoryGraph(name="Graph 1", character_objects=[alice, bob, charlie], location_objects=[town], starting_ws = state_1)
+graph_1 = StoryGraph(name="Graph 1", character_objects=[alice], location_objects=[town], starting_ws = state_1)
 
 graph_1.insert_multiple_parts(part_list=[node_a, node_b, node_c], character=alice, location_list=[town, town, town])
 
-rule_b_to_de = RewriteRule(story_condition=[node_b], story_change=[node_d, node_e], remove_before_insert=True)
-rule_c_to_fg = RewriteRule(story_condition=[node_c], story_change=[node_f, node_g], remove_before_insert=True)
-rule_b_to_bad1 = RewriteRule(story_condition=[node_b], story_change=[bad_1])
-rule_c_to_bad2 = RewriteRule(story_condition=[node_c], story_change=[bad_2])
+rule_b_to_de = RewriteRule(name="b->de",story_condition=[node_b], story_change=[node_d, node_e], remove_before_insert=True)
+rule_c_to_fg = RewriteRule(name="c->fg",story_condition=[node_c], story_change=[node_f, node_g], remove_before_insert=True)
+rule_b_to_bad1 = RewriteRule(name="b->bad1",story_condition=[node_b], story_change=[bad_1])
+rule_c_to_bad2 = RewriteRule(name="c->bad2",story_condition=[node_c], story_change=[bad_2])
 
 # graph_1.print_all_node_beautiful_format()
 # graph_1.refresh_longest_path_length()
 # print(graph_1.get_longest_path_length_by_character(character=alice))
 # print(graph_1.get_latest_story_node_from_character(character=alice))
 
-generate_story_from_starter_graph(init_storygraph=graph_1, list_of_rules=[rule_b_to_bad1, rule_b_to_de, rule_c_to_bad2, rule_c_to_fg], required_story_length=5, top_n=5, extra_attempts=0, verbose=True)
+graph_1_modded = generate_story_from_starter_graph(init_storygraph=graph_1, list_of_rules=[rule_b_to_bad1, rule_b_to_de, rule_c_to_bad2, rule_c_to_fg], required_story_length=5, top_n=5, extra_attempts=0, verbose=True)
 
 print("We expect the story following Story Graph to contain the following nodes for Alice: A-D-E-F-G.")
-graph_1.print_all_node_beautiful_format()
+graph_1_modded.print_all_node_beautiful_format()
+
+# We gotta test Attempt Apply Rule because apparently that thing isn't working...
