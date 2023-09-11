@@ -222,6 +222,9 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
         #Since we don't want to clog top_n_valid_actions, we're just going to insert this action as-is.
         #We will randomly pick one valid spot to move to that location here, although it will most likely be the last step so might as well as make that the only option?
+        
+        # TODO (Important): There's a lot of redundant waiting in the testing. How will we be able to eliminate that?
+        # The solution might lie in checking the attempt move towards quest
         if force_move_towards_quest_into_top_n:
             final_abs_step = final_story_graph.get_longest_path_length_by_character(character=current_character) -1
             move_towards_quest_container = StoryGenerationActionContainer(action_name="Move Towards Task Location", action_object=None, action_score=0, perform_index=final_abs_step)
@@ -239,13 +242,22 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         # if len()
         extra_attempts_left = extra_attempts        
 
+        if verbose:
+            print("Choosing action to do...")
         while not action_for_character_found:
+
+            if verbose:
+                print("Extra Attempts Left:", extra_attempts_left)
 
             # #Check the length of the list now. Do we have enough? If this is blank or if we're out of attempts, we must make our character wait.
             if len(top_n_valid_actions) == 0 or extra_attempts_left == 0:
-                 latest_action = final_story_graph.get_latest_story_node_from_character(current_character)
-                 final_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=latest_action.timestep)
-                 action_for_character_found = True
+                if verbose and len(top_n_valid_actions) == 0:
+                    print("No valid actions found! This character will wait.")
+                if verbose and extra_attempts_left == 0:
+                    print("Out of extra attempts! This character will wait.")                     
+                latest_action = final_story_graph.get_latest_story_node_from_character(current_character)
+                final_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=latest_action.timestep)
+                action_for_character_found = True
 
             # #From the valid options, we pick from the rule we will use randomly.
             chosen_action_container = random.choice(top_n_valid_actions)
@@ -257,14 +269,24 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
             #Each action will return a true/false value. If the apply is successful, True is returned. If not, False is returned.
             match action_type:
                 case "Apply Rule":
+                    if verbose:
+                        print("Attempting to apply a rule:",chosen_action_container.action_object.rule_name,"at abs_step",chosen_action_container.perform_index,"for",current_charname)
                     action_for_character_found = attempt_apply_rule(rule_object=chosen_action_container.action_object, perform_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, character_object=current_character, shortest_path_charname_list=shortest_path_character_names_list)
                 case "Advance Task":
+                    if verbose:
+                        print("Attempting to advance task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
                     action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
                 case "Perform Task":
+                    if verbose:
+                        print("Attempting to perform task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
                     action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
                 case "Cancel Task":
+                    if verbose:
+                        print("Attempting to cancel task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
                     action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
                 case "Move Towards Task Location":
+                    if verbose:
+                        print("Attempting to move towards task location:")
 
                     #We can make a list of index and randomly pick from it until it gives us a positive result
                     #Let's do it in the function
@@ -275,9 +297,14 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 case _:
                     pass
 
+            if verbose:
+                print("Chosen action validity:", action_for_character_found)
+
             #If we don't find the rule to apply yet, we might need to add new rules to top_n. Suitable rules might be clogged behind invalid joint rules.
             if not action_for_character_found:
                 if extra_attempts_left == -1 or extra_attempts > 0:
+                    if verbose:
+                        print("We still have extra attempts, so we'll keep trying.")
                     #Check if we have any attempts left, if we do, then add the first thing from the extra rules if there are still more extra rules
                     if len(extra_actions) > 0:
                         top_n_valid_actions.append(extra_actions.pop(0))

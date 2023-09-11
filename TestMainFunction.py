@@ -65,9 +65,11 @@ rule_c_to_bad2 = RewriteRule(name="c->bad2",story_condition=[node_c], story_chan
 # print(graph_1.get_longest_path_length_by_character(character=alice))
 # print(graph_1.get_latest_story_node_from_character(character=alice))
 
-graph_1_modded = generate_story_from_starter_graph(init_storygraph=graph_1, list_of_rules=[rule_b_to_bad1, rule_b_to_de, rule_c_to_bad2, rule_c_to_fg], required_story_length=5, top_n=5, extra_attempts=0, verbose=True)
+graph_1_modded = generate_story_from_starter_graph(init_storygraph=graph_1, list_of_rules=[rule_b_to_bad1, rule_b_to_de, rule_c_to_bad2, rule_c_to_fg], required_story_length=5, top_n=5, extra_attempts=-1, verbose=True)
 
 print("We expect the story following Story Graph to contain the following nodes for Alice: A-D-E-F-G.")
 graph_1_modded.print_all_node_beautiful_format()
 
+
+#TODO (Important): I think there might be something wrong with the insert functions. They might not be properly adding the "next nodes" or "previous nodes".
 # We gotta test Attempt Apply Rule because apparently that thing isn't working...

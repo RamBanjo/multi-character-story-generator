@@ -168,6 +168,9 @@ class StoryGraph:
             #if there is a previous node, remove references to this node
             if absolute_step-1 >= 0:
                 prevnode = self.story_parts[(char_name, absolute_step-1)]
+
+                #TAG: temporary print
+                print("Removing",removed.name, "Previous is",prevnode.name)
                 prevnode.remove_next_node(character)
             
             #if the removed thing is not the last thing, then we need to move stuff down
@@ -401,8 +404,26 @@ class StoryGraph:
     # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
     # Split Joint: The score is the max among all the given splits.
 
+    #TODO (Important): Rule. Rule. Of Course. We should have return the fail value if there is no pattern.
+    #Obviously we aren't going to let the user use those bad bad horrible no good rules.
     def calculate_score_from_rule_char_and_cont(self, actor, insert_index, rule, mode=0):
 
+        # For the non-joint rule we can use self.check_for_pattern_in_storyline() to see if there is a pattern.
+        # For the cont joint and split joint we can uses the same.
+        # For the join joint, there has to be a pattern for at least one of the nodes listed.
+
+        if not rule.is_joint_rule:
+            test_result = self.check_for_pattern_in_storyline(pattern_to_test=rule.story_condition, character_to_extract=actor)
+            if not test_result[0]:
+                return DEFAULT_INVALID_SCORE
+        else:
+            if rule.joint_type == JointType.JOIN:
+                pass
+            else:
+                pass
+            
+        #TAG: Temporary Print
+        print(insert_index, rule.rule_name)
         #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
 
         #If it's a normal type of rule then we can use the normal calculate score function do do this.

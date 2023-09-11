@@ -39,6 +39,6 @@ rule_b_to_bad1 = RewriteRule(story_condition=[node_b], story_change=[bad_1])
 rule_c_to_bad2 = RewriteRule(story_condition=[node_c], story_change=[bad_2])
 
 # rule_attempt = graph_1.check_continuation_validity(actor=alice, abs_step_to_cont_from=0, cont_list=[node_d, node_e], target_list=None, purge_count=2)
-# rule_attempt = attempt_apply_rule(rule_object=rule_b_to_de, perform_index=1, target_story_graph=graph_1, character_object=alice, shortest_path_charname_list=["alice"])
-rule_attempt = graph_1.apply_rewrite_rule(rule=rule_b_to_de, character=alice, abs_step=1, verbose=True)
+rule_attempt = attempt_apply_rule(rule_object=rule_b_to_de, perform_index=1, target_story_graph=graph_1, character_object=alice, shortest_path_charname_list=["alice"])
+# rule_attempt = graph_1.apply_rewrite_rule(rule=rule_b_to_de, character=alice, abs_step=1, verbose=True)
 print(rule_attempt)
