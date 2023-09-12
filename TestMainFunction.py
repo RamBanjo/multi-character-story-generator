@@ -44,8 +44,8 @@ bad_1 = StoryNode(name="Bad_1", required_test_list=[not_warrior_tag])
 bad_2 = StoryNode(name="Bad_2", required_test_list=[not_warrior_tag])
 
 alice = CharacterNode(name="Alice", tags={"Type":"Character", "Job":"Warrior"})
-bob = CharacterNode(name="Alice", tags={"Type":"Character", "Job":"Fighter"})
-charlie = CharacterNode(name="Alice", tags={"Type":"Character", "Job":"Bard"})
+bob = CharacterNode(name="Bob", tags={"Type":"Character", "Job":"Fighter"})
+charlie = CharacterNode(name="Charlie", tags={"Type":"Character", "Job":"Bard"})
 town = LocationNode(name = "Town")
 
 state_1 = WorldState(name="State 1", objectnodes=[alice, town])
@@ -54,6 +54,12 @@ state_1.connect(from_node=town, edge_name="holds", to_node=alice)
 graph_1 = StoryGraph(name="Graph 1", character_objects=[alice], location_objects=[town], starting_ws = state_1)
 
 graph_1.insert_multiple_parts(part_list=[node_a, node_b, node_c], character=alice, location_list=[town, town, town])
+
+# for part in graph_1.story_parts.values():
+#     print(part.name)
+#     print("prev",part.previous_nodes)
+#     print("next",part.next_nodes)
+#     print("-----")
 
 rule_b_to_de = RewriteRule(name="b->de",story_condition=[node_b], story_change=[node_d, node_e], remove_before_insert=True)
 rule_c_to_fg = RewriteRule(name="c->fg",story_condition=[node_c], story_change=[node_f, node_g], remove_before_insert=True)
@@ -71,5 +77,6 @@ print("We expect the story following Story Graph to contain the following nodes 
 graph_1_modded.print_all_node_beautiful_format()
 
 
-#TODO (Important): I think there might be something wrong with the insert functions. They might not be properly adding the "next nodes" or "previous nodes".
-# We gotta test Attempt Apply Rule because apparently that thing isn't working...
+# #TODO (Important): Of note is that the error that we can't find previous node occurs when b->de is called but not c->fg
+# 
+# # We gotta test Attempt Apply Rule because apparently that thing isn't working...

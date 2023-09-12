@@ -122,7 +122,9 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 #In the event of a normal rule, if one node is invalid the entire sequence will return -999, which lets us know the rule isn't valid.
                 #In the event of a joint rule, -999 will only be returned if all the available slots are -999, which means that this rule cannot be applied to this character and thus is invalid.
                 if rule_score != -999:
-
+                    
+                    if verbose:
+                        print("Found Acceptable Rule", rule.rule_name, "at", rule_insert_index)
                     rule_container = StoryGenerationActionContainer(action_name="Apply Rule", action_object=rule, action_score=rule_score, perform_index=rule_insert_index)
                     acceptable_rules_with_absolute_step_and_score.append(rule_container)
 
@@ -299,6 +301,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
             if verbose:
                 print("Chosen action validity:", action_for_character_found)
+                if action_for_character_found:
+                    print("The action is valid, so the action was performed.")
 
             #If we don't find the rule to apply yet, we might need to add new rules to top_n. Suitable rules might be clogged behind invalid joint rules.
             if not action_for_character_found:
@@ -312,6 +316,14 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                         extra_attempts_left -= 1
             else:
                 #If we did find the rule to apply we should update the story graph so that the locations show up in the story.
+
+                #Temporary Print
+                # for part in final_story_graph.story_parts.values():
+                #     print(part.name)
+                #     print("prev",part.previous_nodes)
+                #     print("next",part.next_nodes)
+                #     print("-----")
+
                 final_story_graph.fill_in_locations_on_self()
 
         #Finally, we fill in the locations on self and update the list of changes.

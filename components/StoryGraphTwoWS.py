@@ -168,9 +168,6 @@ class StoryGraph:
             #if there is a previous node, remove references to this node
             if absolute_step-1 >= 0:
                 prevnode = self.story_parts[(char_name, absolute_step-1)]
-
-                #TAG: temporary print
-                print("Removing",removed.name, "Previous is",prevnode.name)
                 prevnode.remove_next_node(character)
             
             #if the removed thing is not the last thing, then we need to move stuff down
@@ -216,16 +213,16 @@ class StoryGraph:
             #then, we add a new story part at the spot
             return_node = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy, targets)
 
-            #finally, connect this to other nodes
-            #the node that comes after,
-            return_node.add_next_node(self.story_parts[(char_name, absolute_step+1)], character)
-
-            #and the node that comes before if it's not inserted as first node
-
+            #Connect to Other Nodes.
+            #Firstly, if this isn't the first node, we will connect to the previous node.
+            #The previous node severs its ties with its previous next node and now considers the current node to be its next node.
             if absolute_step-1 >= 0:
                 prevnode =  self.story_parts[(char_name, absolute_step-1)]
                 prevnode.remove_next_node(character)
                 prevnode.add_next_node(return_node, character)
+
+            #Secondly, since to get here we established that a next node exists, we need to add the next node as the current node's next node.
+            return_node.add_next_node(self.story_parts[(char_name, absolute_step+1)], character)
 
         self.refresh_longest_path_length()
 
@@ -412,18 +409,25 @@ class StoryGraph:
         # For the cont joint and split joint we can uses the same.
         # For the join joint, there has to be a pattern for at least one of the nodes listed.
 
+        pattern_found_at_step = False
         if not rule.is_joint_rule:
-            test_result = self.check_for_pattern_in_storyline(pattern_to_test=rule.story_condition, character_to_extract=actor)
-            if not test_result[0]:
-                return DEFAULT_INVALID_SCORE
+            test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=rule.story_condition, character_to_extract=actor)
+            pattern_found_at_step = insert_index in test_result_tuple[1]
+
         else:
             if rule.joint_type == JointType.JOIN:
-                pass
+                #Want to know if there is at least one pattern.
+                for potential_joint in rule.base_actions:
+                    test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=[potential_joint], character_to_extract=actor)
+                    pattern_found_at_step = pattern_found_at_step or insert_index in test_result_tuple[1]
+
             else:
-                pass
+                test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=[rule.base_joint], character_to_extract=actor)
+                pattern_found_at_step = insert_index in test_result_tuple[1]
+
+        if not pattern_found_at_step:
+            return DEFAULT_INVALID_SCORE
             
-        #TAG: Temporary Print
-        print(insert_index, rule.rule_name)
         #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
 
         #If it's a normal type of rule then we can use the normal calculate score function do do this.
@@ -558,8 +562,6 @@ class StoryGraph:
 
         # return traveling_state
 
-    #TODO (Important): banned_subgraph_locs is a relic of a bygone era. Can we force location without using it and use exact index instead?
-    #Actually, is there any place where Apply Once is True since we changed our system?
     #...we definitely don't need Apply Once. The new Rewrite Rules don't use it, and our generation system specifies clearly the absolute step every single time.
     def apply_rewrite_rule(self, rule, character, location_list = None, abs_step = -1, verbose=False):
         '''

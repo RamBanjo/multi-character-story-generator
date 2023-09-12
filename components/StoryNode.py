@@ -140,6 +140,7 @@ class StoryNode:
             char_name = character_reference.get_name()
 
         self.next_nodes[char_name] = next_node
+
         next_node.previous_nodes[char_name] = self
         #next_node.add_actor(character_reference)
 
@@ -150,7 +151,7 @@ class StoryNode:
     Then, it removes next_node from its own next nodes
     '''
     def remove_next_node(self, character_reference):
-
+        
         char_name = None
 
         if character_reference is not None:
