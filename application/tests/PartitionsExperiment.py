@@ -1,8 +1,10 @@
 import itertools
 import sys
+
 sys.path.insert(0,'')
 
-from application.components.UtilFunctions import list_all_good_combinations_from_joint_join_pattern
+from application.components.StoryObjects import CharacterNode
+from application.components.UtilFunctions import all_possible_actor_groupings, list_all_good_combinations_from_joint_join_pattern, permute_actor_for_task_stack_requirements, permute_all_possible_groups_with_ranges_and_freesize
 # from application.components.StoryObjects import CharacterNode
 
 
@@ -18,13 +20,15 @@ from application.components.UtilFunctions import list_all_good_combinations_from
 
 # print(permute_all_possible_groups(4, 2))
 
-# alice = CharacterNode("Alice")
-# bob = CharacterNode("Bob")
-# charlie = CharacterNode("Charlie")
-# daniel = CharacterNode("Daniel")
+alice = CharacterNode("Alice")
+bob = CharacterNode("Bob")
+charlie = CharacterNode("Charlie")
+daniel = CharacterNode("Daniel")
 
 # charcter_list = [("Alice", 3), ("Bob", 3), ("Charlie", 3), ("Daniel", 3)]
-# all_possible_actor_groupings((2,1,1), charcter_list)
+
+character_list = ["A"]
+print(permute_actor_for_task_stack_requirements(actor_name_list=character_list, placeholder_fill_slots=1))
 
 # test_range = [1, 2, -1, 5, (3,4), -1, 2, -1, (1, 2), (1, 6)]
 # test_range_2 = [5, 15]
@@ -76,10 +80,10 @@ from application.components.UtilFunctions import list_all_good_combinations_from
 #     return e[0]
 
 # testdict = {"NodeA" : ["A", "B", "C"], "AAAANodeB": ["D","E"]}
-# print(sorted(list(testdict.items()), key=getfirst))
+# # print(sorted(list(testdict.items()), key=getfirst))
 
-testdict = {"NodeA":["Alice", "Eve"], "NodeB":["Bob", "Charlie"], "NodeC":["Daniel", "Frankie"]}
-print(list_all_good_combinations_from_joint_join_pattern(current_actor_name=None, dict_of_base_nodes=testdict, actors_wanted=3))
+# testdict = {"NodeA":["Alice", "Eve"], "NodeB":["Bob", "Charlie"], "NodeC":["Daniel", "Frankie"]}
+# print(list_all_good_combinations_from_joint_join_pattern(current_actor_name=None, dict_of_base_nodes=testdict, actors_wanted=3))
 
 # suggested_included_tags={"Job":"Swordmaster", "Job":"Warrior", "Job":"Fighter"}
 # print(suggested_included_tags)

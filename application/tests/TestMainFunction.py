@@ -1,10 +1,10 @@
 # Testing the Main Function. Here are the things we need to test:
 
-# 1. Testing if replacement rules are recognized.
+# 1. Testing if replacement rules are recognized. (COMPLETED!)
 # Graph starts with A-B-C. We have rules that say B -> DE and C -> FG. If we make the graph continue generating until the shortest path length of 5 is reached we would get ADEFG.
 # There are also invalid rules that the main character can't do. We want to make sure the program is able to ignore those as well. B -> Bad_1 and C -> Bad_2 are invalid because those nodes are invalid for the character.
 #
-# 2. Testing if task is recognized.
+# 2. Testing if task is recognized. (COMPLETED!)
 # Graph starts with A-B-C, where A contains a TaskChange Object. The task consists of two steps, each step has 1 action: Action D and Action E.
 # ...performing the task would potentially put you in a different location. What if B or C travels to another node? Would doing a chart break that? I don't like the sound of this.
 # I mean, it *would* make the option invalid at least if we put the proper requirements in the traveling nodes...
@@ -28,7 +28,7 @@ from application.StoryGeneration_NewFlowchart import attempt_apply_rule, generat
 from application.components.CharacterTask import CharacterTask, TaskStack
 from application.components.ConditionTest import HasEdgeTest, HasTagTest, SameLocationTest
 from application.components.RelChange import RelChange, TagChange, TaskChange
-from application.components.RewriteRuleWithWorldState import RewriteRule
+from application.components.RewriteRuleWithWorldState import *
 from application.components.StoryGraphTwoWS import StoryGraph
 from application.components.StoryNode import StoryNode
 from application.components.StoryObjects import CharacterNode, LocationNode, ObjectNode
@@ -47,9 +47,9 @@ not_warrior_tag = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag
 bad_1 = StoryNode(name="Bad_1", required_test_list=[not_warrior_tag])
 bad_2 = StoryNode(name="Bad_2", required_test_list=[not_warrior_tag])
 
-alice = CharacterNode(name="Alice", tags={"Type":"Character", "Job":"Warrior"})
-bob = CharacterNode(name="Bob", tags={"Type":"Character", "Job":"Fighter"})
-charlie = CharacterNode(name="Charlie", tags={"Type":"Character", "Job":"Bard"})
+alice = CharacterNode(name="Alice", tags={"Type":"Character", "Job":"Warrior", "Alive":True})
+bob = CharacterNode(name="Bob", tags={"Type":"Character", "Job":"Fighter", "Alive":True})
+charlie = CharacterNode(name="Charlie", tags={"Type":"Character", "Job":"Bard", "Alive":True})
 town = LocationNode(name = "Town")
 
 #Test 1: Recognization of Replacement Rules
@@ -90,45 +90,103 @@ town = LocationNode(name = "Town")
 
 #BEGIN TEST 2
 
-reward = ObjectNode(name="Reward", tags={"Type":"Object", "Value":"Expensive"})
+# reward = ObjectNode(name="Reward", tags={"Type":"Object", "Value":"Expensive"})
 
-target_is_alive = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=True)
-target_dies = TagChange(name="Target Dies",object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=False, add_or_remove=ChangeAction.ADD)
+# target_is_alive = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=True)
+# target_dies = TagChange(name="Target Dies",object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=False, add_or_remove=ChangeAction.ADD)
 
-task_giver_holds_reward = HasEdgeTest(object_from_test=GenericObjectNode.TASK_GIVER, edge_name_test="holds", object_to_test=reward, soft_equal=True)
-task_giver_and_owner_share_loc = SameLocationTest(list_to_test=[GenericObjectNode.TASK_GIVER, GenericObjectNode.TASK_OWNER])
-task_giver_loses_reward = RelChange(name="Task Giver Lose Reward", node_a=GenericObjectNode.TASK_GIVER, edge_name="holds", node_b=reward, value=None,add_or_remove=ChangeAction.REMOVE, soft_equal=True)
-task_owner_gets_reward = RelChange(name="Task Owner Gets Reward", node_a=GenericObjectNode.TASK_OWNER, edge_name="holds", node_b=reward, value=None,add_or_remove=ChangeAction.ADD)
+# task_giver_holds_reward = HasEdgeTest(object_from_test=GenericObjectNode.TASK_GIVER, edge_name_test="holds", object_to_test=reward, soft_equal=True)
+# bob_holds_reward = HasEdgeTest(object_from_test=bob, edge_name_test="holds", object_to_test=reward, soft_equal=True)
 
-kill_target = StoryNode(name="Kill Target", actor=[GenericObjectNode.TASK_OWNER],target=["kill_target"],required_test_list=[target_is_alive], effects_on_next_ws=[target_dies])
-get_reward = StoryNode(name="Get Reward", actor=[GenericObjectNode.TASK_GIVER, GenericObjectNode.TASK_OWNER], effects_on_next_ws=[task_giver_holds_reward, task_owner_gets_reward], required_test_list=[task_giver_holds_reward, task_giver_and_owner_share_loc])
+# task_giver_and_owner_share_loc = SameLocationTest(list_to_test=[GenericObjectNode.TASK_GIVER, GenericObjectNode.TASK_OWNER])
+# task_giver_loses_reward = RelChange(name="Task Giver Lose Reward", node_a=GenericObjectNode.TASK_GIVER, edge_name="holds", node_b=reward, value=None,add_or_remove=ChangeAction.REMOVE, soft_equal=True)
+# task_owner_gets_reward = RelChange(name="Task Owner Gets Reward", node_a=GenericObjectNode.TASK_OWNER, edge_name="holds", node_b=reward, value=None,add_or_remove=ChangeAction.ADD)
 
-task_giver_hates_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.TASK_GIVER, edge_name_test="hates", object_to_test="kill_target")
+# kill_target = StoryNode(name="Kill Target", actor=[GenericObjectNode.TASK_OWNER],target=["kill_target"],required_test_list=[target_is_alive], effects_on_next_ws=[target_dies], charcount=1, target_count=1)
+# get_reward = StoryNode(name="Get Reward", actor=[GenericObjectNode.TASK_GIVER, GenericObjectNode.TASK_OWNER], effects_on_next_ws=[task_giver_loses_reward, task_owner_gets_reward], required_test_list=[task_giver_holds_reward, task_giver_and_owner_share_loc], charcount=1, target_count=1)
 
-kill_target_task = CharacterTask(task_name="Kill Target Task", task_actions=[kill_target], task_location_name="Town", actor_placeholder_string_list=["kill_target"])
-get_reward_task = CharacterTask(task_name="Get Reward Task", task_actions=[get_reward], task_location_name="Town")
-kill_target_task_stack = TaskStack(stack_name="Kill and Get Rewarded", task_stack=[kill_target_task, get_reward_task], task_stack_requirement=[task_giver_hates_kill_target], stack_giver_name=GenericObjectNode.GENERIC_ACTOR, stack_owner_name=GenericObjectNode.GENERIC_TARGET)
+# task_giver_hates_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.TASK_GIVER, edge_name_test="hates", object_to_test="kill_target")
 
-get_kill_target_task_stack = TaskChange(name="Get Task", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_TARGET, task_stack=kill_target_task_stack)
+# kill_target_task = CharacterTask(task_name="Kill Target Task", task_actions=[kill_target], task_location_name="Town", actor_placeholder_string_list=["kill_target"])
+# get_reward_task = CharacterTask(task_name="Get Reward Task", task_actions=[get_reward], task_location_name="Town")
+# kill_target_task_stack = TaskStack(stack_name="Kill and Get Rewarded", task_stack=[kill_target_task, get_reward_task], task_stack_requirement=[task_giver_hates_kill_target], stack_giver_name=GenericObjectNode.GENERIC_ACTOR, stack_owner_name=GenericObjectNode.GENERIC_TARGET)
 
-get_task = StoryNode(name="Get Task", effects_on_next_ws=[get_kill_target_task_stack], charcount=1, target_count=1)
+# get_kill_target_task_stack = TaskChange(name="Get Task", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_TARGET, task_stack=kill_target_task_stack)
+
+# get_task = StoryNode(name="Get Task", effects_on_next_ws=[get_kill_target_task_stack], charcount=1, target_count=1)
+# node_b = StoryNode(name="Node B")
+# node_c = StoryNode(name="Node C")
+# node_x = StoryNode(name="Node X")
+
+# state_2 = WorldState(name="State 2", objectnodes=[alice, bob, charlie, reward, town])
+# state_2.connect(from_node=town, edge_name="holds", to_node=alice)
+# state_2.connect(from_node=town, edge_name="holds", to_node=bob)
+# state_2.connect(from_node=town, edge_name="holds", to_node=charlie)
+
+# state_2.connect(from_node=bob, edge_name="hates", to_node=charlie)
+# state_2.connect(from_node=bob, edge_name="holds", to_node=reward)
+
+# print(state_2.check_connection(node_a=bob, node_b=reward, edge_name="holds", edge_value=None, soft_equal=True))
+
+# sg2 = StoryGraph(name="Graph 2", character_objects=[alice, bob, charlie], location_objects=[town], starting_ws = state_2)
+
+# sg2.insert_joint_node(joint_node=get_task, main_actor=bob, targets=[alice])
+# sg2.insert_multiple_parts(part_list=[node_b, node_c], character=alice, location_list=[town, town], absolute_step=1)
+# sg2.insert_multiple_parts(part_list=[node_x, node_x, node_x], character=bob, location_list=[town, town, town], absolute_step=1)
+
+# sg2.insert_multiple_parts(part_list=[node_d, node_e, node_f, node_g], character=charlie, location_list=[town, town, town, town])
+
+# sg2.refresh_longest_path_length()
+
+# print(sg2.attempt_advance_task_stack("Kill and Get Rewarded", "Alice", 1, verbose=True))
+# print(sg2.attempt_advance_task_stack("Kill and Get Rewarded", "Alice", 2, verbose=True))
+# print(sg2.attempt_advance_task_stack("Kill and Get Rewarded", "Alice", 3, verbose=True))
+
+# TODO (Extra Features): Since we have found out that there are some cases where a task is assigned but it isn't possible to do or cancel, we would need a way to prevent that from happening.
+# What sort of Error Handling can we do to prevent that? For now, let's sanitize our inputs to make sure that doesn't happen.
+
+# sg2.attempt_advance_task_stack(task_stack_name="Kill and Get Rewarded", actor_name="Alice", abs_step=1)
+
+# print("---")
+# sg2.print_all_nodes_from_characters_storyline_beautiful_format(alice)
+# print("---")
+# sg2.print_all_nodes_from_characters_storyline_beautiful_format(bob)
+# print("---")
+# sg2.print_all_nodes_from_characters_storyline_beautiful_format(charlie)
+# print("---")
+
+# #TODO (Important): Task stack shouldn't be cleared, Alice should go receive the reward from Bob before it can be considered as cleared.
+# print(sg2.attempt_advance_task_stack(task_stack_name="Kill and Get Rewarded", actor_name="Alice", abs_step=2, verbose=True))
+# print(sg2.attempt_advance_task_stack(task_stack_name="Kill and Get Rewarded", actor_name="Alice", abs_step=3, verbose=True))
+# print(sg2.attempt_advance_task_stack(task_stack_name="Kill and Get Rewarded", actor_name="Alice", abs_step=4, verbose=True))
+
+# graph_2_modded = generate_story_from_starter_graph(init_storygraph=sg2, list_of_rules=[], required_story_length=5, top_n=5, extra_attempts=-1, verbose=True)
+
+# print("---")
+# graph_2_modded.print_all_nodes_from_characters_storyline_beautiful_format(alice)
+# print("---")
+# graph_2_modded.print_all_nodes_from_characters_storyline_beautiful_format(bob)
+# print("---")
+# graph_2_modded.print_all_nodes_from_characters_storyline_beautiful_format(charlie)
+# print("---")
+# END TEST 2
+
+# Test 3: Recognition of Joint Rules (all three types)
+# BEGIN TEST 3
+# Graph starts with A-B-C for two characters. There is a rule where C -> Joint Node X, Joint Node X -> Joint Node Y, and Joint Node Y -> D or E. Both characters should have the same chart.
+
+state_3 = WorldState("Test State 3", objectnodes=[alice, bob, town])
+sg3 = StoryGraph(name="Graph 3", character_objects=[alice, bob], location_objects=[town], starting_ws=state_3)
+
+node_a = StoryNode(name="Node A")
 node_b = StoryNode(name="Node B")
 node_c = StoryNode(name="Node C")
-node_x = StoryNode(name="Node X")
+node_d = StoryNode(name="Node D")
+node_e = StoryNode(name="Node E")
 
-state_2 = WorldState(name="State 2", objectnodes=[alice, bob, charlie, town])
-state_2.connect(from_node=town, edge_name="holds", to_node=alice)
-state_2.connect(from_node=town, edge_name="holds", to_node=bob)
-state_2.connect(from_node=town, edge_name="holds", to_node=charlie)
-state_2.connect(from_node=bob, edge_name="hates", to_node=charlie)
+joint_x = StoryNode(name="Joint X", charcount=2)
+joint_y = StoryNode(name="Joint Y", charcount=2)
 
-sg2 = StoryGraph(name="Graph 1", character_objects=[alice, bob, charlie], location_objects=[town], starting_ws = state_2)
-
-sg2.insert_joint_node(joint_node=get_task, main_actor=bob, targets=[alice])
-sg2.insert_multiple_parts(part_list=[node_b, node_c], character=alice, location_list=[town, town], absolute_step=1)
-sg2.insert_multiple_parts(part_list=[node_x, node_x, node_x], character=bob, location_list=[town, town, town], absolute_step=1)
-
-sg2.insert_multiple_parts(part_list=[node_x, node_x, node_x, node_x], character=charlie, location_list=[town, town, town, town])
-
-sg2.print_all_node_beautiful_format()
-#END TEST 2
+rule_c_to_x = JoiningJointRule(base_actions=[node_c], joint_node=joint_x, rule_name="c->x")
+rule_x_to_y = ContinuousJointRule(base_joint=joint_x, joint_node=joint_y, rule_name="x->y")
+rule_y_to_de = SplittingJointRule(base_joint=joint_y, split_list=[node_d, node_e], rule_name="y->de")

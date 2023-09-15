@@ -30,6 +30,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
     while True:
 
+        final_story_graph.refresh_longest_path_length()
+
         #check the shortest story length
         shortest_path_length = final_story_graph.get_shortest_path_length_from_all()
 
@@ -46,14 +48,15 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
             print("Getting the names of characters with shortest path...")    
         shortest_path_character_names_list = final_story_graph.get_characters_with_shortest_path_length()
 
-        #Randomly pick one name from that list. That will be the character we generate stories for in this step. 
+        #Randomly pick one name from that list. That will be the character we generate stories for in this step.
+        
         current_charname = random.choice(shortest_path_character_names_list)
         if verbose:
             print("Chosen current character:", current_charname)
         latest_state = final_story_graph.make_latest_state()
 
         current_character = latest_state.node_dict[current_charname]
-
+        final_story_graph.print_all_nodes_from_characters_storyline(current_character)
         action_for_character_found = False
 
         if verbose:
@@ -152,8 +155,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         for task_name in available_task_name_list:
             for attempt_index in range(0, final_story_graph.longest_path_length):
 
-                task_completeness = final_story_graph.test_task_completeness()
-                task_valid = final_story_graph.test_task_stack_advance_validity(task_stack_name=task_name, actor_name=current_charname, abs_step=task_name)
+                task_completeness = final_story_graph.test_task_completeness(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
+                task_valid = final_story_graph.test_task_stack_advance_validity(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
 
                 if task_valid:
                     default_task_score = 0
@@ -189,7 +192,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
 
         #Checking the number of things that say "Cancel".
         task_count = len(list_of_available_tasks)
-        cancel_count = len([x for x in list_of_available_tasks if x[3] == "Cancel"])
+        cancel_count = len([x for x in list_of_available_tasks if x.action_name == "Cancel Task"])
 
         #So if there is not a task or if everything is a cancel, we add a move towards quest action
         if len(list_of_available_tasks) < 0 or task_count == cancel_count:
@@ -263,44 +266,44 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 latest_action = final_story_graph.get_latest_story_node_from_character(current_character)
                 final_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=latest_action.timestep)
                 action_for_character_found = True
+            else:
+                # #From the valid options, we pick from the rule we will use randomly.
+                chosen_action_container = random.choice(top_n_valid_actions)
+                top_n_valid_actions.remove(chosen_action_container)
 
-            # #From the valid options, we pick from the rule we will use randomly.
-            chosen_action_container = random.choice(top_n_valid_actions)
-            top_n_valid_actions.remove(chosen_action_container)
+                action_type = chosen_action_container.action_name
 
-            action_type = chosen_action_container.action_name
+                # What is this action? We check the first element to find out.
+                #Each action will return a true/false value. If the apply is successful, True is returned. If not, False is returned.
+                match action_type:
+                    case "Apply Rule":
+                        if verbose:
+                            print("Attempting to apply a rule:",chosen_action_container.action_object.rule_name,"at abs_step",chosen_action_container.perform_index,"for",current_charname)
+                        action_for_character_found = attempt_apply_rule(rule_object=chosen_action_container.action_object, perform_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, character_object=current_character, shortest_path_charname_list=shortest_path_character_names_list)
+                    case "Advance Task":
+                        if verbose:
+                            print("Attempting to advance task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
+                        action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
+                    case "Perform Task":
+                        if verbose:
+                            print("Attempting to perform task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
+                        action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
+                    case "Cancel Task":
+                        if verbose:
+                            print("Attempting to cancel task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
+                        action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
+                    case "Move Towards Task Location":
+                        if verbose:
+                            print("Attempting to move towards task location:")
 
-            # What is this action? We check the first element to find out.
-            #Each action will return a true/false value. If the apply is successful, True is returned. If not, False is returned.
-            match action_type:
-                case "Apply Rule":
-                    if verbose:
-                        print("Attempting to apply a rule:",chosen_action_container.action_object.rule_name,"at abs_step",chosen_action_container.perform_index,"for",current_charname)
-                    action_for_character_found = attempt_apply_rule(rule_object=chosen_action_container.action_object, perform_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, character_object=current_character, shortest_path_charname_list=shortest_path_character_names_list)
-                case "Advance Task":
-                    if verbose:
-                        print("Attempting to advance task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
-                    action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
-                case "Perform Task":
-                    if verbose:
-                        print("Attempting to perform task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
-                    action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
-                case "Cancel Task":
-                    if verbose:
-                        print("Attempting to cancel task:",chosen_action_container.action_object,"at",chosen_action_container.perform_index,"for",current_charname)
-                    action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
-                case "Move Towards Task Location":
-                    if verbose:
-                        print("Attempting to move towards task location:")
-
-                    #We can make a list of index and randomly pick from it until it gives us a positive result
-                    #Let's do it in the function
-                    #Actually, I think it would be better to always call this function from the latest step.
-                    action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character, movement_index=final_abs_step)
-                case "Wait":
-                    pass
-                case _:
-                    pass
+                        #We can make a list of index and randomly pick from it until it gives us a positive result
+                        #Let's do it in the function
+                        #Actually, I think it would be better to always call this function from the latest step.
+                        action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character, movement_index=final_abs_step)
+                    case "Wait":
+                        pass
+                    case _:
+                        pass
 
             if verbose:
                 print("Chosen action validity:", action_for_character_found)

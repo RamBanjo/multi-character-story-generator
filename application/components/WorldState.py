@@ -307,9 +307,8 @@ class WorldState:
 
         if number_of_placeholder_chars_needed > len(eligible_character_names):
             return []
-        
-        possible_combs = all_possible_actor_groupings_with_ranges_and_freesizes([number_of_placeholder_chars_needed, -1], eligible_character_names)
-        possible_combs = [thing[0] for thing in possible_combs]
+
+        possible_combs = permute_actor_for_task_stack_requirements(actor_name_list=eligible_character_names, placeholder_fill_slots=number_of_placeholder_chars_needed)
         permuted_possible_combs = []
 
         for thing in possible_combs:

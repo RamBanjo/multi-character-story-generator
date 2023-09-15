@@ -69,6 +69,7 @@ class StoryGraph:
         self.placeholder_dicts_of_tasks = dict()
 
     def add_to_story_part_dict(self, character_name, abs_step, story_part):
+        story_part.abs_step = abs_step
         self.story_parts[(character_name, abs_step)] = story_part
 
     #Copy=False would be used in the case of joint.
@@ -634,12 +635,14 @@ class StoryGraph:
             main_actor = other_actors.pop(0)
         
         new_node = self.insert_story_part(part=joint_node, character=main_actor, location=location, absolute_step=absolute_step, copy=copy, targets=targets)
-
-        for additional_actor in other_actors:
-            self.add_story_part_at_step(part=new_node, character=additional_actor, location=location, absolute_step=absolute_step, timestep=new_node.timestep, copy=False)
         
-        for target in new_node.target:
-            self.add_story_node_to_targets_storyline(pot_target=target, abs_step=absolute_step, story_part=new_node)
+        #TODO (Important): These two should insert instead of entirely replacing the node.
+        for additional_actor in other_actors:
+            self.insert_story_part(part=new_node, character=additional_actor, location=location, absolute_step=absolute_step, copy=False)
+        
+        for target in targets:
+            self.insert_story_node_for_target(target=target, abs_step=absolute_step, story_part=new_node)
+        # self.add_targets_to_storynode(node = new_node, abs_step=absolute_step, target_list=targets)
 
         return new_node
 
@@ -877,6 +880,38 @@ class StoryGraph:
         if pot_target in self.character_objects:
             self.add_to_story_part_dict(character_name=pot_target.get_name(), abs_step=abs_step, story_part=story_part)
 
+    #In all cases, we assume that the story part is already populated by all other information except for target information. This function is here for that.
+    def insert_story_node_for_target(self, target, abs_step, story_part):
+        
+        character_path_length = self.get_longest_path_length_by_character(target)
+        char_name = target.get_name()
+
+        if abs_step >= character_path_length:
+
+            self.add_story_node_to_targets_storyline(pot_target=target, abs_step=abs_step, story_part=story_part)
+
+        else:
+            #first, we need to move everything that comes after this part up by one
+            for i in range(character_path_length-1, abs_step-1, -1):
+                move_up = self.story_parts.pop((char_name, i))
+                self.add_to_story_part_dict(character_name=char_name, abs_step=i+1, story_part=move_up)
+
+            #then, we add a new story part at the spot
+            self.add_story_node_to_targets_storyline(pot_target=target, abs_step=abs_step, story_part=story_part)
+
+            #Connect to Other Nodes.
+            #Firstly, if this isn't the first node, we will connect to the previous node.
+            #The previous node severs its ties with its previous next node and now considers the current node to be its next node.
+            if abs_step-1 >= 0:
+                prevnode =  self.story_parts[(char_name, abs_step-1)]
+                prevnode.remove_next_node(target)
+                prevnode.add_next_node(story_part, target)
+
+            #Secondly, since to get here we established that a next node exists, we need to add the next node as the current node's next node.
+            story_part.add_next_node(self.story_parts[(char_name, abs_step+1)], target)
+
+        self.refresh_longest_path_length()
+
     def joint_continuation(self, abs_step, joint_node, actors, location=None, target_list=[]):
 
         #Applying here is inserting the next node to be the Joint Node for the first character, then having the second character and so on Join in.
@@ -1109,7 +1144,7 @@ class StoryGraph:
     def add_targets_to_storynode(self, node, abs_step, target_list):
         for target in target_list:
             node.add_target(target)
-            #Check if any of the targets exist in self.characters. If there is one, then make sure to add this node to that character's StoryGraph in the same step.
+            #Check if any of the targets exist in self.characters. If there is one, then make sure to add this node to that character's StoryGraph in the same step. 
             self.add_story_node_to_targets_storyline(target, abs_step, node)
 
     def print_all_nodes(self):
@@ -1133,6 +1168,17 @@ class StoryGraph:
     def print_all_nodes_from_characters_storyline(self, actor):
         for thing in self.make_story_part_list_of_one_character(character_to_extract=actor):
             print(thing)
+
+    def print_all_nodes_from_characters_storyline_beautiful_format(self, actor):
+        print("ENTIRE STORYLINE OF", actor.get_name())
+        step = 0
+        for thing in self.make_story_part_list_of_one_character(character_to_extract=actor):
+            print(thing, thing.abs_step)
+            print("Node Name:", thing.get_name())
+            print("Timestep", thing.timestep)
+            print("Actors:", thing.get_actor_names())
+            print("Targets:", thing.get_target_names())
+            print("----------")
 
     def check_for_pattern_in_storyline(self, pattern_to_test, character_to_extract, verbose=False):
 
@@ -1181,7 +1227,7 @@ class StoryGraph:
         #For use with the new subgraph function
 
         list_of_char_parts = []
-
+        
         keys_for_this_char = [selfkey for selfkey in self.story_parts.keys() if selfkey[0] == character_to_extract.get_name()]
         keys_for_this_char = sorted(keys_for_this_char, key=getsecond)
 
@@ -1302,7 +1348,8 @@ class StoryGraph:
                         for current_test_to_check in equivalent_tests:
 
                             if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
-
+                                
+                                print("failed test", current_test_to_check)
                                 return False
         return True
 
@@ -1374,7 +1421,7 @@ class StoryGraph:
             return False
         
         location_has_actor = current_ws.check_connection(node_a = current_loc, edge_name = current_ws.DEFAULT_HOLD_EDGE_NAME, node_b = actor, soft_equal = True)
-        
+
         placeholder_charname_dict = task.placeholder_info_dict
         placeholder_charobj_pair = [(x[0], current_ws.node_dict[x[1]]) for x in placeholder_charname_dict.items()]
         
@@ -1418,7 +1465,6 @@ class StoryGraph:
     "last_update_step": The last step that the task got updated, meaning that the next step of the task advancing should be after this step.
     '''
     def find_last_step_of_task_stack_from_actor(self, task_stack_name, actor_name, verbose=False):
-        
 
         self.refresh_longest_path_length()
 
@@ -1462,7 +1508,9 @@ class StoryGraph:
         current_task = task_stack.get_current_task()
 
         #The current task itself must be valid
-        return self.test_task_validity(task=current_task, actor=char_at_ws, abs_step=abs_step), completeness
+        
+        test_result = self.test_task_validity(task=current_task, actor=char_at_ws, abs_step=abs_step)
+        return test_result, completeness
     
     def insert_multiple_parts_with_joint_and_nonjoint(self, node_list, main_character, abs_step):
         for index in range(0, len(node_list)):
@@ -1483,22 +1531,23 @@ class StoryGraph:
                         make_main_char_target = True
 
                         actor_list = [x for x in current_story_part.actor]
-                        target_list = [x for x in current_story_part.target if x is not main_character]
+                        target_list = [x for x in current_story_part.target if x != main_character]
                     else:
-                        actor_list = [x for x in current_story_part.actor if x is not main_character]
+                        actor_list = [x for x in current_story_part.actor if x != main_character]
                         target_list = [x for x in current_story_part.target]                       
                     
                     #We need to reset the character slots when adding story parts, because they already come with translated story nodes.
                     current_story_part.actor = []
                     current_story_part.target = []
-                    self.insert_joint_node(joint_node=current_story_part, main_actor=main_character, other_actors=actor_list, location=current_story_part.location, targets=target_list, absolute_step=current_insert_index, make_main_actor_a_target=make_main_char_target)
+                    newnode = self.insert_joint_node(joint_node=current_story_part, main_actor=main_character, other_actors=actor_list, location=current_story_part.location, targets=target_list, absolute_step=current_insert_index, make_main_actor_a_target=make_main_char_target)
 
                 else:
                     #We need to reset the character slots when adding story parts, because they already come with translated story nodes.
                     current_story_part.actor = []
-                    self.insert_story_part(part=current_story_part, character=main_character, location=current_story_part.location, absolute_step=current_insert_index)
-        
-    def attempt_advance_task_stack(self, task_stack_name, actor_name, abs_step):
+                    newnode = self.insert_story_part(part=current_story_part, character=main_character, location=current_story_part.location, absolute_step=current_insert_index)
+
+                    
+    def attempt_advance_task_stack(self, task_stack_name, actor_name, abs_step, verbose=False):
         # Get the Task Stack Object.
         
         current_ws = self.make_state_at_step(abs_step)
@@ -1506,20 +1555,25 @@ class StoryGraph:
 
         #Return False on Actor None
         if actor_object is None:
+            if verbose:
+                print("This Actor Object does not Exist!")
             return False
         
         #Return False on Task Stack Object None
         task_stack_object = actor_object.get_task_stack_by_name(task_stack_name)
         if task_stack_object is None:
+            if verbose:
+                print("This Task Stack doesn't exist!")
             return False    
 
         # Use test_task_stack_advance_validity to test if task stack can be advanced here
 
         advance_valid = self.test_task_stack_advance_validity(task_stack_name=task_stack_name, actor_name=actor_name, abs_step=abs_step)
-
+        
         #Task advance is true, we will add the action from the stack's current task to the story node
         if advance_valid[0]:
-
+            if verbose:
+                print("Task Step can Advance")
             current_task = task_stack_object.get_current_task()
             story_nodes_to_add = current_task.task_actions
 
@@ -1600,6 +1654,8 @@ class StoryGraph:
                 #TODO (Extra Features): By technicality there shouldn't be anyone with already a task in WS0, but we can think of a way to handle that later.
                 #Get the story node before this step and add task_advance to it
                 case "task_step_already_completed":
+                    if verbose:
+                        print("Task Step is Already Completed, Task Auto Advanced")
                     task_advance_name = "task_advance_for_" + actor_name + "_" + task_stack_name
                     advance_stack_object = TaskAdvance(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
                     previous_story_node.effects_on_next_ws.append(advance_stack_object)
@@ -1607,6 +1663,8 @@ class StoryGraph:
                 
                 #Get the story node at this step and add task_cancel to it
                 case "task_step_already_failed":
+                    if verbose:
+                        print("Task Step is Already Failed, Task Cancelled")
                     task_advance_name = "task_cancel_for_" + actor_name + "_" + task_stack_name
                     cancel_stack_object = TaskCancel(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
                     previous_story_node.effects_on_next_ws.append(cancel_stack_object)
@@ -1614,6 +1672,8 @@ class StoryGraph:
                 
                 #Nothing is modified because the task cannot be advanced here
                 case _:
+                    if verbose:
+                        print("Task Step Can't Advance Because",advance_valid[1])
                     return False
 
         # If true, advance it and add TaskAdvance to the last action of the task. Return True.
@@ -1646,6 +1706,9 @@ class StoryGraph:
         current_ws = self.make_state_at_step(abs_step)
         actor_at_ws = current_ws.node_dict[actor_name]
         task_stack_at_ws = actor_at_ws.get_task_stack_by_name(task_stack_name)
+
+        if actor_at_ws.get_task_stack_by_name(task_stack_name) is None:
+            return "not_exist"
 
         #Return "wrong_location" if the character in the current state isn't in the right location for the task step.
         character_current_location_name = current_ws.get_actor_current_location(actor_at_ws).name
@@ -1764,15 +1827,24 @@ class StoryGraph:
 
 def make_list_of_changes_from_list_of_story_nodes(story_node_list):
     changeslist = []
-        
-    for snode in story_node_list:
+    
+    dupeless_node_list = remove_dupe_nodes(story_node_list)
+
+    for snode in dupeless_node_list:
         for change in snode.effects_on_next_ws:
             changes_from_snode = translate_generic_change(change, snode)
             changeslist.extend(changes_from_snode)
 
     return changeslist
         
-#     return loclist
+def remove_dupe_nodes(node_list):
+    sanitized_list = []
+
+    for node in node_list:
+        if node not in sanitized_list:
+            sanitized_list.append(node)
+
+    return sanitized_list
 
 def calculate_score_from_char_and_unpopulated_node_with_both_slots(actor, node, world_state, mode=0):
 
