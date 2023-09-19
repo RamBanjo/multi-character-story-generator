@@ -9,7 +9,7 @@
 # ...performing the task would potentially put you in a different location. What if B or C travels to another node? Would doing a chart break that? I don't like the sound of this.
 # I mean, it *would* make the option invalid at least if we put the proper requirements in the traveling nodes...
 #
-# 3. Testing if joint rules are recognized.
+# 3. Testing if joint rules are recognized. (COMPLETED!)
 # Graph starts with A-B-C for two characters. There is a rule where C -> Joint Node X, Joint Node X -> Joint Node Y, and Joint Node Y -> D or E. Both characters should have the same chart.
 #
 # 4. Testing if scores are recognized
@@ -26,7 +26,7 @@ sys.path.insert(0,'')
 
 from application.StoryGeneration_NewFlowchart import attempt_apply_rule, generate_story_from_starter_graph
 from application.components.CharacterTask import CharacterTask, TaskStack
-from application.components.ConditionTest import HasEdgeTest, HasTagTest, SameLocationTest
+from application.components.ConditionTest import HasEdgeTest, HasTagTest, InBiasRangeTest, SameLocationTest
 from application.components.RelChange import RelChange, TagChange, TaskChange
 from application.components.RewriteRuleWithWorldState import *
 from application.components.StoryGraphTwoWS import StoryGraph
@@ -138,14 +138,9 @@ town = LocationNode(name = "Town")
 
 # sg2.refresh_longest_path_length()
 
-# print(sg2.attempt_advance_task_stack("Kill and Get Rewarded", "Alice", 1, verbose=True))
-# print(sg2.attempt_advance_task_stack("Kill and Get Rewarded", "Alice", 2, verbose=True))
-# print(sg2.attempt_advance_task_stack("Kill and Get Rewarded", "Alice", 3, verbose=True))
 
 # TODO (Extra Features): Since we have found out that there are some cases where a task is assigned but it isn't possible to do or cancel, we would need a way to prevent that from happening.
 # What sort of Error Handling can we do to prevent that? For now, let's sanitize our inputs to make sure that doesn't happen.
-
-# sg2.attempt_advance_task_stack(task_stack_name="Kill and Get Rewarded", actor_name="Alice", abs_step=1)
 
 # print("---")
 # sg2.print_all_nodes_from_characters_storyline_beautiful_format(alice)
@@ -155,7 +150,6 @@ town = LocationNode(name = "Town")
 # sg2.print_all_nodes_from_characters_storyline_beautiful_format(charlie)
 # print("---")
 
-# #TODO (Important): Task stack shouldn't be cleared, Alice should go receive the reward from Bob before it can be considered as cleared.
 # print(sg2.attempt_advance_task_stack(task_stack_name="Kill and Get Rewarded", actor_name="Alice", abs_step=2, verbose=True))
 # print(sg2.attempt_advance_task_stack(task_stack_name="Kill and Get Rewarded", actor_name="Alice", abs_step=3, verbose=True))
 # print(sg2.attempt_advance_task_stack(task_stack_name="Kill and Get Rewarded", actor_name="Alice", abs_step=4, verbose=True))
@@ -175,18 +169,92 @@ town = LocationNode(name = "Town")
 # BEGIN TEST 3
 # Graph starts with A-B-C for two characters. There is a rule where C -> Joint Node X, Joint Node X -> Joint Node Y, and Joint Node Y -> D or E. Both characters should have the same chart.
 
-state_3 = WorldState("Test State 3", objectnodes=[alice, bob, town])
-sg3 = StoryGraph(name="Graph 3", character_objects=[alice, bob], location_objects=[town], starting_ws=state_3)
+# state_3 = WorldState("Test State 3", objectnodes=[alice, bob, town])
+# state_3.connect(from_node=town, edge_name="holds", to_node=alice)
+# state_3.connect(from_node=town, edge_name="holds", to_node=bob)
 
-node_a = StoryNode(name="Node A")
-node_b = StoryNode(name="Node B")
-node_c = StoryNode(name="Node C")
-node_d = StoryNode(name="Node D")
-node_e = StoryNode(name="Node E")
+# sg3 = StoryGraph(name="Graph 3", character_objects=[alice, bob], location_objects=[town], starting_ws=state_3)
 
-joint_x = StoryNode(name="Joint X", charcount=2)
-joint_y = StoryNode(name="Joint Y", charcount=2)
+# node_a = StoryNode(name="Node A")
+# node_b = StoryNode(name="Node B")
+# node_c = StoryNode(name="Node C")
+# node_d = StoryNode(name="Node D", biasweight=30)
+# node_e = StoryNode(name="Node E", biasweight=40)
 
-rule_c_to_x = JoiningJointRule(base_actions=[node_c], joint_node=joint_x, rule_name="c->x")
-rule_x_to_y = ContinuousJointRule(base_joint=joint_x, joint_node=joint_y, rule_name="x->y")
-rule_y_to_de = SplittingJointRule(base_joint=joint_y, split_list=[node_d, node_e], rule_name="y->de")
+# joint_x = StoryNode(name="Joint X", charcount=2, biasweight=10)
+# joint_y = StoryNode(name="Joint Y", charcount=2, biasweight=20)
+
+# rule_c_to_x = JoiningJointRule(base_actions=[node_c], joint_node=joint_x, rule_name="c->x")
+# rule_x_to_y = ContinuousJointRule(base_joint=joint_x, joint_node=joint_y, rule_name="x->y")
+# rule_y_to_de = SplittingJointRule(base_joint=joint_y, split_list=[node_d, node_e], rule_name="y->de")
+
+# sg3.insert_multiple_parts(part_list=[node_a, node_b, node_c], character=alice, location_list=[town, town, town])
+# sg3.insert_multiple_parts(part_list=[node_a, node_b, node_c], character=bob, location_list=[town, town, town])
+
+# sg3_modded = generate_story_from_starter_graph(init_storygraph=sg3, list_of_rules=[rule_c_to_x, rule_x_to_y, rule_y_to_de], required_story_length=6, top_n=5, extra_attempts=-1, verbose=True)
+# sg3_modded.print_all_node_beautiful_format()
+# TEST 3 END
+
+# BEGIN TEST 4
+
+# alex = CharacterNode(name="Alex", biases={"lawbias":50, "moralbias":50}, tags={"Job":"Warrior"})
+
+# #base_node that can be continued from
+# node_x = StoryNode(name="Node X")
+
+# #No Test, these should be straightforward
+# scored_node_a = StoryNode(name="Node A", biasweight=1)
+# scored_node_b = StoryNode(name="Node B", biasweight=10)
+# scored_node_c = StoryNode(name="Node C", biasweight=30)
+# scored_node_d = StoryNode(name="Node D", biasweight=50)
+# scored_node_e = StoryNode(name="Node E", biasweight=100)
+
+#Contains Suggested Tests, which means the score will be based on how many tests our main character passses.
+#Be sure to put in a cluster of tag test and bias tests as well
+# is_warrior = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Job", value="Warrior", score=10)
+# non_negative_law_bias = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="lawbias", min_accept=0, max_accept=100, score=20)
+# greater_than_30_moral_bias = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", min_accept=30, max_accept=100, score=40)
+# is_swordfighter = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Job", value="Swordfighter", score=1000)
+
+# scored_node_f = StoryNode(name="Node F", biasweight=0, suggested_test_list=[is_warrior])
+# scored_node_g = StoryNode(name="Node G", biasweight=0, suggested_test_list=[non_negative_law_bias])
+# scored_node_h = StoryNode(name="Node H", biasweight=0, suggested_test_list=[greater_than_30_moral_bias])
+# scored_node_i = StoryNode(name="Node I", biasweight=0, suggested_test_list=[is_warrior, non_negative_law_bias, is_swordfighter])
+# scored_node_j = StoryNode(name="Node J", biasweight=0, suggested_test_list=[is_swordfighter])
+
+
+# rule_xa = RewriteRule(story_condition=[node_x], story_change=[scored_node_a], name="x->a", remove_before_insert=True)
+# rule_xb = RewriteRule(story_condition=[node_x], story_change=[scored_node_b], name="x->b", remove_before_insert=True)
+# rule_xc = RewriteRule(story_condition=[node_x], story_change=[scored_node_c], name="x->c", remove_before_insert=True)
+# rule_xd = RewriteRule(story_condition=[node_x], story_change=[scored_node_d], name="x->d", remove_before_insert=True)
+# rule_xe = RewriteRule(story_condition=[node_x], story_change=[scored_node_e], name="x->e", remove_before_insert=True)
+# rule_xf = RewriteRule(story_condition=[node_x], story_change=[scored_node_f], name="x->f", remove_before_insert=True)
+# rule_xg = RewriteRule(story_condition=[node_x], story_change=[scored_node_g], name="x->g", remove_before_insert=True)
+# rule_xh = RewriteRule(story_condition=[node_x], story_change=[scored_node_h], name="x->h", remove_before_insert=True)
+# rule_xi = RewriteRule(story_condition=[node_x], story_change=[scored_node_i], name="x->i", remove_before_insert=True)
+# rule_xj = RewriteRule(story_condition=[node_x], story_change=[scored_node_j], name="x->j", remove_before_insert=True)
+# rule_list = [rule_xa, rule_xb, rule_xc, rule_xd, rule_xe, rule_xf, rule_xg, rule_xh, rule_xi, rule_xj]
+
+#Theoratically, the top 5 of these 10 rules should be:
+# scored node e: 100 points
+# scored node i: 70 points
+# scored node d: 50 points
+# scored node h: 30 points
+# scored node c: 30 points
+
+# ws4 = WorldState(name="World State 4", objectnodes=[alex, town])
+# ws4.connect(from_node=town, edge_name="holds", to_node=alex)
+
+# sg4 = StoryGraph(name="Graph 4", character_objects=[alex], location_objects=[town], starting_ws=ws4)
+# sg4.add_story_part(part=node_x, character=alex, location=town)
+
+# modded_sg4 = generate_story_from_starter_graph(init_storygraph=sg4, list_of_rules=rule_list, required_story_length=2, top_n=5, verbose=True)
+
+#TEST 4 COMPLETE
+#Begin Test 5
+
+#Recognition of Task Locations...it's been a while.
+
+town_a = LocationNode("Town A")
+town_b = LocationNode("Town B")
+town_c = LocationNode("Town C")

@@ -711,7 +711,8 @@ class StoryGraph:
             if verbose:
                 print("Main character is not among the character list!")
             return False
-
+        
+        
         assumed_node = self.story_parts.get((main_character.get_name(), insert_index-1), None)
         #Oh yeah---to follow a rule there has to be a base graph, therefore, logically there has to be a "previous node". Failing that means there is none graph!
         if assumed_node is None:
@@ -931,7 +932,7 @@ class StoryGraph:
             if additional_targets_list != None and len(additional_targets_list) != 0:
                 current_target_list += additional_targets_list[i]
 
-            return self.insert_joint_node(joint_node=split_list[i], main_actor=None, other_actors=chargroup_list[i]["actor_group"], location=current_location, targets=current_target_list, absolute_step=abs_step)
+            self.insert_joint_node(joint_node=split_list[i], main_actor=None, other_actors=chargroup_list[i]["actor_group"], location=current_location, targets=current_target_list, absolute_step=abs_step)
 
     def generate_all_valid_actor_and_target_splits(self, node, abs_step, character_list):
         list_of_charnames = [x.get_name() for x in character_list]
