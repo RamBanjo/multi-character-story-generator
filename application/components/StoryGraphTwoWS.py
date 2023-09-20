@@ -1410,7 +1410,6 @@ class StoryGraph:
         #
         # Something about tasks doesn't play nice with multiple characters... I need a way to manage it somehow
         # 
-        #
         # Return true if it passes all the test, return false if it fails even one test.
 
         #There's also placeholder characters in play. We need to take that into account as well.

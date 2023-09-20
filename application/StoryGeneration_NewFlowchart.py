@@ -52,7 +52,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         latest_state = final_story_graph.make_latest_state()
 
         current_character = latest_state.node_dict[current_charname]
-        final_story_graph.print_all_nodes_from_characters_storyline(current_character)
+        # final_story_graph.print_all_nodes_from_characters_storyline(current_character)
         action_for_character_found = False
 
         if verbose:
@@ -243,7 +243,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         # TODO (Important): There's a lot of redundant waiting in the testing. How will we be able to eliminate that?
         # The solution might lie in checking the attempt move towards quest
         if force_move_towards_quest_into_top_n:
-            final_abs_step = final_story_graph.get_longest_path_length_by_character(character=current_character) -1
+            final_abs_step = final_story_graph.get_longest_path_length_by_character(character=current_character)
             move_towards_quest_container = StoryGenerationActionContainer(action_name="Move Towards Task Location", action_descriptor="Default", action_object=None, action_score=0, perform_index=final_abs_step)
             top_n_valid_actions.append(move_towards_quest_container)
 
