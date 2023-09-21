@@ -364,7 +364,7 @@ def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:di
             new_actor_list.append(actor)
 
     for target in story_node_copy.target:
-        if target in placeholder_dict.keys():
+        if target in list(placeholder_dict.keys()):
             new_actor = get_actor_object_from_list_with_actor_name(actor_name=placeholder_dict[target], actor_list=list_of_actor_objects)
             new_target_list.append(new_actor)
         else:

@@ -27,8 +27,12 @@ daniel = CharacterNode("Daniel")
 
 # charcter_list = [("Alice", 3), ("Bob", 3), ("Charlie", 3), ("Daniel", 3)]
 
-character_list = ["A"]
-print(permute_actor_for_task_stack_requirements(actor_name_list=character_list, placeholder_fill_slots=1))
+character_list = [alice, bob, charlie]
+
+print(bob in character_list)
+
+# character_list = ["A"]
+# print(permute_actor_for_task_stack_requirements(actor_name_list=character_list, placeholder_fill_slots=1))
 
 # test_range = [1, 2, -1, 5, (3,4), -1, 2, -1, (1, 2), (1, 6)]
 # test_range_2 = [5, 15]

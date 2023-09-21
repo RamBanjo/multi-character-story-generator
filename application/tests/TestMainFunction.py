@@ -284,8 +284,12 @@ sg5.add_story_part(part=node_a, character=charlie, location=town_c)
 
 modded_sg5 = generate_story_from_starter_graph(init_storygraph=sg5, list_of_rules=[], required_story_length=5, verbose=True)
 
+modded_sg5.print_all_node_beautiful_format()
+latest_state = modded_sg5.make_latest_state()
+
+print(latest_state.get_actor_current_location(alice))
 # Greek Salad
-#
+# (Doesn't have to have the same name btw)
 # Characters
 # - Hercules
 # - Sisyphus

@@ -215,7 +215,7 @@ class WorldState:
             if relchange_object.two_way:
                 self.doubleconnect(nodeA=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, nodeB = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
             else:
-                self.connect(nodeA=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, nodeB = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
+                self.connect(from_node=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, to_node = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
 
         if (relchange_object.add_or_remove == ChangeAction.REMOVE and not reverse) or (relchange_object.add_or_remove == ChangeAction.ADD and reverse):
             #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
@@ -690,7 +690,9 @@ class WorldState:
     # (Note that some tasks don't have locations therefore cannot be located, and must be done based on other conditions)
 
     def get_actor_current_location(self, actor):
-        return self.node_dict[actor.get_incoming_edge(self.DEFAULT_HOLD_EDGE_NAME)[0].from_node.get_name()]
+
+        actor_from_ws = self.node_dict[actor.get_name()]
+        return actor_from_ws.get_incoming_edge(self.DEFAULT_HOLD_EDGE_NAME)[0].from_node
     
     def get_optimal_location_towards_task(self, actor, verbose=False):        
         actor_task_stacks = actor.list_of_task_stacks

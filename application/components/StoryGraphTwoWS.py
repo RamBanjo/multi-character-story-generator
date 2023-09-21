@@ -1164,6 +1164,7 @@ class StoryGraph:
             print("Timestep", self.story_parts[node].timestep)
             print("Actors:", self.story_parts[node].get_actor_names())
             print("Targets:", self.story_parts[node].get_target_names())
+            print("Location:", self.story_parts[node].location.get_name())
             print("----------")
     
     def print_all_nodes_from_characters_storyline(self, actor):
@@ -1179,6 +1180,7 @@ class StoryGraph:
             print("Timestep", thing.timestep)
             print("Actors:", thing.get_actor_names())
             print("Targets:", thing.get_target_names())
+            print("Location:", thing.location.get_name())
             print("----------")
 
     def check_for_pattern_in_storyline(self, pattern_to_test, character_to_extract, verbose=False):
