@@ -288,6 +288,7 @@ modded_sg5.print_all_node_beautiful_format()
 latest_state = modded_sg5.make_latest_state()
 
 print(latest_state.get_actor_current_location(alice))
+
 # Greek Salad
 # (Doesn't have to have the same name btw)
 # Characters
@@ -297,3 +298,43 @@ print(latest_state.get_actor_current_location(alice))
 # - Achilles
 # - Outis
 # - Loki
+#
+# Plot of the Story:
+# Two Gods, the God of Light and the God of Darkness, are having a dispute over who is more powerful and got their followers to compete against each other in various battles.
+# Each year, one of their most powerful followers would enter into a battle. The winning faction gains the control of the Central Realm for a year.
+
+# The battle involve a Trial of Luck (which always involve a dice game of some sort), a Trial of Strength (which is just a hand to hand combat tournament), and a Trial of Knowledge (which is set up like a quiz show)
+
+# The competitions are really nasty because the competitors would cheat just to win instead of competing honorably, because winning for your team gets a lot of clout and prestige within the community.
+
+# The entire Light Team got food poisoning mysteriously one year.
+
+# A member of the Darkness Team was reportedly "throwing" the competition the other year. That person was later revealed to be taking payment from a Light faction member to throw games.
+# Two guys each from Light and Darkness is bored of these honorless cheats and just wants people to get along, so they secretly meet and plot.
+
+# The plan is to expose to the gods that their subjects are performing dishonorable cheaty acts under their names. Each one record the evidence of all the cheatings taking place by the team members.
+# - Light Faction Guy finds out some Light Faction Members are planning to use a loaded die in the Trial of Luck.
+# - Dark Faction Guy finds out that the Dark Faction Members have stolen the questions to the Trial of Knowledge from the Central Realm Library and is memorizing the answer.
+
+# The guys gather up the evidence and individually addresses the gods.
+# The gods are not pleased at the cheating that is going on. They take the evidence very seriously, and even consider putting their differences aside for a moment to deal with these cheaters.
+
+# The day of the competition comes, and the people who are cheating in the competition realizes they screwed up when the competitions don't completely match what they're supposed to do.
+# The Trial of Luck, instead of being a dice game competition, ends up being a 50-question multiple choice questions with all the questions being "If you're lucky you can guess what my answer is" choices being "Choose Me!"
+# The Trial of Knowledge is replaced with only one question: The probability of the dice you are currently holding.
+# - Anyone who says their die is a fair die gets their dice tested. If it's loaded, they get disqualified and is sent away to Hell.
+# - Anyone who says their die is not a fair die also gets disqualified, but at least they are not sent away because they admit their crimes.
+
+# After eliminating everyone who had a hand in cheating, it turns out there is one last competition to do: the Trial of Strength.
+# Since all the other competitors are eliminated, the two guys who reported the cheating end up having to face each other.
+
+# Light Faction Guy wants to have a go, but Dark Faction Guy points out that this is a god's battle, so why are mortals fighting it for them
+# Light Faction Guy agrees and they go consult the gods again
+# Light Faction Guy asks Why
+# Light God says it's to see who is more powerful between Light God and Dark God
+# Light Faction Guy points out technically this is testing whose followers are more powerful, not the gods themselves
+# Light God says this has merit
+# He directly gets up and challenges Darkness God directly
+# Darkness God accepts
+# They have a duel in the arena and realizes they don't really hate each other that much, and dueling for the sake of it is kind of fun in itself
+# The Light God and the Dark God finally have a truce, and the competitions instead of being a trial to decide who gets to rule the Central Realm gets shifted towards are more friendly sports competition
