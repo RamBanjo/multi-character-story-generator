@@ -459,3 +459,5 @@ For NPCs in game? However Important NPCs might not always act rationally like Ch
     - Write Testing Scheme to standardize testing, so that the knowledge can be passed
     - We definitely have to include metrics to show concretely that our work is an improvement from previous works
     - We might not have to include all the metrics, only include ones relevant to our work
+
+INTERESTING THING TO NOTE: We currently do not have any change objects for tagchange that changes the number within a tag, nor do we have a conditiontest that tests for a number within a tag. Should we write new ones?

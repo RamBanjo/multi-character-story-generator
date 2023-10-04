@@ -8,9 +8,17 @@ from application.components.WorldState import WorldState
 columbo = CharacterNode
 iris = CharacterNode
 amil = CharacterNode
+alien_god = CharacterNode
 
 earth = LocationNode
-new_world = LocationNode
+new_world_greenland = LocationNode
+tatain = LocationNode
+death_paradise = LocationNode
+outer_space = LocationNode
+
+tatain_people = ObjectNode
+death_paradise_robots = ObjectNode
+enemy_mercenary = ObjectNode
 
 all_characters = []
 all_locations = []

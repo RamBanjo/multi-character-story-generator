@@ -14,21 +14,21 @@ rich_ritchie = CharacterNode(name="Rich_Ritchie", biases={"lawbias":0, "moralbia
 player_art = CharacterNode(name="Adventure_Arthur", biases={"lawbias":40, "moralbias":0}, tags={"Type":"Player", "Rank":"Knight", "Alive":True})
 player_rob = CharacterNode(name="Robber_Robin", biases={"lawbias":-40, "moralbias":0}, tags={"Type":"Player", "Rank":"Ranger", "Alive":True})
 
-royal_castle = LocationNode
-main_town = LocationNode
-peasant_village = LocationNode
-large_forest = LocationNode
-goblin_city = LocationNode
-orc_cave = LocationNode
+royal_castle = LocationNode(name="Royal_Castle")
+main_town = LocationNode(name="Main_Town")
+peasant_village = LocationNode(name="Peasant_Village")
+large_forest = LocationNode(name="Large_Forest")
+goblin_city = LocationNode(name="Goblin_City")
+orc_cave = LocationNode(name="Orc_Cave")
 
-excalibur = ObjectNode
-golden_mirror = ObjectNode
-dirty_shovel = ObjectNode
-tax_income = ObjectNode
-royal_sceptre = ObjectNode
-royal_crown = ObjectNode
+excalibur = ObjectNode(name="Excalibur", tags={"Status":"Owned","Type":"Object","Value":"Priceless"})
+golden_mirror = ObjectNode(name="Golden_Mirror", tags={"Status":"Owned","Type":"Object","Value":"Valuable"})
+dirty_shovel = ObjectNode(name="Dirty_Shovel", tags={"Status":"Owned","Type":"Object","Value":"Worthless"})
+tax_income = ObjectNode(name="Tax_Income", tags={"Status":"Owned","Type":"Object","Value":"Valuable"})
+royal_sceptre = ObjectNode(name="Royal_Sceptre", tags={"Status":"Owned","Type":"Object","Value":"Priceless"})
+royal_crown = ObjectNode(name="Royal_Crown", tags={"Status":"Owned","Type":"Object","Value":"Priceless"})
 
-goblin = ObjectNode
-goblin_king = ObjectNode
-bandits = ObjectNode
-orc = ObjectNode
+goblin = ObjectNode(name="Goblin",tags={"Type":"Enemy","Rank":"Peon","Number":3})
+goblin_king = ObjectNode(name="Goblin_King",tags={"Type":"Enemy","Rank":"King","Number":1})
+bandits = ObjectNode(name="Bandits",tags={"Type":"Enemy","Rank":"Peon","Number":3})
+orc = ObjectNode(name="Orc",tags={"Type":"Enemy","Rank":"Peon","Number":3})

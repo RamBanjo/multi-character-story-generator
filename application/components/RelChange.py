@@ -48,6 +48,9 @@ class TagChange(SomeChange):
     def __str__(self):
         return "TagChange: " + self.object_node_name + " " + str(self.add_or_remove) + " (" + self.tag + ": " + self.value + ")"
 
+class RelativeTagChange(SomeChange):
+    pass
+
 class ConditionalChange(SomeChange):
     def __init__(self, name, list_of_test_object_names, list_of_condition_tests, list_of_changes, **kwargs):
 

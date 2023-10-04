@@ -78,4 +78,14 @@ world_state.doubleconnect(nodeA=central_realm, edge_name=world_state.DEFAULT_ADJ
 world_state.doubleconnect(nodeA=starlight, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, nodeB=dicey_den)
 world_state.doubleconnect(nodeA=starlight, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, nodeB=knowers_abode)
 
-#Now, we need to make connections
+#Now, we need to make connections between charcters.
+world_state.doubleconnect(nodeA=honest_harry, edge_name="friends", nodeB=justice_john, value="hate_cheaters")
+world_state.doubleconnect(nodeA=mysterious_misty, edge_name="friends", nodeB=dicey_darren, value="business_partners")
+world_state.connect(from_node=knower, edge_name="scared_of", to_node=dicey_darren, value="criminal")
+
+world_state.connect(from_node=shady_samuel, edge_name="hates",to_node=blackmailer, value="blackmailer")
+world_state.connect(from_node=shady_samuel, edge_name="client_of", to_node=ravenous_redmond, value="hitman")
+
+world_state.connect(from_node=ravenous_redmond, edge_name="hates", to_node=mysterious_misty, value="old_grudge")
+
+world_state.doubleconnect(nodeA=god_of_dark, edge_name="rivals", nodeB=god_of_light, value="power_struggle")
