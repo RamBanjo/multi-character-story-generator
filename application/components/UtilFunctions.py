@@ -188,6 +188,13 @@ def partitionfunc(n,k,l=1):
         for result in partitionfunc(n-i,k-1,i):
             yield (i,)+result
 
+def permute_actor_for_task_stack_requirements(actor_name_list, placeholder_fill_slots):
+    all_permute = sorted(list(set(itertools.permutations(actor_name_list))))
+
+    return_list = sorted(list(set([x[:placeholder_fill_slots] for x in all_permute])))
+
+    return return_list
+
 def permute_all_possible_freesize_groups(actor_count, group_count):
 
     return_list = []
@@ -547,6 +554,8 @@ def replace_placeholder_object_with_test_taker_sameloc(test, test_taker, placeho
         copiedtest.list_to_test.remove(placeholder_object)
         copiedtest.list_to_test.append(test_taker)
         return copiedtest
+
+    return test
     
 def replace_placeholder_object_with_test_taker_hastag(test, test_taker, placeholder_object):
 

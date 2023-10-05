@@ -2,7 +2,7 @@
 import sys
 sys.path.insert(0,'')
 
-from StoryGeneration_NewFlowchart import attempt_apply_rule
+from application.StoryGeneration_NewFlowchart import attempt_apply_rule
 from application.components.ConditionTest import HasTagTest
 from application.components.RewriteRuleWithWorldState import RewriteRule
 from application.components.StoryGraphTwoWS import StoryGraph
