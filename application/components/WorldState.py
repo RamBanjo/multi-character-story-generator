@@ -175,6 +175,41 @@ class WorldState:
             self.apply_relationship_change(changeobject, reverse)
         if changeobject.changetype == ChangeType.TAGCHANGE:
             self.apply_tag_change(changeobject, reverse)
+        if changeobject.changetype == ChangeType.RELATIVETAGCHANGE:
+
+            current_object = self.node_dict[changeobject.object_node_name]
+            current_value = current_object.tags[changeobject.tag]
+            
+            multiplier = 1
+            if reverse:
+                multiplier = -1
+
+            new_value = current_value + (changeobject.value_delta * multiplier)
+
+            equivalent_changeobject = TagChange(name="Equivalent Tagchange", object_node_name=changeobject.object_node_name, tag=changeobject.tag, value=new_value, add_or_remove=ChangeAction.ADD)
+
+            self.apply_tag_change(tagchange_object=equivalent_changeobject, reverse=False)
+
+        if changeobject.changetype == ChangeType.RELATIVEBIASCHANGE:
+
+            
+            current_object = self.node_dict[changeobject.object_node_name]
+
+            if type(current_object) == CharacterNode:
+                current_value = current_object.biases[changeobject.bias]
+
+                multiplier = 1
+                if reverse:
+                    multiplier = -1
+
+                new_value = current_value + (changeobject.biasvalue_delta * multiplier)
+
+                if new_value > 100:
+                    new_value = 100
+                if new_value < -100:
+                    new_value = -100
+
+                current_object.biases[changeobject.bias] = new_value
 
     # For each of the name found in list_of_test_object_names, find the corresponding object in this WorldState. Then, run tests given in the conditionalchange, replacing the placeholder token with the object.
     # If all the tests are passed, apply the change, by calling apply relationship change and apply tag change from this very same worldstate. Phew!
@@ -490,7 +525,8 @@ class WorldState:
                 test_result = self.has_tag_test(object_to_test=test.object_to_test, tag=test.tag, value=test.value, soft_equal=test.soft_equal)
             case TestType.IN_BIAS_RANGE:
                 test_result = self.bias_range_check(object_to_test=test.object_to_test, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept)
-            
+            case TestType.TAG_VALUE_IN_RANGE:
+                test_result = self.tag_value_in_range_test(object_to_test=test.object_to_test, tag=test.tag, value_min = test.value_min, value_max = test.value_max)
             # case TestType.HAS_DOUBLE_EDGE:
             #     test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
             case _:
@@ -537,6 +573,22 @@ class WorldState:
             return False
         
         return object_node.check_if_this_item_has_tag(tag=tag, value=value, soft_equal=soft_equal)
+    
+    def tag_value_in_range_test(self, object_to_test, tag, value_min, value_max):
+        object_node = self.node_dict.get(object_to_test.get_name(), None)
+
+        if object_node is None:
+            return False
+        
+        tag_value = object_node.tags.get(tag)
+
+        if tag_value is None:
+            return False
+        
+        if tag_value < value_min or tag_value > value_max:
+            return False
+
+        return True
 
     @staticmethod
     def check_items_in_same_location(item_checklist):

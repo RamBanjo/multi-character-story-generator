@@ -22,6 +22,8 @@ class ChangeType(Enum):
     TASKCHANGE = 3
     TASKADVANCECHANGE = 4
     TASKCANCELCHANGE = 5
+    RELATIVETAGCHANGE = 6
+    RELATIVEBIASCHANGE = 7
 
 class TestType(Enum):
     HELD_ITEM_TAG = 0
@@ -29,6 +31,7 @@ class TestType(Enum):
     HAS_EDGE = 2
     HAS_TAG = 3
     IN_BIAS_RANGE = 4
+    TAG_VALUE_IN_RANGE = 5
 
 class JointType(Enum):
     JOIN = 0
