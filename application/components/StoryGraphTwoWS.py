@@ -861,10 +861,30 @@ class StoryGraph:
         graphcopy.fill_in_locations_on_self()
 
         validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
+
+        actorlist = [x for x in actors_to_test + targets_to_test if type(x) == CharacterNode]
+
+        found_dupe_with_this_name_adjacent = graphcopy.test_if_anyone_in_list_has_adjacent_duped_node_with_given_name(actor_list=actorlist, dupe_node_name=joint_node.name)
+
         del(graphcopy)
 
-        return validity
+        return validity and not found_dupe_with_this_name_adjacent
     
+    def test_if_anyone_in_list_has_adjacent_duped_node_with_given_name(self, actor_list, dupe_node_name):
+
+        for actor in actor_list:
+            part_list = self.make_story_part_list_of_one_character(actor)
+
+            if len(part_list) > 1:
+                for index in range(0, len(part_list)-1):
+                    current_part = part_list[index]
+                    next_part = part_list[index+1]
+
+                    if current_part == next_part and current_part.name == dupe_node_name:
+                        return True
+
+        return False
+
     def check_add_split_validity(self, split_list, chargroup_list, insert_index):
         
         graphcopy = deepcopy(self)
@@ -1418,9 +1438,10 @@ class StoryGraph:
 
         current_ws = self.make_state_at_step(abs_step)
 
-        current_loc = current_ws.node_dict.get(task.task_location_name, None)
-        if current_loc is None:
-            return False
+        if task.task_location_name is not None:
+            current_loc = current_ws.node_dict.get(task.task_location_name, None)
+            if current_loc is None:
+                return False
         
         location_has_actor = current_ws.check_connection(node_a = current_loc, edge_name = current_ws.DEFAULT_HOLD_EDGE_NAME, node_b = actor, soft_equal = True)
 
@@ -1716,8 +1737,9 @@ class StoryGraph:
         character_current_location_name = current_ws.get_actor_current_location(actor_at_ws).name
         
         current_task = task_stack_at_ws.task_stack[last_task_step["last_task_step"]]
-        if current_task.task_location_name != character_current_location_name:
-            return "wrong_location"
+        if current_task.task_location_name is not None:
+            if current_task.task_location_name != character_current_location_name:
+                return "wrong_location"
 
         #Return "task_step_already_completed" if the tests in goal state all return true
 

@@ -10,6 +10,8 @@ class ConditionTest:
         self.score = score
         self.test_type = test_type
 
+#TODO: Layered test where for objects that can fulfill the test condition, it also fulfills another condition
+
 class HeldItemTagTest(ConditionTest):
     def __init__(self, holder_to_test, tag_to_test, value_to_test, soft_equal = True, inverse = False, score=1):
         
