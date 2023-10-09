@@ -25,6 +25,34 @@ class HeldItemTagTest(ConditionTest):
     def __str__(self):
         return self.name + " (" + str(self.holder_to_test) + " {" + str(self.tag_to_test) + ":" + str(self.value_to_test) + "}, inverse = " + str(self.inverse) + ")"
 
+# HOW THIS WORKS
+# (Not allowed to stack with each other)
+# Gets a list of tests with placeholders
+# Each test will replace the placeholder with each object in the world state
+# A list of objects passing the test will be given
+# Intersect all lists, and if the list at the end has at least one object then this test will pass
+# If successful, this might even replace HeldItemTagTest as a more generic thing.
+class IntersectObjectExistsTest(ConditionTest):
+    def __init__(self, list_of_tests_with_placeholder, inverse=False, score=1):
+
+        super().__init__(name="Intersect Object Exists Test", test_type=TestType.INTERSECTED_EDGE, inverse=inverse, score=score)
+
+        self.list_of_tests_with_placeholder = list_of_tests_with_placeholder
+
+# HOW THIS WORKS
+# (Not allowed to stack with each other)
+# Gets a list of tests with placeholders, as well as an object to replace those placeholders
+# This passes the test if at least one test returns true.
+
+#TODO: Go and edit the things that interact with ConditionTest in WorldState and SG2WS to accept these two tests.
+class ObjectPassesAtLeastOneTestTest(ConditionTest):
+    def __init__(self, list_of_tests_with_placeholder, object_to_test, inverse=False, score=1):
+
+        super().__init__(name="Object Passes At Least One", TestType=TestType.OBJECT_PASSES_ONE, inverse=inverse, score=score)
+
+        self.object_to_test = object_to_test
+        self.list_of_tests_with_placeholder = list_of_tests_with_placeholder
+
 class SameLocationTest(ConditionTest):
     def __init__(self, list_to_test, inverse = False, score=1):
 
