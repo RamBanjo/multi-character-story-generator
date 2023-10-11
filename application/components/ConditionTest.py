@@ -9,9 +9,7 @@ class ConditionTest:
         self.inverse = inverse
         self.score = score
         self.test_type = test_type
-
-#TODO: Layered test where for objects that can fulfill the test condition, it also fulfills another condition
-
+        
 class HeldItemTagTest(ConditionTest):
     def __init__(self, holder_to_test, tag_to_test, value_to_test, soft_equal = True, inverse = False, score=1):
         
@@ -35,7 +33,7 @@ class HeldItemTagTest(ConditionTest):
 class IntersectObjectExistsTest(ConditionTest):
     def __init__(self, list_of_tests_with_placeholder, inverse=False, score=1):
 
-        super().__init__(name="Intersect Object Exists Test", test_type=TestType.INTERSECTED_EDGE, inverse=inverse, score=score)
+        super().__init__(name="Intersect Object Exists Test", test_type=TestType.INTERSECTED_OBJECT_EXISTS, inverse=inverse, score=score)
 
         self.list_of_tests_with_placeholder = list_of_tests_with_placeholder
 
@@ -48,7 +46,7 @@ class IntersectObjectExistsTest(ConditionTest):
 class ObjectPassesAtLeastOneTestTest(ConditionTest):
     def __init__(self, list_of_tests_with_placeholder, object_to_test, inverse=False, score=1):
 
-        super().__init__(name="Object Passes At Least One", TestType=TestType.OBJECT_PASSES_ONE, inverse=inverse, score=score)
+        super().__init__(name="Object Passes At Least One", test_type=TestType.OBJECT_PASSES_ONE, inverse=inverse, score=score)
 
         self.object_to_test = object_to_test
         self.list_of_tests_with_placeholder = list_of_tests_with_placeholder

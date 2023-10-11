@@ -68,11 +68,10 @@ class RelativeBiasChange(SomeChange):
         self.biasvalue_delta = biasvalue_delta
 
 class ConditionalChange(SomeChange):
-    def __init__(self, name, list_of_test_object_names, list_of_condition_tests, list_of_changes, **kwargs):
+    def __init__(self, name, list_of_condition_tests, list_of_changes, **kwargs):
 
         super().__init__(name=name, changetype=ChangeType.CONDCHANGE)
 
-        self.list_of_test_object_names = list_of_test_object_names
         self.list_of_condition_tests = list_of_condition_tests
         self.list_of_changes = list_of_changes
 

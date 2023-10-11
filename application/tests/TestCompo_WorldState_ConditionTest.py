@@ -42,7 +42,7 @@ placeholder_share_location_with_target_and_actor = SameLocationTest(list_to_test
 
 #For now we won't be able to stack Conditional Changes, but imagine if we need to do that *shudders*
 placeholder_hates_actor = RelChange(name="hate_alice", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="hates", node_b=alice, add_or_remove=ChangeAction.ADD, value="murder_of_friend")
-if_share_location_and_friends_hate_murderer = ConditionalChange(name="if share location and friends hate murderer", list_of_test_object_names=["Charlie", "Dave", "Eliane", "Frank"], list_of_condition_tests=[placeholder_friends_with_target, placeholder_share_location_with_target_and_actor], list_of_changes=[placeholder_hates_actor])
+if_share_location_and_friends_hate_murderer = ConditionalChange(name="if share location and friends hate murderer", list_of_condition_tests=[placeholder_friends_with_target, placeholder_share_location_with_target_and_actor], list_of_changes=[placeholder_hates_actor])
 
 # changereplaced = replace_placeholder_object_with_change_haver(placeholder_hates_actor, charlie)
 # print(changereplaced.node_a)

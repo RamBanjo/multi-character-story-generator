@@ -893,6 +893,7 @@ class StoryGraph:
         graphcopy.fill_in_locations_on_self()
 
         validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
+        
         del(graphcopy)
 
         return validity

@@ -32,7 +32,7 @@ class TestType(Enum):
     HAS_TAG = 3
     IN_BIAS_RANGE = 4
     TAG_VALUE_IN_RANGE = 5
-    INTERSECTED_EDGE = 6
+    INTERSECTED_OBJECT_EXISTS = 6
     OBJECT_PASSES_ONE = 7
 
 class JointType(Enum):

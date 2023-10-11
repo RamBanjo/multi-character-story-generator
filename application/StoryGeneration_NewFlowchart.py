@@ -17,7 +17,7 @@ from application.components.UtilityEnums import ChangeAction, GenericObjectNode
 # DEFAULT_ADJACENCY_EDGE_NAME = "connects"
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
-def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False):
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_morement_requirement_list = []):
 
     #make a copy of the graph
     if verbose:
@@ -300,7 +300,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                         #We can make a list of index and randomly pick from it until it gives us a positive result
                         #Let's do it in the function
                         #Actually, I think it would be better to always call this function from the latest step.
-                        action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character, movement_index=final_abs_step)
+                        action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character, movement_index=final_abs_step, extra_movement_requirements=extra_morement_requirement_list)
                     case "Wait":
                         pass
                     case _:
@@ -450,10 +450,9 @@ def attempt_apply_task(stack_name, attempt_index, target_story_graph, current_ch
 
 # TODO (Testing): Test this function
 # Will return True if changes are made to the story graph and False if not.
-def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character, movement_index):
+def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character, movement_index, extra_movement_requirements = []):
 
     current_ws = target_story_graph.make_state_at_step(movement_index)
-    character_at_step = current_ws.node_dict[current_character.get_name()]
     optimal_location_object = current_ws.get_optimal_location_towards_task(current_character)
     current_location_of_character = current_ws.get_actor_current_location(current_character)
 
@@ -470,9 +469,9 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
     not_be_in_current_location_change = RelChange(name="Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.REMOVE, soft_equal=True, value=None)
 
     target_location_adjacent_to_current_location = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_LOCATION, edge_name_test=current_ws.DEFAULT_ADJACENCY_EDGE_NAME, object_to_test=optimal_location_object, soft_equal=True)
-
+    all_requirements = extra_movement_requirements.append(target_location_adjacent_to_current_location)
     # move_towards_task_location_node = StoryNode("Move Towards Task Location", biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[go_to_new_location_change, not_be_in_current_location_change], required_test_list=[target_location_adjacent_to_current_location])
-    move_towards_task_location_node = StoryNode(name="Move Towards "+optimal_location_name, biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[not_be_in_current_location_change, go_to_new_location_change], required_test_list=[target_location_adjacent_to_current_location])
+    move_towards_task_location_node = StoryNode(name="Move Towards "+optimal_location_name, biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[not_be_in_current_location_change, go_to_new_location_change], required_test_list=all_requirements)
 
     #We have made our custom move towards task location node. We will check to see if it's a valid move to move to that location.
     movement_validity = target_story_graph.check_continuation_validity(actor=current_character, abs_step_to_cont_from=movement_index, cont_list=[move_towards_task_location_node])
@@ -480,27 +479,27 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
         target_story_graph.insert_story_part(part=move_towards_task_location_node, character=current_character, absolute_step=movement_index)
         return True
     
-def cycle_attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character):
+# def cycle_attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character):
     
-    #The path length of the character is the range.
+#     #The path length of the character is the range.
 
-    path_length_list = target_story_graph.get_all_path_length_with_charname()
-    current_char_path_length = [x[1] for x in path_length_list if x[0] == current_character.get_name()]
-    possible_insert_locs = list(range(0, current_char_path_length))
+#     path_length_list = target_story_graph.get_all_path_length_with_charname()
+#     current_char_path_length = [x[1] for x in path_length_list if x[0] == current_character.get_name()]
+#     possible_insert_locs = list(range(0, current_char_path_length))
 
-    good_insert_loc_found = False
+#     good_insert_loc_found = False
 
-    while not good_insert_loc_found:
+#     while not good_insert_loc_found:
         
-        if len(possible_insert_locs) == 0:
-            return False
+#         if len(possible_insert_locs) == 0:
+#             return False
         
-        chosen_loc = random.choice(possible_insert_locs)
-        possible_insert_locs.remove(chosen_loc)
+#         chosen_loc = random.choice(possible_insert_locs)
+#         possible_insert_locs.remove(chosen_loc)
 
-        if attempt_move_towards_task_loc(target_story_graph=target_story_graph, current_character=current_character, movement_index=chosen_loc):
-            return True
-        #Pick a random thing from the possible insert locs, remove it
+#         if attempt_move_towards_task_loc(target_story_graph=target_story_graph, current_character=current_character, movement_index=chosen_loc):
+#             return True
+#         #Pick a random thing from the possible insert locs, remove it
 
 def perform_wait_action(target_story_graph:StoryGraph, current_character):
     latest_action = target_story_graph.get_latest_story_node_from_character()

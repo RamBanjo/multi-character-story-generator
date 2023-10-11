@@ -211,21 +211,18 @@ class WorldState:
 
                 current_object.biases[changeobject.bias] = new_value
 
-    # For each of the name found in list_of_test_object_names, find the corresponding object in this WorldState. Then, run tests given in the conditionalchange, replacing the placeholder token with the object.
+    # For each item in this world state, find the corresponding object in the previous WorldState. Then, run tests given in the conditionalchange, replacing the placeholder token with the object.
     # If all the tests are passed, apply the change, by calling apply relationship change and apply tag change from this very same worldstate. Phew!
 
     # Note: We need to look at the state of the Previous World State, not this current world state. The changes should only be applied if and only if the previous world state passed those tests.
     def apply_conditional_change(self, condchange_object, previous_ws, reverse=False):
 
-        for item_name in condchange_object.list_of_test_object_names:
+        for item in self.node_dict.values():
 
-            current_object = self.node_dict[item_name]
-
-            pass_test = True
-
-            for test in condchange_object.list_of_condition_tests:
-                translated_test = replace_placeholder_object_with_test_taker(test=test, test_taker=current_object, placeholder_object=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER)
-                pass_test = pass_test and previous_ws.test_story_compatibility_with_conditiontest(translated_test)
+            item_name = item.name
+            current_object = previous_ws.node_dict[item_name]
+            
+            pass_test = previous_ws.check_if_this_object_passes_all_tests(test_list_with_placeholder=condchange_object.list_of_condition_tests, object_to_test=current_object)
 
             if pass_test:
                 for change in condchange_object.list_of_changes:
@@ -527,6 +524,10 @@ class WorldState:
                 test_result = self.bias_range_check(object_to_test=test.object_to_test, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept)
             case TestType.TAG_VALUE_IN_RANGE:
                 test_result = self.tag_value_in_range_test(object_to_test=test.object_to_test, tag=test.tag, value_min = test.value_min, value_max = test.value_max)
+            case TestType.INTERSECTED_OBJECT_EXISTS:
+                test_result = self.check_at_least_one_object_pass_all_tests(test_list_with_placeholder=test.list_of_tests_with_placeholder)
+            case TestType.OBJECT_PASSES_ONE:
+                test_result = self.check_if_this_object_passes_at_least_one_test(test_list_with_placeholder=test.list_of_tests_with_placeholder, object_to_test=test.object_to_test)
             # case TestType.HAS_DOUBLE_EDGE:
             #     test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
             case _:
@@ -589,6 +590,34 @@ class WorldState:
             return False
 
         return True
+
+    def check_at_least_one_object_pass_all_tests(self, test_list_with_placeholder):
+
+        for object_node in self.node_dict.values():
+            if self.check_if_this_object_passes_all_tests(test_list_with_placeholder=test_list_with_placeholder, object_to_test=object_node):
+                return True
+            
+        return False
+
+    def check_if_this_object_passes_all_tests(self, test_list_with_placeholder, object_to_test):
+
+        for test in test_list_with_placeholder:
+            translated_test = replace_placeholder_object_with_test_taker(test=test, test_taker=object_to_test, placeholder_object=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER)
+            
+            if not self.test_story_compatibility_with_conditiontest(translated_test):
+                return False
+            
+        return True
+    
+    def check_if_this_object_passes_at_least_one_test(self, test_list_with_placeholder, object_to_test):
+
+        for test in test_list_with_placeholder:
+            translated_test = replace_placeholder_object_with_test_taker(test=test, test_taker=object_to_test, placeholder_object=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER)
+
+            if self.test_story_compatibility_with_conditiontest(translated_test):
+                return True
+            
+        return False
 
     @staticmethod
     def check_items_in_same_location(item_checklist):
