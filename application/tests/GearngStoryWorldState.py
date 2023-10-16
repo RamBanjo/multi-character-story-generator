@@ -68,14 +68,37 @@ world_state.connect(from_node=apollo, edge_name="obeys", to_node=alien_god)
 # Nodes
 # (All rules require that the characters (both actor and target) be alive unless specified)
 
+actor_alive = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Alive", value=True)
+target_alive = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=True)
+
 # Resurrect with Data Backup:
 # Conditions: Target must be dead, target must be a robot, the actor must command the target, actor must be a god, target must not have tag version:deprecated
 # Changes: Target becomes alive, target's location moves to actor's location
 
+target_dead = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=False)
+target_is_robot = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Species", value="Robot")
+actor_commands_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="commands", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
+actor_is_god = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Species", value="Robot")
+
+target_becomes_alive = TagChange(name="Target Becomes Alive", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=True, add_or_remove=ChangeAction.ADD)
+
+check_if_holding_target = HasEdgeTest(object_from_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name_test="holds", object_to_test=GenericObjectNode.GENERIC_TARGET)
+stop_holding_target = RelChange(name="Noli Me Tangere", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, value=None, soft_equal=True, add_or_remove=ChangeAction.REMOVE)
+
+thing_currently_holding_target_no_longer_holds_it = ConditionalChange(name="Thing that holds target no longer holds it", list_of_condition_tests=[check_if_holding_target], list_of_changes=[stop_holding_target])
+current_location_holds_target = RelChange(name="Current Location Holds Target", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, value=None)
+
 resurrect_target = StoryNode
+
 # Kill:
 # Conditions: Actor must have a KillReason (Planet Invader, Revenge), Target must be Alive, Target must not have Plot Armor
 # Changes: Target becomes dead
+
+actor_has_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="KillReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
+target_no_plot_armor = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="PlotArmor", value=True, inverse=True)
+
+target_has_no_plot_armor = HasTagTest
+
 
 kill_another_actor = StoryNode
 
@@ -145,11 +168,11 @@ create_apollo = StoryNode
 # Wait
 # Conditions -
 
-# Report Work
-# Conditions: Actor must be a Robot. Target must command Actor.
-# Changes: Target has knowledge of the work done.
-
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
+
+# (For Amil after killing Iris) Settle in New World
+# Conditions:
+# Changes: Remove Amil's plot armor
 
 # Extra Movement Requirement:
 # Actor must NOT have tag Stranded:True
