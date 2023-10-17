@@ -86,9 +86,14 @@ check_if_holding_target = HasEdgeTest(object_from_test=GenericObjectNode.CONDITI
 stop_holding_target = RelChange(name="Noli Me Tangere", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, value=None, soft_equal=True, add_or_remove=ChangeAction.REMOVE)
 
 thing_currently_holding_target_no_longer_holds_it = ConditionalChange(name="Thing that holds target no longer holds it", list_of_condition_tests=[check_if_holding_target], list_of_changes=[stop_holding_target])
-current_location_holds_target = RelChange(name="Current Location Holds Target", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, value=None)
 
-resurrect_target = StoryNode
+check_if_holding_actor = HasEdgeTest(object_from_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name_test="holds", object_to_test=GenericObjectNode.GENERIC_ACTOR)
+start_holding_target = RelChange(name="Touch Me", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, value=None, soft_equal=True, add_or_remove=ChangeAction.ADD)
+
+thing_holding_actor_begins_holding_target = ConditionalChange(name="Thing that holds actor holds target", list_of_condition_tests=[check_if_holding_actor], list_of_changes=[start_holding_target])
+
+
+resurrect_target = StoryNode(name="Resurrect Target", tags={"Type":"Resurrection"}, charcount=1, target_count=1, effects_on_next_ws=[thing_currently_holding_target_no_longer_holds_it, thing_holding_actor_begins_holding_target, target_becomes_alive], required_test_list=[actor_alive, target_dead, target_is_robot, actor_is_god, actor_commands_target])
 
 # Kill:
 # Conditions: Actor must have a KillReason (Planet Invader, Revenge), Target must be Alive, Target must not have Plot Armor
@@ -97,29 +102,36 @@ resurrect_target = StoryNode
 actor_has_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="KillReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
 target_no_plot_armor = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="PlotArmor", value=True, inverse=True)
 
-target_has_no_plot_armor = HasTagTest
+target_becomes_dead = TagChange(name="Target Becomes Dead", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=False, add_or_remove=ChangeAction.ADD)
 
-
-kill_another_actor = StoryNode
+kill_another_actor = StoryNode(name="Actor Kills Actor", biasweight=0, tags={"Type":"Murder"}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead], required_test_list=[actor_has_reason_to_kill_target, target_no_plot_armor])
 
 # Attack Inhabitants:
 # Conditions: Actor's goal must be to Eradicate Living Beings, Actor share location with Target, Target is a Mob, target's count is greater than 0
 
-attack_inhabitants = StoryNode
+actors_goal_is_eradication = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Goal", value="Eradicate Living Beings")
+actor_shares_location_with_target = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, GenericObjectNode.GENERIC_TARGET])
+target_is_mob = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Type", value="Mob")
+target_count_greater_than_0 = TagValueInRangeTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Count", value_min=1, value_max=999)
+
+attack_inhabitants = StoryNode(name="Attack Inhabitants", tags={"Type":"Fight"}, charcount=1, required_test_list=[actors_goal_is_eradication, actor_shares_location_with_target, target_is_mob, target_count_greater_than_0])
 
 # Kill Mob for Food:
-# Conditions: Actor's Goal must be to Explore New World, Target is a mob, Target has tag Edible Flesh: True, target's count is greater than 0, follows Get Ambushed By Mob
+# Conditions: Actor's Goal must be to Explore New World, Target is a mob, Target has tag Edible Flesh: True, target's count is greater than 0, follows Get Ambushed By Mob, actor and target shares location
 # Changes: Target's count reduces by 1
 
-kill_greenland_insect_for_food = StoryNode
+actors_goal_is_explore = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Goal", value="Explore New World")
+target_flesh_is_edible = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="EdibleFlesh", value=True)
+reduce_target_count_by_1 = RelativeTagChange(name="Reduce Count by One", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Count", value_delta=-1)
+kill_mob_for_food = StoryNode(name="Kill Mob For Food", charcount=1, required_test_list=[actors_goal_is_explore, target_flesh_is_edible, target_is_mob, target_count_greater_than_0, actor_shares_location_with_target], effects_on_next_ws=[reduce_target_count_by_1])
 
-# Eradicate Inhabitants (one for each mob type):
+# Eradicate Inhabitants (one rule object for each mob type):
 # Conditions: Target is a mob, target's count is greater than 0, actor either shares a location with target or is a god. Actor must command someone who is dead.
 # Changes: Target's Count goes to Zero
 
 eradicate_mob = StoryNode      
 
-# Get Attacked by Mob (one for each aggressive mob):
+# Get Attacked by Mob (one rule object for each aggressive mob):
 # Conditions: Actor and mob share location, The Target is a Mob, The Target has tag Behavior: Aggressive Or the Target must have KillReason edge towards Actor.
 
 attacked_by_mob = StoryNode
@@ -180,24 +192,30 @@ DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placehol
 # Tasks
 # Rescue Columbo
 # Source: Get Command From Higher Ups
+# Owner: Amil
 # Requirement: Columbo must be alive.
 # Placeholder Actors: "columbo" -> Stranded Human
 #
 # Destroy Tatain
 # Source: Alien God
+# Owner: Iris
 # Requirement: Alien God must not have knowledge of Destroy Tatain Task.
 # Action: (Tatain): Attack Inhabitants
 #
 # Destory Death Paradise
 # Source: Alien God
+# Owner: Iris
 # Requirement: Alien God must not have knowledge of Destroy Death Pardise Task.
 # Actions: (Death Paradise): Attacked by Mob
 #
 # Preserve Greenland
 # Source: Alien God
+# Owner: Iris
 # Requirement: Alien God must not have knowledge of Preserve Greenland Task.
 # Actions: (New World Greenland): Notice Invader
 # Placeholder Actors: "columbo" -> Stranded Human
+
+# Rules
 
 # Starting Story Graph:
 # Non Main Characters will wait
