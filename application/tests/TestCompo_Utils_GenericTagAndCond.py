@@ -37,7 +37,7 @@ test_ws.connect(from_node=daniel, edge_name="hates", to_node=bob, value="blackma
 placeholder_hate_test = HasEdgeTest(object_from_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name_test="hates", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
 placeholder_like_killer = RelChange(name="Liking the Killer", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="likes", node_b=GenericObjectNode.GENERIC_ACTOR, value="killer_of_hated_person", add_or_remove=ChangeAction.ADD)
 
-like_killer_for_killing_hated = ConditionalChange(name="Like Killer For Killing Hated Character", list_of_test_object_names=[charlie, daniel, eve, frank], list_of_condition_tests=[placeholder_hate_test], list_of_changes=[placeholder_like_killer])
+like_killer_for_killing_hated = ConditionalChange(name="Like Killer For Killing Hated Character", list_of_condition_tests=[placeholder_hate_test], list_of_changes=[placeholder_like_killer])
 kill_node = StoryNode(name="Kill Victim", biasweight=0, tags={"Type":"Murder"}, charcount=1, target_count=1, actor=[alice], target=[bob])
 
 getncondchange = translate_generic_condchange(like_killer_for_killing_hated, kill_node)

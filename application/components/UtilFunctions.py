@@ -5,9 +5,9 @@ import random
 import sys
 sys.path.insert(0,'')
 
-from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, SameLocationTest
+from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, SameLocationTest, IntersectObjectExistsTest, ObjectPassesAtLeastOneTestTest
 from application.components.Edge import Edge
-from application.components.RelChange import ConditionalChange, RelChange, TagChange, TaskAdvance, TaskCancel, TaskChange
+from application.components.RelChange import ConditionalChange, RelChange, RelativeBiasChange, RelativeTagChange, TagChange, TaskAdvance, TaskCancel, TaskChange
 from application.components.StoryObjects import ObjectNode
 from application.components.UtilityEnums import ChangeType, GenericObjectNode, TestType
 
@@ -515,8 +515,8 @@ def replace_placeholder_object_with_test_taker(test, test_taker, placeholder_obj
                 return replace_placeholder_object_with_test_taker_sameloc(test, test_taker, placeholder_object)
             case TestType.HAS_EDGE:
                 return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
-            # case TestType.HAS_DOUBLE_EDGE:
-            #     return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
+            case TestType.TAG_VALUE_IN_RANGE:
+                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
             case TestType.HAS_TAG:
                 return replace_placeholder_object_with_test_taker_hastag(test, test_taker, placeholder_object)
             case TestType.IN_BIAS_RANGE:
@@ -537,6 +537,15 @@ def replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeho
         return copiedtest
         
     return test
+
+def replace_placeholder_object_with_test_taker_valuerange(test, test_taker, placeholder_object):
+    if test.object_to_test == placeholder_object:
+        copiedtest = copy.deepcopy(test)
+        copiedtest.object_to_test = test_taker
+        return copiedtest
+    
+    return test
+    
 
 def replace_placeholder_object_with_test_taker_holds(test, test_taker, placeholder_object):
 
@@ -631,6 +640,10 @@ def translate_generic_change(change, populated_story_node):
             equivalent_changelist = translate_generic_relchange(change, populated_story_node)
         case ChangeType.TAGCHANGE:
             equivalent_changelist = translate_generic_tagchange(change, populated_story_node)
+        case ChangeType.RELATIVETAGCHANGE:
+            equivalent_changelist = translate_generic_relative_tagchange(change, populated_story_node)
+        case ChangeType.RELATIVEBIASCHANGE:
+            equivalent_changelist = translate_generic_relative_biaschange(change, populated_story_node)
         case ChangeType.CONDCHANGE:
             equivalent_changelist = translate_generic_condchange(change, populated_story_node)
         case ChangeType.TASKCHANGE:
@@ -670,22 +683,36 @@ def translate_generic_tagchange(tagchange, populated_story_node):
 
     return list_of_equivalent_tagchanges
 
-def translate_generic_condchange(change, populated_story_node):
+def translate_generic_relative_tagchange(tagchange, populated_story_node):
+    list_of_equivalent_tagchanges = []
 
-    equivalent_objects = []
+    objectlist = check_keyword_and_return_objectnodelist(populated_story_node, tagchange.object_node_name)
+
+    for item in objectlist:
+        if issubclass(type(item), ObjectNode):
+            list_of_equivalent_tagchanges.append(RelativeTagChange(name=tagchange.name, object_node_name=item.name, tag=tagchange.tag, value_delta=tagchange.value_delta))
+        else:
+            list_of_equivalent_tagchanges.append(RelativeTagChange(name=tagchange.name, object_node_name=item, tag=tagchange.tag, value_delta=tagchange.value_delta))
+
+    return list_of_equivalent_tagchanges
+
+def translate_generic_relative_biaschange(biaschange, populated_story_node):
+    list_of_equivalent_biaschange = []
+
+    objectlist = check_keyword_and_return_objectnodelist(populated_story_node, biaschange.object_node_name)
+
+    for item in objectlist:
+        if issubclass(type(item), ObjectNode):
+            list_of_equivalent_biaschange.append(RelativeBiasChange(name=biaschange.name, object_node_name=item.name, bias=biaschange.bias, biasvalue_delta=biaschange.biasvalue_delta))
+        else:
+            list_of_equivalent_biaschange.append(RelativeBiasChange(name=biaschange.name, object_node_name=item, bias=biaschange.bias, biasvalue_delta=biaschange.biasvalue_delta))
+
+    return list_of_equivalent_biaschange
+
+
+def translate_generic_condchange(change, populated_story_node):
     equivalent_tests = []
     equivalent_changes = []
-
-    found_objects = []
-    for item_name in change.list_of_test_object_names:
-        current_object = check_keyword_and_return_objectnodelist(populated_story_node, item_name)
-        found_objects.extend(current_object)
-
-    for thing in found_objects:
-        if issubclass(type(thing), ObjectNode):
-            equivalent_objects.append(thing.get_name())
-        else:
-            equivalent_objects.append(thing)
 
     for test in change.list_of_condition_tests:
         equivalent_tests.extend(translate_generic_test(test, populated_story_node))
@@ -693,7 +720,7 @@ def translate_generic_condchange(change, populated_story_node):
     for subchange in change.list_of_changes:
         equivalent_changes.extend(translate_generic_change(subchange, populated_story_node))
 
-    return ConditionalChange(change.name, equivalent_objects, equivalent_tests, equivalent_changes)
+    return ConditionalChange(name=change.name, list_of_condition_tests=equivalent_tests, list_of_changes=equivalent_changes)
 
 def translate_generic_taskchange(change, populated_story_node):
 
@@ -783,6 +810,8 @@ def translate_generic_test(condtest, populated_story_node):
             list_of_equivalent_condtests = translate_has_tag_test(test=condtest, node=populated_story_node)
         case TestType.IN_BIAS_RANGE:
             list_of_equivalent_condtests = translate_in_bias_range_test(test=condtest, node=populated_story_node)
+        case TestType.INTERSECTED_OBJECT_EXISTS:
+            list_of_equivalent_condtests = translate_intersect_object_test(test=condtest, node=populated_story_node)
         # case TestType.HAS_DOUBLE_EDGE:
         #     list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
         case _:
@@ -844,6 +873,29 @@ def translate_in_bias_range_test(test, node):
         list_of_equivalent_tests.append(InBiasRangeTest(object_to_test=item, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept, inverse=test.inverse, score=test.score))
 
     return list_of_equivalent_tests
+def translate_intersect_object_test(test, node):
+
+    equivalent_tests = []
+    for test in test.list_of_tests_with_placeholder:
+        equivalent_tests.extend(translate_generic_test(condtest=test, populated_story_node=node))
+
+    return [IntersectObjectExistsTest(list_of_tests_with_placeholder=equivalent_tests, inverse=test.inverse, score=test.score)]
+
+def translate_one_test_test(test, node):
+
+    list_of_all_tests = []
+    object_list = check_keyword_and_return_objectnodelist(storynode=node, objnode_to_check=test.object_to_test)
+
+    for object_eq in object_list:
+
+        equivalent_tests = []
+        
+        for test in test.list_of_tests_with_placeholder:
+            equivalent_tests.extend(translate_generic_test(condtest=test, populated_story_node=node))
+
+        list_of_all_tests.append(ObjectPassesAtLeastOneTestTest(list_of_tests_with_placeholder=equivalent_tests, object_to_test=object_eq))
+
+    return list_of_all_tests
 
 def get_actor_object_from_list_with_actor_name(actor_name:str, actor_list=[]):
 

@@ -255,39 +255,39 @@ town = LocationNode(name = "Town")
 
 #Recognition of Task Locations...it's been a while.
 
-town_a = LocationNode("Town A")
-town_b = LocationNode("Town B")
-town_c = LocationNode("Town C")
+# town_a = LocationNode("Town A")
+# town_b = LocationNode("Town B")
+# town_c = LocationNode("Town C")
 
-ws5 = WorldState(name="World State", objectnodes=[alice, bob, charlie, town_a, town_b, town_c])
+# ws5 = WorldState(name="World State", objectnodes=[alice, bob, charlie, town_a, town_b, town_c])
 
-ws5.doubleconnect(nodeA=town_a, edge_name="connects", nodeB=town_b)
-ws5.doubleconnect(nodeA=town_b, edge_name="connects", nodeB=town_c)
-ws5.connect(from_node=town_a, edge_name="holds", to_node=alice)
-ws5.connect(from_node=town_a, edge_name="holds", to_node=bob)
-ws5.connect(from_node=town_c, edge_name="holds", to_node=charlie)
+# ws5.doubleconnect(nodeA=town_a, edge_name="connects", nodeB=town_b)
+# ws5.doubleconnect(nodeA=town_b, edge_name="connects", nodeB=town_c)
+# ws5.connect(from_node=town_a, edge_name="holds", to_node=alice)
+# ws5.connect(from_node=town_a, edge_name="holds", to_node=bob)
+# ws5.connect(from_node=town_c, edge_name="holds", to_node=charlie)
 
-share_loc_charlie = SameLocationTest(list_to_test=[GenericObjectNode.TASK_OWNER, charlie])
-talk_to_charlie = StoryNode(name="Talk to Charlie", charcount=1, target_count=1, actor=[GenericObjectNode.TASK_OWNER], target=[charlie], required_test_list=[share_loc_charlie])
+# share_loc_charlie = SameLocationTest(list_to_test=[GenericObjectNode.TASK_OWNER, charlie])
+# talk_to_charlie = StoryNode(name="Talk to Charlie", charcount=1, target_count=1, actor=[GenericObjectNode.TASK_OWNER], target=[charlie], required_test_list=[share_loc_charlie])
 
-talk_to_charlie_task = CharacterTask(task_name="Talk to Charlie", task_actions=[talk_to_charlie], task_location_name="Town C")
-talk_to_charlie_stack = TaskStack(stack_name="Just Talk to Charlie, Bro", task_stack=[talk_to_charlie_task])
+# talk_to_charlie_task = CharacterTask(task_name="Talk to Charlie", task_actions=[talk_to_charlie], task_location_name="Town C")
+# talk_to_charlie_stack = TaskStack(stack_name="Just Talk to Charlie, Bro", task_stack=[talk_to_charlie_task])
 
-add_talk_charlie_stack = TaskChange(name="Add Talk Charlie Stack", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_TARGET, task_stack=talk_to_charlie_stack)
+# add_talk_charlie_stack = TaskChange(name="Add Talk Charlie Stack", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_TARGET, task_stack=talk_to_charlie_stack)
 
-give_task = StoryNode(name="Give Task", charcount=1, target_count=1, effects_on_next_ws=[add_talk_charlie_stack])
+# give_task = StoryNode(name="Give Task", charcount=1, target_count=1, effects_on_next_ws=[add_talk_charlie_stack])
 
-sg5 = StoryGraph(name="Story Graph 5", character_objects=[alice, bob, charlie], location_objects=[town_a, town_b, town_c], starting_ws=ws5)
+# sg5 = StoryGraph(name="Story Graph 5", character_objects=[alice, bob, charlie], location_objects=[town_a, town_b, town_c], starting_ws=ws5)
 
-sg5.insert_joint_node(joint_node=give_task, main_actor=bob, location=town_a, targets=[alice])
-sg5.add_story_part(part=node_a, character=charlie, location=town_c)
+# sg5.insert_joint_node(joint_node=give_task, main_actor=bob, location=town_a, targets=[alice])
+# sg5.add_story_part(part=node_a, character=charlie, location=town_c)
 
-modded_sg5 = generate_story_from_starter_graph(init_storygraph=sg5, list_of_rules=[], required_story_length=5, verbose=True)
+# modded_sg5 = generate_story_from_starter_graph(init_storygraph=sg5, list_of_rules=[], required_story_length=5, verbose=True)
 
-modded_sg5.print_all_node_beautiful_format()
-latest_state = modded_sg5.make_latest_state()
+# modded_sg5.print_all_node_beautiful_format()
+# latest_state = modded_sg5.make_latest_state()
 
-print(latest_state.get_actor_current_location(alice))
+# print(latest_state.get_actor_current_location(alice))
 
 # Greek Salad
 # (Doesn't have to have the same name btw)
