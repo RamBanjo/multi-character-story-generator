@@ -141,7 +141,8 @@ actor_with_target_or_actor_is_god = ObjectPassesAtLeastOneTestTest(list_of_tests
 
 target_count_zeros = TagChange(name="Target Count Zeros", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Count", value=0, add_or_remove=ChangeAction.ADD)
 
-eradicate_mob = StoryNode(name="Eradicate Mobs", tags={"Type":"Destruction"}, effects_on_next_ws=[target_count_zeros], required_test_list=[actor_with_target_or_actor_is_god, target_count_greater_than_0, target_is_mob])      
+eradicate_mob_with_godly_power = StoryNode(name="Eradicate Mobs With God Power", tags={"Type":"Destruction"}, effects_on_next_ws=[target_count_zeros], required_test_list=[actor_is_god, target_count_greater_than_0, target_is_mob])      
+massacre_mob = StoryNode(name="Massacre Mobs", tags={"Type":"Destruction"}, effects_on_next_ws=[target_count_zeros], required_test_list=[actor_shares_location_with_target, actors_goal_is_eradication, target_count_greater_than_0, target_is_mob])      
 
 # Get Attacked by Mob (one rule object for each aggressive mob):
 # Conditions: Actor and target share location, The Target is a Mob, The Target has tag Behavior: Aggressive Or the Target must have KillReason edge towards Actor.
@@ -255,7 +256,9 @@ find_columbo = StoryNode(name="Find Columbo", tags={"Type":"Conversation"}, targ
 find_columbo_task = CharacterTask(task_name="Find Columbo Task", task_actions=[find_columbo], actor_placeholder_string_list=["columbo"])
 
 columbo_goal_is_explore_world = HasTagTest(object_to_test="columbo", tag="Goal", value="Explore New World")
-rescue_columbo_task = TaskStack(stack_name="Find Columbo Stack", task_stack=[find_columbo_task], task_stack_requirement=[columbo_goal_is_explore_world])
+find_columbo_stack = TaskStack(stack_name="Find Columbo Stack", task_stack=[find_columbo_task], task_stack_requirement=[columbo_goal_is_explore_world])
+
+get_rescue_columbo_task = TaskChange(name="Get Rescue Columbo Task", task_giver_name=None, task_owner_name="Amil", task_stack=find_columbo_stack)
 
 get_command_from_higher_up = StoryNode(name="Get Command from Higher Up")
 
@@ -264,20 +267,26 @@ get_command_from_higher_up = StoryNode(name="Get Command from Higher Up")
 # Owner: Iris
 # Requirement: Alien God must not have knowledge of Destroy Tatain Task.
 # Action: (Tatain): Attack Inhabitants
-#
+
+task_giver_not_know_about_tatain_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenTatainTask", value=True, inverse=True)
+
 # Destory Death Paradise
 # Source: Alien God
 # Owner: Iris
 # Requirement: Alien God must not have knowledge of Destroy Death Pardise Task.
 # Actions: (Death Paradise): Attacked by Mob
-#
+
+task_giver_not_know_about_dp_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenDeathParaTask", value=True, inverse=True)
+
 # Preserve Greenland
 # Source: Alien God
 # Owner: Iris
 # Requirement: Alien God must not have knowledge of Preserve Greenland Task.
 # Actions: (New World Greenland): Notice Invader
 # Placeholder Actors: "columbo" -> Stranded Human
-#
+
+task_giver_not_know_about_greenland_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenGreenlandTask", value=True, inverse=True)
+
 # Invade Greenland
 # Source: Alien God
 # Owner: Apollo
@@ -286,13 +295,31 @@ get_command_from_higher_up = StoryNode(name="Get Command from Higher Up")
 
 # (The nodes that give away these tasks will in itself give knowledge of the task to the giver)
 
+task_giver_not_know_about_attack_greenland_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenAttackGreenlandTask", value=True, inverse=True)
+
 # Rules
+
+# Ambush -+> Kill Mob as Defense
+# Ambush -+> Kill Mob for Food
+# Attacked by Mob -+> Record Earth Army Data
+# Attacked by Mob -+> Killed by Mob
+# Attack Inhabitants -> Killed by Mob
+# Attacked by Mob -> Massacre Mobs
+# Attack Inhabitants -> Massacre Mobs
+
+# (Nothing) -> Kill Actor
+# (Nothing) -> Attack Inhabitants
+# (Nothing) -> Command Army to Attack
+# (Nothing) -> Eradicate Mob With God Power
+# (Nothing) -> Attacked by Mob
+# (Nothing) -> Create Apollo
+# (Nothing) -> Data Backup Resurrection
 
 # Starting Story Graph:
 # Non Main Characters will wait
 # Main Characters:
 #
-# Columbo is in New World / Greenland in Timestep 0, and is waiting in Timestep 1
+# Columbo is in New World / Greenland in Timestep 0 and performing Explore World, and is waiting in Timestep 1
 # Iris is in Alien God Planet in Timestep 0 getting task to Destroy Tatain, and is waiting in Timestep 1
 # Amil is Waiting at Earth in Timestep 0, and gets the task to rescue Columbo in Timestep 1
 
