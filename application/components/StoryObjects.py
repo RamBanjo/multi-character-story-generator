@@ -123,10 +123,10 @@ class CharacterNode(ObjectNode):
 
     DEFAULT_BIASES = {"lawbias": 0, "moralbias": 0}
 
-    def __init__(self, name, biases=DEFAULT_BIASES, tags={"Type": "Character"}, start_timestep=0, **kwargs):
+    def __init__(self, name, biases=DEFAULT_BIASES, tags={"Type": "Character"}, start_timestep=0, internal_id:int=0, description:str="", **kwargs):
 
         #call super constructor
-        super().__init__(name, tags)
+        super().__init__(name=name, tags=tags, internal_id=internal_id, description=description)
 
         #The bias values of this character as a dict. Mutable.
         #Only exists if it's a character.
@@ -180,8 +180,8 @@ class CharacterNode(ObjectNode):
 
 
 class LocationNode(ObjectNode):
-    def __init__(self, name, tags={"Type": "Location"}, **kwargs):
-        super().__init__(name, tags)
+    def __init__(self, name, tags={"Type": "Location"}, internal_id:int=0, description:str="", **kwargs):
+        super().__init__(name=name, tags=tags, internal_id=internal_id, description=description)
 
     def get_adjacent_locations_list(self, adjacent_rel_name = "adjacent_to", return_as_objects = False):
         adjacencies = self.get_outgoing_edge(adjacent_rel_name)
