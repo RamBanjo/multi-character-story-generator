@@ -110,7 +110,7 @@ class ObjectNode:
         if type(self) != type(rhs):
             return False
 
-        return self.name == rhs.name and self.internal_id == rhs.internal_id
+        return self.internal_id == rhs.internal_id
 
     def __ge__(self, rhs):
         return self.get_name() >= rhs.get_name()
