@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from interface import ObjectFrame,OptionFrame,Menu
+from interface import ObjectFrame,OptionFrame,Menu,ObjectsTab
+from application.components import StoryObjects
 
 class App(tk.Tk):
     
@@ -10,7 +11,9 @@ class App(tk.Tk):
         self.resources = {
             'test': tk.Variable(value=["Alice", "Bob", "Charlie", "Dugson", "Edison", "Florence", "Giraffa", "Hector", "Ivan", "Jello"]),
             'optionNumber': tk.IntVar(value=-1),
-            'btnLabels' : ["Objects","Actions","World State","Rules","Tasks","Initial Graph","Generate"]
+            'btnLabels' : ["Objects","Actions","World State","Rules","Tasks","Initial Graph","Generate"],
+            'objects': [StoryObjects.ObjectNode("Sword")],
+            'objectDetail': None
         }
 
         self.title(" Multi-Character Story Generator")
@@ -23,7 +26,7 @@ class App(tk.Tk):
             9: ObjectFrame.InitialFrame(self)
         }
         self.objectFrame = self.resources['objectFrames'][9]
-        self.resources['objectFrames'][0] = ObjectFrame.ObjectsTab(self.objectFrame)
+        self.resources['objectFrames'][0] = ObjectsTab.ObjectsTab(self.objectFrame)
         for i in range(1,7):
             self.resources['objectFrames'][i] = ObjectFrame.NumberedFrame(self.objectFrame,i)
         self.resources['objectFrames'][8] = ObjectFrame.PlaceholdingFrame(self.objectFrame)
