@@ -417,9 +417,14 @@ class StoryGraph:
         else:
             if rule.joint_type == JointType.JOIN:
                 #Want to know if there is at least one pattern.
-                for potential_joint in rule.base_actions:
-                    test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=[potential_joint], character_to_extract=actor)
-                    pattern_found_at_step = pattern_found_at_step or insert_index in test_result_tuple[1]
+                #Note that if no base pattern is given, then pattern is always found at step.
+
+                if rule.base_actions is None or len(rule.base_actions) == 0:
+                    pattern_found_at_step = True
+                else:   
+                    for potential_joint in rule.base_actions:
+                        test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=[potential_joint], character_to_extract=actor)
+                        pattern_found_at_step = pattern_found_at_step or insert_index in test_result_tuple[1]
 
             else:
                 test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=[rule.base_joint], character_to_extract=actor)
@@ -843,10 +848,16 @@ class StoryGraph:
 
             #For each of the possible base action, at any point if this character is seen performing the base action then add it to the list.
             valid_locs = []
-            for base_node in joint_rule.base_actions:
 
-                valid_locs += self.check_for_pattern_in_storyline([base_node], actor)[1]
-                return len(valid_locs) > 0, sorted(list(set(valid_locs)))
+            if joint_rule.base_actions is None or len(joint_rule.base_actions) == 0:
+                for i in range(0, self.get_longest_path_length_by_character(actor)):
+                    valid_locs.append(i)
+
+                    return len(valid_locs) > 0, sorted(list(set(valid_locs)))
+            else:
+                for base_node in joint_rule.base_actions:
+                    valid_locs += self.check_for_pattern_in_storyline([base_node], actor)[1]
+                    return len(valid_locs) > 0, sorted(list(set(valid_locs)))
 
             return self.check_for_pattern_in_storyline()
         if joint_rule.joint_type == JointType.CONT or joint_rule.joint_type == JointType.SPLIT:
