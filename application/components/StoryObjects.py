@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0,'')
 
 class ObjectNode:
-    def __init__(self, name, tags={"Type": "Object"}, **kwargs):
+    def __init__(self, name:str, tags:dict={"Type": "Object"}, internal_id:int=0, description:str="", **kwargs):
         
         #What this object will be referred to as. Assumed to be unique.
         self.name = name
@@ -16,26 +16,32 @@ class ObjectNode:
         #The list of relationships that point to this object.
         self.incoming_edges = []
 
-    def set_tag(self, attribute, new_value):
+        #The internal ID of the object node. (Prevents duplication)
+        self.internal_id = internal_id
+
+        #The string description of this object. Not used in generation, only for note-taking.
+        self.description = description
+
+    def set_tag(self, attribute:str, new_value:str):
         self.tags[attribute] = new_value
 
-    def remove_tag(self, attribute):
+    def remove_tag(self, attribute:str):
         del self.tags[attribute]
 
     def get_name(self):
         return self.name
     
-    def set_name(self, new_name):
+    def set_name(self, new_name:str):
         self.name = new_name
         
-    def get_incoming_edge(self, edgename):
+    def get_incoming_edge(self, edgename:str):
         return_edge = []
         for edge in self.incoming_edges:
             if edge.name == edgename:
                 return_edge.append(edge)
         return return_edge
     
-    def get_outgoing_edge(self, edgename):
+    def get_outgoing_edge(self, edgename:str):
         return_edge = []
         for edge in self.outgoing_edges:
             if edge.name == edgename:
@@ -104,7 +110,7 @@ class ObjectNode:
         if type(self) != type(rhs):
             return False
 
-        return self.name == rhs.name
+        return self.name == rhs.name and self.internal_id == rhs.internal_id
 
     def __ge__(self, rhs):
         return self.get_name() >= rhs.get_name()

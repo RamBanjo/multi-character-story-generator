@@ -299,6 +299,7 @@ task_giver_not_know_about_attack_greenland_task = HasTagTest(object_to_test=Gene
 
 # Rules
 
+# Rewrite Rule
 # Ambush -+> Kill Mob as Defense
 # Ambush -+> Kill Mob for Food
 # Attacked by Mob -+> Record Earth Army Data
@@ -306,14 +307,19 @@ task_giver_not_know_about_attack_greenland_task = HasTagTest(object_to_test=Gene
 # Attack Inhabitants -> Killed by Mob
 # Attacked by Mob -> Massacre Mobs
 # Attack Inhabitants -> Massacre Mobs
-
-# (Nothing) -> Kill Actor
 # (Nothing) -> Attack Inhabitants
 # (Nothing) -> Command Army to Attack
 # (Nothing) -> Eradicate Mob With God Power
 # (Nothing) -> Attacked by Mob
+
+# JoiningJoint
+# (Nothing) -> Kill Actor
 # (Nothing) -> Create Apollo
 # (Nothing) -> Data Backup Resurrection
+
+# ContJoint
+
+# SplitJoint
 
 # Starting Story Graph:
 # Non Main Characters will wait
