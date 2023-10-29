@@ -47,42 +47,42 @@ not_warrior_tag = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag
 bad_1 = StoryNode(name="Bad_1", required_test_list=[not_warrior_tag])
 bad_2 = StoryNode(name="Bad_2", required_test_list=[not_warrior_tag])
 
-alice = CharacterNode(name="Alice", tags={"Type":"Character", "Job":"Warrior", "Alive":True})
-bob = CharacterNode(name="Bob", tags={"Type":"Character", "Job":"Fighter", "Alive":True})
-charlie = CharacterNode(name="Charlie", tags={"Type":"Character", "Job":"Bard", "Alive":True})
-town = LocationNode(name = "Town")
+alice = CharacterNode(name="Alice", tags={"Type":"Character", "Job":"Warrior", "Alive":True}, internal_id=0)
+bob = CharacterNode(name="Bob", tags={"Type":"Character", "Job":"Fighter", "Alive":True}, internal_id=1)
+charlie = CharacterNode(name="Charlie", tags={"Type":"Character", "Job":"Bard", "Alive":True},internal_id=2)
+town = LocationNode(name = "Town", internal_id=3)
 
 #Test 1: Recognization of Replacement Rules
 # Graph starts with A-B-C. We have rules that say B -> DE and C -> FG. If we make the graph continue generating until the shortest path length of 5 is reached we would get ADEFG.
 
 #BEGIN TEST 1
-# state_1 = WorldState(name="State 1", objectnodes=[alice, town])
-# state_1.connect(from_node=town, edge_name="holds", to_node=alice)
+state_1 = WorldState(name="State 1", objectnodes=[alice, town])
+state_1.connect(from_node=town, edge_name="holds", to_node=alice)
 
-# graph_1 = StoryGraph(name="Graph 1", character_objects=[alice], location_objects=[town], starting_ws = state_1)
+graph_1 = StoryGraph(name="Graph 1", character_objects=[alice], location_objects=[town], starting_ws = state_1)
 
-# graph_1.insert_multiple_parts(part_list=[node_a, node_b, node_c], character=alice, location_list=[town, town, town])
+graph_1.insert_multiple_parts(part_list=[node_a, node_b, node_c], character=alice, location_list=[town, town, town])
 
-# # for part in graph_1.story_parts.values():
-# #     print(part.name)
-# #     print("prev",part.previous_nodes)
-# #     print("next",part.next_nodes)
-# #     print("-----")
+# for part in graph_1.story_parts.values():
+#     print(part.name)
+#     print("prev",part.previous_nodes)
+#     print("next",part.next_nodes)
+#     print("-----")
 
-# rule_b_to_de = RewriteRule(name="b->de",story_condition=[node_b], story_change=[node_d, node_e], remove_before_insert=True)
-# rule_c_to_fg = RewriteRule(name="c->fg",story_condition=[node_c], story_change=[node_f, node_g], remove_before_insert=True)
-# rule_b_to_bad1 = RewriteRule(name="b->bad1",story_condition=[node_b], story_change=[bad_1])
-# rule_c_to_bad2 = RewriteRule(name="c->bad2",story_condition=[node_c], story_change=[bad_2])
+rule_b_to_de = RewriteRule(name="b->de",story_condition=[node_b], story_change=[node_d, node_e], remove_before_insert=True)
+rule_c_to_fg = RewriteRule(name="c->fg",story_condition=[node_c], story_change=[node_f, node_g], remove_before_insert=True)
+rule_b_to_bad1 = RewriteRule(name="b->bad1",story_condition=[node_b], story_change=[bad_1])
+rule_c_to_bad2 = RewriteRule(name="c->bad2",story_condition=[node_c], story_change=[bad_2])
 
-# # graph_1.print_all_node_beautiful_format()
-# # graph_1.refresh_longest_path_length()
-# # print(graph_1.get_longest_path_length_by_character(character=alice))
-# # print(graph_1.get_latest_story_node_from_character(character=alice))
+# graph_1.print_all_node_beautiful_format()
+# graph_1.refresh_longest_path_length()
+# print(graph_1.get_longest_path_length_by_character(character=alice))
+# print(graph_1.get_latest_story_node_from_character(character=alice))
 
-# graph_1_modded = generate_story_from_starter_graph(init_storygraph=graph_1, list_of_rules=[rule_b_to_bad1, rule_b_to_de, rule_c_to_bad2, rule_c_to_fg], required_story_length=5, top_n=5, extra_attempts=-1, verbose=True)
+graph_1_modded = generate_story_from_starter_graph(init_storygraph=graph_1, list_of_rules=[rule_b_to_bad1, rule_b_to_de, rule_c_to_bad2, rule_c_to_fg], required_story_length=5, top_n=5, extra_attempts=-1, verbose=True)
 
-# print("We expect the story following Story Graph to contain the following nodes for Alice: A-D-E-F-G.")
-# graph_1_modded.print_all_node_beautiful_format()
+print("We expect the story following Story Graph to contain the following nodes for Alice: A-D-E-F-G.")
+graph_1_modded.print_all_node_beautiful_format()
 #END TEST 1
 
 #Test 2: Recognition of Tasks
@@ -190,6 +190,8 @@ town = LocationNode(name = "Town")
 
 # sg3.insert_multiple_parts(part_list=[node_a, node_b, node_c], character=alice, location_list=[town, town, town])
 # sg3.insert_multiple_parts(part_list=[node_a, node_b, node_c], character=bob, location_list=[town, town, town])
+
+# # sg3.print_all_node_beautiful_format()
 
 # sg3_modded = generate_story_from_starter_graph(init_storygraph=sg3, list_of_rules=[rule_c_to_x, rule_x_to_y, rule_y_to_de], required_story_length=6, top_n=5, extra_attempts=-1, verbose=True)
 # sg3_modded.print_all_node_beautiful_format()

@@ -117,16 +117,13 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         if verbose:
             print("Checking for acceptable actions...")
         for rule in acceptable_rules:
-            for rule_insert_index in range(0, final_story_graph.get_longest_path_length_by_character(current_character)):
+            for rule_insert_index in range(0, final_story_graph.get_longest_path_length_by_character(current_character)+1):
                 rule_score = final_story_graph.calculate_score_from_rule_char_and_cont(actor=current_character, insert_index=rule_insert_index, rule = rule, mode=0)
 
                 #We can use the rule score itself to test whether or not a rule is suitable.
                 #In the event of a normal rule, if one node is invalid the entire sequence will return -999, which lets us know the rule isn't valid.
                 #In the event of a joint rule, -999 will only be returned if all the available slots are -999, which means that this rule cannot be applied to this character and thus is invalid.
                 if rule_score != -999:
-                    
-                    if rule.is_joint_rule:
-                        rule_insert_index += 1
                 
                     if verbose:
                         print("Found Acceptable Rule", rule.rule_name, "at", rule_insert_index)
@@ -416,7 +413,7 @@ def attempt_apply_rule(rule_object, perform_index, target_story_graph, character
                 #If there are no valid splits here at all, it's skipped.
                 if chosen_grouping_split is None:
                     continue
-
+                
                 rule_validity = target_story_graph.check_joint_continuity_validity(joint_rule=current_rule, main_character=character_object, grouping_split=chosen_grouping_split, insert_index=current_index)
 
                 if rule_validity:
@@ -432,9 +429,9 @@ def attempt_apply_rule(rule_object, perform_index, target_story_graph, character
             #Apply the continuation based on whether the rule was a split rule.
             if current_rule.joint_type == JointType.SPLIT:
 
-                target_story_graph.split_continuation(split_list=current_rule.split_list, chargroup_list=valid_character_grouping, abs_step=current_index+1)
+                target_story_graph.split_continuation(split_list=current_rule.split_list, chargroup_list=valid_character_grouping, abs_step=current_index)
             else:
-                target_story_graph.joint_continuation(abs_step=current_index+1, joint_node=current_rule.joint_node, actors=valid_character_grouping[0]["actor_group"], target_list=valid_character_grouping[0]["target_group"])
+                target_story_graph.joint_continuation(abs_step=current_index, joint_node=current_rule.joint_node, actors=valid_character_grouping[0]["actor_group"], target_list=valid_character_grouping[0]["target_group"])
 
             apply_rule_success = True
 

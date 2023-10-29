@@ -10,25 +10,25 @@ from application.components.ConditionTest import *
 from application.components.RelChange import *
 from application.components.CharacterTask import *
 
-columbo = CharacterNode(name="Columbo", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Human", "Goal":"Explore New World","Alive":True, "Stranded":True})
-iris = CharacterNode(name="Iris", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Robot", "Goal":"Eradicate Living Beings", "Version":"Old", "Alive":True})
-amil = CharacterNode(name="Amil", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Human", "Goal":"Rescue Mission","PlotArmor":True,"Alive":True})
+columbo = CharacterNode(name="Columbo", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Human", "Goal":"Explore New World","Alive":True, "Stranded":True}, internal_id=0)
+iris = CharacterNode(name="Iris", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Robot", "Goal":"Eradicate Living Beings", "Version":"Old", "Alive":True}, internal_id=1)
+amil = CharacterNode(name="Amil", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Human", "Goal":"Rescue Mission","PlotArmor":True,"Alive":True}, internal_id=2)
 
-alien_god = CharacterNode(name="Alien God", biases={"lawbias":100, "moralbias":0}, tags={"Type":"Character","Species":"God", "Alive":True})
-apollo = CharacterNode(name="Apollo", biases={"lawbias":100, "moralbias":0}, tags={"Type":"Character","Species":"Robot", "Goal":"Repel Greenland Humans","Version":"New","Alive":False})
+alien_god = CharacterNode(name="Alien God", biases={"lawbias":100, "moralbias":0}, tags={"Type":"Character","Species":"God", "Alive":True}, internal_id=3)
+apollo = CharacterNode(name="Apollo", biases={"lawbias":100, "moralbias":0}, tags={"Type":"Character","Species":"Robot", "Goal":"Repel Greenland Humans","Version":"New","Alive":False}, internal_id=4)
 
-earth = LocationNode(name="Earth", tags={"Type":"Location", "Climate":"Hi-Tech", "AlienGodsWill":"Unknown"})
-new_world_greenland = LocationNode(name="New World Greenland", tags={"Type":"Location", "Climate":"Lush", "AlienGodsWill":"Preserve"})
-tatain = LocationNode(name="Tatain", tags={"Type":"Location", "Climate":"Sandy", "AlienGodsWill":"Destroy"})
-death_paradise = LocationNode(name="Death Paradise", tags={"Type":"Location", "Climate":"Poisonous", "AlienGodsWill":"Destroy"})
-alien_god_planet = LocationNode(name="Alien God Planet", tags={"Type":"Location", "Climate":"Unknown", "AlienGodsWill":"Unknown"})
-outer_space = LocationNode(name="Outer Space", tags={"Type":"Location", "Climate":"Space", "AlienGodsWill":"Unknown"})
+earth = LocationNode(name="Earth", tags={"Type":"Location", "Climate":"Hi-Tech", "AlienGodsWill":"Unknown"}, internal_id=5)
+new_world_greenland = LocationNode(name="New World Greenland", tags={"Type":"Location", "Climate":"Lush", "AlienGodsWill":"Preserve"}, internal_id=6)
+tatain = LocationNode(name="Tatain", tags={"Type":"Location", "Climate":"Sandy", "AlienGodsWill":"Destroy"}, internal_id=7)
+death_paradise = LocationNode(name="Death Paradise", tags={"Type":"Location", "Climate":"Poisonous", "AlienGodsWill":"Destroy"}, internal_id=8)
+alien_god_planet = LocationNode(name="Alien God Planet", tags={"Type":"Location", "Climate":"Unknown", "AlienGodsWill":"Unknown"}, internal_id=9)
+outer_space = LocationNode(name="Outer Space", tags={"Type":"Location", "Climate":"Space", "AlienGodsWill":"Unknown"}, internal_id=10)
 
-greenland_insects = ObjectNode(name="Greenland Insects", tags={"Type":"Mob", "Count":"5", "Behavior":"Aggressive", "EdibleFlesh":True, "Faction":None})
-tatain_people = ObjectNode(name="Tatain People", tags={"Type":"Mob","Count":5, "Behavior":"Passive", "Faction":"Tatain"})
-death_paradise_robots = ObjectNode(name="Death Paradise Robots", tags={"Type":"Mob","Count":5, "Behavior":"Aggressive", "Faction":"Death Paradise"})
-enemy_mercenary = ObjectNode(name="Enemy Mercenary", tags={"Type":"Mob","Count":5, "Behavior":"Aggressive", "Faction":"Mercenary"})
-earth_army = ObjectNode(name="Earth Army", tags={"Type":"Mob","Count":5, "Behavior":"Passive", "Faction":"Earth"})
+greenland_insects = ObjectNode(name="Greenland Insects", tags={"Type":"Mob", "Count":"5", "Behavior":"Aggressive", "EdibleFlesh":True, "Faction":None},internal_id=11)
+tatain_people = ObjectNode(name="Tatain People", tags={"Type":"Mob","Count":5, "Behavior":"Passive", "Faction":"Tatain"}, internal_id=12)
+death_paradise_robots = ObjectNode(name="Death Paradise Robots", tags={"Type":"Mob","Count":5, "Behavior":"Aggressive", "Faction":"Death Paradise"}, internal_id=13)
+enemy_mercenary = ObjectNode(name="Enemy Mercenary", tags={"Type":"Mob","Count":5, "Behavior":"Aggressive", "Faction":"Mercenary"}, internal_id=14)
+earth_army = ObjectNode(name="Earth Army", tags={"Type":"Mob","Count":5, "Behavior":"Passive", "Faction":"Earth"}, internal_id=15)
 
 all_characters = [columbo, iris, amil, apollo, alien_god]
 all_locations = [earth, new_world_greenland, tatain, death_paradise, outer_space]

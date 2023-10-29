@@ -403,6 +403,8 @@ class StoryGraph:
 
     #TODO (Important): Rule. Rule. Of Course. We should have return the fail value if there is no pattern.
     #Obviously we aren't going to let the user use those bad bad horrible no good rules.
+
+    #PLEASE NOTE that the insert_index always refers to the location where the first node will be inserted
     def calculate_score_from_rule_char_and_cont(self, actor, insert_index, rule, mode=0):
 
         # For the non-joint rule we can use self.check_for_pattern_in_storyline() to see if there is a pattern.
@@ -419,16 +421,16 @@ class StoryGraph:
                 #Want to know if there is at least one pattern.
                 #Note that if no base pattern is given, then pattern is always found at step.
 
-                if rule.base_actions is None or len(rule.base_actions) == 0:
+                if rule.is_patternless_join():
                     pattern_found_at_step = True
                 else:   
                     for potential_joint in rule.base_actions:
                         test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=[potential_joint], character_to_extract=actor)
-                        pattern_found_at_step = pattern_found_at_step or insert_index in test_result_tuple[1]
+                        pattern_found_at_step = pattern_found_at_step or insert_index-1 in test_result_tuple[1]
 
             else:
                 test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=[rule.base_joint], character_to_extract=actor)
-                pattern_found_at_step = insert_index in test_result_tuple[1]
+                pattern_found_at_step = insert_index-1 in test_result_tuple[1]
 
         if not pattern_found_at_step:
             return DEFAULT_INVALID_SCORE
@@ -717,13 +719,20 @@ class StoryGraph:
                 print("Main character is not among the character list!")
             return False
         
-        
+        patternless_join = False
+
+        if joint_rule.joint_type == JointType.JOIN:
+            patternless_join = joint_rule.is_patternless_join()
+
         assumed_node = self.story_parts.get((main_character.get_name(), insert_index-1), None)
         #Oh yeah---to follow a rule there has to be a base graph, therefore, logically there has to be a "previous node". Failing that means there is none graph!
-        if assumed_node is None:
-            if verbose:
-                print("Rule cannot be applied because there is no previous node!")
-            return False
+        # TODO: add a little caveat here that if a joinjoint has no pattern it could possibly be used for this purpose.
+
+        if not patternless_join:
+            if assumed_node is None:
+                if verbose:
+                    print("Rule cannot be applied because there is no previous node!")
+                return False
 
         if joint_rule.joint_type == JointType.CONT or joint_rule.joint_type == JointType.SPLIT:
 
@@ -750,29 +759,29 @@ class StoryGraph:
             #     list_of_testing_actor_names.add(actor.get_name())
             # for target in targets_to_test:
             #     list_of_testing_actor_names.add(target.get_name())
+            if not patternless_join:
+                if joint_rule.joint_type == JointType.JOIN:
+                    joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=entire_character_name_list, absolute_step_to_search=insert_index-1)
+                else:
+                    joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=[joint_rule.base_joint], character_name_list=entire_character_name_list, absolute_step_to_search=insert_index-1)
+                
+                if not joint_pattern_check[0]:
+                    if verbose:
+                        print("The absolute step doesn't match joint pattern!")
+                    return False
+                
+                list_of_possible_combis = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=joint_pattern_check[1], actors_wanted=joint_rule.joint_node.charcount, current_actor_name=main_character.get_name())
+                # print(list_of_possible_combi)
 
-            if joint_rule.joint_type == JointType.JOIN:
-                joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=joint_rule.base_actions, character_name_list=entire_character_name_list, absolute_step_to_search=insert_index-1)
-            else:
-                joint_pattern_check = self.check_if_abs_step_has_joint_pattern(required_story_nodes_list=[joint_rule.base_joint], character_name_list=entire_character_name_list, absolute_step_to_search=insert_index-1)
-            
-            if not joint_pattern_check[0]:
-                if verbose:
-                    print("The absolute step doesn't match joint pattern!")
-                return False
-            
-            list_of_possible_combis = list_all_good_combinations_from_joint_join_pattern(dict_of_base_nodes=joint_pattern_check[1], actors_wanted=joint_rule.joint_node.charcount, current_actor_name=main_character.get_name())
-            # print(list_of_possible_combi)
+                found_exact_set = False
+                for combi in list_of_possible_combis:
+                    if set(combi) == set(entire_character_name_list):
+                        found_exact_set = True
 
-            found_exact_set = False
-            for combi in list_of_possible_combis:
-                if set(combi) == set(entire_character_name_list):
-                     found_exact_set = True
-
-            if not found_exact_set:
-                 if verbose:
-                     print("This joint pattern is impossible!")
-                 return False
+                if not found_exact_set:
+                    if verbose:
+                        print("This joint pattern is impossible!")
+                    return False
             
         #Might end up with a sampling method for now (Test one random combination to see if it works out). If it doesn't cause too many problems then we can do it this way.
         #Consider: create a list of good splits and then look through to see if there is at least one good split there, if the sampling method doesn't work.
@@ -849,7 +858,7 @@ class StoryGraph:
             #For each of the possible base action, at any point if this character is seen performing the base action then add it to the list.
             valid_locs = []
 
-            if joint_rule.base_actions is None or len(joint_rule.base_actions) == 0:
+            if joint_rule.is_patternless_join():
                 for i in range(0, self.get_longest_path_length_by_character(actor)):
                     valid_locs.append(i)
 
@@ -868,8 +877,13 @@ class StoryGraph:
     def check_add_joint_validity(self, joint_node, actors_to_test, targets_to_test, insert_index):
 
         graphcopy = deepcopy(self)
+        # print(insert_index)
         graphcopy.joint_continuation(abs_step=insert_index, joint_node=joint_node, actors=actors_to_test, target_list=targets_to_test, location=None)
         graphcopy.fill_in_locations_on_self()
+
+        # print("GRAPHCOPY")
+        # graphcopy.print_all_node_beautiful_format()
+        # print("END GRAPHCOPY")
 
         validity = graphcopy.check_worldstate_validity_on_own_graph(insert_index)
 
