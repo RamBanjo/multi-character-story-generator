@@ -528,6 +528,8 @@ class WorldState:
                 test_result = self.check_at_least_one_object_pass_all_tests(test_list_with_placeholder=test.list_of_tests_with_placeholder)
             case TestType.OBJECT_PASSES_ONE:
                 test_result = self.check_if_this_object_passes_at_least_one_test(test_list_with_placeholder=test.list_of_tests_with_placeholder, object_to_test=test.object_to_test)
+            case TestType.OBJECT_EQUALITY:
+                test_result = self.object_equality_from_ws(object_list=test.object_list)
             # case TestType.HAS_DOUBLE_EDGE:
             #     test_result = self.check_double_connection(test.object_from_test, test.object_to_test, test.edge_name_test, test.value_test, test.soft_equal)
             case _:
@@ -538,6 +540,19 @@ class WorldState:
             
         return test_result
 
+    def object_equality_from_ws(self, object_list):
+        
+        previous_object = None
+        for thing in object_list:
+            thing_from_ws = self.node_dict[thing.name]
+
+            if previous_object is not None:
+                if thing_from_ws != previous_object:
+                    return False
+                previous_object = thing_from_ws
+    
+        return True
+    
     #In order to ensure that all nodes called are from the worldstate directly, we will use the object name to invoke them
     def same_location_check(self, check_list):
         list_from_this_ws = []

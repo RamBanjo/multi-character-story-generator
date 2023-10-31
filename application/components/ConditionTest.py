@@ -119,6 +119,22 @@ class InBiasRangeTest(ConditionTest):
         self.min_accept = min_accept
         self.max_accept = max_accept
 
+class ObjectEqualityTest(ConditionTest):
+    def __init__(self, object_list, inverse=False, score=1):
+        super().__init__(name="Object Equality Test", test_type=TestType.OBJECT_EQUALITY, inverse=inverse, score=score)
+
+        self.object_list = object_list
+
+    def __str__(self):
+
+        printlist = ""
+
+        for item in self.object_list:
+            printlist += str(item)
+            printlist += ", "
+
+        return self.name + " (" + printlist[:-2] + ", inverse = " + str(self.inverse) + ")"
+
 
 # class HasDoubleEdgeTest(ConditionTest):
 #     def __init__(self, object_from_test, edge_name_test, object_to_test, value_test = None, soft_equal = False, inverse = False):

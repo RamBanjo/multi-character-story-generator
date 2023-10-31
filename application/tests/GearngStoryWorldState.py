@@ -1,3 +1,4 @@
+from copy import deepcopy
 import sys
 
 sys.path.insert(0,'')
@@ -9,6 +10,8 @@ from application.components.UtilityEnums import *
 from application.components.ConditionTest import *
 from application.components.RelChange import *
 from application.components.CharacterTask import *
+from application.components.RewriteRuleWithWorldState import RewriteRule
+from application.components.UtilFunctions import copy_story_node_with_extra_conditions
 
 columbo = CharacterNode(name="Columbo", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Human", "Goal":"Explore New World","Alive":True, "Stranded":True}, internal_id=0)
 iris = CharacterNode(name="Iris", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Robot", "Goal":"Eradicate Living Beings", "Version":"Old", "Alive":True}, internal_id=1)
@@ -81,6 +84,12 @@ target_is_robot = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, ta
 actor_commands_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="commands", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
 actor_is_god = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Species", value="God")
 
+target_is_greenland_insect = ObjectEqualityTest(object_list=[GenericObjectNode.GENERIC_TARGET, greenland_insects])
+target_is_death_robots = ObjectEqualityTest(object_list=[GenericObjectNode.GENERIC_TARGET, death_paradise_robots])
+target_is_space_mercs = ObjectEqualityTest(object_list=[GenericObjectNode.GENERIC_TARGET, enemy_mercenary])
+target_is_tatain_people = ObjectEqualityTest(object_list=[GenericObjectNode.GENERIC_TARGET, tatain_people])
+target_is_earth_army = ObjectEqualityTest(object_list=[GenericObjectNode.GENERIC_TARGET, earth_army])
+
 target_becomes_alive = TagChange(name="Target Becomes Alive", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=True, add_or_remove=ChangeAction.ADD)
 
 check_if_holding_target = HasEdgeTest(object_from_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name_test="holds", object_to_test=GenericObjectNode.GENERIC_TARGET)
@@ -152,7 +161,15 @@ something_has_reason_to_kill_actor = HasEdgeTest(object_from_test=GenericObjectN
 
 target_is_aggressive_or_has_kill_reason = ObjectPassesAtLeastOneTestTest(list_of_tests_with_placeholder=[something_is_aggressive, something_has_reason_to_kill_actor], object_to_test=GenericObjectNode.GENERIC_TARGET)
 
-attacked_by_mob = StoryNode(name="Attacked by Mob", tags={"Type":"Fight"}, required_test_list=[target_is_mob, actor_has_reason_to_kill_target, actor_shares_location_with_target, target_is_mob])
+attacked_by_mob = StoryNode(name="Attacked by Mob", tags={"Type":"Fight"}, required_test_list=[target_is_mob, target_is_aggressive_or_has_kill_reason, actor_shares_location_with_target, target_is_mob])
+
+copy_story_node_with_extra_conditions
+
+attacked_by_insects = copy_story_node_with_extra_conditions(base_node=attacked_by_mob, new_node_name="Attacked by Insects", extra_condition_list=[target_is_greenland_insect])
+attacked_by_robots = copy_story_node_with_extra_conditions(base_node=attacked_by_mob, new_node_name="Attacked by Robots", extra_condition_list=[target_is_death_robots])
+attacked_by_mercs = copy_story_node_with_extra_conditions(base_node=attacked_by_mob, new_node_name="Attacked by Mercs", extra_condition_list=[target_is_space_mercs])
+attacked_by_army = copy_story_node_with_extra_conditions(base_node=attacked_by_mob, new_node_name="Attacked by Army", extra_condition_list=[target_is_earth_army])
+
 
 # Killed by Mob (one for each aggressive mob):
 # Conditions: Actor must not have tag Plot Armor: True. Actor and Target shares location. This node follows Attack Inhabitants or Get Ambushed by Mob.
@@ -163,11 +180,22 @@ actor_becomes_dead = TagChange(name="Target Becomes Dead", object_node_name=Gene
 
 killed_by_mob = StoryNode(name="Get Killed by Mob", effects_on_next_ws=[actor_becomes_dead], required_test_list=[actor_is_alive, actor_has_no_plot_armor, actor_shares_location_with_target])
 
+killed_by_insect = copy_story_node_with_extra_conditions(base_node=killed_by_mob, new_node_name="Killed by Insects", extra_condition_list=[target_is_greenland_insect])
+killed_by_robots =  copy_story_node_with_extra_conditions(base_node=killed_by_mob, new_node_name="Killed by Robots", extra_condition_list=[target_is_death_robots])
+killed_by_mercs =  copy_story_node_with_extra_conditions(base_node=killed_by_mob, new_node_name="Killed by Mercs", extra_condition_list=[target_is_space_mercs])
+killed_by_army =  copy_story_node_with_extra_conditions(base_node=killed_by_mob, new_node_name="Killed by Army", extra_condition_list=[target_is_earth_army])
+
+
 # Kill Mob as Defense (one for each aggressive mob):
 # Conditions: This node follows Get Attacked by Mob. Target must be a mob. Target's count must be greater than 0. Actor and Target must share location.
 # Changes: Target's count reduces by 1.
 
 kill_mob_as_defense = StoryNode(name="Kill Mob as Defense", effects_on_next_ws=[reduce_target_count_by_1], required_test_list=[actor_is_alive, target_is_mob, target_count_greater_than_0, actor_shares_location_with_target])
+
+self_defense_kill_insect = copy_story_node_with_extra_conditions(base_node=kill_mob_as_defense, new_node_name="Self Defense Kill - Insects", extra_condition_list=[target_is_greenland_insect])
+self_defense_kill_robots =  copy_story_node_with_extra_conditions(base_node=kill_mob_as_defense, new_node_name="Self Defense Kill - Robots", extra_condition_list=[target_is_death_robots])
+self_defense_kill_mercs =  copy_story_node_with_extra_conditions(base_node=kill_mob_as_defense, new_node_name="Self Defense Kill - Mercs", extra_condition_list=[target_is_space_mercs])
+self_defense_kill_army =  copy_story_node_with_extra_conditions(base_node=kill_mob_as_defense, new_node_name="Self Defense Kill - Army", extra_condition_list=[target_is_earth_army])
 
 # NoticeInvader
 # Conditions: Actor shares location with Target. Location has tag "AlienGodsWill" : "Preserve" Target is a human.
@@ -300,26 +328,41 @@ task_giver_not_know_about_attack_greenland_task = HasTagTest(object_to_test=Gene
 # Rules
 
 # Rewrite Rule
-# Ambush -+> Kill Mob as Defense
-# Ambush -+> Kill Mob for Food
+
+# For each type of mob rule we are going to add one for each mob type.
+
+# Reminder of mob types
+# - Greenland Insects
+# - Tatain People
+# - Death Paradise Robots
+# - Enemy Mercenary 
+# - Earth Army
+
+# Attacked by Mob -+> Kill Mob as Defense
+kill_mob_from_ambush = RewriteRule(name="Attack Mob -+> Kill Mob as Defense", story_condition=[attacked_by_mob], story_change=[kill_mob_as_defense], remove_before_insert = False, target_list=[])
+
+
+# Attacked by Mob -+> Kill Mob for Food
 # Attacked by Mob -+> Record Earth Army Data
 # Attacked by Mob -+> Killed by Mob
-# Attack Inhabitants -> Killed by Mob
-# Attacked by Mob -> Massacre Mobs
-# Attack Inhabitants -> Massacre Mobs
+# Attacked by Mob -+> Massacre Mobs
+
+# Attack Inhabitants -+> Killed by Mob
+# Attack Inhabitants -+> Massacre Mobs
+
 # (Nothing) -> Attack Inhabitants
 # (Nothing) -> Command Army to Attack
 # (Nothing) -> Eradicate Mob With God Power
 # (Nothing) -> Attacked by Mob
 
-# JoiningJoint
+# JoiningJointRule
 # (Nothing) -> Kill Actor
 # (Nothing) -> Create Apollo
 # (Nothing) -> Data Backup Resurrection
 
-# ContJoint
+# ContJointRule
 
-# SplitJoint
+# SplitJointRule
 
 # Starting Story Graph:
 # Non Main Characters will wait

@@ -5,7 +5,7 @@ import random
 import sys
 sys.path.insert(0,'')
 
-from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, SameLocationTest, IntersectObjectExistsTest, ObjectPassesAtLeastOneTestTest
+from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, ObjectEqualityTest, SameLocationTest, IntersectObjectExistsTest, ObjectPassesAtLeastOneTestTest
 from application.components.Edge import Edge
 from application.components.RelChange import ConditionalChange, RelChange, RelativeBiasChange, RelativeTagChange, TagChange, TaskAdvance, TaskCancel, TaskChange
 from application.components.StoryObjects import ObjectNode
@@ -521,6 +521,8 @@ def replace_placeholder_object_with_test_taker(test, test_taker, placeholder_obj
                 return replace_placeholder_object_with_test_taker_hastag(test, test_taker, placeholder_object)
             case TestType.IN_BIAS_RANGE:
                 return replace_placeholder_object_with_test_taker_biasrange(test, test_taker, placeholder_object)
+            case TestType.OBJECT_EQUALITY:
+                return replace_placeholder_object_with_test_taker_objequality(test, test_taker, placeholder_object)
             case _:
                 return None
 
@@ -562,6 +564,16 @@ def replace_placeholder_object_with_test_taker_sameloc(test, test_taker, placeho
         copiedtest = copy.deepcopy(test)
         copiedtest.list_to_test.remove(placeholder_object)
         copiedtest.list_to_test.append(test_taker)
+        return copiedtest
+
+    return 
+
+def replace_placeholder_object_with_test_taker_objequality(test, test_taker, placeholder_object):
+
+    if placeholder_object in test.object_list:
+        copiedtest = copy.deepcopy(test)
+        copiedtest.object_list.remove(placeholder_object)
+        copiedtest.object_list.append(test_taker)
         return copiedtest
 
     return test
@@ -814,6 +826,12 @@ def translate_generic_test(condtest, populated_story_node):
             list_of_equivalent_condtests = translate_intersect_object_test(test=condtest, node=populated_story_node)
         # case TestType.HAS_DOUBLE_EDGE:
         #     list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
+        case TestType.OBJECT_PASSES_ONE:
+            list_of_equivalent_condtests = translate_one_test_test(test=condtest, node=populated_story_node)
+        case TestType.INTERSECTED_OBJECT_EXISTS:
+            list_of_equivalent_condtests = translate_intersect_object_test(test=condtest, node=populated_story_node)
+        case TestType.OBJECT_EQUALITY:
+            list_of_equivalent_condtests = translate_object_equality_test(test=condtest, node=populated_story_node)
         case _:
             list_of_equivalent_condtests = [condtest]
         
@@ -897,6 +915,16 @@ def translate_one_test_test(test, node):
 
     return list_of_all_tests
 
+def translate_object_equality_test(test, node):
+    
+    objectlist = []
+
+    for item in test.object_list:
+        objectlist.extend(check_keyword_and_return_objectnodelist(node, item))
+
+    return [ObjectEqualityTest(objectlist, inverse=test.inverse, score=test.score)]
+
+
 def get_actor_object_from_list_with_actor_name(actor_name:str, actor_list=[]):
 
     for actor in actor_list:
@@ -915,6 +943,14 @@ def replace_pair_value_with_actual_actors(kv_pair_list=[], actor_list=[]):
         else:
             return_list.append(kv_pair)
     return return_list
+
+def copy_story_node_with_extra_conditions(base_node, new_node_name, extra_condition_list):
+    
+    new_node = copy.deepcopy(base_node)
+    new_node.name = new_node_name
+    new_node.required_test_list.extend(extra_condition_list)
+
+    return new_node
 
 
 # def translate_generic_has_doubleedge_test(test, node):
