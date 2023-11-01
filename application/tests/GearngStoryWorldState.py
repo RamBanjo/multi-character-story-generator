@@ -125,6 +125,12 @@ target_count_greater_than_0 = TagValueInRangeTest(object_to_test=GenericObjectNo
 
 attack_inhabitants = StoryNode(name="Attack Inhabitants", tags={"Type":"Fight"}, required_test_list=[actors_goal_is_eradication, actor_shares_location_with_target, target_is_mob, target_count_greater_than_0])
 
+attack_inhabitants_insects = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Attack Inhabitants - Insects", extra_condition_list=[target_is_greenland_insect])
+attack_inhabitants_robots = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Attack Inhabitants - Robots", extra_condition_list=[target_is_death_robots])
+attack_inhabitants_mercs = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Attack Inhabitants - Mercs", extra_condition_list=[target_is_space_mercs])
+attack_inhabitants_army = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Attack Inhabitants - Army", extra_condition_list=[target_is_earth_army])
+attack_inhabitants_tatain = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Attack Inhabitants - Tatain", extra_condition_list=[target_is_tatain_people])
+
 # Kill Mob for Food:
 # Conditions: Actor's Goal must be to Explore New World, Target is a mob, Target has tag Edible Flesh: True, target's count is greater than 0, follows Get Ambushed By Mob, actor and target shares location
 # Changes: Target's count reduces by 1
@@ -133,6 +139,8 @@ actors_goal_is_explore = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACT
 target_flesh_is_edible = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="EdibleFlesh", value=True)
 reduce_target_count_by_1 = RelativeTagChange(name="Reduce Count by One", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Count", value_delta=-1)
 kill_mob_for_food = StoryNode(name="Kill Mob For Food", required_test_list=[actors_goal_is_explore, target_flesh_is_edible, target_is_mob, target_count_greater_than_0, actor_shares_location_with_target], effects_on_next_ws=[reduce_target_count_by_1])
+
+kill_mob_for_food_insects = copy_story_node_with_extra_conditions(base_node=kill_mob_for_food, new_node_name="Kill for Food - Insects", extra_condition_list=[target_is_greenland_insect])
 
 # Eradicate Inhabitants (one rule object for each mob type):
 # Conditions: Target is a mob, target's count is greater than 0, actor either shares a location with target or is a god. If Actor is God, Actor must also command something dead.
@@ -153,6 +161,18 @@ target_count_zeros = TagChange(name="Target Count Zeros", object_node_name=Gener
 eradicate_mob_with_godly_power = StoryNode(name="Eradicate Mobs With God Power", tags={"Type":"Destruction"}, effects_on_next_ws=[target_count_zeros], required_test_list=[actor_is_god, target_count_greater_than_0, target_is_mob])      
 massacre_mob = StoryNode(name="Massacre Mobs", tags={"Type":"Destruction"}, effects_on_next_ws=[target_count_zeros], required_test_list=[actor_shares_location_with_target, actors_goal_is_eradication, target_count_greater_than_0, target_is_mob])      
 
+god_kills_insects = copy_story_node_with_extra_conditions(base_node=eradicate_mob_with_godly_power, new_node_name="God Kills Insects", extra_condition_list=[target_is_greenland_insect])
+god_kills_robots = copy_story_node_with_extra_conditions(base_node=eradicate_mob_with_godly_power, new_node_name="God Kills Robots", extra_condition_list=[target_is_death_robots])
+god_kills_mercs = copy_story_node_with_extra_conditions(base_node=eradicate_mob_with_godly_power, new_node_name="God Kills Mercs", extra_condition_list=[target_is_space_mercs])
+god_kills_army = copy_story_node_with_extra_conditions(base_node=eradicate_mob_with_godly_power, new_node_name="God Kills Army", extra_condition_list=[target_is_earth_army])
+
+massacre_insects = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Insects", extra_condition_list=[target_is_greenland_insect])
+massacre_robots = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Robots", extra_condition_list=[target_is_death_robots])
+massacre_mercs = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Mercs", extra_condition_list=[target_is_space_mercs])
+massacre_army = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Army", extra_condition_list=[target_is_earth_army])
+massace_tatain = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Tatain", extra_condition_list=[target_is_tatain_people])
+
+
 # Get Attacked by Mob (one rule object for each aggressive mob):
 # Conditions: Actor and target share location, The Target is a Mob, The Target has tag Behavior: Aggressive Or the Target must have KillReason edge towards Actor.
 
@@ -162,8 +182,6 @@ something_has_reason_to_kill_actor = HasEdgeTest(object_from_test=GenericObjectN
 target_is_aggressive_or_has_kill_reason = ObjectPassesAtLeastOneTestTest(list_of_tests_with_placeholder=[something_is_aggressive, something_has_reason_to_kill_actor], object_to_test=GenericObjectNode.GENERIC_TARGET)
 
 attacked_by_mob = StoryNode(name="Attacked by Mob", tags={"Type":"Fight"}, required_test_list=[target_is_mob, target_is_aggressive_or_has_kill_reason, actor_shares_location_with_target, target_is_mob])
-
-copy_story_node_with_extra_conditions
 
 attacked_by_insects = copy_story_node_with_extra_conditions(base_node=attacked_by_mob, new_node_name="Attacked by Insects", extra_condition_list=[target_is_greenland_insect])
 attacked_by_robots = copy_story_node_with_extra_conditions(base_node=attacked_by_mob, new_node_name="Attacked by Robots", extra_condition_list=[target_is_death_robots])
@@ -343,9 +361,14 @@ kill_mob_from_ambush = RewriteRule(name="Attack Mob -+> Kill Mob as Defense", st
 
 
 # Attacked by Mob -+> Kill Mob for Food
+
+kill_insect_for_food_followup = RewriteRule(name="Kill Insect for Food Followup", story_condition=[attacked_by_insects], story_change=[kill_mob_for_food_insects], target_list=[greenland_insects])
+
 # Attacked by Mob -+> Record Earth Army Data
 # Attacked by Mob -+> Killed by Mob
 # Attacked by Mob -+> Massacre Mobs
+
+earth_army_data_followup = RewriteRule(name="Earth Army Data Followup", story_condition=[attacked_by_army], story_change=[record_earth_army_data], target_list=[earth_army])
 
 # Attack Inhabitants -+> Killed by Mob
 # Attack Inhabitants -+> Massacre Mobs
@@ -374,4 +397,4 @@ kill_mob_from_ambush = RewriteRule(name="Attack Mob -+> Kill Mob as Defense", st
 
 # Current Problems
 # We don't know how to define score properly. Whoops?
-# We need to assign scores to the individual nodes.
+# Use Default Scoring for now
