@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0,'')
 
 class ObjectNode:
-    def __init__(self, name:str, tags:dict={"Type": "Object"}, internal_id:int=0, description:str="", **kwargs):
+    def __init__(self, name:str, tags:dict={"Type": "Object"}, internal_id:int=0, display_name:str=None, description:str="", **kwargs):
         
         #What this object will be referred to as. Assumed to be unique.
         self.name = name
@@ -22,6 +22,14 @@ class ObjectNode:
         #The string description of this object. Not used in generation, only for note-taking.
         self.description = description
 
+        #The display name of the object AKA the name that the player put on the object to refer to it.
+        #Can duplicate.
+        if display_name != None:
+            self.display_name = display_name
+        else:
+            self.display_name = name
+
+
     def set_tag(self, attribute:str, new_value:str):
         self.tags[attribute] = new_value
 
@@ -30,6 +38,9 @@ class ObjectNode:
 
     def get_name(self):
         return self.name
+    
+    def get_display_name(self):
+        return self.display_name
     
     def set_name(self, new_name:str):
         self.name = new_name
@@ -103,7 +114,7 @@ class ObjectNode:
 
 
     def __str__(self) -> str:
-        return self.get_name()
+        return self.get_display_name() + "(Internal Name: " + self.get_name() + ")" 
 
     def __eq__(self, rhs) -> bool:
 

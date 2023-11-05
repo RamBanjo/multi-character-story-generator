@@ -10,8 +10,10 @@ from application.components.UtilityEnums import *
 from application.components.ConditionTest import *
 from application.components.RelChange import *
 from application.components.CharacterTask import *
-from application.components.RewriteRuleWithWorldState import RewriteRule
+from application.components.RewriteRuleWithWorldState import RewriteRule, JoiningJointRule
 from application.components.UtilFunctions import copy_story_node_with_extra_conditions
+from application.components.StoryGraphTwoWS import StoryGraph
+from application.StoryGeneration_NewFlowchart import *
 
 columbo = CharacterNode(name="Columbo", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Human", "Goal":"Explore New World","Alive":True, "Stranded":True}, internal_id=0)
 iris = CharacterNode(name="Iris", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Species":"Robot", "Goal":"Eradicate Living Beings", "Version":"Old", "Alive":True}, internal_id=1)
@@ -170,7 +172,7 @@ massacre_insects = copy_story_node_with_extra_conditions(base_node=attack_inhabi
 massacre_robots = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Robots", extra_condition_list=[target_is_death_robots])
 massacre_mercs = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Mercs", extra_condition_list=[target_is_space_mercs])
 massacre_army = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Army", extra_condition_list=[target_is_earth_army])
-massace_tatain = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Tatain", extra_condition_list=[target_is_tatain_people])
+massacre_tatain = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Tatain", extra_condition_list=[target_is_tatain_people])
 
 
 # Get Attacked by Mob (one rule object for each aggressive mob):
@@ -243,7 +245,7 @@ actor_commands_a_mob_with_greater_count = IntersectObjectExistsTest(list_of_test
 something_gets_kill_reason_towards_target_orders = RelChange(name="Gain Invasion Kill Reason", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="KillReason", node_b=GenericObjectNode.GENERIC_TARGET, soft_equal="FollowingOrders", add_or_remove=ChangeAction.ADD)
 if_commanded_by_actor_then_kill_target_reason = ConditionalChange(name="If Commanded then Kill Reason", list_of_condition_tests=[something_is_a_mob, actor_commands_something], list_of_changes=[something_gets_kill_reason_towards_target_orders])
 
-command_army_attack = StoryNode(name="Command Army to Attack", effects_on_next_ws=[if_commanded_by_actor_then_kill_target_reason], required_test_list=[actor_is_alive, actor_commands_a_mob_with_greater_count])
+command_army_attack = StoryNode(name="Command Army to Attack", effects_on_next_ws=[if_commanded_by_actor_then_kill_target_reason], required_test_list=[actor_is_alive, actor_has_reason_to_kill_target, actor_commands_a_mob_with_greater_count])
 
 # Record Data of Earth's Army
 # Conditions: Actor must be a robot. Actor shares location with something that is a mob and also belongs to the faction Earth. This node follows Get Attacked By Mob. 
@@ -251,12 +253,13 @@ command_army_attack = StoryNode(name="Command Army to Attack", effects_on_next_w
 
 somethings_faction_is_earth = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Faction", value="Earth")
 actor_shares_location_with_something = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER])
+actor_not_have_earth_army_data = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="HasEarthArmyData", value=True, inverse=True)
 
 actor_shares_location_with_mob_from_earth = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_is_a_mob, somethings_faction_is_earth, actor_shares_location_with_something])
 
 actor_gains_earth_army_data = TagChange(name="Gain Earth Army Data", tag="HasEarthArmyData", value=True)
 
-record_earth_army_data = StoryNode(name="Record Earth Army Data", required_test_list=[actor_is_alive, actor_shares_location_with_mob_from_earth], effects_on_next_ws=[actor_gains_earth_army_data])
+record_earth_army_data = StoryNode(name="Record Earth Army Data", required_test_list=[actor_is_alive, actor_shares_location_with_mob_from_earth, actor_not_have_earth_army_data], effects_on_next_ws=[actor_gains_earth_army_data])
 
 # Create Apollo
 # Conditions: Target must be a Robot. Actor must command Target. Actor must command someone, who has data of Earth Army. Actor must NOT command anyone alive.
@@ -278,6 +281,12 @@ change_version_of_actor_commanded_objects = ConditionalChange(name="Change Versi
 
 create_apollo = StoryNode(name="Birth of Apollo", required_test_list=[target_is_robot, actor_commands_target, actor_commands_someone_with_earth_army_data, actor_does_not_command_anyone_alive, actor_is_alive], effects_on_next_ws=[change_version_of_actor_commanded_objects, target_becomes_alive])
 
+# Actor Attacks Actor
+# Conditions: Actor and Target are alive. Actor has reason to kill Target. Actor and Target share a location.
+# Changes: Target gains reason to kill Actor.
+
+actor_attack_another_actor = StoryNode
+
 # Wait
 # Conditions -
 
@@ -290,6 +299,9 @@ DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placehol
 # Extra Movement Requirement:
 # Actor must NOT have tag Stranded:True
 
+actor_is_not_stranded = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Stranded", value=True, inverse=False)
+task_owner_is_dead = HasTagTest(object_to_test=GenericObjectNode.TASK_OWNER, tag="Alive", value=False)
+
 # Tasks
 # Rescue Columbo
 # Source: Get Command From Higher Ups
@@ -299,14 +311,31 @@ DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placehol
 
 find_columbo = StoryNode(name="Find Columbo", tags={"Type":"Conversation"}, target_count=1, actor=[GenericObjectNode.TASK_OWNER], target=["columbo"])
 
-find_columbo_task = CharacterTask(task_name="Find Columbo Task", task_actions=[find_columbo], actor_placeholder_string_list=["columbo"])
+# Order Army Follow: Orders the earth army to follow. Amil "carries" the Army.
+# Dismiss Army Follow: Orders the earth army to stop following. Amil stops "carrying" the Army and the Army is now in whatever location Amil is in.
 
-columbo_goal_is_explore_world = HasTagTest(object_to_test="columbo", tag="Goal", value="Explore New World")
-find_columbo_stack = TaskStack(stack_name="Find Columbo Stack", task_stack=[find_columbo_task], task_stack_requirement=[columbo_goal_is_explore_world])
+location_stop_carrying_target = RelChange(name="Location stop Carrying Target", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.REMOVE, soft_equal=True)
+actor_carry_target = RelChange(name="Actor Carrying Target", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD)
 
-get_rescue_columbo_task = TaskChange(name="Get Rescue Columbo Task", task_giver_name=None, task_owner_name="Amil", task_stack=find_columbo_stack)
+actor_stop_carrying_target = RelChange(name="Actor stop Carrying Target", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.REMOVE, soft_equal=True)
+location_carry_target = RelChange(name="Location Carrying Target", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD)
 
-get_command_from_higher_up = StoryNode(name="Get Command from Higher Up")
+order_army_follow = StoryNode(name="Order Army Follow", actor=[GenericObjectNode.TASK_OWNER], target=[earth_army], effects_on_next_ws=[location_stop_carrying_target, actor_carry_target])
+dismiss_army_follow = StoryNode(name="Dismiss Army Follow", actor=[GenericObjectNode.TASK_OWNER], target=[earth_army], effects_on_next_ws=[actor_stop_carrying_target, location_carry_target])
+
+order_army_follow_task = CharacterTask(task_name="Order Army Follow Task", task_actions=[order_army_follow], actor_placeholder_string_list=[], avoidance_state=[task_owner_is_dead], task_location_name="Earth")
+
+columbo_is_not_alive = HasTagTest(object_to_test="columbo", tag="Alive", value=False)
+find_columbo_task = CharacterTask(task_name="Find Columbo Task", task_actions=[dismiss_army_follow, find_columbo], actor_placeholder_string_list=["columbo"], avoidance_state=[task_owner_is_dead, columbo_is_not_alive], task_location_name="New World Greenland")
+
+columbo_is_columbo = ObjectEqualityTest(object_list=["columbo", columbo])
+columbo_is_alive = HasTagTest(object_to_test="columbo", tag="Alive", value=True)
+
+find_columbo_stack = TaskStack(stack_name="Find Columbo Stack", task_stack=[find_columbo_task], task_stack_requirement=[columbo_is_alive, columbo_is_columbo])
+
+get_rescue_columbo_taskchange = TaskChange(name="Get Rescue Columbo Task", task_giver_name=None, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=find_columbo_stack)
+
+get_command_from_higher_up = StoryNode(name="Get Command from Higher Up", effects_on_next_ws=[get_rescue_columbo_taskchange], target_count=1)
 
 # Destroy Tatain
 # Source: Alien God
@@ -314,7 +343,21 @@ get_command_from_higher_up = StoryNode(name="Get Command from Higher Up")
 # Requirement: Alien God must not have knowledge of Destroy Tatain Task.
 # Action: (Tatain): Attack Inhabitants
 
+attack_inhabitants_tatain_with_characters = deepcopy(attack_inhabitants_tatain)
+attack_inhabitants_tatain_with_characters.actor.append(GenericObjectNode.TASK_OWNER)
+attack_inhabitants_tatain_with_characters.target.append(tatain_people)
+
+attack_tatain_task = CharacterTask(task_name="Attack Tatain Task", task_actions=[attack_inhabitants_tatain_with_characters], avoidance_state=[task_owner_is_dead])
+
 task_giver_not_know_about_tatain_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenTatainTask", value=True, inverse=True)
+task_giver_know_about_tatain = TagChange(name="Target Knows of Tatain Task", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="HasGivenTatainTask", value=True)
+
+attack_tatain_stack = TaskStack(stack_name="Attack Tatain Stack", task_stack=[attack_tatain_task], task_stack_requirement=[task_giver_not_know_about_tatain_task])
+
+get_attack_tatain_taskchange = TaskChange(name="Get Attack Tatain Task", task_giver_name=GenericObjectNode.GENERIC_TARGET, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=attack_tatain_stack)
+
+get_tatain_task_node = StoryNode(name="Get Tatain Node", effects_on_next_ws=[get_attack_tatain_taskchange, task_giver_know_about_tatain], target_count=1)
+
 
 # Destory Death Paradise
 # Source: Alien God
@@ -322,7 +365,20 @@ task_giver_not_know_about_tatain_task = HasTagTest(object_to_test=GenericObjectN
 # Requirement: Alien God must not have knowledge of Destroy Death Pardise Task.
 # Actions: (Death Paradise): Attacked by Mob
 
+attacked_by_robots_with_characters = deepcopy(attacked_by_robots)
+attacked_by_robots_with_characters.actors_append(GenericObjectNode.TASK_OWNER)
+attacked_by_robots_with_characters.targets.append(death_paradise_robots)
+
+get_attacked_by_robots_task = CharacterTask(task_name="Attacked by Robots Task", task_actions=[attacked_by_robots_with_characters], avoidance_state=[task_owner_is_dead], task_location_name="Death Paradise")
+
 task_giver_not_know_about_dp_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenDeathParaTask", value=True, inverse=True)
+task_giver_know_about_death_paradise = TagChange(name="Target Knows of DP Task", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="HasGivenDeathParaTask", value=True)
+
+get_attacked_by_robots_stack = TaskStack(stack_name="Get Attacked by Bots Stack", task_stack=[get_attacked_by_robots_task], task_stack_requirement=[task_giver_not_know_about_dp_task])
+
+get_attacked_by_robots_taskchange = TaskChange(name="Get Attacked by Bots Task", task_giver_name=GenericObjectNode.GENERIC_TARGET, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=get_attacked_by_robots_stack)
+
+get_dp_task_node = StoryNode(name="Get DP Node", effects_on_next_ws=[get_attacked_by_robots_taskchange, task_giver_know_about_death_paradise], target_count=1)
 
 # Preserve Greenland
 # Source: Alien God
@@ -331,13 +387,26 @@ task_giver_not_know_about_dp_task = HasTagTest(object_to_test=GenericObjectNode.
 # Actions: (New World Greenland): Notice Invader
 # Placeholder Actors: "columbo" -> Stranded Human
 
+notice_invader_with_characters = deepcopy(notice_invader)
+notice_invader_with_characters.actor.apend(GenericObjectNode.TASK_OWNER)
+notice_invader_with_characters.target.append("columbo")
+
+notice_invader_task = CharacterTask(task_name="Notice Invader Task", task_actions=[notice_invader_with_characters], avoidance_state=[task_owner_is_dead, columbo_is_not_alive], task_location_name="New World Greenland", actor_placeholder_string_list=["columbo"])
+
 task_giver_not_know_about_greenland_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenGreenlandTask", value=True, inverse=True)
+task_giver_know_about_greenland = TagChange(name="Task Giver Knows of Greenland Task", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="HasGivenGreenlandTask", value=True)
+
+notice_invader_stack = TaskStack(stack_name="Notice Invader Stack", task_stack=[notice_invader_task], task_stack_requirement=[columbo_is_columbo, columbo_is_alive, task_giver_not_know_about_greenland_task])
+
+notice_invader_taskchange = TaskChange(name="Get Notice Invader task", task_giver_name=GenericObjectNode.GENERIC_TARGET, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=notice_invader_stack)
+
+get_greenland_task_node = StoryNode(name="Get Greenland 1 Node", effects_on_next_ws=[notice_invader_taskchange, task_giver_know_about_greenland], target_count=1)
 
 # Invade Greenland
 # Source: Alien God
 # Owner: Apollo
 # Requirement: Alien God must not have knowledge of the Invade Greenland task
-# Actions: (New World Greenland): Attack Greenland
+# Actions: (New World Greenland): Attack Amil, Amil commands army to kill 
 
 # (The nodes that give away these tasks will in itself give knowledge of the task to the giver)
 
@@ -357,44 +426,148 @@ task_giver_not_know_about_attack_greenland_task = HasTagTest(object_to_test=Gene
 # - Earth Army
 
 # Attacked by Mob -+> Kill Mob as Defense
-kill_mob_from_ambush = RewriteRule(name="Attack Mob -+> Kill Mob as Defense", story_condition=[attacked_by_mob], story_change=[kill_mob_as_defense], remove_before_insert = False, target_list=[])
+rule_list = []
 
+kill_insect_defense_followup = RewriteRule(name="Attacked by Insects -+> Kill Insects as Defense", story_condition=[attacked_by_insects], story_change=[self_defense_kill_insect], remove_before_insert = False, target_list=[[greenland_insects]])
+kill_robot_defense_followup = RewriteRule(name="Attacked by Robots -+> Kill Robots as Defense", story_condition=[attacked_by_robots], story_change=[self_defense_kill_robots], remove_before_insert = False, target_list=[[death_paradise_robots]])
+kill_mercs_defense_followup = RewriteRule(name="Attacked by Mercs -+> Kill Mercs as Defense", story_condition=[attacked_by_mercs], story_change=[self_defense_kill_mercs], remove_before_insert = False, target_list=[[enemy_mercenary]])
+kill_army_defense_followup = RewriteRule(name="Attacked by Army -+> Kill Army as Defense", story_condition=[attacked_by_army], story_change=[self_defense_kill_army], remove_before_insert = False, target_list=[[earth_army]])
+
+rule_list.extend([kill_insect_defense_followup, kill_robot_defense_followup, kill_mercs_defense_followup, kill_army_defense_followup])
 
 # Attacked by Mob -+> Kill Mob for Food
 
-kill_insect_for_food_followup = RewriteRule(name="Kill Insect for Food Followup", story_condition=[attacked_by_insects], story_change=[kill_mob_for_food_insects], target_list=[greenland_insects])
+kill_insect_for_food_followup = RewriteRule(name="Attacked by Insects -+> Kill Insects for Food", story_condition=[attacked_by_insects], story_change=[kill_mob_for_food_insects], target_list=[[greenland_insects]])
+rule_list.append(kill_insect_for_food_followup)
 
 # Attacked by Mob -+> Record Earth Army Data
+
+attack_mob_then_record_followup = RewriteRule(name="Attacked by Army -+> Record Army Data", story_condition=[attacked_by_army], story_change=[record_earth_army_data], target_list=[[earth_army]])
+rule_list.append(attack_mob_then_record_followup)
+
 # Attacked by Mob -+> Killed by Mob
+
+attacked_and_killed_insect_followup = RewriteRule(name="Attacked by Insects -+> Killed by Insects", story_condition=[attacked_by_insects], story_change=[killed_by_insect], target_list=[[greenland_insects]])
+attacked_and_killed_robot_followup = RewriteRule(name="Attacked by Robots -+> Killed by Robots", story_condition=[attacked_by_robots], story_change=[killed_by_robots], target_list=[[death_paradise_robots]])
+attacked_and_killed_mercs_followup = RewriteRule(name="Attacked by Mercs -+> Killed by Mercs", story_condition=[attacked_by_mercs], story_change=[killed_by_mercs], target_list=[[enemy_mercenary]])
+attacked_and_killed_army_followup = RewriteRule(name="Attacked by Army -+> Killed by Army", story_condition=[attacked_by_army], story_change=[killed_by_army], target_list=[[earth_army]])
+
+rule_list.extend([attacked_and_killed_army_followup, attacked_and_killed_insect_followup, attacked_and_killed_mercs_followup, attacked_and_killed_robot_followup])
+
 # Attacked by Mob -+> Massacre Mobs
 
-earth_army_data_followup = RewriteRule(name="Earth Army Data Followup", story_condition=[attacked_by_army], story_change=[record_earth_army_data], target_list=[earth_army])
+attacked_and_killed_insect_followup = RewriteRule(name="Attacked by Insects -+> Massacre Insects", story_condition=[attacked_by_insects], story_change=[massacre_insects], target_list=[[greenland_insects]])
+attacked_and_killed_robot_followup = RewriteRule(name="Attacked by Robots -+> Massacre Robots", story_condition=[attacked_by_robots], story_change=[massacre_robots], target_list=[[death_paradise_robots]])
+attacked_and_killed_mercs_followup = RewriteRule(name="Attacked by Mercs -+> Massacre Mercs", story_condition=[attacked_by_mercs], story_change=[massacre_mercs], target_list=[[enemy_mercenary]])
+attacked_and_killed_army_followup = RewriteRule(name="Attacked by Army -+> Massacre Army", story_condition=[attacked_by_army], story_change=[massacre_army], target_list=[[earth_army]])
+
+rule_list.extend([attacked_and_killed_robot_followup, attacked_and_killed_army_followup, attacked_and_killed_insect_followup, attacked_and_killed_mercs_followup])
 
 # Attack Inhabitants -+> Killed by Mob
+
+attack_inhab_killed_insect_followup = RewriteRule(name="Attack Insects -+> Killed by Insects", story_condition=[attack_inhabitants_insects], story_change=[killed_by_insect], target_list=[[greenland_insects]])
+attack_inhab_killed_robots_followup = RewriteRule(name="Attack Robots -+> Killed by Robots", story_condition=[attack_inhabitants_robots], story_change=[killed_by_robots], target_list=[[death_paradise_robots]])
+attack_inhab_killed_mercs_followup = RewriteRule(name="Attack Mercs -+> Killed by Mercs", story_condition=[attack_inhabitants_mercs], story_change=[killed_by_mercs], target_list=[[enemy_mercenary]])
+attack_inhab_killed_army_followup = RewriteRule(name="Attack Army -+> Killed by Army", story_condition=[attack_inhabitants_army], story_change=[killed_by_army], target_list=[[earth_army]])
+
+rule_list.extend([attack_inhab_killed_army_followup, attack_inhab_killed_insect_followup, attack_inhab_killed_mercs_followup, attack_inhab_killed_robots_followup])
+
 # Attack Inhabitants -+> Massacre Mobs
 
+attack_inhab_massacre_insect_followup = RewriteRule(name="Attack Insects -+> Massacre Insects", story_condition=[attack_inhabitants_insects], story_change=[massacre_insects], target_list=[[greenland_insects]])
+attack_inhab_massacre_robots_followup = RewriteRule(name="Attack Robots -+> Massacre Robots", story_condition=[attack_inhabitants_robots], story_change=[massacre_robots], target_list=[[death_paradise_robots]])
+attack_inhab_massacre_mercs_followup = RewriteRule(name="Attack Mercs -+> Massacre Mercs", story_condition=[attack_inhabitants_mercs], story_change=[massacre_mercs], target_list=[[enemy_mercenary]])
+attack_inhab_massacre_army_followup = RewriteRule(name="Attack Army -+> Massacre Army", story_condition=[attack_inhabitants_army], story_change=[massacre_army], target_list=[[earth_army]])
+attack_inhab_massacre_tatain_followup = RewriteRule(name="Attack Tatain -+> Massacre Tatain", story_condition=[attack_inhabitants_tatain], story_change=[massacre_tatain], target_list=[[tatain_people]])
+
+rule_list.extend([attack_inhab_massacre_army_followup, attack_inhab_massacre_insect_followup, attack_inhab_massacre_mercs_followup, attack_inhab_massacre_robots_followup, attack_inhab_massacre_tatain_followup])
+
 # (Nothing) -> Attack Inhabitants
-# (Nothing) -> Command Army to Attack
+
+attack_inhab_insect_begin = RewriteRule(name="Begin Attack Insects", story_condition=[], story_change=[attack_inhabitants_insects], target_list=[[greenland_insects]])
+attack_inhab_robots_begin = RewriteRule(name="Begin Attack Robots", story_condition=[], story_change=[attack_inhabitants_robots], target_list=[[death_paradise_robots]])
+attack_inhab_mercs_begin = RewriteRule(name="Begin Attack Mercs", story_condition=[], story_change=[attack_inhabitants_mercs], target_list=[[enemy_mercenary]])
+attack_inhab_army_begin = RewriteRule(name="Begin Attack Army", story_condition=[], story_change=[attack_inhabitants_army], target_list=[[earth_army]])
+attack_inhab_tatain_begin = RewriteRule(name="Begin Attack Tatain", story_condition=[], story_change=[attack_inhabitants_tatain], target_list=[[tatain_people]])
+
+rule_list.extend([attack_inhab_army_begin, attack_inhab_mercs_begin, attack_inhab_insect_begin, attack_inhab_robots_begin, attack_inhab_tatain_begin])
+
 # (Nothing) -> Eradicate Mob With God Power
+
+eradicate_insects_begin = RewriteRule(name="Eradicate Insects Begin", story_condition=[], story_change=[god_kills_insects], target_list=[[greenland_insects]])
+eradicate_robots_begin = RewriteRule(name="Eradicate Robots Begin", story_condition=[], story_change=[god_kills_robots], target_list=[[death_paradise_robots]])
+eradicate_mercs_begin = RewriteRule(name="Eradicate Mercs Begin", story_condition=[], story_change=[god_kills_mercs], target_list=[[enemy_mercenary]])
+eradicate_army_begin = RewriteRule(name="Eradicate Army Begin", story_condition=[], story_change=[god_kills_army], target_list=[[earth_army]])
+
+rule_list.extend([eradicate_army_begin, eradicate_insects_begin, eradicate_robots_begin, eradicate_mercs_begin])
+
 # (Nothing) -> Attacked by Mob
+
+attacked_by_insects_begin = RewriteRule(name="Attacked by Insects Begin", story_condition=[], story_change=[attacked_by_insects], target_list=[[greenland_insects]])
+attacked_by_robots_begin = RewriteRule(name="Attacked by Robots Begin", story_condition=[], story_change=[attacked_by_robots], target_list=[[death_paradise_robots]])
+attacked_by_mercs_begin = RewriteRule(name="Attacked by Mercs Begin", story_condition=[], story_change=[attacked_by_mercs], target_list=[[enemy_mercenary]])
+attacked_by_army_begin = RewriteRule(name="Attacked by Army Begin", story_condition=[], story_change=[attacked_by_army], target_list=[[earth_army]])
+
+rule_list.extend([attacked_by_insects_begin, attacked_by_robots_begin, attacked_by_mercs_begin, attacked_by_army_begin])
 
 # JoiningJointRule
 # (Nothing) -> Kill Actor
 # (Nothing) -> Create Apollo
 # (Nothing) -> Data Backup Resurrection
+# (Nothing) -> Command Army to Attack
+
+start_kill_actor = JoiningJointRule(rule_name="Start Kill Actor", base_actions=[], joint_node=kill_another_actor)
+start_create_apollo = JoiningJointRule(rule_name="Start Create Apollo", base_actions=[], joint_node=create_apollo)
+start_data_backup_resurrection = JoiningJointRule(rule_name="Start Resurrect", base_actions=[], joint_node=resurrect_target)
+start_command_army = JoiningJointRule(rule_name="Start Command Army", base_actions=[], joint_node=command_army_attack)
+
+rule_list.extend([start_kill_actor, start_create_apollo, start_data_backup_resurrection, start_command_army])
 
 # ContJointRule
+# None Yet
 
 # SplitJointRule
+# None Yet
+
+story_graph = StoryGraph(name="Gearng Story Graph", character_objects=all_characters, location_objects=all_locations, starting_ws=world_state)
 
 # Starting Story Graph:
 # Non Main Characters will wait
 # Main Characters:
-#
-# Columbo is in New World / Greenland in Timestep 0 and performing Explore World, and is waiting in Timestep 1
-# Iris is in Alien God Planet in Timestep 0 getting task to Destroy Tatain, and is waiting in Timestep 1
-# Amil is Waiting at Earth in Timestep 0, and gets the task to rescue Columbo in Timestep 1
+
+# TS0
+# Columbo: Explore World
+# Iris: Get Destroy Tatain Task
+# Amil: Wait
+
+# TS1
+# Columbo: Attacked by Insects
+# Iris: Get Destroy Death Paradise Task
+# Amil: Wait
+
+# TS2
+# Columbo: Wait
+# Iris: Get Preserve Greenland Task
+# Amil: Wait
+
+# TS3
+# Columbo and Iris: Notice Invader 
+# Amil: Get Rescue Columbo Task
+
+# TS4
+# Columbo and Iris: Iris kills Columbo
+# Amil: Wait
+
+
+extra_movement = [actor_is_not_stranded, actor_is_alive]
+
+generated_graph = generate_story_from_starter_graph(init_storygraph=story_graph, list_of_rules=rule_list, required_story_length=10, extra_movement_requirement_list=extra_movement)
 
 # Current Problems
 # We don't know how to define score properly. Whoops?
 # Use Default Scoring for now
+# 
+# Scoring Schemes:
+# 1. Default (Everything is a 0)
+# 2. Deaths Give Points
+# 3. Deaths Take Points

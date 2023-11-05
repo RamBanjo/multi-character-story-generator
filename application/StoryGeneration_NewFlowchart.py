@@ -17,7 +17,7 @@ from application.components.UtilityEnums import ChangeAction, GenericObjectNode
 # DEFAULT_ADJACENCY_EDGE_NAME = "connects"
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
-def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_morement_requirement_list = []):
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = []):
 
     #make a copy of the graph
     if verbose:
@@ -297,7 +297,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                         #We can make a list of index and randomly pick from it until it gives us a positive result
                         #Let's do it in the function
                         #Actually, I think it would be better to always call this function from the latest step.
-                        action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character, movement_index=final_abs_step, extra_movement_requirements=extra_morement_requirement_list)
+                        action_for_character_found = attempt_move_towards_task_loc(target_story_graph=final_story_graph, current_character=current_character, movement_index=final_abs_step, extra_movement_requirements=extra_movement_requirement_list)
                     case "Wait":
                         pass
                     case _:

@@ -95,7 +95,7 @@ class StoryNode:
         for actorobject in self.actor:
 
             if actorobject is not None:
-                actornamestring += actorobject.get_name()
+                actornamestring += actorobject.get_display_name()
             else:
                 actornamestring += "None"
                 
@@ -108,7 +108,7 @@ class StoryNode:
         for targetobject in self.target:
 
             if targetobject is not None:
-                targetnamestring += targetobject.get_name()
+                targetnamestring += targetobject.get_display_name()
             else:
                 targetnamestring += "None"
                 

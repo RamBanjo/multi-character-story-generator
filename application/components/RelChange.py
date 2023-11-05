@@ -19,7 +19,7 @@ class SomeChange:
         self.changetype = changetype
 
 class RelChange(SomeChange):
-    def __init__(self, name, node_a, edge_name, node_b, value, add_or_remove: ChangeAction, soft_equal = False, two_way = False, **kwargs):
+    def __init__(self, name, node_a, edge_name, node_b, add_or_remove: ChangeAction, value=None, soft_equal = False, two_way = False, **kwargs):
         
         super().__init__(name=name, changetype=ChangeType.RELCHANGE)
 
