@@ -285,6 +285,7 @@ create_apollo = StoryNode(name="Birth of Apollo", required_test_list=[target_is_
 # Conditions: Actor and Target are alive. Actor has reason to kill Target. Actor and Target share a location.
 # Changes: Target gains reason to kill Actor.
 
+#TODO: Complete this Node, then put it into the Attack Greenland Task (Apollo)
 actor_attack_another_actor = StoryNode
 
 # Wait
@@ -425,8 +426,8 @@ task_giver_not_know_about_attack_greenland_task = HasTagTest(object_to_test=Gene
 # - Enemy Mercenary 
 # - Earth Army
 
-# Attacked by Mob -+> Kill Mob as Defense
 rule_list = []
+# Attacked by Mob -+> Kill Mob as Defense
 
 kill_insect_defense_followup = RewriteRule(name="Attacked by Insects -+> Kill Insects as Defense", story_condition=[attacked_by_insects], story_change=[self_defense_kill_insect], remove_before_insert = False, target_list=[[greenland_insects]])
 kill_robot_defense_followup = RewriteRule(name="Attacked by Robots -+> Kill Robots as Defense", story_condition=[attacked_by_robots], story_change=[self_defense_kill_robots], remove_before_insert = False, target_list=[[death_paradise_robots]])
