@@ -174,7 +174,6 @@ massacre_mercs = copy_story_node_with_extra_conditions(base_node=attack_inhabita
 massacre_army = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Army", extra_condition_list=[target_is_earth_army])
 massacre_tatain = copy_story_node_with_extra_conditions(base_node=attack_inhabitants, new_node_name="Massacre Tatain", extra_condition_list=[target_is_tatain_people])
 
-
 # Get Attacked by Mob (one rule object for each aggressive mob):
 # Conditions: Actor and target share location, The Target is a Mob, The Target has tag Behavior: Aggressive Or the Target must have KillReason edge towards Actor.
 
@@ -283,10 +282,10 @@ create_apollo = StoryNode(name="Birth of Apollo", required_test_list=[target_is_
 
 # Actor Attacks Actor
 # Conditions: Actor and Target are alive. Actor has reason to kill Target. Actor and Target share a location.
-# Changes: Target gains reason to kill Actor.
+# Changes: Target gains reason to kill Actor. (Self Preservation)
 
-#TODO: Complete this Node, then put it into the Attack Greenland Task (Apollo)
-actor_attack_another_actor = StoryNode
+target_gains_kill_reason = RelChange(name="Target Gains Self Preserve Kill Reason", edge_name="KillReason", value="SelfPreserve", add_or_remove=ChangeAction.ADD)
+actor_attack_another_actor = StoryNode(name="Actor Attacks Another Actor", target_count=1, effects_on_next_ws=[target_gains_kill_reason], required_test_list=[actor_shares_location_with_target, actor_has_reason_to_kill_target, actor_is_alive, target_is_alive])
 
 # Wait
 # Conditions -
@@ -353,12 +352,11 @@ attack_tatain_task = CharacterTask(task_name="Attack Tatain Task", task_actions=
 task_giver_not_know_about_tatain_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenTatainTask", value=True, inverse=True)
 task_giver_know_about_tatain = TagChange(name="Target Knows of Tatain Task", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="HasGivenTatainTask", value=True)
 
-attack_tatain_stack = TaskStack(stack_name="Attack Tatain Stack", task_stack=[attack_tatain_task], task_stack_requirement=[task_giver_not_know_about_tatain_task])
+attack_tatain_stack = TaskStack(stack_name="Attack Tatain Stack", task_stack=[attack_tatain_task])
 
 get_attack_tatain_taskchange = TaskChange(name="Get Attack Tatain Task", task_giver_name=GenericObjectNode.GENERIC_TARGET, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=attack_tatain_stack)
 
-get_tatain_task_node = StoryNode(name="Get Tatain Node", effects_on_next_ws=[get_attack_tatain_taskchange, task_giver_know_about_tatain], target_count=1)
-
+get_tatain_task_node = StoryNode(name="Get Tatain Node", effects_on_next_ws=[get_attack_tatain_taskchange, task_giver_know_about_tatain], required_test_list=[task_giver_not_know_about_tatain_task], target_count=1)
 
 # Destory Death Paradise
 # Source: Alien God
@@ -367,19 +365,19 @@ get_tatain_task_node = StoryNode(name="Get Tatain Node", effects_on_next_ws=[get
 # Actions: (Death Paradise): Attacked by Mob
 
 attacked_by_robots_with_characters = deepcopy(attacked_by_robots)
-attacked_by_robots_with_characters.actors_append(GenericObjectNode.TASK_OWNER)
-attacked_by_robots_with_characters.targets.append(death_paradise_robots)
+attacked_by_robots_with_characters.actor.append(GenericObjectNode.TASK_OWNER)
+attacked_by_robots_with_characters.target.append(death_paradise_robots)
 
 get_attacked_by_robots_task = CharacterTask(task_name="Attacked by Robots Task", task_actions=[attacked_by_robots_with_characters], avoidance_state=[task_owner_is_dead], task_location_name="Death Paradise")
 
 task_giver_not_know_about_dp_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenDeathParaTask", value=True, inverse=True)
 task_giver_know_about_death_paradise = TagChange(name="Target Knows of DP Task", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="HasGivenDeathParaTask", value=True)
 
-get_attacked_by_robots_stack = TaskStack(stack_name="Get Attacked by Bots Stack", task_stack=[get_attacked_by_robots_task], task_stack_requirement=[task_giver_not_know_about_dp_task])
+get_attacked_by_robots_stack = TaskStack(stack_name="Get Attacked by Bots Stack", task_stack=[get_attacked_by_robots_task])
 
 get_attacked_by_robots_taskchange = TaskChange(name="Get Attacked by Bots Task", task_giver_name=GenericObjectNode.GENERIC_TARGET, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=get_attacked_by_robots_stack)
 
-get_dp_task_node = StoryNode(name="Get DP Node", effects_on_next_ws=[get_attacked_by_robots_taskchange, task_giver_know_about_death_paradise], target_count=1)
+get_dp_task_node = StoryNode(name="Get DP Node", effects_on_next_ws=[get_attacked_by_robots_taskchange, task_giver_know_about_death_paradise], required_test_list=[task_giver_not_know_about_dp_task], target_count=1)
 
 # Preserve Greenland
 # Source: Alien God
@@ -389,7 +387,7 @@ get_dp_task_node = StoryNode(name="Get DP Node", effects_on_next_ws=[get_attacke
 # Placeholder Actors: "columbo" -> Stranded Human
 
 notice_invader_with_characters = deepcopy(notice_invader)
-notice_invader_with_characters.actor.apend(GenericObjectNode.TASK_OWNER)
+notice_invader_with_characters.actor.append(GenericObjectNode.TASK_OWNER)
 notice_invader_with_characters.target.append("columbo")
 
 notice_invader_task = CharacterTask(task_name="Notice Invader Task", task_actions=[notice_invader_with_characters], avoidance_state=[task_owner_is_dead, columbo_is_not_alive], task_location_name="New World Greenland", actor_placeholder_string_list=["columbo"])
@@ -397,11 +395,11 @@ notice_invader_task = CharacterTask(task_name="Notice Invader Task", task_action
 task_giver_not_know_about_greenland_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenGreenlandTask", value=True, inverse=True)
 task_giver_know_about_greenland = TagChange(name="Task Giver Knows of Greenland Task", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="HasGivenGreenlandTask", value=True)
 
-notice_invader_stack = TaskStack(stack_name="Notice Invader Stack", task_stack=[notice_invader_task], task_stack_requirement=[columbo_is_columbo, columbo_is_alive, task_giver_not_know_about_greenland_task])
+notice_invader_stack = TaskStack(stack_name="Notice Invader Stack", task_stack=[notice_invader_task], task_stack_requirement=[columbo_is_columbo, columbo_is_alive])
 
 notice_invader_taskchange = TaskChange(name="Get Notice Invader task", task_giver_name=GenericObjectNode.GENERIC_TARGET, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=notice_invader_stack)
 
-get_greenland_task_node = StoryNode(name="Get Greenland 1 Node", effects_on_next_ws=[notice_invader_taskchange, task_giver_know_about_greenland], target_count=1)
+get_greenland_task_node = StoryNode(name="Get Greenland Task 1 Node", effects_on_next_ws=[notice_invader_taskchange, task_giver_know_about_greenland], required_test_list=[task_giver_not_know_about_greenland_task], target_count=1)
 
 # Invade Greenland
 # Source: Alien God
@@ -412,7 +410,26 @@ get_greenland_task_node = StoryNode(name="Get Greenland 1 Node", effects_on_next
 # (The nodes that give away these tasks will in itself give knowledge of the task to the giver)
 
 task_giver_not_know_about_attack_greenland_task = HasTagTest(object_to_test=GenericObjectNode.TASK_GIVER, tag="HasGivenAttackGreenlandTask", value=True, inverse=True)
+task_giver_know_about_attack_greenland_task = TagChange(name="Task Giver Knows of Attack Greenland Task", object_node_name=GenericObjectNode.GENERIC_TARGET,tag="HasGivenAttackGreenlandTask", value=True, add_or_remove=ChangeAction.ADD)
 
+attack_amil = deepcopy(actor_attack_another_actor)
+attack_amil.actor.append(GenericObjectNode.TASK_OWNER)
+attack_amil.target.append("amil")
+
+amil_command_army_attack_quest_owner = deepcopy(command_army_attack)
+amil_command_army_attack_quest_owner.actor.append("amil")
+amil_command_army_attack_quest_owner.target.append(GenericObjectNode.TASK_OWNER)
+
+amil_is_amil = ObjectEqualityTest(object_list=["amil", amil])
+amil_is_alive = HasTagTest(object_to_test="amil", tag="Alive", value=True)
+
+attack_amil_task = CharacterTask(task_name="Attack Amil and Get Attacked", task_requirement=[amil_is_amil, amil_is_alive], actor_placeholder_string_list=["amil"], task_location_name="New World Greenland", task_actions=[attack_amil, amil_command_army_attack_quest_owner])
+
+attack_greenland_stack = TaskStack(stack_name="Attack Greenland Stack", task_stack=[attack_amil_task])
+
+get_attack_greenland_stack = TaskChange(name="Get Attack Greenland Stack", task_giver_name=GenericObjectNode.GENERIC_TARGET, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=attack_greenland_stack)
+
+get_attack_greenland_node = StoryNode(name="Get Greenland Task 2 Node", effects_on_next_ws=[get_attack_greenland_stack,task_giver_know_about_attack_greenland_task], required_test_list=[task_giver_not_know_about_attack_greenland_task], target_count=1)
 # Rules
 
 # Rewrite Rule
@@ -530,6 +547,7 @@ rule_list.extend([start_kill_actor, start_create_apollo, start_data_backup_resur
 # SplitJointRule
 # None Yet
 
+#TODO: Set up the initial Story Graph. (Please work I am BEGGING)
 story_graph = StoryGraph(name="Gearng Story Graph", character_objects=all_characters, location_objects=all_locations, starting_ws=world_state)
 
 # Starting Story Graph:
@@ -559,10 +577,10 @@ story_graph = StoryGraph(name="Gearng Story Graph", character_objects=all_charac
 # Columbo and Iris: Iris kills Columbo
 # Amil: Wait
 
-
 extra_movement = [actor_is_not_stranded, actor_is_alive]
 
 generated_graph = generate_story_from_starter_graph(init_storygraph=story_graph, list_of_rules=rule_list, required_story_length=10, extra_movement_requirement_list=extra_movement)
+generated_graph.print_all_node_beautiful_format()
 
 # Current Problems
 # We don't know how to define score properly. Whoops?
