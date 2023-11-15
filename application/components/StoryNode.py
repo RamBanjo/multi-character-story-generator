@@ -39,11 +39,11 @@ class StoryNode:
         
         #dict of nodes that leads to this node. Each entry has character's unique ID as key and points to
         #the node that character performed before arriving at this node.
-        self.previous_nodes = dict()
+        # self.previous_nodes = dict()
         
         #dict of nodes that continue from here. Each entry has character's unique ID as key and points to
         #the node that character will perform after leaving this node.
-        self.next_nodes = dict()
+        # self.next_nodes = dict()
 
         #timestep property. For template storynodes it will be 0. But once it is assigned to the story the number will never change.
         #This will prevent stories from different timestep from being blended together.
@@ -116,7 +116,6 @@ class StoryNode:
             targetnamestring += ", "
         return targetnamestring[:-2]
 
-
     def __str__(self) -> str:
         return self.get_name() + " (Actors: " + self.get_actor_names() + ")"
 
@@ -134,17 +133,17 @@ class StoryNode:
 
     It will also add self as one of next_node's previous nodes! Convenient!
     '''
-    def add_next_node(self, next_node, character_reference):
+    # def add_next_node(self, next_node, character_reference):
 
-        char_name = None
+    #     char_name = None
 
-        if character_reference is not None:
-            char_name = character_reference.get_name()
+    #     if character_reference is not None:
+    #         char_name = character_reference.get_name()
 
-        self.next_nodes[char_name] = next_node
+    #     self.next_nodes[char_name] = next_node
 
-        next_node.previous_nodes[char_name] = self
-        #next_node.add_actor(character_reference)
+    #     next_node.previous_nodes[char_name] = self
+    #     #next_node.add_actor(character_reference)
 
 
     '''
@@ -152,17 +151,17 @@ class StoryNode:
 
     Then, it removes next_node from its own next nodes
     '''
-    def remove_next_node(self, character_reference):
+    # def remove_next_node(self, character_reference):
         
-        char_name = None
+    #     char_name = None
 
-        if character_reference is not None:
-            char_name = character_reference.get_name()
+    #     if character_reference is not None:
+    #         char_name = character_reference.get_name()
 
-        next_node = self.next_nodes[char_name]
+    #     next_node = self.next_nodes[char_name]
 
-        del next_node.previous_nodes[char_name]
-        del self.next_nodes[char_name]
+    #     del next_node.previous_nodes[char_name]
+    #     del self.next_nodes[char_name]
 
     # This will test the tests in the required_tests that feature the character's name after replacing all actor placeholders with the character themself.
     # Deprecation of this function???
@@ -345,7 +344,6 @@ def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:di
     # - Targets 
     # - Relationship Changes
     # - Requirement Tests
-    
     story_node_copy = deepcopy(story_node)
 
     new_actor_list = []
@@ -357,15 +355,17 @@ def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:di
     new_suggest_test_list = []
 
     for actor in story_node_copy.actor:
-        if actor in placeholder_dict.keys():
+        if actor in list(placeholder_dict.keys()):
             new_actor = get_actor_object_from_list_with_actor_name(actor_name=placeholder_dict[actor], actor_list=list_of_actor_objects)
             new_actor_list.append(new_actor)
         else:
             new_actor_list.append(actor)
 
+   
     for target in story_node_copy.target:
         if target in list(placeholder_dict.keys()):
             new_actor = get_actor_object_from_list_with_actor_name(actor_name=placeholder_dict[target], actor_list=list_of_actor_objects)
+            # print(new_actor)
             new_target_list.append(new_actor)
         else:
             new_target_list.append(target)
@@ -386,5 +386,7 @@ def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:di
     story_node_copy.required_test_list = new_req_test_list
     story_node_copy.suggested_test_list = new_suggest_test_list
     story_node_copy.effects_on_next_ws = new_ws_effect_list
+
+    # print(new_actor_list, new_target_list, new_req_test_list, new_suggest_test_list, new_ws_effect_list)
 
     return story_node_copy

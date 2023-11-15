@@ -1,4 +1,3 @@
-
 from copy import deepcopy
 import random
 from application.components.CharacterTask import CharacterTask, TaskStack
@@ -172,14 +171,17 @@ class WorldState:
 
     def apply_some_change(self, changeobject, reverse=False):
         if changeobject.changetype == ChangeType.RELCHANGE:
-            self.apply_relationship_change(changeobject, reverse)
+            return self.apply_relationship_change(changeobject, reverse)
         if changeobject.changetype == ChangeType.TAGCHANGE:
-            self.apply_tag_change(changeobject, reverse)
+            return self.apply_tag_change(changeobject, reverse)
         if changeobject.changetype == ChangeType.RELATIVETAGCHANGE:
 
-            current_object = self.node_dict[changeobject.object_node_name]
-            current_value = current_object.tags[changeobject.tag]
+            current_object = self.node_dict.get(changeobject.object_node_name, None)
+            current_value = current_object.tags.get(changeobject.tag, None)
             
+            if current_object is None or current_value is None:
+                return False
+
             multiplier = 1
             if reverse:
                 multiplier = -1
@@ -188,12 +190,14 @@ class WorldState:
 
             equivalent_changeobject = TagChange(name="Equivalent Tagchange", object_node_name=changeobject.object_node_name, tag=changeobject.tag, value=new_value, add_or_remove=ChangeAction.ADD)
 
-            self.apply_tag_change(tagchange_object=equivalent_changeobject, reverse=False)
+            return self.apply_tag_change(tagchange_object=equivalent_changeobject, reverse=False)
 
         if changeobject.changetype == ChangeType.RELATIVEBIASCHANGE:
 
-            
-            current_object = self.node_dict[changeobject.object_node_name]
+            current_object = self.node_dict.get(changeobject.object_node_name, None)
+
+            if current_object == None:
+                return False
 
             if type(current_object) == CharacterNode:
                 current_value = current_object.biases[changeobject.bias]
@@ -210,6 +214,8 @@ class WorldState:
                     new_value = -100
 
                 current_object.biases[changeobject.bias] = new_value
+
+            return True
 
     # For each item in this world state, find the corresponding object in the previous WorldState. Then, run tests given in the conditionalchange, replacing the placeholder token with the object.
     # If all the tests are passed, apply the change, by calling apply relationship change and apply tag change from this very same worldstate. Phew!
@@ -229,10 +235,11 @@ class WorldState:
                     translated_change = replace_placeholder_object_with_change_haver(changeobject=change, change_haver=current_object, placeholder_object=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER)
                     self.apply_some_change(translated_change, reverse=reverse)
 
+        return True
+
     # Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
     # Not needed: We can simply loop through the entire list and run this function for each item in the list.
     def apply_relationship_change(self, relchange_object, reverse=False):
-
         if (relchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (relchange_object.add_or_remove == ChangeAction.REMOVE and reverse):
             #If the intention is to add, then we add a connection between the nodes
             #If either nodes don't exist already, then they must be added to the list of nodes.
@@ -248,12 +255,11 @@ class WorldState:
                 self.doubleconnect(nodeA=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, nodeB = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
             else:
                 self.connect(from_node=self.node_dict[relchange_object.node_a.get_name()], edge_name = relchange_object.edge_name, to_node = self.node_dict[relchange_object.node_b.get_name()], value=relchange_object.value)
-
+            
         if (relchange_object.add_or_remove == ChangeAction.REMOVE and not reverse) or (relchange_object.add_or_remove == ChangeAction.ADD and reverse):
             #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
             #Don't delete the nodes, though
             #Check if this exact edge between these exact nodes exists
-
             node_a_retrieved = self.node_dict.get(relchange_object.node_a.get_name(), None)
             node_b_retrieved = self.node_dict.get(relchange_object.node_b.get_name(), None) #if self.check_connection(node_a=node_a_retrieved, node_b=node_b_retrieved, edge_name=relchange_object.edge_name, edge_value=relchange_object.value, soft_equal=relchange_object.soft_equal):
             
@@ -270,11 +276,20 @@ class WorldState:
             #         my_edge.to_node.incoming_edges.remove(check_edge)
             #         self.edges.remove(check_edge)
 
+        return True
+
     def apply_tag_change(self, tagchange_object, reverse=False):
+
+        tagchange_object_from_ws = self.node_dict.get(tagchange_object.object_node_name, None)
+        if tagchange_object_from_ws == None:
+            return False
+
         if (tagchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (tagchange_object.add_or_remove == ChangeAction.REMOVE and reverse):
             self.node_dict[tagchange_object.object_node_name].set_tag(tagchange_object.tag, tagchange_object.value)
         if (tagchange_object.add_or_remove == ChangeAction.REMOVE and not reverse) or (tagchange_object.add_or_remove == ChangeAction.ADD and reverse):
             self.node_dict[tagchange_object.object_node_name].remove_tag(tagchange_object.tag)
+
+        return True
 
     #It does this for each of the placeholder listed in actor_placeholder_string_list:
     #It cycles through (oh this again?) all the characters excluding the task giver and the task owner to put as the placeholder
@@ -324,13 +339,13 @@ class WorldState:
     def make_list_of_possible_task_stack_character_replacements(self, task_stack_object: TaskStack):
 
         eligible_character_names = [x.get_name() for x in self.node_dict.values() if x.tags["Type"] == "Character"]
-        
 
         #The character performing this task and the character who gave this task aren't legible placeholders
 
-        eligible_character_names.remove(task_stack_object.stack_giver_name)
-        eligible_character_names.remove(task_stack_object.stack_owner_name)
-        
+        if task_stack_object.stack_giver_name is not None:
+            eligible_character_names.remove(task_stack_object.stack_giver_name)
+        if task_stack_object.stack_owner_name is not None:
+            eligible_character_names.remove(task_stack_object.stack_owner_name)
         
         task_stack_object.make_placeholder_string_list()
 
@@ -353,8 +368,10 @@ class WorldState:
         for unchecked_comb in permuted_possible_combs:
             placeholder_charname_zip = list(zip(task_stack_object.actor_placeholder_string_list, unchecked_comb))
 
-            placeholder_charname_zip.append((GenericObjectNode.TASK_GIVER, task_stack_object.stack_giver_name))
-            placeholder_charname_zip.append((GenericObjectNode.TASK_OWNER, task_stack_object.stack_owner_name))
+            if task_stack_object.stack_giver_name is not None:
+                placeholder_charname_zip.append((GenericObjectNode.TASK_GIVER, task_stack_object.stack_giver_name))
+            if task_stack_object.stack_owner_name is not None:
+                placeholder_charname_zip.append((GenericObjectNode.TASK_OWNER, task_stack_object.stack_owner_name))
 
             return_dict = dict(placeholder_charname_zip)
 
@@ -420,8 +437,12 @@ class WorldState:
     # Actually...yeah I think we need to test the change in world state with the Story Graph. Oof.
     def apply_task_change(self, taskchange_object, verbose=False):
 
+        
         task_stack = deepcopy(taskchange_object.task_stack)
-     
+        
+        if verbose:
+            print("TaskStack Object", task_stack)
+
         possible_list = self.make_list_of_possible_task_stack_character_replacements(task_stack)
         if len(possible_list) <= 0:
             if verbose:
@@ -445,14 +466,32 @@ class WorldState:
 
     #Reverse not Implemented
     def apply_task_advance_change(self, taskadvancechange_object, abs_step = 0):
+        actor = self.node_dict.get(taskadvancechange_object.actor_name, None)
 
-        actor = self.node_dict[taskadvancechange_object.actor_name]
+        if actor is None:
+            return False
+        
         task_stack = actor.get_task_stack_by_name(taskadvancechange_object.task_stack_name)
-        task_stack.mark_current_task_as_complete(abs_step)
+
+        if task_stack is None:
+            return False
+        
+        if not task_stack.mark_current_task_as_complete(abs_step):
+            return False
+
+        return True
 
     def apply_task_cancel_change(self, taskcancelchange_object):
         actor = self.node_dict[taskcancelchange_object.actor_name]
+
+        if actor is None:
+            return False
+        
         task_stack = actor.get_task_stack_by_name(taskcancelchange_object.task_stack_name)
+
+        if task_stack is None:
+            return False
+        
         task_stack.remove_from_pool = True
 
     def print_all_nodes(self):
@@ -481,7 +520,45 @@ class WorldState:
             compatibility_result = compatibility_result and self.test_story_compatibility_with_conditiontest(condtest)
 
         return compatibility_result
+    
+    #Returns true if there is at least one configuration for the StoryNode that makes the conditions correct
+    def test_story_compatibility_with_actor_slot_of_node(self, story_node, actor):
+        
+        actor_from_ws = self.node_dict[actor.get_name()]
+        current_location = self.get_actor_current_location(actor=actor)
+        for target_slot_actor in self.get_all_actors():
+            if actor_from_ws != target_slot_actor:
+                nodecopy = deepcopy(story_node)
+                nodecopy.set_location(current_location)
+                nodecopy.add_actor(actor_from_ws)
+                nodecopy.add_target(target_slot_actor)
 
+                if self.test_story_compatibility_with_storynode(nodecopy):
+                    del(nodecopy)
+                    return True
+
+        del(nodecopy)
+        return False
+                
+
+    def test_story_compatibility_with_target_slot_of_node(self, story_node, actor):
+
+        actor_from_ws = self.node_dict[actor.get_name()]
+        current_location = self.get_actor_current_location(actor=actor)
+        for actor_slot_actor in self.get_all_actors():
+            if actor_from_ws != actor_slot_actor:
+                nodecopy = deepcopy(story_node)
+                nodecopy.set_location(current_location)
+                nodecopy.add_actor(actor_slot_actor)
+                nodecopy.add_target(actor_from_ws)
+
+                if self.test_story_compatibility_with_storynode(nodecopy):
+                    del(nodecopy)
+                    return True
+
+        del(nodecopy)
+        return False
+                
     def get_score_from_story_node(self, story_node):
         test_list = []
 
@@ -505,6 +582,7 @@ class WorldState:
 
         #Check what kind of test is going to be done here
 
+        # print(test.test_type)
         test_type = test.test_type
         test_result = False
         
@@ -544,12 +622,14 @@ class WorldState:
         
         previous_object = None
         for thing in object_list:
+            # print(thing)
             thing_from_ws = self.node_dict[thing.name]
-
+            
             if previous_object is not None:
                 if thing_from_ws != previous_object:
                     return False
-                previous_object = thing_from_ws
+            
+            previous_object = thing_from_ws
     
         return True
     
@@ -583,6 +663,10 @@ class WorldState:
         return object_node.check_bias_range(bias_axis=bias_axis, min_accept=min_accept, max_accept=max_accept)
     
     def has_tag_test(self, object_to_test, tag, value, soft_equal):
+
+        if object_to_test is None:
+            return False
+
         object_node = self.node_dict.get(object_to_test.get_name(), None)
 
         if object_node is None:
@@ -790,8 +874,9 @@ class WorldState:
         actor_from_ws = self.node_dict[actor.get_name()]
         return actor_from_ws.get_incoming_edge(self.DEFAULT_HOLD_EDGE_NAME)[0].from_node
     
-    def get_optimal_location_towards_task(self, actor, verbose=False):        
-        actor_task_stacks = actor.list_of_task_stacks
+    def get_optimal_location_towards_task(self, actor, verbose=False):
+        actor_from_ws = self.node_dict[actor.name]        
+        actor_task_stacks = actor_from_ws.list_of_task_stacks
         current_location = self.get_actor_current_location(actor=actor)
         
         names_of_locations_with_tasks = set()
@@ -898,6 +983,9 @@ class WorldState:
 
     def get_all_locations(self):
         return [x for x in self.node_dict.values() if type(x) == LocationNode]
+    
+    def get_all_actors(self):
+        return [x for x in self.node_dict.values() if type(x) == CharacterNode]
     
     def get_all_location_names(self):
         return [x.get_name() for x in self.node_dict.values() if type(x) == LocationNode]

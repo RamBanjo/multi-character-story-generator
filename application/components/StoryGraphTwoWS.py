@@ -74,19 +74,14 @@ class StoryGraph:
 
     #Copy=False would be used in the case of joint.
     def add_story_part(self, part, character, location=None, timestep=0, copy=True, targets=[]):
-
-        char_name = None
-
-        if character is not None:
-            char_name = character.get_name()
         
         #first we need to get the last entry in this character's story
         character_path_length = self.get_longest_path_length_by_character(character)
 
-        new_part = self.add_story_part_at_step(part, character, location, character_path_length, timestep, copy, targets)
+        new_part = self.add_story_part_at_step(part=part, character=character, location=location, absolute_step=character_path_length, timestep=timestep, copy=copy, targets=targets)
 
-        if character_path_length > 0:
-            self.story_parts[(char_name, character_path_length-1)].add_next_node(new_part, character)
+        # if character_path_length > 0:
+        #     self.story_parts[(char_name, character_path_length-1)].add_next_node(new_part, character)
 
         self.refresh_longest_path_length()
 
@@ -94,7 +89,7 @@ class StoryGraph:
 
     def add_story_part_at_step(self, part, character, location=None, absolute_step=0, timestep=0, copy=True, targets=[], verbose=False):
 
-        relevant_ws = self.make_state_at_step(stopping_step=absolute_step)
+        relevant_ws = self.make_state_at_step(stopping_step=absolute_step)[0]
 
         char_name = None
 
@@ -108,6 +103,9 @@ class StoryGraph:
 
         character_from_ws = relevant_ws.node_dict[char_name]
 
+        # if char_name == "Amil":
+        #     print("Amil Tasks at Step (He is Actor)", absolute_step, character_from_ws.get_incomplete_task_stack_names())
+
         new_part.add_actor(character_from_ws)
         new_part.timestep = timestep
         new_part.abs_step = absolute_step
@@ -116,20 +114,26 @@ class StoryGraph:
             print(character.name, "added to", part.name)
 
         if location is not None:
-            new_part.set_location(location)
+            location_from_ws = relevant_ws.node_dict[location.get_name()]
+            new_part.set_location(location_from_ws)
 
         for target in targets:
+            
+            # if type(target) == CharacterNode and target.name == "Amil":
+            #     print("Amil Tasks at Step (He is Target)", absolute_step, target.get_incomplete_task_stack_names())
 
             target_from_ws = relevant_ws.node_dict[target.get_name()]
             new_part.add_target(target_from_ws)
 
         new_part.effects_on_next_ws = []
 
+        modded_taskobj_list = dict()
         for change in part.effects_on_next_ws:
             if change.changetype == ChangeType.TASKCHANGE:
                 modded_taskobj = self.modify_taskchange_object_on_add(abs_step=absolute_step, story_node=new_part, taskchange_object=change)
                 if modded_taskobj[0]:
                     change.task_object = modded_taskobj[1]
+                    modded_taskobj_list[modded_taskobj[1].stack_name] = modded_taskobj[1]
 
 
             change_copy = deepcopy(change)
@@ -139,7 +143,8 @@ class StoryGraph:
 
         for i in range(0, len(new_part.effects_on_next_ws)):
             if new_part.effects_on_next_ws[i].changetype == ChangeType.TASKCHANGE:
-                new_part.effects_on_next_ws[i].task_stack.copy_all_attributes(modded_taskobj[1])
+                stack_name = new_part.effects_on_next_ws[i].task_stack.stack_name
+                new_part.effects_on_next_ws[i].task_stack.copy_all_attributes(modded_taskobj_list[stack_name])
 
 
         self.add_to_story_part_dict(character_name=char_name, abs_step=absolute_step, story_part=new_part)
@@ -162,18 +167,18 @@ class StoryGraph:
 
             current_longest = self.get_longest_path_length_by_character(character)
 
-            prevnode = None
-            nextnode = None
+            # prevnode = None
+            # nextnode = None
 
             #if there is a previous node, remove references to this node
-            if absolute_step-1 >= 0:
-                prevnode = self.story_parts[(char_name, absolute_step-1)]
-                prevnode.remove_next_node(character)
+            # if absolute_step-1 >= 0:
+                # prevnode = self.story_parts[(char_name, absolute_step-1)]
+                # prevnode.remove_next_node(character)
             
             #if the removed thing is not the last thing, then we need to move stuff down
             if absolute_step < current_longest:
 
-                nextnode = self.story_parts[(char_name, absolute_step+1)]
+                # nextnode = self.story_parts[(char_name, absolute_step+1)]
 
                 for i in range(absolute_step+1, current_longest+1):
                 
@@ -182,12 +187,12 @@ class StoryGraph:
                     self.add_to_story_part_dict(character_name=char_name, abs_step=i-1, story_part=move_down)
 
             #finally, if both conditions are met, then those two must be connected
-            if prevnode is not None and nextnode is not None:
-                prevnode.add_next_node(nextnode, character)
+            # if prevnode is not None and nextnode is not None:
+                # prevnode.add_next_node(nextnode, character)
         
         self.refresh_longest_path_length()
 
-    def insert_story_part(self, part, character, location=None, absolute_step=0, copy=True, targets=[]):
+    def insert_story_part(self, part, character, location=None, absolute_step=0, copy=True, targets=[], timestep=None):
 
         #check if this would be the last storypart in the list, if it is, then call add story part like normal
         char_name = None
@@ -195,15 +200,16 @@ class StoryGraph:
         if character is not None:
             char_name = character.get_name()
 
-        if self.story_parts.get((char_name, absolute_step-1), None) is None:
-            timestep = 0
-        else:
-            timestep = self.story_parts[(char_name, absolute_step-1)].timestep
+        if timestep == None:
+            if self.story_parts.get((char_name, absolute_step-1), None) is None:
+                timestep = 0
+            else:
+                timestep = self.story_parts[(char_name, absolute_step-1)].timestep
 
         character_path_length = self.get_longest_path_length_by_character(character)
 
         if absolute_step >= character_path_length:
-            return_node = self.add_story_part(part, character, location, timestep, copy, targets)
+            return_node = self.add_story_part(part=part, character=character, location=location, timestep=timestep, copy=copy, targets=targets)
         else:
             #first, we need to move everything that comes after this part up by one
             for i in range(character_path_length-1, absolute_step-1, -1):
@@ -213,16 +219,16 @@ class StoryGraph:
             #then, we add a new story part at the spot
             return_node = self.add_story_part_at_step(part, character, location, absolute_step, timestep, copy, targets)
 
-            #Connect to Other Nodes.
-            #Firstly, if this isn't the first node, we will connect to the previous node.
-            #The previous node severs its ties with its previous next node and now considers the current node to be its next node.
-            if absolute_step-1 >= 0:
-                prevnode =  self.story_parts[(char_name, absolute_step-1)]
-                prevnode.remove_next_node(character)
-                prevnode.add_next_node(return_node, character)
+            # #Connect to Other Nodes.
+            # #Firstly, if this isn't the first node, we will connect to the previous node.
+            # #The previous node severs its ties with its previous next node and now considers the current node to be its next node.
+            # if absolute_step-1 >= 0:
+            #     prevnode =  self.story_parts[(char_name, absolute_step-1)]
+            #     prevnode.remove_next_node(character)
+            #     prevnode.add_next_node(return_node, character)
 
-            #Secondly, since to get here we established that a next node exists, we need to add the next node as the current node's next node.
-            return_node.add_next_node(self.story_parts[(char_name, absolute_step+1)], character)
+            # #Secondly, since to get here we established that a next node exists, we need to add the next node as the current node's next node.
+            # return_node.add_next_node(self.story_parts[(char_name, absolute_step+1)], character)
 
         self.refresh_longest_path_length()
 
@@ -242,7 +248,7 @@ class StoryGraph:
             if targets != None:
                 cur_tar = targets[index]
 
-            self.insert_story_part(item, character, cur_loc, absolute_step+index, copy, cur_tar)
+            self.insert_story_part(part=item, character=character, location=cur_loc, absolute_step=absolute_step+index, copy=copy, targets=cur_tar)
 
             index += 1
 
@@ -364,39 +370,48 @@ class StoryGraph:
         #returns the latest state
         
         self.refresh_longest_path_length()
-        return self.make_state_at_step(self.longest_path_length, state_name)
+        
+        latest_state_tuple = self.make_state_at_step(self.longest_path_length, state_name)
+        return latest_state_tuple[0]
 
-    def make_state_at_step(self, stopping_step, state_name = "Traveling State"):
+    def make_state_at_step(self, stopping_step, state_name = None):
         #Same as make_latest_state, but you can choose the step where to stop.
         #In fact, make_latest_state should call this function but set the stopping step as the last step.
         self.update_list_of_changes()
 
         traveling_state = deepcopy(self.starting_ws)
-
+        
+        if state_name is None:
+            state_name = "State at abs_step " + str(stopping_step)
         traveling_state.name = state_name
 
+        # print("Begin Making State: " + state_name)
+
+        world_state_validity = True
+
         for index in range(0, stopping_step):
+            # print(index, "Amil List of Tasks", traveling_state.node_dict["Amil"].get_incomplete_task_stack_names())
             for change in self.list_of_changes[index]:
                 frozen_current_state = deepcopy(traveling_state)
-
                 # TaskChange will call apply_task_change from the traveling_state
                 # (We assume that dict is already added to the TaskStack in the change when it was called)
                 # TaskAdvanceChange will call apply_task_advance_change from the traveling_state
                 # TaskCancelChange will call apply_task_cancel_change from the traveling_state
-
-                match change.changetype:
+                # if change.changetype == ChangeType.TASKCHANGE:
+                    # print(index, change)
+                match change.changetype:              
                     case ChangeType.CONDCHANGE:
-                        traveling_state.apply_conditional_change(change, frozen_current_state)
+                        world_state_validity = world_state_validity and traveling_state.apply_conditional_change(change, frozen_current_state)
                     case ChangeType.TASKCHANGE:
-                        traveling_state.apply_task_change(taskchange_object=change)
+                        world_state_validity = world_state_validity and traveling_state.apply_task_change(taskchange_object=change)
                     case ChangeType.TASKADVANCECHANGE:
-                        traveling_state.apply_task_advance_change(taskadvancechange_object=change, abs_step = index)
+                        world_state_validity = world_state_validity and traveling_state.apply_task_advance_change(taskadvancechange_object=change, abs_step = index)
                     case ChangeType.TASKCANCELCHANGE:
-                        traveling_state.apply_task_cancel_change(taskcancelchange_object=change)
+                        world_state_validity = world_state_validity and traveling_state.apply_task_cancel_change(taskcancelchange_object=change)
                     case _:
-                        traveling_state.apply_some_change(change)
-        
-        return traveling_state
+                        world_state_validity = world_state_validity and traveling_state.apply_some_change(change)
+
+        return traveling_state, world_state_validity
 
     # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
     # Split Joint: The score is the max among all the given splits.
@@ -415,6 +430,20 @@ class StoryGraph:
         if not rule.is_joint_rule:
             test_result_tuple = self.check_for_pattern_in_storyline(pattern_to_test=rule.story_condition, character_to_extract=actor)
             pattern_found_at_step = insert_index in test_result_tuple[1]
+
+            cont_valid = False
+            if pattern_found_at_step:
+                purge_count = 0
+                insert_point = insert_index
+
+                if rule.remove_before_insert:
+                    purge_count = len(rule.story_condition)
+                else:
+                    insert_point += len(rule.story_condition)
+                    
+                cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=insert_point, cont_list=rule.story_change, target_list=rule.target_list, purge_count=purge_count)
+
+            pattern_found_at_step = pattern_found_at_step and cont_valid
 
         else:
             if rule.joint_type == JointType.JOIN:
@@ -435,7 +464,8 @@ class StoryGraph:
         if not pattern_found_at_step:
             return DEFAULT_INVALID_SCORE
             
-        #There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
+        # There is no need to test if the rule fits this spot, because by the point that this function is called, all the unsuitable rules should have been removed from the list.
+        # Hey guess how poorly this statement above has aged lol. Screw this.
 
         #If it's a normal type of rule then we can use the normal calculate score function do do this.
         if not rule.is_joint_rule:
@@ -447,11 +477,11 @@ class StoryGraph:
             else:
                 insert_point += len(rule.story_condition)
 
-            return self.calculate_score_from_char_and_cont(actor=actor, insert_index=insert_point, contlist=rule.story_change, mode=mode, purge_count=purge_count)
+            return self.calculate_score_from_char_and_cont(actor=actor, insert_index=insert_point, contlist=rule.story_change, mode=mode, purge_count=purge_count, target_list=rule.target_list)
         else:
 
             #Get character information from the relevant step.
-            current_ws = self.make_state_at_step(insert_index)
+            current_ws = self.make_state_at_step(insert_index)[0]
             character_from_ws = current_ws.node_dict[actor.get_name()]
 
             if rule.joint_type == JointType.SPLIT:
@@ -485,7 +515,7 @@ class StoryGraph:
 
         match completeness:
             case "task_step_can_advance":
-                current_ws = self.make_state_at_step(task_perform_index)
+                current_ws = self.make_state_at_step(task_perform_index)[0]
                 actor = current_ws.node_dict[actor_name]
 
                 self.find_last_step_of_task_stack_from_actor
@@ -505,7 +535,7 @@ class StoryGraph:
             case _:
                 return DEFAULT_INVALID_SCORE
 
-    def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0, has_joint_in_contlist = False):
+    def calculate_score_from_char_and_cont(self, actor, insert_index, contlist, mode=0, purge_count=0, has_joint_in_contlist = False, target_list = None):
         '''Mode is an int, depending on what it is, this function will do different things:
         mode = 0: return max between all the cont list.
         mode = 1: return average between all the cont list.
@@ -514,19 +544,20 @@ class StoryGraph:
         score = []
         
         graphcopy = deepcopy(self)
-
+        
         #This is the part where nodes are removed/inserted from the Graph Copy. If this is correct, it won't have to be changed.
         if purge_count > 0:
             graphcopy.remove_parts_by_count(start_step=insert_index, count=purge_count, actor=actor)
+
         if has_joint_in_contlist:
             graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=contlist, main_character=actor, abs_step=insert_index)
         else:
-            graphcopy.insert_multiple_parts(part_list=contlist, character = actor, absolute_step=insert_index)
+            graphcopy.insert_multiple_parts(part_list=contlist, character = actor, absolute_step=insert_index, targets=target_list)
 
         #This is the part where score calculations are done.
         #Since we already added actor information when calling insert_multiple_parts and insert_multiple_parts_with_joint_and_nonjoint we don't have to add actor information here again.
         for current_index in range(insert_index, insert_index+len(contlist)):
-            current_state = graphcopy.make_state_at_step(current_index)
+            current_state = graphcopy.make_state_at_step(current_index)[0]
             current_node = graphcopy.story_parts[(actor.get_name(), current_index)]
 
             #By default the score is invalid, but if all the nodes are valid then this score will be replaced by an actual biasweight score.
@@ -558,7 +589,7 @@ class StoryGraph:
     def reverse_steps(self, number_of_reverse, state_name = "Reversed State"):
         #Returns a World State, reversing the changes for steps equal to number_of_reverse from the last state
 
-        return self.make_state_at_step(len(self.list_of_changes) - number_of_reverse - 1, state_name=state_name)
+        return self.make_state_at_step(len(self.list_of_changes) - number_of_reverse - 1, state_name=state_name)[0]
 
         # traveling_state = deepcopy(self.latest_ws)
         # traveling_state.name = state_name
@@ -570,7 +601,7 @@ class StoryGraph:
         # return traveling_state
 
     #...we definitely don't need Apply Once. The new Rewrite Rules don't use it, and our generation system specifies clearly the absolute step every single time.
-    def apply_rewrite_rule(self, rule, character, location_list = None, abs_step = -1, verbose=False):
+    def apply_rewrite_rule(self, rule, character, location_list = None, abs_step = -1, verbose=True):
         '''
         If abs_step is set as -1, this will choose a random valid spot, if able.
         '''
@@ -584,26 +615,34 @@ class StoryGraph:
         is_subgraph, subgraph_locs = self.check_for_pattern_in_storyline(rule.story_condition, character)
 
         #In order to apply the rule, we need a valid graph location, if we set it to not be "Any".
-        if abs_step not in subgraph_locs and abs_step != 1:
-            if verbose:
-                print("Pattern not found. Returning False.")            
-            return False
         
         # for banned_loc in banned_subgraph_locs:
         #     subgraph_locs.remove(banned_loc)
 
         #Here, we will check each loc in subgraph_locs to see if the continuation from that point on is valid.
         valid_insert_points = []
+        
         for potential_insert_point in subgraph_locs:
 
             purge_count = 0
 
             if rule.remove_before_insert:
                 purge_count = len(rule.story_condition)
+            else:
+                potential_insert_point += len(rule.story_condition)
 
-            if self.check_continuation_validity(character, potential_insert_point, rule.story_change, rule.target_list, purge_count):
+            if self.check_continuation_validity(actor=character, abs_step_to_cont_from=potential_insert_point, cont_list=rule.story_change, target_list=rule.target_list, purge_count=purge_count):
                 valid_insert_points.append(potential_insert_point)
 
+        check_step = abs_step
+        if not rule.remove_before_insert:
+            check_step += len(rule.story_condition)
+
+        if check_step not in valid_insert_points and abs_step != -1:
+            if verbose:
+                print("Pattern not found. Returning False.")
+            return False
+        
         if len(valid_insert_points) > 0:
             if verbose:
                 print("There is at least one valid insert point. Applying Rule.")
@@ -631,21 +670,20 @@ class StoryGraph:
         return good_insertion_found
 
     #Remake this function so that it has basically the same arguments and functionality as add_multiple_characters_to_part because by god this is so outdated.
-    #references apply_joint_node and insert_joint_node should be fixed because apparently I fucked up in so, so many spots.
+    #references apply_joint_node and insert_joint_node should be fixed because apparently I screw up in so, so many spots.
     #This function basically works like normal insert story part if the node is not a joint node. How convenient!
-    def insert_joint_node(self, joint_node, main_actor=None, other_actors=[], location=None, targets=[], absolute_step=0, copy=True, make_main_actor_a_target = False):
-
+    def insert_joint_node(self, joint_node, main_actor=None, other_actors=[], location=None, targets=[], absolute_step=0, copy=True, make_main_actor_a_target = False, timestep=None):
         if make_main_actor_a_target:
             targets.append(main_actor)
 
         if main_actor is None or make_main_actor_a_target:
             main_actor = other_actors.pop(0)
         
-        new_node = self.insert_story_part(part=joint_node, character=main_actor, location=location, absolute_step=absolute_step, copy=copy, targets=targets)
+        new_node = self.insert_story_part(part=joint_node, character=main_actor, location=location, absolute_step=absolute_step, copy=copy, targets=targets, timestep=timestep)
         
         #TODO (Important): These two should insert instead of entirely replacing the node.
         for additional_actor in other_actors:
-            self.insert_story_part(part=new_node, character=additional_actor, location=location, absolute_step=absolute_step, copy=False)
+            self.insert_story_part(part=new_node, character=additional_actor, location=location, absolute_step=absolute_step, copy=False, timestep=timestep)
         
         for target in targets:
             self.insert_story_node_for_target(target=target, abs_step=absolute_step, story_part=new_node)
@@ -798,20 +836,19 @@ class StoryGraph:
 
         #We already have the grouping, because our input is the grouping (duh)
         #For some reason check add joint validity and check add split validity consumes actor input. I'm making a copy here to prevent that.
-
-        copy_of_split = deepcopy(grouping_split)
         
         if joint_rule.joint_type == JointType.JOIN or joint_rule.joint_type == JointType.CONT:
             if verbose:
                 print("Validity is based on Add Joint Validity function")
-            validity = validity and self.check_add_joint_validity(joint_node = joint_rule.joint_node, actors_to_test = copy_of_split[0]["actor_group"], targets_to_test = copy_of_split[0]["target_group"], insert_index=insert_index)
+            validity = validity and self.check_add_joint_validity(joint_node = joint_rule.joint_node, actors_to_test = grouping_split[0]["actor_group"], targets_to_test = grouping_split[0]["target_group"], insert_index=insert_index)
         if joint_rule.joint_type == JointType.SPLIT:
             if verbose:
                 print("Validity is based on Add Split Validity function")
-            validity = validity and self.check_add_split_validity(split_list=cont_list, chargroup_list=copy_of_split, insert_index=insert_index)
+            validity = validity and self.check_add_split_validity(split_list=cont_list, chargroup_list=grouping_split, insert_index=insert_index)
             #validity = validity and self.check_add_joint_validity(joint_node = cont_list[test_index], actors_to_test = sampled_grouping[test_index]["actor_group"], targets_to_test = sampled_grouping[test_index]["target_group"], insert_index=insert_index)
         
-        del(copy_of_split)
+        # del(copy_of_split)
+        
         return validity
     
     #This function is for testing if an absolute step contains a pattern that is suitable for a join joint.
@@ -904,8 +941,9 @@ class StoryGraph:
                 for index in range(0, len(part_list)-1):
                     current_part = part_list[index]
                     next_part = part_list[index+1]
+                    # print(current_part.name, next_part.name, dupe_node_name)
 
-                    if current_part == next_part and current_part.name == dupe_node_name:
+                    if current_part.name == next_part.name and current_part.name == dupe_node_name:
                         return True
 
         return False
@@ -946,16 +984,16 @@ class StoryGraph:
             #then, we add a new story part at the spot
             self.add_story_node_to_targets_storyline(pot_target=target, abs_step=abs_step, story_part=story_part)
 
-            #Connect to Other Nodes.
-            #Firstly, if this isn't the first node, we will connect to the previous node.
-            #The previous node severs its ties with its previous next node and now considers the current node to be its next node.
-            if abs_step-1 >= 0:
-                prevnode =  self.story_parts[(char_name, abs_step-1)]
-                prevnode.remove_next_node(target)
-                prevnode.add_next_node(story_part, target)
+            # #Connect to Other Nodes.
+            # #Firstly, if this isn't the first node, we will connect to the previous node.
+            # #The previous node severs its ties with its previous next node and now considers the current node to be its next node.
+            # if abs_step-1 >= 0:
+            #     prevnode =  self.story_parts[(char_name, abs_step-1)]
+            #     prevnode.remove_next_node(target)
+            #     prevnode.add_next_node(story_part, target)
 
-            #Secondly, since to get here we established that a next node exists, we need to add the next node as the current node's next node.
-            story_part.add_next_node(self.story_parts[(char_name, abs_step+1)], target)
+            # #Secondly, since to get here we established that a next node exists, we need to add the next node as the current node's next node.
+            # story_part.add_next_node(self.story_parts[(char_name, abs_step+1)], target)
 
         self.refresh_longest_path_length()
 
@@ -984,7 +1022,7 @@ class StoryGraph:
         list_of_charnames = [x.get_name() for x in character_list]
         all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes([node.charcount, node.target_count], list_of_charnames)
         #print(all_possible_groupings)
-        state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
+        state_at_step = self.make_state_at_step(abs_step)[0] #This is the state where we will check if the characters are compatible with each of their assigned nodes.
 
         entire_list_of_split_dicts = []
         for current_grouping in all_possible_groupings:
@@ -1040,7 +1078,7 @@ class StoryGraph:
         list_of_charnames = [x.get_name() for x in character_list]
         all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes(grouping_size_list, list_of_charnames)
 
-        state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
+        state_at_step = self.make_state_at_step(abs_step)[0] #This is the state where we will check if the characters are compatible with each of their assigned nodes.
 
         all_valid_groupings = []
         for current_group in all_possible_groupings:
@@ -1088,7 +1126,13 @@ class StoryGraph:
         return all_valid_groupings
 
     def pick_one_random_valid_character_grouping_from_all_valid_groupings(self, continuations, abs_step, character_list, verbose=False):
-        entire_approved_list = self.generate_all_valid_character_grouping_for_splitting(continuations=continuations, abs_step=abs_step, character_list=character_list)
+
+        character_list_from_ws = []
+        current_ws = self.make_state_at_step(stopping_step=abs_step)[0]
+        for character in character_list:
+            character_list_from_ws.append(current_ws.node_dict[character.get_name()])
+
+        entire_approved_list = self.generate_all_valid_character_grouping_for_splitting(continuations=continuations, abs_step=abs_step, character_list=character_list_from_ws)
         
         if verbose:
             groupingno = 0
@@ -1131,7 +1175,7 @@ class StoryGraph:
         all_possible_groupings = all_possible_actor_groupings_with_ranges_and_freesizes(grouping, list_of_charnames)
         #print(all_possible_groupings)
 
-        state_at_step = self.make_state_at_step(abs_step) #This is the state where we will check if the characters are compatible with each of their assigned nodes.
+        state_at_step = self.make_state_at_step(abs_step)[0] #This is the state where we will check if the characters are compatible with each of their assigned nodes.
 
         found_valid_grouping = False
 
@@ -1324,13 +1368,13 @@ class StoryGraph:
     def check_if_joint_node_is_valid_at_timestep_for_actor(self, actor, joint_node, step):
 
         #Get the character at that step
-        character_at_step = self.make_state_at_step(step).node_dict[actor.get_name()]
+        character_at_step = self.make_state_at_step(step)[0].node_dict[actor.get_name()]
 
         #This function returns if the character can fit in at least as an actor or a target.
         return joint_node.check_actor_or_target_compatibility(character_at_step)
 
 
-    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None, purge_count = 0, has_joint_in_contlist = False):
+    def check_continuation_validity(self, actor, abs_step_to_cont_from, cont_list, target_list = None, purge_count = 0, has_joint_in_contlist = False, perform_dupe_check = True):
         #We did the main function, but now we also need to check if the character is being a target, and pull up the requirement for being a target instead if that's the case.
         #This function is meant for use with only the continuation part of a normal non-joint rule. We probably should make a new function to use with the joint rules.
 
@@ -1347,11 +1391,16 @@ class StoryGraph:
 
         if purge_count > 0:
             graphcopy.remove_parts_by_count(abs_step_to_cont_from, purge_count, actor)
-
         if has_joint_in_contlist:
             graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=cont_list, main_character=actor, abs_step=abs_step_to_cont_from)
         else:
             graphcopy.insert_multiple_parts(cont_list, actor, None, abs_step_to_cont_from, targets=target_list)
+
+        if perform_dupe_check:
+            for node in cont_list:
+                if graphcopy.test_if_anyone_in_list_has_adjacent_duped_node_with_given_name(actor_list=[actor], dupe_node_name=node.get_name()):
+                    return False
+        
         graphcopy.fill_in_locations_on_self()
         graphcopy.update_list_of_changes()
         graphcopy.refresh_longest_path_length()
@@ -1364,13 +1413,18 @@ class StoryGraph:
 
     #Help lmao I forgot if this check worldstate validity also includes itself
     #If it does then I have no reason to add another check before adding nodes (we already check ws validity while running apply rule)
-    def check_worldstate_validity_on_own_graph(self, start_step):
+    def check_worldstate_validity_on_own_graph(self, start_step=0):
         self.refresh_longest_path_length()
 
         for check_index in range(start_step, self.longest_path_length):
 
             #Make the world state
-            current_ws = self.make_state_at_step(check_index)
+            current_ws_and_validity = self.make_state_at_step(check_index)
+
+            # if not current_ws_and_validity[1]:
+            #     return False
+
+            current_ws = current_ws_and_validity[0]
 
             for current_char in self.character_objects:
                 current_step = self.story_parts.get((current_char.get_name(), check_index))
@@ -1395,10 +1449,10 @@ class StoryGraph:
                         equivalent_tests = translate_generic_test(current_test_to_convert, current_step)
 
                         for current_test_to_check in equivalent_tests:
-
+                            # print(current_test_to_check)
                             if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
                                 
-                                print("failed test", current_test_to_check)
+                                # print("failed test", current_test_to_check)
                                 return False
         return True
 
@@ -1432,10 +1486,10 @@ class StoryGraph:
         #the current worldstate.
 
         self.refresh_longest_path_length()
-
+        
         for index in range(0, self.longest_path_length):
-            self.update_list_of_changes()
-            cur_state = self.make_state_at_step(index)
+            
+            cur_state = self.make_state_at_step(index)[0]
 
             for story_char in self.character_objects:
 
@@ -1462,7 +1516,7 @@ class StoryGraph:
 
         #There's also placeholder characters in play. We need to take that into account as well.
 
-        current_ws = self.make_state_at_step(abs_step)
+        current_ws = self.make_state_at_step(abs_step)[0]
 
         if task.task_location_name is not None:
             current_loc = current_ws.node_dict.get(task.task_location_name, None)
@@ -1474,21 +1528,26 @@ class StoryGraph:
         placeholder_charname_dict = task.placeholder_info_dict
         placeholder_charobj_pair = [(x[0], current_ws.node_dict[x[1]]) for x in placeholder_charname_dict.items()]
         
+        task_valid = True
         for test in task.task_requirement:
+            # if test == None:
+            #     print(test, task.task_name)
             replaced_test = replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_charobj_pair)
             task_valid = task_valid and current_ws.test_story_compatibility_with_conditiontest(replaced_test)
 
         translated_task = []
         for story_node in task.task_actions:
+            # print(placeholder_charname_dict)
             translated_task.append(replace_placeholders_in_story_node(story_node=story_node, placeholder_dict=placeholder_charname_dict, list_of_actor_objects=self.character_objects))
                                                           
-        cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=translated_task, has_joint_in_contlist=True)
+        cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=abs_step, cont_list=translated_task, has_joint_in_contlist=True, perform_dupe_check=True)
 
+        # print(cont_valid)
         return location_has_actor and cont_valid
 
     def get_task_stack_from_actor_at_absolute_step(self, task_stack_name, actor_name, abs_step):
         
-        current_ws = self.make_state_at_step(stopping_step=abs_step)
+        current_ws = self.make_state_at_step(stopping_step=abs_step)[0]
         character_object = current_ws.node_dict.get(actor_name, None)
 
         if character_object is None:
@@ -1500,12 +1559,7 @@ class StoryGraph:
 
         last_ws = self.make_latest_state()
         current_actor = last_ws.node_dict[actor_name]
-
-        task_stack_name_list = []
-        for task_stack in current_actor.list_of_task_stacks:
-            task_stack_name_list.append(task_stack.stack_name)
-
-        return task_stack_name_list
+        return current_actor.get_incomplete_task_stack_names()
 
     '''
     Returns a dict with the following information:
@@ -1519,19 +1573,23 @@ class StoryGraph:
 
         #The index of the current task in the task list.
         last_task_step = 0
+        first_task_step = None
         
         #The absolute step that contains the latest instance of a TaskAdvance Object that affects this task.
         last_graph_step_with_graph_update = 0
 
         for current_index in range(0, self.longest_path_length+1):
 
-            current_ws = self.make_state_at_step(current_index)
+            current_ws = self.make_state_at_step(current_index)[0]
             actor_from_ws = current_ws.node_dict.get(actor_name, None)
 
             if actor_from_ws is not None:
+  
                 task_stack_from_ws = actor_from_ws.get_task_stack_by_name(task_stack_name)
 
                 if task_stack_from_ws is not None:
+                    if first_task_step == None:
+                        first_task_step = current_index
                     if verbose:
                         print("current task index at index ", current_index, "is", task_stack_from_ws.current_task_index)
                     new_last_task_step = task_stack_from_ws.current_task_index
@@ -1540,7 +1598,9 @@ class StoryGraph:
                         last_graph_step_with_graph_update = current_index
                     last_task_step = new_last_task_step
 
-        return {"last_task_step":last_task_step, "last_update_step":last_graph_step_with_graph_update}
+        if verbose:
+            print({"last_task_step":last_task_step, "last_update_step":last_graph_step_with_graph_update, "first_task_step":first_task_step-1})
+        return {"last_task_step":last_task_step, "last_update_step":last_graph_step_with_graph_update, "first_task_step":first_task_step-1}
 
     #In order to perform a task, it must both be incomplete and be completable. Otherwise, it's not a valid option to take.
     def test_task_stack_advance_validity(self, task_stack_name, actor_name, abs_step):
@@ -1551,7 +1611,7 @@ class StoryGraph:
         if completeness != "task_step_can_advance":
             return False, completeness
         
-        current_ws = self.make_state_at_step(abs_step)
+        current_ws = self.make_state_at_step(abs_step)[0]
         char_at_ws = current_ws.node_dict[actor_name]
         task_stack = char_at_ws.get_task_stack_by_name(task_stack_name)
         current_task = task_stack.get_current_task()
@@ -1561,11 +1621,15 @@ class StoryGraph:
         test_result = self.test_task_validity(task=current_task, actor=char_at_ws, abs_step=abs_step)
         return test_result, completeness
     
-    def insert_multiple_parts_with_joint_and_nonjoint(self, node_list, main_character, abs_step):
+    def insert_multiple_parts_with_joint_and_nonjoint(self, node_list, main_character, abs_step, location=None):
         for index in range(0, len(node_list)):
 
                 current_story_part = node_list[index]
                 current_insert_index = abs_step+index
+                current_location = location
+
+                if current_location is None:
+                    current_location = current_story_part.location 
 
                 #If the node is a joint node, apply it like a joint node
                 #If it's not a joint node, apply it like a normal node
@@ -1575,7 +1639,7 @@ class StoryGraph:
                     actor_list = []
                     target_list = []
                     make_main_char_target = False
- 
+
                     if main_character in current_story_part.target:
                         make_main_char_target = True
 
@@ -1588,18 +1652,17 @@ class StoryGraph:
                     #We need to reset the character slots when adding story parts, because they already come with translated story nodes.
                     current_story_part.actor = []
                     current_story_part.target = []
-                    newnode = self.insert_joint_node(joint_node=current_story_part, main_actor=main_character, other_actors=actor_list, location=current_story_part.location, targets=target_list, absolute_step=current_insert_index, make_main_actor_a_target=make_main_char_target)
-
+                    newnode = self.insert_joint_node(joint_node=current_story_part, main_actor=main_character, other_actors=actor_list, location=current_location, targets=target_list, absolute_step=current_insert_index, make_main_actor_a_target=make_main_char_target)
                 else:
                     #We need to reset the character slots when adding story parts, because they already come with translated story nodes.
                     current_story_part.actor = []
-                    newnode = self.insert_story_part(part=current_story_part, character=main_character, location=current_story_part.location, absolute_step=current_insert_index)
+                    newnode = self.insert_story_part(part=current_story_part, character=main_character, location=current_location, absolute_step=current_insert_index)
 
                     
     def attempt_advance_task_stack(self, task_stack_name, actor_name, abs_step, verbose=False):
         # Get the Task Stack Object.
         
-        current_ws = self.make_state_at_step(abs_step)
+        current_ws = self.make_state_at_step(abs_step)[0]
         actor_object = current_ws.node_dict.get(actor_name, None)
 
         #Return False on Actor None
@@ -1638,7 +1701,9 @@ class StoryGraph:
 
             task_advance_name = "task_advance_for_" + actor_name + "_" + task_stack_name
             advance_stack_object = TaskAdvance(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
-            last_story_node.effects_on_next_ws.append(advance_stack_object)
+
+            if advance_stack_object not in last_story_node.effects_on_next_ws:
+                last_story_node.effects_on_next_ws.append(advance_stack_object)
 
             #Now, insert each of the story nodes into the story
 
@@ -1648,8 +1713,9 @@ class StoryGraph:
             # Fixed! We now have insert_multiple_parts_with_joint_and_nonjoint which we also use for task validation
 
             #self.insert_multiple_parts(part_list=translated_nodes, character=actor_object, absolute_step=abs_step, copy=True)
+            task_location = current_ws.node_dict[current_task.task_location_name]
 
-            self.insert_multiple_parts_with_joint_and_nonjoint(node_list=translated_nodes, main_character=actor_object, abs_step=abs_step)
+            self.insert_multiple_parts_with_joint_and_nonjoint(node_list=translated_nodes, main_character=actor_object, abs_step=abs_step, location=task_location)
             # for index in range(0, len(translated_nodes)):
 
             #     current_story_part = translated_nodes[index]
@@ -1706,7 +1772,9 @@ class StoryGraph:
                     if verbose:
                         print("Task Step is Already Completed, Task Auto Advanced")
                     task_advance_name = "task_advance_for_" + actor_name + "_" + task_stack_name
-                    advance_stack_object = TaskAdvance(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
+
+                    if advance_stack_object not in last_story_node.effects_on_next_ws:
+                        advance_stack_object = TaskAdvance(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
                     previous_story_node.effects_on_next_ws.append(advance_stack_object)
                     return True
                 
@@ -1738,6 +1806,7 @@ class StoryGraph:
 
         latest_ws = self.make_latest_state()
         latest_actor = latest_ws.node_dict[actor_name]
+
         if latest_actor.get_task_stack_by_name(task_stack_name) is None:
             return "not_exist"
 
@@ -1749,10 +1818,11 @@ class StoryGraph:
             return "task_stack_cleared"
 
         #Return "incompatible" if the abs_step chosen is before the last update step (cannot update before the latest change)
-        if abs_step < last_task_step["last_update_step"]:
+        #Also return "incompatible" if the abs_step chosen is equal to the first task step (to prevent accidents)
+        if abs_step < last_task_step["last_update_step"] or abs_step == last_task_step["first_task_step"]:
             return "incompatible"
         
-        current_ws = self.make_state_at_step(abs_step)
+        current_ws = self.make_state_at_step(abs_step)[0]
         actor_at_ws = current_ws.node_dict[actor_name]
         task_stack_at_ws = actor_at_ws.get_task_stack_by_name(task_stack_name)
 
@@ -1820,7 +1890,7 @@ class StoryGraph:
     #Return False and no Task Stack Object vs Return True and a Task Stack Object
     def modify_taskchange_object_on_add(self, abs_step, story_node, taskchange_object):
 
-        current_ws = self.make_state_at_step(abs_step)
+        current_ws = self.make_state_at_step(abs_step)[0]
         new_task_stack = deepcopy(taskchange_object.task_stack)
 
         #Setting stack owner and stack giver names, according to the storynode.
@@ -1876,6 +1946,7 @@ class StoryGraph:
         pass
 
 def make_list_of_changes_from_list_of_story_nodes(story_node_list):
+    # print("Begin Making List of Changes")
     changeslist = []
     
     dupeless_node_list = remove_dupe_nodes(story_node_list)
@@ -1909,10 +1980,10 @@ def calculate_score_from_char_and_unpopulated_node_with_both_slots(actor, node, 
 
     calculate_list = []
 
-    if world_state.test_story_compatibility_with_storynode(actor_populated_node):
+    if world_state.test_story_compatibility_with_actor_slot_of_node(story_node = node, actor = actor):
         calculate_list.append(world_state.get_score_from_story_node(actor_populated_node))
 
-    if world_state.test_story_compatibility_with_storynode(target_populated_node):
+    if world_state.test_story_compatibility_with_target_slot_of_node(story_node = node, actor = actor):
         calculate_list.append(world_state.get_score_from_story_node(target_populated_node))
 
     if len(calculate_list) <= 0:

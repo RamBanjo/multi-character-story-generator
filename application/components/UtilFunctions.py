@@ -5,7 +5,7 @@ import random
 import sys
 sys.path.insert(0,'')
 
-from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, ObjectEqualityTest, SameLocationTest, IntersectObjectExistsTest, ObjectPassesAtLeastOneTestTest
+from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, ObjectEqualityTest, SameLocationTest, IntersectObjectExistsTest, ObjectPassesAtLeastOneTestTest, TagValueInRangeTest
 from application.components.Edge import Edge
 from application.components.RelChange import ConditionalChange, RelChange, RelativeBiasChange, RelativeTagChange, TagChange, TaskAdvance, TaskCancel, TaskChange
 from application.components.StoryObjects import ObjectNode
@@ -210,14 +210,13 @@ def all_possible_actor_groupings(grouping_info, charcter_list):
 
     permutations_of_character_list = itertools.permutations(charcter_list)
     all_possible_grouping_list = []
-
+    # print(charcter_list, list(permutations_of_character_list))
     for line in permutations_of_character_list:
 
         current_line = []
         actor_count = 0
 
         for grouping in grouping_info:
-
             this_group = []
             for iteration in range(0, grouping):
                 this_group.append((line[actor_count]))
@@ -405,10 +404,13 @@ def actor_count_sum(lhs, rhs):
     return -1
 
 def permute_actor_list_for_joint_with_range_and_freesize(current_actor, other_actors, size):
-
+    
     if type(size) == tuple:
         return permute_actor_list_for_joint_with_variable_length(current_actor, other_actors, min_size=size[0], max_size=size[1])
     
+    if size > len(other_actors) + 1:
+        return []
+
     if size == -1:
         return permute_actor_list_for_joint_with_variable_length(current_actor, other_actors, min_size=2, max_size=len(other_actors)+1)
     
@@ -498,14 +500,16 @@ def replace_multiple_placeholders_with_multiple_test_takers(test, placeholder_te
     copiedtest = copy.deepcopy(test)
 
     for thing in placeholder_tester_pair_list:
+        # if test == None:
+        #     print(test, placeholder_tester_pair_list[0], placeholder_tester_pair_list[1])
         copiedtest = replace_placeholder_object_with_test_taker(test=copiedtest, test_taker=thing[1], placeholder_object=thing[0])
-
+    
     return copiedtest
 
 def replace_placeholder_object_with_test_taker(test, test_taker, placeholder_object):
         
         #Check what kind of test is going to be done here
-
+    
         test_type = test.test_type
 
         match test_type:
@@ -516,13 +520,17 @@ def replace_placeholder_object_with_test_taker(test, test_taker, placeholder_obj
             case TestType.HAS_EDGE:
                 return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
             case TestType.TAG_VALUE_IN_RANGE:
-                return replace_placeholder_object_with_test_taker_hasedge(test, test_taker, placeholder_object)
+                return replace_placeholder_object_with_test_taker_valuerange(test, test_taker, placeholder_object)
             case TestType.HAS_TAG:
                 return replace_placeholder_object_with_test_taker_hastag(test, test_taker, placeholder_object)
             case TestType.IN_BIAS_RANGE:
                 return replace_placeholder_object_with_test_taker_biasrange(test, test_taker, placeholder_object)
             case TestType.OBJECT_EQUALITY:
                 return replace_placeholder_object_with_test_taker_objequality(test, test_taker, placeholder_object)
+            case TestType.OBJECT_PASSES_ONE:
+                return replace_placeholder_object_with_test_taker_pass_one_test(test, test_taker, placeholder_object)
+            case TestType.INTERSECTED_OBJECT_EXISTS:
+                return replace_placeholder_object_with_test_taker_intersected_object(test, test_taker, placeholder_object)
             case _:
                 return None
 
@@ -566,7 +574,7 @@ def replace_placeholder_object_with_test_taker_sameloc(test, test_taker, placeho
         copiedtest.list_to_test.append(test_taker)
         return copiedtest
 
-    return 
+    return test
 
 def replace_placeholder_object_with_test_taker_objequality(test, test_taker, placeholder_object):
 
@@ -595,6 +603,31 @@ def replace_placeholder_object_with_test_taker_biasrange(test, test_taker, place
         return copiedtest
     
     return test
+
+def replace_placeholder_object_with_test_taker_pass_one_test(test, test_taker, placeholder_object):
+
+    equivalent_test_list = []
+    for subtest in test.list_of_tests_with_placeholder:
+        equivalent_test_list.append(replace_placeholder_object_with_test_taker(test=subtest, test_taker=test_taker, placeholder_object=placeholder_object))
+
+    copiedtest = copy.deepcopy(test)
+    copiedtest.list_of_tests_with_placeholder = equivalent_test_list
+
+    if copiedtest.object_to_test == placeholder_object:
+        copiedtest.object_to_test = test_taker
+    
+    return copiedtest
+
+def replace_placeholder_object_with_test_taker_intersected_object(test, test_taker, placeholder_object):
+    
+    equivalent_test_list = []
+    for subtest in test.list_of_tests_with_placeholder:
+        equivalent_test_list.append(replace_placeholder_object_with_test_taker(test=subtest, test_taker=test_taker, placeholder_object=placeholder_object))
+
+    copiedtest = copy.deepcopy(test)
+    copiedtest.list_of_tests_with_placeholder = equivalent_test_list
+
+    return copiedtest
 
 def replace_multiple_placeholders_with_multiple_change_havers(change, placeholder_tester_pair_list):
     copiedchange = copy.deepcopy(change)
@@ -732,10 +765,11 @@ def translate_generic_condchange(change, populated_story_node):
     for subchange in change.list_of_changes:
         equivalent_changes.extend(translate_generic_change(subchange, populated_story_node))
 
-    return ConditionalChange(name=change.name, list_of_condition_tests=equivalent_tests, list_of_changes=equivalent_changes)
+    return [ConditionalChange(name=change.name, list_of_condition_tests=equivalent_tests, list_of_changes=equivalent_changes)]
 
 def translate_generic_taskchange(change, populated_story_node):
 
+    # print("Begin Translating Generic Taskchange")
     equivalent_givers = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.task_giver_name)
     equivalent_owners = check_keyword_and_return_objectnodelist(storynode=populated_story_node, objnode_to_check=change.task_owner_name)
 
@@ -753,7 +787,7 @@ def translate_generic_taskchange(change, populated_story_node):
                 owner_name_adjusted = owner_name.get_name()
 
             equivalent_changes.append(TaskChange(name=change.name, task_giver_name=giver_name_adjusted, task_owner_name=owner_name_adjusted, task_stack=change.task_stack))
-
+            # print(equivalent_changes[0], equivalent_changes[0].task_stack.stack_name)
     return equivalent_changes
 
 def translate_generic_taskadvance(change, populated_story_node):
@@ -824,8 +858,8 @@ def translate_generic_test(condtest, populated_story_node):
             list_of_equivalent_condtests = translate_in_bias_range_test(test=condtest, node=populated_story_node)
         case TestType.INTERSECTED_OBJECT_EXISTS:
             list_of_equivalent_condtests = translate_intersect_object_test(test=condtest, node=populated_story_node)
-        # case TestType.HAS_DOUBLE_EDGE:
-        #     list_of_equivalent_condtests = translate_generic_has_doubleedge_test(condtest, populated_story_node)
+        case TestType.TAG_VALUE_IN_RANGE:
+             list_of_equivalent_condtests = translate_tag_value_test(condtest, populated_story_node)
         case TestType.OBJECT_PASSES_ONE:
             list_of_equivalent_condtests = translate_one_test_test(test=condtest, node=populated_story_node)
         case TestType.INTERSECTED_OBJECT_EXISTS:
@@ -891,6 +925,18 @@ def translate_in_bias_range_test(test, node):
         list_of_equivalent_tests.append(InBiasRangeTest(object_to_test=item, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept, inverse=test.inverse, score=test.score))
 
     return list_of_equivalent_tests
+
+def translate_tag_value_test(test, node):
+
+    list_of_equivalent_tests = []
+
+    object_list = check_keyword_and_return_objectnodelist(storynode=node, objnode_to_check=test.object_to_test)
+
+    for item in object_list:
+        list_of_equivalent_tests.append(TagValueInRangeTest(object_to_test=item, tag=test.tag, value_max=test.value_max, value_min=test.value_min, inverse=test.inverse, score=test.score))
+
+    return list_of_equivalent_tests
+
 def translate_intersect_object_test(test, node):
 
     equivalent_tests = []
@@ -952,6 +998,27 @@ def copy_story_node_with_extra_conditions(base_node, new_node_name, extra_condit
 
     return new_node
 
+def get_all_values_by_key(list_to_sort, key, reverse=False):
+
+    all_values = set()
+
+    for item in list_to_sort:
+        all_values.add(key(item))
+
+    return sorted(list(all_values), reverse=reverse)
+
+def scrambled_sort(list_to_sort, key, reverse):
+    value_list = get_all_values_by_key(list_to_sort=list_to_sort, key=key, reverse=reverse)
+
+    scramble_sorted_list = []
+    for value in value_list:
+        list_of_items_with_value = [thing for thing in list_to_sort if key(thing) == value]
+
+        random.shuffle(list_of_items_with_value)
+
+        scramble_sorted_list.extend(list_of_items_with_value)
+
+    return scramble_sorted_list
 
 # def translate_generic_has_doubleedge_test(test, node):
     

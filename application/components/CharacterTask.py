@@ -63,16 +63,22 @@ class TaskStack:
         self.stack_giver_name = ts.stack_giver_name
         self.stack_owner_name = ts.stack_owner_name
         self.remove_from_pool = ts.remove_from_pool
-        
+    
+    def stack_is_complete(self):
+        return self.current_task_index == -1
+    
     def get_current_task(self):
 
-        if self.current_task_index == -1:
+        if self.stack_is_complete():
             return None
         
         return self.task_stack[self.current_task_index]
     
     def mark_current_task_as_complete(self, completion_step = 0):
         current_task = self.get_current_task()
+
+        if current_task == None:
+            return False
 
         current_task.task_complete_status = True
         current_task.completion_step = completion_step
@@ -81,6 +87,8 @@ class TaskStack:
         if self.current_task_index >= len(self.task_stack):
             self.current_task_index = -1
             self.remove_from_pool = True
+
+        return True
 
     def make_placeholder_string_list(self):
 

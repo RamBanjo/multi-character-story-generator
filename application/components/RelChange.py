@@ -45,7 +45,7 @@ class TagChange(SomeChange):
         self.add_or_remove = add_or_remove
 
     def __str__(self):
-        return "TagChange: " + self.object_node_name + " " + str(self.add_or_remove) + " (" + self.tag + ": " + self.value + ")"
+        return "TagChange: " + str(self.object_node_name) + " " + str(self.add_or_remove) + " (" + self.tag + ": " + str(self.value) + ")"
 
 class RelativeTagChange(SomeChange):
 
@@ -56,6 +56,9 @@ class RelativeTagChange(SomeChange):
         self.object_node_name = object_node_name
         self.tag = tag
         self.value_delta = value_delta
+        
+    def __str__(self):
+        return "RelativeTagChange: " + str(self.object_node_name) + " " + str(self.tag) + " " + str(self.value_delta)
 
 class RelativeBiasChange(SomeChange):
     
@@ -78,13 +81,16 @@ class ConditionalChange(SomeChange):
 class TaskChange(SomeChange):
     def __init__(self, name, task_giver_name, task_owner_name, task_stack):
 
-        super().__init__(name=name, changetype=TaskChange)
+        super().__init__(name=name, changetype=ChangeType.TASKCHANGE)
 
         self.task_giver_name = task_giver_name
         self.task_owner_name = task_owner_name
         self.task_stack = task_stack
         self.add_or_remove = ChangeAction.ADD
         self.placeholder_dict = dict()
+
+    def __str__(self) -> str:
+        return "TaskChange: " +self.name + " given from " + str(self.task_giver_name) + " to " + str(self.task_owner_name)
         
 class TaskAdvance(SomeChange):
     def __init__(self, name, actor_name, task_stack_name):
@@ -93,6 +99,13 @@ class TaskAdvance(SomeChange):
 
         self.actor_name = actor_name
         self.task_stack_name = task_stack_name
+
+    def __eq__(self, rhs):
+
+        if type(rhs) != TaskAdvance:
+            return False
+        
+        return self.name == rhs.name, self.actor_name == rhs.actor_name, self.task_stack_name == rhs.task_stack_name
 
 class TaskCancel(SomeChange):
     def __init__(self, name, actor_name, task_stack_name):

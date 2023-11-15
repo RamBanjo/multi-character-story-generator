@@ -114,7 +114,7 @@ class ObjectNode:
 
 
     def __str__(self) -> str:
-        return self.get_display_name() + "(Internal Name: " + self.get_name() + ")" 
+        return self.get_display_name() + " (Internal Name: " + self.get_name() + ")" 
 
     def __eq__(self, rhs) -> bool:
 
@@ -168,11 +168,21 @@ class CharacterNode(ObjectNode):
         found_stacks = [x for x in self.list_of_task_stacks if x.stack_name == stack_name]
         # for thing in found_stacks:
         #     print("Found Stack", thing.stack_name)
-
+        
         if len(found_stacks) == 0:
             return None
         
         return found_stacks[0]
+    
+    def get_incomplete_task_stack_names(self):
+        
+        incomplete_names = []
+        
+        for stack in self.list_of_task_stacks:
+            if not stack.stack_is_complete():
+                incomplete_names.append(stack.stack_name)
+
+        return incomplete_names
 
     def advance_stack_by_name(self, stack_name):
         found_stack = self.get_task_stack_by_name(stack_name=stack_name)

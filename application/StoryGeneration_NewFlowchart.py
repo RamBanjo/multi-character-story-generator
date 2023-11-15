@@ -10,27 +10,35 @@ from application.components.RewriteRuleWithWorldState import JoiningJointRule, J
 
 from application.components.StoryGraphTwoWS import StoryGraph
 from application.components.StoryNode import StoryNode
-from application.components.UtilFunctions import permute_actor_list_for_joint, permute_actor_list_for_joint_with_range_and_freesize, permute_actor_list_for_joint_with_variable_length
+from application.components.UtilFunctions import permute_actor_list_for_joint, permute_actor_list_for_joint_with_range_and_freesize, permute_actor_list_for_joint_with_variable_length, scrambled_sort
 from application.components.UtilityEnums import ChangeAction, GenericObjectNode
 
 # DEFAULT_HOLD_EDGE_NAME = "holds"
 # DEFAULT_ADJACENCY_EDGE_NAME = "connects"
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
-def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = []):
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], action_repeat_penalty = -10):
 
     #make a copy of the graph
     if verbose:
         print("Creating a copy of the Storygraph")
     final_story_graph = deepcopy(init_storygraph)
 
+    dict_of_taken_actions = dict()
+
+    for actor in final_story_graph.character_objects:
+        dict_of_taken_actions[actor.get_name()] = list()
+
     while True:
+
+        if verbose:
+            print("===== BEGIN LOOP =====")
 
         final_story_graph.refresh_longest_path_length()
 
         #check the shortest story length
         shortest_path_length = final_story_graph.get_shortest_path_length_from_all()
-
+        print("Shortest Path Length:", shortest_path_length)
         #If the path length is equal to or greater than the required length, we're done
         if shortest_path_length >= required_story_length:
             #return result
@@ -43,7 +51,9 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         if verbose:
             print("Getting the names of characters with shortest path...")    
         shortest_path_character_names_list = final_story_graph.get_characters_with_shortest_path_length()
-
+        if verbose:
+            print(shortest_path_character_names_list)
+            
         #Randomly pick one name from that list. That will be the character we generate stories for in this step.
         
         current_charname = random.choice(shortest_path_character_names_list)
@@ -115,11 +125,14 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         #
         # Format: (Rule, Insert Index, Score)
         if verbose:
-            print("Checking for acceptable actions...")
+            print("Checking for acceptable rules...")
         for rule in acceptable_rules:
             for rule_insert_index in range(0, final_story_graph.get_longest_path_length_by_character(current_character)+1):
+                if verbose:
+                    print("Currently evaluating:", rule.rule_name, "at", rule_insert_index)
                 rule_score = final_story_graph.calculate_score_from_rule_char_and_cont(actor=current_character, insert_index=rule_insert_index, rule = rule, mode=0)
 
+                
                 #We can use the rule score itself to test whether or not a rule is suitable.
                 #In the event of a normal rule, if one node is invalid the entire sequence will return -999, which lets us know the rule isn't valid.
                 #In the event of a joint rule, -999 will only be returned if all the available slots are -999, which means that this rule cannot be applied to this character and thus is invalid.
@@ -129,6 +142,13 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                         print("Found Acceptable Rule", rule.rule_name, "at", rule_insert_index)
 
                     rule_container = StoryGenerationActionContainer(action_name="Apply Rule", action_object=rule, action_descriptor=rule.rule_name, action_score=rule_score, perform_index=rule_insert_index)
+                    rule_application_count = dict_of_taken_actions[current_charname].count(rule_container.scoreless_string())
+                    
+                    if rule_application_count > 0:
+                        if verbose:
+                            print("The rule",rule.rule_name,"was already repeated",str(rule_application_count),"time(s), so we will deduct some score.")
+                        rule_container.action_score += (rule_application_count * action_repeat_penalty)
+
                     acceptable_rules_with_absolute_step_and_score.append(rule_container)
 
         acceptable_rules_with_absolute_step_and_score = sorted(acceptable_rules_with_absolute_step_and_score, key=get_action_score, reverse=True)
@@ -149,9 +169,16 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         list_of_available_tasks = []
         cancel_count = 1
 
-        for task_name in available_task_name_list:
-            for attempt_index in range(0, final_story_graph.longest_path_length):
+        current_character_pathlength = final_story_graph.get_longest_path_length_by_character(current_character)
 
+        if verbose:
+            print("Checking for acceptable tasks...")
+        for task_name in available_task_name_list:
+
+            
+            for attempt_index in range(0, current_character_pathlength+1):
+                if verbose:
+                    print("Evaluating:", task_name, "at", attempt_index)
                 task_completeness = final_story_graph.test_task_completeness(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
                 task_valid = final_story_graph.test_task_stack_advance_validity(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
 
@@ -172,9 +199,12 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                             default_task_score = -999
                     
                     if action_chosen != "Do Nothing":
-
+   
                         task_container = StoryGenerationActionContainer(action_name=action_chosen, action_object=task_name, action_descriptor=task_name, action_score=default_task_score, perform_index=attempt_index)
                         list_of_available_tasks.append(task_container)
+
+                        if verbose:
+                            print("Found acceptable Task-related action:", task_container.scoreless_string())
 
         if verbose:
             print("Acceptable task-related actions found:", len(list_of_available_tasks))
@@ -214,7 +244,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         # TODO (Important): No Valid Actions will essentially never happen because Move Towards Task Location is always valid. :thinking:
         # You know what, I'm fine with this. We can make characters move around if there are no valid actions, with staying and waiting being the "last resort" option in the event that there are no possible actions.
 
-        sorted_list_of_valid_actions = sorted(list_of_valid_actions, key=get_action_score, reverse=True)
+        sorted_list_of_valid_actions = scrambled_sort(list_of_valid_actions, key=get_action_score, reverse=True)
         top_pick_count = top_n
         if len(list_of_valid_actions) < top_n:
             if verbose:
@@ -270,7 +300,11 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 if verbose and extra_attempts_left == 0:
                     print("Out of extra attempts! This character will wait.")                     
                 latest_action = final_story_graph.get_latest_story_node_from_character(current_character)
-                final_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=latest_action.timestep)
+                waiting_step = 0
+                if latest_action is not None:
+                    waiting_step = latest_action.timestep
+                final_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=waiting_step)
+                chosen_action_container = None
                 action_for_character_found = True
             else:
                 # #From the valid options, we pick from the rule we will use randomly.
@@ -321,6 +355,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     if extra_attempts_left > 0:
                         extra_attempts_left -= 1
             else:
+                if chosen_action_container is not None:
+                    dict_of_taken_actions[current_charname].append(chosen_action_container.scoreless_string())
                 #If we did find the rule to apply we should update the story graph so that the locations show up in the story.
 
                 #Temporary Print
@@ -330,13 +366,12 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 #     print("next",part.next_nodes)
                 #     print("-----")
 
-                final_story_graph.fill_in_locations_on_self()
+                # final_story_graph.fill_in_locations_on_self()
 
         #Finally, we fill in the locations on self and update the list of changes.
         final_story_graph.update_list_of_changes()
         final_story_graph.fill_in_locations_on_self()
 
-#TODO (Testing): Test this function to see if it really works because WOW I think it's broken. We have valid rules that didn't get applied!
 def attempt_apply_rule(rule_object, perform_index, target_story_graph, character_object, shortest_path_charname_list):
 
     apply_rule_success = False
@@ -352,20 +387,20 @@ def attempt_apply_rule(rule_object, perform_index, target_story_graph, character
     # Maybe use the banned subgraph locs to ban everything that's not the chosen index?
     if not current_rule.is_joint_rule:
 
-        current_purge_count = 0
+        # current_purge_count = 0
 
-        if current_rule.remove_before_insert:
-            current_purge_count = len(current_rule.story_condition)
+        # if current_rule.remove_before_insert:
+        #     current_purge_count = len(current_rule.story_condition)
 
         #TODO (Extra Features): apply_rewrite_rule already has continuation validity thing going on, so why are we checking it twice here? Read into this.
-        nonjoint_cont_valid = target_story_graph.check_continuation_validity(actor=character_object, abs_step_to_cont_from=current_index, cont_list=current_rule.story_change, target_list=current_rule.target_list, purge_count=current_purge_count)
+        # nonjoint_cont_valid = target_story_graph.check_continuation_validity(actor=character_object, abs_step_to_cont_from=current_index, cont_list=current_rule.story_change, target_list=current_rule.target_list, purge_count=current_purge_count)
 
-        if nonjoint_cont_valid:
+        # if nonjoint_cont_valid:
             #Get the locations where this pattern can be applied, set everything as banned except the location that we want.
             #At no point in apply rewrite rule or check for pattern in storyline does the continuation validity get checked so we need to check for continuation validity.
             #If the application of the rule is successful, then this should return true.
             #Checking for continuation validity already exists within Apply Rewrite Rule, so we don't have to do anything extra here.
-            apply_rule_success = target_story_graph.apply_rewrite_rule(rule=current_rule, character=character_object, abs_step=current_index)
+        apply_rule_success = target_story_graph.apply_rewrite_rule(rule=current_rule, character=character_object, abs_step=current_index)
 
     else:
         applicable_character_names = []
@@ -402,7 +437,8 @@ def attempt_apply_rule(rule_object, perform_index, target_story_graph, character
                 else:
                     nodesplit = [current_rule.joint_node]
 
-                current_state = target_story_graph.make_state_at_step(current_index)
+                current_state = target_story_graph.make_state_at_step(current_index)[0]
+
                 chosen_grouping_with_character_objects = []
 
                 for actor_name in chosen_grouping:
@@ -414,7 +450,9 @@ def attempt_apply_rule(rule_object, perform_index, target_story_graph, character
                 if chosen_grouping_split is None:
                     continue
                 
-                rule_validity = target_story_graph.check_joint_continuity_validity(joint_rule=current_rule, main_character=character_object, grouping_split=chosen_grouping_split, insert_index=current_index)
+                split_copy = deepcopy(chosen_grouping_split)
+                rule_validity = target_story_graph.check_joint_continuity_validity(joint_rule=current_rule, main_character=character_object, grouping_split=split_copy, insert_index=current_index)
+                del(split_copy)
 
                 if rule_validity:
                     valid_character_grouping = chosen_grouping_split
@@ -428,7 +466,6 @@ def attempt_apply_rule(rule_object, perform_index, target_story_graph, character
             
             #Apply the continuation based on whether the rule was a split rule.
             if current_rule.joint_type == JointType.SPLIT:
-
                 target_story_graph.split_continuation(split_list=current_rule.split_list, chargroup_list=valid_character_grouping, abs_step=current_index)
             else:
                 target_story_graph.joint_continuation(abs_step=current_index, joint_node=current_rule.joint_node, actors=valid_character_grouping[0]["actor_group"], target_list=valid_character_grouping[0]["target_group"])
@@ -449,7 +486,8 @@ def attempt_apply_task(stack_name, attempt_index, target_story_graph, current_ch
 # Will return True if changes are made to the story graph and False if not.
 def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character, movement_index, extra_movement_requirements = []):
 
-    current_ws = target_story_graph.make_state_at_step(movement_index)
+    current_ws = target_story_graph.make_state_at_step(movement_index)[0]
+    char_from_ws = current_ws.node_dict.get(current_character.get_name())
     optimal_location_object = current_ws.get_optimal_location_towards_task(current_character)
     current_location_of_character = current_ws.get_actor_current_location(current_character)
 
@@ -466,15 +504,26 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
     not_be_in_current_location_change = RelChange(name="Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.REMOVE, soft_equal=True, value=None)
 
     target_location_adjacent_to_current_location = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_LOCATION, edge_name_test=current_ws.DEFAULT_ADJACENCY_EDGE_NAME, object_to_test=optimal_location_object, soft_equal=True)
-    all_requirements = extra_movement_requirements.append(target_location_adjacent_to_current_location)
+    all_requirements = deepcopy(extra_movement_requirements)
+    all_requirements.append(target_location_adjacent_to_current_location)
     # move_towards_task_location_node = StoryNode("Move Towards Task Location", biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[go_to_new_location_change, not_be_in_current_location_change], required_test_list=[target_location_adjacent_to_current_location])
     move_towards_task_location_node = StoryNode(name="Move Towards "+optimal_location_name, biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[not_be_in_current_location_change, go_to_new_location_change], required_test_list=all_requirements)
 
+    # TODO: why not translate the stuff here to something valid
+
     #We have made our custom move towards task location node. We will check to see if it's a valid move to move to that location.
-    movement_validity = target_story_graph.check_continuation_validity(actor=current_character, abs_step_to_cont_from=movement_index, cont_list=[move_towards_task_location_node])
+    movement_validity = target_story_graph.check_continuation_validity(actor=char_from_ws, abs_step_to_cont_from=movement_index, cont_list=[move_towards_task_location_node])
+    
+    # if char_from_ws.get_name() == "Alien God":
+    #     for item in all_requirements:
+    #         print(item)
+    #     print("Alien God Movement Valid (Should be False):", movement_validity)
+
     if movement_validity:
-        target_story_graph.insert_story_part(part=move_towards_task_location_node, character=current_character, absolute_step=movement_index)
+        target_story_graph.insert_story_part(part=move_towards_task_location_node, character=char_from_ws, absolute_step=movement_index)
         return True
+    
+    return False
     
 # def cycle_attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character):
     
@@ -546,6 +595,9 @@ class StoryGenerationActionContainer:
 
     def __str__(self):
         return self.action_name + " (" + self.action_descriptor + ") for " + str(self.action_score) + " Points at Index " + str(self.perform_index)
-
+    
+    def scoreless_string(self):
+        return self.action_name + " (" + self.action_descriptor + ") at Index " + str(self.perform_index)
+    
 def get_action_score(e: StoryGenerationActionContainer):
     return e.action_score
