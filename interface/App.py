@@ -7,14 +7,18 @@ class App(tk.Tk):
     
     def __init__(self):
         super().__init__()
-        
+        self.root = self
+
         self.resources = {
-            'test': tk.Variable(value=["Alice", "Bob", "Charlie", "Dugson", "Edison", "Florence", "Giraffa", "Hector", "Ivan", "Jello"]),
             'optionNumber': tk.IntVar(value=-1),
             'btnLabels' : ["Objects","Actions","World State","Rules","Tasks","Initial Graph","Generate"],
-            'objects': [StoryObjects.ObjectNode("Sword")],
+            'maxObjects': 10,
+            'objects': [StoryObjects.ObjectNode("Iron Sword", tags={"Type": "Object", "Weapon": "Sword", "Material": "Iron"}, internal_id=1, description="A shoddy iron sword.")],
             'objectDetail': None
         }
+
+        while(len(self.resources['objects']) < self.resources['maxObjects']):
+            self.resources['objects'].append(StoryObjects.ObjectNode("", internal_id=len(self.resources['objects'])+1))
 
         self.title(" Multi-Character Story Generator")
         self.geometry("900x600")
@@ -37,5 +41,8 @@ class App(tk.Tk):
     
     def changeOptionNumber(self, i):
         self.resources['optionNumber'].set(i)
-        self.objectFrame.label.config(text=self.resources['btnLabels'][i])
+        if(i == 8):
+            self.objectFrame.label.config(text="Welcome!")
+        else:
+            self.objectFrame.label.config(text=self.resources['btnLabels'][i])
         self.resources['objectFrames'][i].tkraise()
