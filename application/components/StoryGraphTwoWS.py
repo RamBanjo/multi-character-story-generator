@@ -11,7 +11,7 @@ from application.components.StoryObjects import *
 from copy import deepcopy
 from application.components.UtilFunctions import *
 from application.components.UtilityEnums import GenericObjectNode, TestType
-from application.components.CharacterTask import CharacterTask
+from application.components.CharacterTask import CharacterTask, TaskStack
 
 '''
 Storygraph!
@@ -1247,7 +1247,7 @@ class StoryGraph:
             print(node)
 
     def print_all_node_beautiful_format(self):
-        print("LIST OF NODES")
+        print("LIST OF NODES IN ", self.name)
         for node in self.story_parts:
             print(node)
             print("Node Name:", self.story_parts[node].get_name())
@@ -1258,11 +1258,12 @@ class StoryGraph:
             print("----------")
     
     def print_all_nodes_from_characters_storyline(self, actor):
+        print("ENTIRE STORYLINE OF", actor.get_name(), "IN", self.name)
         for thing in self.make_story_part_list_of_one_character(character_to_extract=actor):
             print(thing)
 
     def print_all_nodes_from_characters_storyline_beautiful_format(self, actor):
-        print("ENTIRE STORYLINE OF", actor.get_name())
+        print("ENTIRE STORYLINE OF", actor.get_name(), "IN", self.name)
         step = 0
         for thing in self.make_story_part_list_of_one_character(character_to_extract=actor):
             print(thing, thing.abs_step)
@@ -1943,7 +1944,22 @@ class StoryGraph:
         #Check if the conditions for failing the task is already fulfilled, if it is, return False.
 
         #Check the validity of the task stack with self.test_task_validity. If it's valid, then add all the story nodes to the absolute step, then apply the task advance object in this world state. Return True.
-        pass
+    
+    # TODO: Test this function
+    def task_object_setup_for_character(self, character_name):
+        list_of_tasks = []
+        latest_ws = self.make_latest_state()
+        char_from_ws = latest_ws.node_dict[character_name]
+
+        for stack_name in char_from_ws.get_incomplete_task_stack_names():
+            task_stack_info = self.find_last_step_of_task_stack_from_actor(task_stack_name=stack_name, actor_name=character_name)
+            new_task_stack = TaskStack(stack_name=stack_name)
+            new_task_stack.char_from_ws.copy_all_attributes(char_from_ws.get_task_stack_by_name(stack_name))
+            new_task_stack.task_stack = new_task_stack.task_stack[task_stack_info["last_task_step"]:]
+
+            list_of_tasks.append(new_task_stack)
+
+        return list_of_tasks
 
 def make_list_of_changes_from_list_of_story_nodes(story_node_list):
     # print("Begin Making List of Changes")
@@ -1994,5 +2010,7 @@ def calculate_score_from_char_and_unpopulated_node_with_both_slots(actor, node, 
     
     else:
         return max(calculate_list) + node.biasweight
+    
+
     
 

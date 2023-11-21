@@ -552,6 +552,56 @@ def perform_wait_action(target_story_graph:StoryGraph, current_character):
     target_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=latest_action.timestep)
     
     return True
+
+def generate_multiple_graphs(initial_graph : StoryGraph, list_of_rules, required_story_length=20, max_storynodes_per_graph=5, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], action_repeat_penalty = -10):
+    
+    #NOTE: Max Storynodes per Graph includes the "Recall Tasks" node.
+
+    list_of_completed_story_graphs = []
+    
+    number_of_graphs_needed = required_story_length // max_storynodes_per_graph
+    length_of_last_graph = required_story_length % max_storynodes_per_graph
+
+    if length_of_last_graph > 0:
+        number_of_graphs_needed+1
+
+    while len(list_of_completed_story_graphs) < number_of_graphs_needed:
+
+        if len(list_of_completed_story_graphs) == 0:
+            loop_init_graph = initial_graph
+        else:
+            graph_name = initial_graph.name + " Continuation # " + str(len(list_of_completed_story_graphs))
+            loop_init_graph = make_base_graph_from_previous_graph(previous_graph=list_of_completed_story_graphs[-1], graph_name=graph_name)
+
+        loop_graph_length = max_storynodes_per_graph
+
+        if len(list_of_completed_story_graphs) == number_of_graphs_needed-1 and length_of_last_graph != 0:
+            loop_graph_length = length_of_last_graph
+
+        list_of_completed_story_graphs.append(generate_story_from_starter_graph(init_storygraph=loop_init_graph, list_of_rules=list_of_rules, required_story_length=loop_graph_length, top_n=top_n, extra_attempts=extra_attempts, score_mode=score_mode, verbose=verbose, extra_movement_requirement_list=extra_movement_requirement_list, action_repeat_penalty=action_repeat_penalty))
+
+    return list_of_completed_story_graphs
+
+def make_base_graph_from_previous_graph(previous_graph: StoryGraph, graph_name):
+
+    init_ws = previous_graph.make_latest_state()
+
+    char_list = init_ws.get_all_actors()
+    loc_list = init_ws.get_all_locations()
+
+    return_graph = StoryGraph(name=graph_name, character_objects=char_list, location_objects=loc_list, starting_ws=init_ws)
+
+    for character in char_list:
+        #TODO (Important): If the character had a task in the last Timestep, remove it, and modify the task so that only the uncompleted items are added in their initial step of the new graph.
+        #Otherwise, have them do a normal wait action.
+
+        #We'll need to write the following functions:
+
+        #Function to translate partially completed tasks into new tasks (Make sure to retain placeholder information)
+        #Creating a new "Recall Tasks" node with no targets. The character just assigns the tasks to themselves but remember where they got the tasks from.
+        pass
+
+    return return_graph
     
     
     
