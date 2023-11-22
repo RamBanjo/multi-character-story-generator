@@ -26,6 +26,10 @@ class CharacterTask:
         self.avoidance_state = avoidance_state
         self.placeholder_info_dict = dict()
 
+
+    def __str__(self) -> str:
+        return self.task_name + " " + "(Consists of " + str(len(self.task_actions)) + " story node(s))"
+
     # Task Stack?
     # Since certain tasks may take place in more than one location, we will include multiple tasks within one task stack with different locations
     # Once a task in the stack is completed, the task moves on to the next.
@@ -96,3 +100,11 @@ class TaskStack:
 
         for task in self.task_stack:
             self.actor_placeholder_string_list.extend(task.actor_placeholder_string_list)
+
+    def __str__(self) -> str:
+
+        task_names = ""
+        for task in self.task_stack:
+            task_names += task.task_name
+            task_names += ", "
+        return self.stack_name + " (Contains " + str(len(self.task_stack)) + " task(s). Tasks include: " + task_names[:-2] + ")"
