@@ -3,6 +3,9 @@ import tkinter.ttk as ttk
 from interface import ObjectFrame,OptionFrame,Menu,ObjectsTab
 from application.components import StoryObjects
 
+#tempload
+from interface import TempObjectLoad as tol
+
 class App(tk.Tk):
     
     def __init__(self):
@@ -13,11 +16,14 @@ class App(tk.Tk):
             'optionNumber': tk.IntVar(value=-1),
             'btnLabels' : ["Entities","Actions","World State","Rules","Tasks","Initial Graph","Generate"],
             'maxObjects': tk.IntVar(value=10),
-            'objects': [StoryObjects.ObjectNode("Iron Sword", tags={"Type": "Object", "Weapon": "Sword", "Material": "Iron"}, internal_id=1, description="A shoddy iron sword.")],
+            #'objects': [StoryObjects.ObjectNode("Iron Sword", tags={"Type": "Object", "Weapon": "Sword", "Material": "Iron"}, internal_id=1, description="A shoddy iron sword.")],
+            'objects': tol.other_objects,
             'maxLocations': tk.IntVar(value=10),
-            'locations': [StoryObjects.LocationNode("Cathedral", tags={"Type": "Location", "Faith": "Feli"}, internal_id=1, description="A mysterious cathedral that resurrects the heroic.")],
+            #'locations': [StoryObjects.LocationNode("Cathedral", tags={"Type": "Location", "Faith": "Feli"}, internal_id=1, description="A mysterious cathedral that resurrects the heroic.")],
+            'locations': tol.all_locations,
             'maxCharacters': tk.IntVar(value=10),
-            'characters': [StoryObjects.CharacterNode("Harold", tags={"Type": "Character", "Class": "Hero", "Weapon": "Sword", "Attribute": "Holy"}, internal_id = 1, description="A man destined to be a hero.")],
+            #'characters': [StoryObjects.CharacterNode("Harold", tags={"Type": "Character", "Class": "Hero", "Weapon": "Sword", "Attribute": "Holy"}, internal_id = 1, description="A man destined to be a hero.")],
+            'characters': tol.all_characters,
             'objectDetail': None
         }
 
@@ -29,7 +35,7 @@ class App(tk.Tk):
             self.resources['characters'].append(StoryObjects.CharacterNode("", internal_id=len(self.resources['characters']) + 1))
 
         self.title(" Multi-Character Story Generator")
-        self.geometry("900x600")
+        self.geometry("1000x600")
 
         self.mainmenu = Menu.Menu(self)
         self.config(menu=self.mainmenu)

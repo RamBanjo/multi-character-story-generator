@@ -45,7 +45,7 @@ class EntityTabButtonPanel(ttk.Frame):
 
 class EntityTab(ttk.Frame):
     def __init__(self,container,entityResource,maxEntityResource, controller):
-        super().__init__(master=container, borderwidth=1, relief="solid")
+        super().__init__(master=container)
         self.root = self.master.root
         self.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
         self.entityResource = entityResource
@@ -144,7 +144,7 @@ class EntityTab(ttk.Frame):
 
 class Descbox(ttk.Frame):
     def __init__(self, container):
-        super().__init__(master=container, borderwidth=1, relief="solid")
+        super().__init__(master=container)
         self.root = self.master.root
         self.grid(column=1, row=0, rowspan=3, padx=5, pady=5, sticky="nsew")
 
@@ -201,6 +201,10 @@ class Tagbox(ttk.Frame):
         # add new tags of current object
         object = self.root.resources['objectDetail']
         if object != None:
+            # TODO: add law/moral bias for character nodes
+            if isinstance(object,StoryObjects.CharacterNode):
+                self.tagTable.insert(parent='', index='end', values=("Law Bias", object.biases["lawbias"]))
+                self.tagTable.insert(parent='', index='end', values=("Moral Bias", object.biases["moralbias"]))
             for key, value in object.tags.items():
                 if key != 'Type':
                     self.tagTable.insert(parent='', index='end', values=(key, value))
@@ -208,7 +212,8 @@ class Tagbox(ttk.Frame):
     
     def onDoubleClick(self, event):
         self.tag = self.tagTable.item(self.tagTable.selection()[0],'values')
-        self.openChangeTagWindow()
+        if(self.tag[0] != "Law Bias" and self.tag[0] != "Moral Bias"):
+            self.openChangeTagWindow()
     
     def openChangeTagWindow(self):
         self.changeTags = tk.Toplevel(self)

@@ -18,13 +18,14 @@ class Menu(tk.Menu):
         self.filemenu.add_command(label="Export As...")
         self.filemenu.add_command(label="Quit", command=container.quit)
 
-        self.projectFilepath = None
+        self.projectFile = None
     
     def reset(self):
         self.root.reset()
         print(self.root.resources['maxObjects'].get())
 
     def save_project_as(self):
-        filename = filedialog.asksaveasfile(initialdir="/",title="Save As...",filetypes=(("JSON files", "*.json")))
-        self.projectFilepath = filename
-        print(filename)
+        file = filedialog.asksaveasfile(title="Save As...", filetypes = [("JSON files","*.json")], defaultextension=[("JSON files","*.json")])
+        self.projectFile = file
+        file.write("balls")
+        print(file.name)
