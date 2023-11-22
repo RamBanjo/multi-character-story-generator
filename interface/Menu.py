@@ -21,15 +21,8 @@ class Menu(tk.Menu):
         self.projectFilepath = None
     
     def reset(self):
-        self.root.resources['maxObjects'] = 10
-        self.root.resources['objects'] = [StoryObjects.ObjectNode("Iron Sword", tags={"Type": "Object", "Weapon": "Sword", "Material": "Iron"}, internal_id=1, description="A shoddy iron sword.")]
-        self.root.resources['objectDetail'] = None
-        while(len(self.root.resources['objects']) < self.root.resources['maxObjects']):
-            self.root.resources['objects'].append(StoryObjects.ObjectNode("", internal_id=len(self.root.resources['objects'])+1))
-        
-        self.root.changeOptionNumber(8)
-        self.root.resources['objectFrames'][0].generate_listbox()
-        self.root.resources['objectFrames'][0].descbox.fetch()
+        self.root.reset()
+        print(self.root.resources['maxObjects'].get())
 
     def save_project_as(self):
         filename = filedialog.asksaveasfile(initialdir="/",title="Save As...",filetypes=(("JSON files", "*.json")))

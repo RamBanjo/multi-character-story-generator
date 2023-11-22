@@ -3,11 +3,54 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from application.components import StoryObjects
 
-class ObjectsTab(ttk.Frame):
-    def __init__(self,container):
+class EntityTabController():
+    def __init__(self, master):
+        # note: this is not a Tk class, so it is not in the tree. It will still inherit some attributes, but it does not get gridded.
+        self.root = master.root
+        self.objectTab = EntityTab(master,self.root.resources['objects'], self.root.resources['maxObjects'], self)
+        self.locationTab = EntityTab(master,self.root.resources['locations'], self.root.resources['maxLocations'], self)
+        self.characterTab = EntityTab(master,self.root.resources['characters'], self.root.resources['maxCharacters'], self)
+
+        self.tabs = [self.objectTab,self.locationTab,self.characterTab]
+        self.currentTab = 0
+    
+    def tkraise(self):
+        self.tabs[self.currentTab].tkraise()
+
+    def reset(self):
+        self.currentTab = 0
+        self.objectTab.reset()
+        self.locationTab.reset()
+        self.characterTab.reset()
+        self.tkraise() 
+
+class EntityTabButtonPanel(ttk.Frame):
+    def __init__(self, container, controller):
+        super().__init__(master=container)
+        self.rowconfigure(0,weight=1)
+        self.columnconfigure([0,1,2],weight=1)
+        self.controller = controller
+
+        self.objectButton = ttk.Button(self, text="Object", command = lambda: self.changeEntityTab(0))
+        self.locationButton = ttk.Button(self, text="Location", command = lambda: self.changeEntityTab(1))
+        self.characterButton = ttk.Button(self, text="Character", command = lambda: self.changeEntityTab(2))
+
+        self.objectButton.grid(column=0,row=0)
+        self.locationButton.grid(column=1,row=0)
+        self.characterButton.grid(column=2,row=0)
+    
+    def changeEntityTab(self, tabNumber):
+        self.controller.currentTab = tabNumber
+        self.controller.tkraise()
+
+class EntityTab(ttk.Frame):
+    def __init__(self,container,entityResource,maxEntityResource, controller):
         super().__init__(master=container, borderwidth=1, relief="solid")
         self.root = self.master.root
         self.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
+        self.entityResource = entityResource
+        self.maxEntityResource = maxEntityResource
+        self.controller = controller
 
         self.rowconfigure(0,weight=1)
         self.rowconfigure(1,weight=30)
@@ -15,7 +58,7 @@ class ObjectsTab(ttk.Frame):
         self.columnconfigure(0,minsize=150,weight=1)
         self.columnconfigure(1,minsize=700,weight=50)
 
-        self.label = ttk.Label(self, text=str("Select an Object."))
+        self.label = EntityTabButtonPanel(self, self.controller)
         self.label.grid(column=0, row=0, padx=0, pady=0, sticky="nsew")
 
         self.changeMaxBtn = ttk.Button(self,text=str("Change Maximum..."), command=self.openChangeMaximumWindow)
@@ -33,7 +76,7 @@ class ObjectsTab(ttk.Frame):
             # get all selected indices
             selected_indices = self.listbox.curselection()[0]
             # get selected items
-            self.root.resources['objectDetail'] = self.root.resources['objects'][selected_indices]
+            self.root.resources['objectDetail'] = self.entityResource[selected_indices]
             self.descbox.fetch()
     
     def clear_selected(self, event):
@@ -41,15 +84,15 @@ class ObjectsTab(ttk.Frame):
             # get all selected indices
             selected_indices = self.listbox.curselection()[0]
             # get selected items (and clear it)
-            self.root.resources['objects'][selected_indices].name = ""
-            self.root.resources['objects'][selected_indices].tags = {'Type': 'Object'}
-            self.root.resources['objects'][selected_indices].description = ""
-            self.root.resources['objectDetail'] = self.root.resources['objects'][selected_indices]
+            self.entityResource[selected_indices].name = ""
+            self.entityResource[selected_indices].tags = {'Type': 'Object'}
+            self.entityResource[selected_indices].description = ""
+            self.root.resources['objectDetail'] = self.entityResource[selected_indices]
             self.descbox.fetch()
     
     def generate_listbox(self):
         self.listvar.clear()
-        objectList = self.root.resources['objects']
+        objectList = self.entityResource
         for i in range(len(objectList)):
             self.listvar.append(str(objectList[i].internal_id)+': '+objectList[i].get_name())
         if(self.listbox != None):
@@ -71,11 +114,11 @@ class ObjectsTab(ttk.Frame):
         self.changeMaxLabel.grid(column=0,row=0,columnspan=3,padx=5,pady=5,sticky="nsew")
         self.changeMaxEntry = ttk.Entry(self.changeMaxLevel)
         self.changeMaxEntry.grid(column=0,row=1,columnspan=3,padx=5,pady=5,sticky="nsew")
-        self.changeMaxEntry.insert(0,str(self.root.resources['maxObjects']))
+        self.changeMaxEntry.insert(0,str(self.maxEntityResource.get()))
 
         self.cancelChangeMax = ttk.Button(self.changeMaxLevel, text="Cancel", command=self.changeMaxLevel.destroy)
         self.cancelChangeMax.grid(column=1,row=2,sticky="nsew")
-        self.okChangeMax = ttk.Button(self.changeMaxLevel, text="Submit", command=self.change_maximum)
+        self.okChangeMax = ttk.Button(self.changeMaxLevel, text="Submit", command=lambda: self.change_maximum())
         self.okChangeMax.grid(column=2,row=2,sticky="nsew")
     
     def change_maximum(self):
@@ -84,14 +127,20 @@ class ObjectsTab(ttk.Frame):
             ttk.Label(self.changeMaxLevel,text="Not a positive number.").grid(column=0,row=2,sticky="nsew")
         else:
             val = int(val)
-            if(val < self.root.resources['maxObjects']):
-                self.root.resources['objects'] = self.root.resources['objects'][0:val]
+            if(val < self.maxEntityResource.get()):
+                self.entityResource = self.entityResource[0:val]
             else:
-                while len(self.root.resources['objects']) < val:
-                    self.root.resources['objects'].append(StoryObjects.ObjectNode(name="", internal_id=self.root.resources['maxObjects']+1))
-                    self.root.resources['maxObjects'] = self.root.resources['maxObjects']+1
+                while len(self.entityResource) < val:
+                    self.entityResource.append(StoryObjects.ObjectNode(name="", internal_id=self.maxEntityResource.get()+1))
+                    self.maxEntityResource.set(self.maxEntityResource.get()+1)
             self.generate_listbox()
             self.changeMaxLevel.destroy()
+
+    def reset(self):
+        self.generate_listbox()
+        print(len(self.entityResource))
+        print(self.maxEntityResource.get())
+        self.descbox.reset()
 
 class Descbox(ttk.Frame):
     def __init__(self, container):
@@ -112,6 +161,11 @@ class Descbox(ttk.Frame):
         self.taglist.fetch()
         self.generalsettings.fetch()
         self.notes.fetch()
+    
+    def reset(self):
+        self.taglist.reset()
+        self.generalsettings.reset()
+        self.notes.reset()
 
 class Tagbox(ttk.Frame):
     def __init__(self, container):
@@ -136,6 +190,8 @@ class Tagbox(ttk.Frame):
         self.tagTable.heading("type",text="Tag",anchor=tk.CENTER)
         self.tagTable.heading("content",text="Content",anchor=tk.CENTER)
 
+        self.tagTable.bind("<Double-1>", self.onDoubleClick)
+        self.tagTable.bind("<Delete>", self.onDelete)
         self.tagTable.grid(column=0,row=1,padx=5,pady=5,sticky="nsew")
     
     def fetch(self):
@@ -146,8 +202,70 @@ class Tagbox(ttk.Frame):
         object = self.root.resources['objectDetail']
         if object != None:
             for key, value in object.tags.items():
-                #if key != 'Type':
+                if key != 'Type':
                     self.tagTable.insert(parent='', index='end', values=(key, value))
+            self.tagTable.insert(parent='',index='end',values=('',''))
+    
+    def onDoubleClick(self, event):
+        self.tag = self.tagTable.item(self.tagTable.selection()[0],'values')
+        self.openChangeTagWindow()
+    
+    def openChangeTagWindow(self):
+        self.changeTags = tk.Toplevel(self)
+        self.changeTags.minsize(400,50)
+        self.changeTags.columnconfigure(0,minsize=200,weight=0)
+        self.changeTags.columnconfigure([1,2],weight=100)
+        self.changeTags.resizable(False,False)
+
+        self.changeTagnameLabel = ttk.Label(self.changeTags, text="Tag")
+        self.changeTagnameLabel.grid(column=0,row=0,padx=5,pady=5,sticky="nsew")
+        self.changeTagnameEntry = ttk.Entry(self.changeTags)
+        self.changeTagnameEntry.grid(column=0,row=1,padx=5,pady=5,sticky="nsew")
+        self.changeTagnameEntry.insert(0,str(self.tag[0]))
+
+        self.changeTagvalueLabel = ttk.Label(self.changeTags, text="Value")
+        self.changeTagvalueLabel.grid(column=1,row=0,padx=5,pady=5,sticky="nsew")
+        self.changeTagvalueEntry = ttk.Entry(self.changeTags)
+        self.changeTagvalueEntry.grid(column=1,row=1,padx=5,pady=5,sticky="nsew")
+        self.changeTagvalueEntry.insert(0,str(self.tag[1]))
+
+        self.cancelChangeMax = ttk.Button(self.changeTags, text="Cancel", command=self.changeTags.destroy)
+        self.cancelChangeMax.grid(column=1,row=2,sticky="nsew")
+        self.okChangeMax = ttk.Button(self.changeTags, text="Submit", command=self.change_tags)
+        self.okChangeMax.grid(column=2,row=2,sticky="nsew")
+    
+    def change_tags(self):
+        newTagName = self.changeTagnameEntry.get()
+        newTagValue = self.changeTagvalueEntry.get()
+        object = self.root.resources['objectDetail']
+        if(newTagName == '' and self.tag[0] == ''): #nothing lost, nothing gained
+            self.changeTags.destroy()
+        elif(newTagName == "Type"):
+            ttk.Label(self.changeTags,text="Cannot change Type attribute.").grid(column=0,row=2,sticky="nsew")
+        elif(self.tag[0] == newTagName): #change only the value
+            object.tags[newTagName] = newTagValue
+            self.fetch()
+            self.changeTags.destroy()
+        else: #remove the old tag, create the new tag
+            if(self.tag[0] != ''): #THERE IS AN OLD TAG
+                del object.tags[self.tag[0]]
+            if(newTagName != ''): #THERE IS A NEW TAG
+                object.tags[newTagName] = newTagValue
+            self.fetch()
+            self.changeTags.destroy()
+
+    def onDelete(self, event):
+        self.tag = self.tagTable.item(self.tagTable.selection()[0],'values')
+        self.delete_tag()
+
+    def delete_tag(self):
+        object = self.root.resources['objectDetail']
+        del object.tags[self.tag[0]]
+        self.fetch()
+    
+    def reset(self):
+        for i in self.tagTable.get_children():
+            self.tagTable.delete(i)
 
 class GeneralSettingsBox(ttk.Frame):
     def __init__(self, container):
@@ -163,16 +281,6 @@ class GeneralSettingsBox(ttk.Frame):
         self.boxLabel.grid(column=0,columnspan=4,row=0,sticky="ws")
         self.nameLabel = tk.Label(self, text="Name")
         self.nameLabel.grid(column=0,row=1,sticky="es")
-        self.typeLabel = tk.Label(self,text = "Type")
-        self.typeLabel.grid(column=0,row=2,padx=5,pady=5,sticky="e")
-
-        self.typeFlag = tk.StringVar(self, "1")
-        self.itemButton = ttk.Radiobutton(self, text="Item",variable=self.typeFlag, value="1", command = lambda : self.update(None))
-        self.itemButton.grid(column=1,row=2,padx=0,pady=5,sticky="nsew")
-        self.locaButton = ttk.Radiobutton(self, text="Location",variable=self.typeFlag, value="2", command = lambda : self.update(None))
-        self.locaButton.grid(column=2,row=2,padx=0,pady=5,sticky="nsew")
-        self.charButton = ttk.Radiobutton(self, text="Character",variable=self.typeFlag, value="3", command = lambda : self.update(None))
-        self.charButton.grid(column=3,row=2,padx=0,pady=5,sticky="nsew")
 
         self.nameVariable = tk.StringVar(self,"")
         self.nameEntry = tk.Entry(self,textvariable=self.nameVariable,width=47)
@@ -183,37 +291,21 @@ class GeneralSettingsBox(ttk.Frame):
         object = self.root.resources['objectDetail']
         if object != None:
             self.nameVariable.set(object.name)
-            if(object.tags["Type"] == "Object"):
-                self.typeFlag.set("1")
-            elif(object.tags["Type"] == "Location"):
-                self.typeFlag.set("2")
-            elif(object.tags["Type"] == "Character"):
-                self.typeFlag.set("3")
         else:
             self.nameVariable.set("")
     
     def update(self, event):
         object = self.root.resources['objectDetail']
-        object.set_name(self.nameVariable.get())
-        if(self.typeFlag.get() == "1"):
-            object.tags["Type"] = "Object"
-        elif(self.typeFlag.get() == "2"):
-            object.tags["Type"] = "Location"
-        elif(self.typeFlag.get() == "3"):
-            object.tags["Type"] = "Character"
+        if object != None:
+            object.set_name(self.nameVariable.get())
         # TODO: convert object to the given StoryObject type
         # i.e. convert from an ObjectNode to a CharacterNode
 
-        newObject = None
-        if(self.typeFlag.get() == "1"):
-            newObject = StoryObjects.ObjectNode(name=object.name, tags=object.tags, internal_id=object.internal_id, description=object.description)
-        elif(self.typeFlag.get() == "2"):
-            newObject = StoryObjects.LocationNode(name=object.name, tags=object.tags, internal_id=object.internal_id, description=object.description)
-        elif(self.typeFlag.get() == "3"):
-            newObject = StoryObjects.CharacterNode(name=object.name, tags=object.tags, internal_id=object.internal_id, description=object.description)
-        self.root.resources['objectDetail'] = newObject
         self.master.master.generate_listbox()
         self.master.fetch()
+    
+    def reset(self):
+        self.nameVariable.set("")
 
 class NoteBox(ttk.Frame):
     def __init__(self, container):
@@ -241,3 +333,6 @@ class NoteBox(ttk.Frame):
     def update(self, event):
         object = self.root.resources['objectDetail']
         object.description = self.noteEntry.get('1.0','end')
+    
+    def reset(self):
+        self.noteEntry.delete('1.0','end')
