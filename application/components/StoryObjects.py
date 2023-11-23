@@ -116,6 +116,14 @@ class ObjectNode:
     def __str__(self) -> str:
         return self.get_display_name() + " (Internal Name: " + self.get_name() + ")" 
 
+    def export_object_as_dict(self) -> dict:
+
+        return_dict = dict()
+
+        return_dict["name"] = self.name
+        return_dict["tags"] = self.tags
+        return return_dict
+    
     def __eq__(self, rhs) -> bool:
 
         if type(self) != type(rhs):
