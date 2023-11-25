@@ -1,14 +1,28 @@
 import sys
 sys.path.insert(0,'')
 
+from application.components.StoryObjects import ObjectNode
 from application.components.UtilityEnums import TestType
 
 class ConditionTest:
-    def __init__(self, name, test_type, inverse=False, score=1):
+    def __init__(self, name, test_type, inverse=False, score=1, internal_id:int = 0):
         self.name = name
         self.inverse = inverse
         self.score = score
         self.test_type = test_type
+        self.internal_id = internal_id
+
+    def export_object_as_dict(self) -> dict:
+
+        return_dict = dict()
+
+        return_dict["name"] = self.name
+        return_dict["inverse"] = self.inverse
+        return_dict["score"] = self.score
+        return_dict["test_type"] = self.test_type
+        return_dict["internal_id"] = self.internal_id
+
+        return return_dict
         
 class HeldItemTagTest(ConditionTest):
     def __init__(self, holder_to_test, tag_to_test, value_to_test, soft_equal = True, inverse = False, score=1):
@@ -22,7 +36,20 @@ class HeldItemTagTest(ConditionTest):
 
     def __str__(self):
         return self.name + " (" + str(self.holder_to_test) + " {" + str(self.tag_to_test) + ":" + str(self.value_to_test) + "}, inverse = " + str(self.inverse) + ")"
+    
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
 
+        holder_name = self.holder_to_test
+        if issubclass(type(holder_name), ObjectNode):
+            holder_name = holder_name.get_name()
+
+        return_dict["holder_name"] = holder_name
+        return_dict["tag_to_test"] = self.tag_to_test
+        return_dict["value_to_test"] = self.value_to_test
+        return_dict["soft_equal"] = self.soft_equal
+
+        return return_dict
 # HOW THIS WORKS
 # (Not allowed to stack with each other)
 # Gets a list of tests with placeholders
@@ -37,6 +64,15 @@ class IntersectObjectExistsTest(ConditionTest):
 
         self.list_of_tests_with_placeholder = list_of_tests_with_placeholder
 
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
+
+        return_dict["list_of_condition_test_ids"] = []
+        for test in self.list_of_tests_with_placeholder:
+            return_dict["list_of_condition_test_ids"].append(test.internal_id)
+
+        return return_dict
+    
 # HOW THIS WORKS
 # (Not allowed to stack with each other)
 # Gets a list of tests with placeholders, as well as an object to replace those placeholders
@@ -50,6 +86,19 @@ class ObjectPassesAtLeastOneTestTest(ConditionTest):
 
         self.object_to_test = object_to_test
         self.list_of_tests_with_placeholder = list_of_tests_with_placeholder
+
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
+
+        object_name = self.object_to_test
+        if issubclass(type(object_name), ObjectNode):
+            object_name = object_name.get_name()
+
+        return_dict["list_of_condition_test_ids"] = []
+        for test in self.list_of_tests_with_placeholder:
+            return_dict["list_of_condition_test_ids"].append(test.internal_id)
+
+        return return_dict
 
 class SameLocationTest(ConditionTest):
     def __init__(self, list_to_test, inverse = False, score=1):
@@ -67,6 +116,18 @@ class SameLocationTest(ConditionTest):
             printlist += ", "
 
         return self.name + " (" + printlist[:-2] + ", inverse = " + str(self.inverse) + ")"
+    
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
+        return_dict["object_name_list"] = []
+
+        for item in self.list_to_test:
+            object_name = item
+            if issubclass(type(object_name), ObjectNode):
+                object_name = item.get_name()
+            return_dict["object_name_list"].append(object_name)
+
+        return return_dict
 
 #TODO (Extra Features): Hey, DoubleEdge test is very similar to normal Edge. What if we remove DoubleEdgeTest and add two-sided to DoubleEdgeTest instead.
 class HasEdgeTest(ConditionTest):
@@ -83,7 +144,27 @@ class HasEdgeTest(ConditionTest):
 
     def __str__(self):
         return self.name + " (" + str(self.object_from_test) + " " + str(self.edge_name_test) + " " + str(self.object_to_test) + ", " + "inverse = " + str(self.inverse) + ")"
+    
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
 
+        from_name = self.object_from_test
+        if issubclass(type(from_name), ObjectNode):
+            from_name = from_name.get_name()
+
+        to_name = self.object_to_test
+        if issubclass(type(to_name), ObjectNode):
+            to_name = to_name.get_name()
+
+        return_dict["from_name"] = from_name
+        return_dict["to_name"] = to_name
+        return_dict["edge_name_test"] = self.edge_name_test
+        return_dict["value_test"] = self.value_test
+        return_dict["soft_equal"] = self.soft_equal
+        return_dict["two_way"] = self.two_way 
+
+        return return_dict
+    
 class HasTagTest(ConditionTest):
     def __init__(self, object_to_test, tag, value, soft_equal = False, inverse=False, score=1):
         super().__init__(name="Has Tag Test", test_type = TestType.HAS_TAG, inverse=inverse, score=score)
@@ -95,7 +176,21 @@ class HasTagTest(ConditionTest):
 
     def __str__(self):
         return self.name + " (" + str(self.object_to_test) + " " + str(self.tag) + " " + str(self.value) + ", " + "inverse = " + str(self.inverse) + ")"
+    
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
 
+        to_name = self.object_to_test
+        if issubclass(type(to_name), ObjectNode):
+            to_name = to_name.get_name()
+
+        return_dict["to_name"] = to_name
+        return_dict["tag"] = self.tag
+        return_dict["value"] = self.value
+        return_dict["soft_equal"] = self.soft_equal
+
+        return return_dict
+    
 class TagValueInRangeTest(ConditionTest):
     def __init__(self, object_to_test, tag, value_min, value_max, inverse=False, score=1):
 
@@ -109,7 +204,20 @@ class TagValueInRangeTest(ConditionTest):
     def __str__(self) -> str:
         return self.name + " (" + str(self.object_to_test) + " " + str(self.tag) + " " + str(self.value_min) + " to " + str(self.value_max) + ", " + "inverse = " + str(self.inverse) + ")"
 
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
 
+        to_name = self.object_to_test
+        if issubclass(type(to_name), ObjectNode):
+            to_name = to_name.get_name()
+
+        return_dict["to_name"] = to_name
+        return_dict["tag"] = self.tag
+        return_dict["value_min"] = self.value_min
+        return_dict["value_max"] = self.value_max
+
+        return return_dict
+    
 class InBiasRangeTest(ConditionTest):
     def __init__(self, object_to_test, bias_axis, min_accept=-100, max_accept=100, inverse=False, score=1):
         super().__init__(name="In Bias Range Test", test_type = TestType.IN_BIAS_RANGE, inverse=inverse, score=score)
@@ -118,6 +226,18 @@ class InBiasRangeTest(ConditionTest):
         self.bias_axis = bias_axis
         self.min_accept = min_accept
         self.max_accept = max_accept
+
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
+
+        to_name = self.object_to_test
+        if issubclass(type(to_name), ObjectNode):
+            to_name = to_name.get_name()
+
+        return_dict["to_name"] = to_name
+        return_dict["bias_axis"] = self.bias_axis
+        return_dict["min_accept"] = self.min_accept
+        return_dict["max_accept"] = self.max_accept
 
 class ObjectEqualityTest(ConditionTest):
     def __init__(self, object_list, inverse=False, score=1):
@@ -134,6 +254,19 @@ class ObjectEqualityTest(ConditionTest):
             printlist += ", "
 
         return self.name + " (" + printlist[:-2] + ", inverse = " + str(self.inverse) + ")"
+    
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
+        return_dict["object_name_list"] = []
+
+        for item in self.object_list:
+            object_name = item
+            if issubclass(type(object_name), ObjectNode):
+                object_name = item.get_name()
+            return_dict["object_name_list"].append(object_name)
+
+        return return_dict
+
 
 
 # class HasDoubleEdgeTest(ConditionTest):

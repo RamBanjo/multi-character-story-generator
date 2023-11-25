@@ -589,7 +589,7 @@ def make_base_graph_from_previous_graph(previous_graph: StoryGraph, graph_name):
     char_list = init_ws.get_all_actors()
     loc_list = init_ws.get_all_locations()
 
-    return_graph = StoryGraph(name=graph_name, character_objects=char_list, location_objects=loc_list, starting_ws=init_ws)
+    return_graph = StoryGraph(name=graph_name, character_objects=char_list, starting_ws=init_ws)
 
     for character in char_list:
         #TODO (Important): If the character had a task in the last Timestep, remove it, and modify the task so that only the uncompleted items are added in their initial step of the new graph.

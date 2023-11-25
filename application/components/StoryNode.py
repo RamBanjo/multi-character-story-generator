@@ -8,7 +8,7 @@ from application.components.UtilFunctions import get_actor_object_from_list_with
 
 #, required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_test_list = [], suggested_test_list = [], required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [],
 class StoryNode:
-    def __init__(self, name, biasweight=0, tags={"Type":"Placeholder"}, charcount=1, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_test_list = [], suggested_test_list = [], **kwargs):
+    def __init__(self, name, biasweight=0, tags={"Type":"Placeholder"}, charcount=1, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_test_list = [], suggested_test_list = [], internal_id:int = 0, **kwargs):
         
         #the name of this action.
         self.name = name
@@ -59,6 +59,8 @@ class StoryNode:
         #Required Tags List, Unwanted Tags List, and Bias Range are taken from RewriteRule.
         self.required_test_list = required_test_list
         self.suggested_test_list = suggested_test_list
+
+        self.internal_id = internal_id
 
     def get_name(self):
         return self.name
@@ -337,6 +339,32 @@ class StoryNode:
         
         #If this node allows more than 1 character or allows more than 1 target which is an actor then it is a joint node.
         return self.charcount > 1 or self.target_count > 0
+    
+    def export_object_as_dict(self) -> dict:
+        return_dict = dict()
+
+        return_dict["name"] = self.name
+        return_dict["biasweight"] = self.biasweight
+        return_dict["tags"] = self.tags
+        return_dict["charcount"] = self.charcount
+        return_dict["target_count"] = self.target_count
+        return_dict["timestep"] = self.timestep
+
+        return_dict["required_test_ids"] = []
+        for test in self.required_test_list:
+            return_dict["required_test_ids"].append(test.internal_id)
+
+        return_dict["suggested_test_ids"] = []
+        for test in self.suggested_test_list:
+            return_dict["suggested_test_ids"].append(test.internal_id)
+
+        return_dict["change_ids"] = []
+        for change in self.effects_on_next_ws:
+            return_dict["change_ids"].append(change.internal_id)
+
+        return_dict["internal_id"] = self.internal_id
+
+        return return_dict
     
 def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:dict, list_of_actor_objects=[]):
     #Things that must be replaced:

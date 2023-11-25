@@ -43,10 +43,10 @@ def add_relationship(obj, tar, edge):
 #from target to target: all targets will change their relationship towards each of the other targets
 #from target to actor: all targets will change their relationship towards each of the actors
 
-class RelationshipChange:
-    def __init__(self, edge, add_or_remove, fromtype, totype):
-        self.edge = edge
-        self.add_or_remove = add_or_remove
+# class RelationshipChange:
+#     def __init__(self, edge, add_or_remove, fromtype, totype):
+#         self.edge = edge
+#         self.add_or_remove = add_or_remove
 
 #Function: Take Action
 #Inputs: Actor, StoryNode, Target, Relationship
@@ -60,38 +60,38 @@ class RelationshipChange:
 #OH NO I FORGOT THAT AN ACTION MAY HAVE MULTIPLE OBJECTS OR OBJ AND TARGET
 #Sob.
 
-def take_action(obj, tar, relchalst, storynode, prevnode = None):
+# def take_action(obj, tar, relchalst, storynode, prevnode = None):
     
-    storynode.actor.add(obj)
-    storynode.target.add(tar)
+#     storynode.actor.add(obj)
+#     storynode.target.add(tar)
     
-    if prevnode is not None:
-        storynode.previous_node[obj.unique_id] = prevnode
-        prevnode.next_node[obj.unique_id] = storynode
+#     if prevnode is not None:
+#         storynode.previous_node[obj.unique_id] = prevnode
+#         prevnode.next_node[obj.unique_id] = storynode
     
-    #Here's the problem child
-    #yanno what, here's what i'll do
-    #Every time the location needs to be changed, the two relationship changes are:
-    #Character is no longer in Old Location
-    #Character is in New Location
-    #Because each thing can be in one location at a time
-    #this makes sense!!!
-    for relcha in relchalst:
-        if(relcha.add_or_remove == "add"):
+#     #Here's the problem child
+#     #yanno what, here's what i'll do
+#     #Every time the location needs to be changed, the two relationship changes are:
+#     #Character is no longer in Old Location
+#     #Character is in New Location
+#     #Because each thing can be in one location at a time
+#     #this makes sense!!!
+#     for relcha in relchalst:
+#         if(relcha.add_or_remove == "add"):
             
-            obj.outgoing_edge.add(relcha.edge)
-            tar.incoming_edge.add(relcha.edge)
+#             obj.outgoing_edge.add(relcha.edge)
+#             tar.incoming_edge.add(relcha.edge)
             
-            relcha.edge.from_node = obj
-            relcha.edge.to_node = tar
+#             relcha.edge.from_node = obj
+#             relcha.edge.to_node = tar
             
-        if(relcha.add_or_remove == "remove"):
+#         if(relcha.add_or_remove == "remove"):
             
-            obj.outgoing_edge.remove(relcha.edge)
-            tar.incoming_edge.remove(relcha.edge)
+#             obj.outgoing_edge.remove(relcha.edge)
+#             tar.incoming_edge.remove(relcha.edge)
             
-            relcha.edge.from_node = None
-            relcha.edge.to_node = None
+#             relcha.edge.from_node = None
+#             relcha.edge.to_node = None
             
             
 def print_all_incoming(list_of_nodes):

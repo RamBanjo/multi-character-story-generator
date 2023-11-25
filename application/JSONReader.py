@@ -402,8 +402,7 @@ def make_world_state_from_extracted_list_of_objects(name, object_list):
 def make_initial_graph_from_world_state(name, world_state):
 
     character_object_list = [storychar for storychar in world_state.objectnodes if type(storychar) is CharacterNode]
-    location_object_list = [storyloc for storyloc in world_state.objectnodes if type(storyloc) is LocationNode]
 
-    kwargs = {"name":name, "character_objects":character_object_list, "location_objects":location_object_list, "starting_ws":world_state}
+    kwargs = {"name":name, "character_objects":character_object_list, "starting_ws":world_state}
 
     return StoryGraph(**kwargs)

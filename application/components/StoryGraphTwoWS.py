@@ -51,10 +51,9 @@ Only two world states will be kept: The starting world state and the worldstate 
 DEFAULT_INVALID_SCORE = -999
 
 class StoryGraph:
-    def __init__(self, name, character_objects, location_objects, starting_ws):
+    def __init__(self, name, character_objects, starting_ws):
         self.name = name
         self.character_objects = character_objects
-        self.location_objects = location_objects
         self.story_parts = dict()
         self.longest_path_length = 0
         self.starting_ws = starting_ws
@@ -68,6 +67,19 @@ class StoryGraph:
         # Whenever a task with a preset dict here is being added, use that preset dict as input
         self.placeholder_dicts_of_tasks = dict()
 
+    def export_object_as_dict(self) -> dict:
+
+        export_dict = dict()
+
+        export_dict["name"] = self.name
+        export_dict["character_object_name_list"] = []
+
+        for thing in self.character_objects:
+            export_dict["character_object_name_list"].append(thing.get_name())
+
+        #Not exporting Starting WS, there should be only one World State attached to the file when exporting (You already know which one)
+        return export_dict
+    
     def add_to_story_part_dict(self, character_name, abs_step, story_part):
         story_part.abs_step = abs_step
         self.story_parts[(character_name, abs_step)] = story_part

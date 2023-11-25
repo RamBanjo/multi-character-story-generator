@@ -120,8 +120,12 @@ class ObjectNode:
 
         return_dict = dict()
 
-        return_dict["name"] = self.name
+        return_dict["name"] = self.get_name()
+        return_dict["display_name"] = self.display_name
+        return_dict["description"] = self.description
         return_dict["tags"] = self.tags
+        return_dict["internal_id"] = self.internal_id
+
         return return_dict
     
     def __eq__(self, rhs) -> bool:
@@ -206,6 +210,14 @@ class CharacterNode(ObjectNode):
             return False
         
         return True
+    
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
+
+        return_dict["start_timestep"] = self.start_timestep
+        return_dict["biases"] = self.biases
+
+        return return_dict
 
 
 class LocationNode(ObjectNode):

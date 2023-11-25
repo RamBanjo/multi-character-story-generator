@@ -45,11 +45,11 @@ world_state = WorldState(name="World of Gearngs Story", objectnodes=all_objects)
 
 #Now, we need to make connections
 
-world_state.doubleconnect(nodeA=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, nodeB=tatain)
-world_state.doubleconnect(nodeA=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, nodeB=death_paradise)
-world_state.doubleconnect(nodeA=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, nodeB=earth)
-world_state.doubleconnect(nodeA=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, nodeB=new_world_greenland)
-world_state.doubleconnect(nodeA=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, nodeB=alien_god_planet)
+world_state.doubleconnect(from_node=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, to_node=tatain)
+world_state.doubleconnect(from_node=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, to_node=death_paradise)
+world_state.doubleconnect(from_node=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, to_node=earth)
+world_state.doubleconnect(from_node=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, to_node=new_world_greenland)
+world_state.doubleconnect(from_node=outer_space, edge_name=world_state.DEFAULT_ADJACENCY_EDGE_NAME, to_node=alien_god_planet)
 
 # world_state.connect(from_node=new_world_greenland, edge_name="holds", to_node=columbo)
 world_state.connect(from_node=new_world_greenland, edge_name="holds", to_node=iris)
@@ -576,7 +576,7 @@ create_apollo_and_give_task = ContinuousJointRule(rule_name="Create Apollo then 
 rule_list.extend([start_kill_actor, start_create_apollo, start_data_backup_resurrection, start_command_army, create_apollo_and_give_task, start_avenge_human])
 
 #TODO: Set up the initial Story Graph. (Please work I am BEGGING)
-story_graph = StoryGraph(name="Gearng Story Graph", character_objects=all_characters, location_objects=all_locations, starting_ws=world_state)
+story_graph = StoryGraph(name="Gearng Story Graph", character_objects=all_characters, starting_ws=world_state)
 
 # Starting Story Graph:
 # Non Main Characters will wait
@@ -680,7 +680,7 @@ generated_graph.print_all_nodes_from_characters_storyline(apollo)
 # world_state_2.connect(from_node=alien_god, edge_name="commands", to_node=iris)
 # world_state_2.connect(from_node=iris, edge_name="obeys", to_node=alien_god)
 
-# story_graph_2 = StoryGraph(name="Test Graph", character_objects=[amil, iris, columbo, alien_god], location_objects=[earth], starting_ws=world_state_2)
+# story_graph_2 = StoryGraph(name="Test Graph", character_objects=[amil, iris, columbo, alien_god], starting_ws=world_state_2)
 
 # iris.tags["Alive"] = False
 

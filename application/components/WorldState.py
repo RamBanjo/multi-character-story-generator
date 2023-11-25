@@ -33,6 +33,23 @@ class WorldState:
     Node Attributes
     '''
 
+    def export_object_as_dict(self) -> dict:
+
+        export_dict = dict()
+        export_dict["name"] = self.name
+        export_dict["object_node_dicts"] = []
+
+        for story_object in self.objectnodes:
+            export_dict["object_node_dicts"].append(story_object.export_object_as_dict())
+
+        export_dict["edges"] = []
+
+        for my_edge in self.edges:
+            export_dict["edges"].append(my_edge.export_object_as_json())
+
+        #Not exporting Node Dict itself, you can build it later with the object nodes here
+        return export_dict
+
     def set_node_name(self, node: ObjectNode, new_name):
         del self.node_dict[node.get_name]
         self.node_dict[new_name] = node
@@ -136,10 +153,10 @@ class WorldState:
 
         self.edges.append(new_edge)
 
-    def doubleconnect(self, nodeA: ObjectNode, edge_name, nodeB: ObjectNode, value = None):
+    def doubleconnect(self, from_node: ObjectNode, edge_name, to_node: ObjectNode, value = None):
 
-        self.connect(from_node = nodeA, edge_name = edge_name, to_node = nodeB, value = value)
-        self.connect(from_node = nodeB, edge_name = edge_name, to_node = nodeA, value = value)
+        self.connect(from_node = from_node, edge_name = edge_name, to_node = to_node, value = value)
+        self.connect(from_node = to_node, edge_name = edge_name, to_node = from_node, value = value)
 
     def disconnect(self, from_node, edge_name, to_node, value = None, soft_equal = False):
 

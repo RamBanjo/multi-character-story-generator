@@ -63,3 +63,5 @@ print(frame_rival_stack)
 for task in frame_rival_stack.task_stack:
     print(task)
 # To test this we also probably need a way to represent task stacks quicky in text form.
+
+print(GenericObjectNode(0))
