@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0,'')
 
 class ObjectNode:
-    def __init__(self, name:str, tags:dict={"Type": "Object"}, internal_id:int=0, description:str="", **kwargs):
+    def __init__(self, name:str, tags:dict={"Type": "Object"}, internal_id:int=0, display_name:str=None, description:str="", **kwargs):
         
         #What this object will be referred to as. Assumed to be unique.
         self.name = name
@@ -22,6 +22,14 @@ class ObjectNode:
         #The string description of this object. Not used in generation, only for note-taking.
         self.description = description
 
+        #The display name of the object AKA the name that the player put on the object to refer to it.
+        #Can duplicate.
+        if display_name != None:
+            self.display_name = display_name
+        else:
+            self.display_name = name
+
+
     def set_tag(self, attribute:str, new_value:str):
         self.tags[attribute] = new_value
 
@@ -30,6 +38,9 @@ class ObjectNode:
 
     def get_name(self):
         return self.name
+    
+    def get_display_name(self):
+        return self.display_name
     
     def set_name(self, new_name:str):
         self.name = new_name
@@ -103,8 +114,20 @@ class ObjectNode:
 
 
     def __str__(self) -> str:
-        return self.get_name()
+        return self.get_display_name() + " (Internal Name: " + self.get_name() + ")" 
 
+    def export_object_as_dict(self) -> dict:
+
+        return_dict = dict()
+
+        return_dict["name"] = self.get_name()
+        return_dict["display_name"] = self.display_name
+        return_dict["description"] = self.description
+        return_dict["tags"] = self.tags
+        return_dict["internal_id"] = self.internal_id
+
+        return return_dict
+    
     def __eq__(self, rhs) -> bool:
 
         if type(self) != type(rhs):
@@ -157,11 +180,21 @@ class CharacterNode(ObjectNode):
         found_stacks = [x for x in self.list_of_task_stacks if x.stack_name == stack_name]
         # for thing in found_stacks:
         #     print("Found Stack", thing.stack_name)
-
+        
         if len(found_stacks) == 0:
             return None
         
         return found_stacks[0]
+    
+    def get_incomplete_task_stack_names(self):
+        
+        incomplete_names = []
+        
+        for stack in self.list_of_task_stacks:
+            if not stack.stack_is_complete():
+                incomplete_names.append(stack.stack_name)
+
+        return incomplete_names
 
     def advance_stack_by_name(self, stack_name):
         found_stack = self.get_task_stack_by_name(stack_name=stack_name)
@@ -177,6 +210,14 @@ class CharacterNode(ObjectNode):
             return False
         
         return True
+    
+    def export_object_as_dict(self) -> dict:
+        return_dict = super().export_object_as_dict()
+
+        return_dict["start_timestep"] = self.start_timestep
+        return_dict["biases"] = self.biases
+
+        return return_dict
 
 
 class LocationNode(ObjectNode):

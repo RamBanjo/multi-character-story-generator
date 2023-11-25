@@ -115,6 +115,9 @@ class JoiningJointRule(JointRule):
     #     else:
     #         return -999
 
+    def is_patternless_join(self):
+        return self.base_actions is None or len(self.base_actions) == 0
+
     def get_character_count(self):
         return actor_count_sum(self.joint_node.charcount, self.joint_node.target_count)
 

@@ -34,6 +34,7 @@ class TestType(Enum):
     TAG_VALUE_IN_RANGE = 5
     INTERSECTED_OBJECT_EXISTS = 6
     OBJECT_PASSES_ONE = 7
+    OBJECT_EQUALITY = 8
 
 class JointType(Enum):
     JOIN = 0
