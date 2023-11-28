@@ -54,7 +54,7 @@ class App(tk.Tk):
         self.optionFrame = OptionFrame.OptionFrame(self)
         self.optionFrame.pack(side='top',fill='x',padx=5,pady=2)
     
-    def changeOptionNumber(self, i):
+    def changeOptionNumber(self, i) -> None:
         self.resources['optionNumber'].set(i)
         if(i == 8):
             self.objectFrame.label.config(text="Welcome!")
@@ -62,7 +62,7 @@ class App(tk.Tk):
             self.objectFrame.label.config(text=self.resources['btnLabels'][i])
         self.subframes[i].tkraise()
     
-    def reset(self):
+    def reset(self) -> None:
         self.resources['maxObjects'].set(10)
         self.resources['objects'].clear()
         self.resources['objects'].append(StoryObjects.ObjectNode("Iron Sword", tags={"Type": "Object", "Weapon": "Sword", "Material": "Iron"}, internal_id=1, description="A shoddy iron sword."))
@@ -81,7 +81,7 @@ class App(tk.Tk):
         self.subframes[0].reset()
         self.root.changeOptionNumber(8)
     
-    def destroy(self):
+    def destroy(self) -> None:
         if(self.mainmenu.projectFile != None):
             self.mainmenu.projectFile.close()
         super().destroy()
