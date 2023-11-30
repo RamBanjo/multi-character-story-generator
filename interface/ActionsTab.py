@@ -1,66 +1,43 @@
 import tkinter as tk
 
 import tkinter.ttk as ttk
-from application.components import StoryObjects
-from interface import UtilDefaults,UtilFunctions
+from application.components import StoryObjects,StoryNode
 
-class EntityTabController():
-    def __init__(self, master):
-        # note: this is not a Tk class, so it is not in the tree. It will still inherit some attributes, but it does not get gridded.
-        self.root = master.root
-        self.objectTab = EntityTab(master,self.root.resources['objects'], self.root.resources['maxObjects'], self)
-        self.locationTab = EntityTab(master,self.root.resources['locations'], self.root.resources['maxLocations'], self)
-        self.characterTab = EntityTab(master,self.root.resources['characters'], self.root.resources['maxCharacters'], self)
+'''
+As a reminder to self:
+The Actions Tab is a location to store various StoryNodes with the ability to edit, create, and destroy them at will.
+Each StoryNode has the following components, which must have their respective interfaces.
+- General Settings
+    Name, str: The name of the StoryNode. Edited in this tab.
+    Bias Weight, int: No fucking idea what this does. Apparently goes up to atleast 200. Wut.
+    Tags, dict: Just steal the taglist. Probably used to determine what actions can be used in a WS.
+    Actor: 
+     - charcount, int: The number of CharacterNodes who's doing the action.
+     - #actor: The set of CharacterNodes actually doing the action. (No Interface)
+    Target:
+     - target_count, int: The number of CharacterNodes who is NOT DOING THE ACTION but is affected by it (and is thus involved)
+     - #target: The set of CharacterNodes affected by the action. (No Interface)
+    #Location = None: Where this StoryNode happens. (No Interface)
+    #timestep: When this StoryNode happens in timestep notation. (No Interface)
+    effects_on_next_ws, list(RelChange): What happens to the World after this StoryNode happens.
+    #abs_step = 0: Joint Rules, apparently. I haven't looked into it yet. (No Interface)
+    Required Test List, list(ConditionTest): The conditions required to perform this StoryNode.
+    Suggested Test List, list(ConditionTest): The conditions recommended to prioritize this StoryNode.
+'''
 
-        self.tabs = [self.objectTab,self.locationTab,self.characterTab]
-        self.currentTab = 0
-    
-    def tkraise(self):
-        self.tabs[self.currentTab].tkraise()
-
-    def reset(self):
-        self.currentTab = 0
-        self.objectTab.reset()
-        self.locationTab.reset()
-        self.characterTab.reset()
-        self.tkraise() 
-
-class EntityTabButtonPanel(ttk.Frame):
-    def __init__(self, container, controller):
-        super().__init__(master=container)
-        self.rowconfigure(0,weight=1)
-        self.columnconfigure([0,1,2],weight=1)
-        self.controller = controller
-
-        self.objectButton = ttk.Button(self, text="Object", command = lambda: self.changeEntityTab(0))
-        self.locationButton = ttk.Button(self, text="Location", command = lambda: self.changeEntityTab(1))
-        self.characterButton = ttk.Button(self, text="Character", command = lambda: self.changeEntityTab(2))
-
-        self.objectButton.grid(column=0,row=0)
-        self.locationButton.grid(column=1,row=0)
-        self.characterButton.grid(column=2,row=0)
-    
-    def changeEntityTab(self, tabNumber):
-        self.controller.currentTab = tabNumber
-        self.controller.tkraise()
-
-class EntityTab(ttk.Frame):
-    def __init__(self,container,entityResource,maxEntityResource, controller):
+class ActionsTab(ttk.Frame):
+    def __init__(self,container):
         super().__init__(master=container)
         self.root = self.master.root
         self.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
-        self.entityResource = entityResource
-        self.maxEntityResource = maxEntityResource
-        self.controller = controller
+        self.entityResource = self.root.resources['actions']
+        self.maxEntityResource = self.root.resources['maxActions']
 
         self.rowconfigure(0,weight=1)
         self.rowconfigure(1,weight=30)
         self.rowconfigure(2,weight=1)
         self.columnconfigure(0,minsize=150,weight=1)
         self.columnconfigure(1,minsize=700,weight=50)
-
-        self.label = EntityTabButtonPanel(self, self.controller)
-        self.label.grid(column=0, row=0, padx=0, pady=0, sticky="nsew")
 
         self.changeMaxBtn = ttk.Button(self,text=str("Change Maximum..."), command=self.openChangeMaximumWindow)
         self.changeMaxBtn.grid(column=0,row=2,padx=0,pady=0,sticky="nsew")
@@ -77,17 +54,6 @@ class EntityTab(ttk.Frame):
             # get all selected indices
             selected_indices = self.listbox.curselection()[0]
             # get selected items
-            self.root.objectDetail = self.entityResource[selected_indices]
-            self.descbox.fetch()
-    
-    def clear_selected(self, event):
-        if(len(self.listbox.curselection()) > 0):
-            # get all selected indices
-            selected_indices = self.listbox.curselection()[0]
-            # get selected items (and clear it)
-            self.entityResource[selected_indices].name = ""
-            self.entityResource[selected_indices].tags = {'Type': 'Object'}
-            self.entityResource[selected_indices].description = ""
             self.root.objectDetail = self.entityResource[selected_indices]
             self.descbox.fetch()
     
@@ -130,15 +96,14 @@ class EntityTab(ttk.Frame):
             val = int(val)
             if(val == 0 or val >= 1000000):
                 return
+            elif(val < self.maxEntityResource.get()):
+                self.entityResource = self.entityResource[0:val]
             else:
-                self.maxEntityResource.set(val)
-                UtilFunctions.pad_or_truncate(self.entityResource,self.maxEntityResource.get(),UtilDefaults.DEFAULT_OF_OBJECT(self.entityResource[0]))
+                while len(self.entityResource) < val:
+                    self.entityResource.append(StoryNode.StoryNode(name="", internal_id=self.maxEntityResource.get()+1))
+                    self.maxEntityResource.set(self.maxEntityResource.get()+1)
             self.generate_listbox()
             self.changeMaxLevel.destroy()
-
-    def reset(self):
-        self.generate_listbox()
-        self.descbox.reset()
 
 class Descbox(ttk.Frame):
     def __init__(self, container):
@@ -152,18 +117,55 @@ class Descbox(ttk.Frame):
         self.columnconfigure(1,minsize=300,weight=1)
 
         self.generalsettings = GeneralSettingsBox(self)
-        self.notes = NoteBox(self)
         self.taglist = Tagbox(self)
-    
+
     def fetch(self):
         self.taglist.fetch()
         self.generalsettings.fetch()
-        self.notes.fetch()
     
     def reset(self):
         self.taglist.reset()
         self.generalsettings.reset()
-        self.notes.reset()
+
+class GeneralSettingsBox(ttk.Frame):
+    def __init__(self, container):
+        super().__init__(master=container, borderwidth=1, relief="solid")
+        self.root = self.master.root
+        self.grid(column=0,row=0,padx=5, pady=5,sticky="news")
+
+        self.columnconfigure([0,1,2,3],weight=1)
+        self.rowconfigure([0,1],minsize=5,weight=1)
+        self.rowconfigure(2,weight=30)
+
+        self.boxLabel = tk.Label(self, text="General Settings", font='Helvetica 9 bold')
+        self.boxLabel.grid(column=0,columnspan=4,row=0,sticky="ws")
+        self.nameLabel = tk.Label(self, text="Name")
+        self.nameLabel.grid(column=0,row=1,sticky="es")
+
+        self.nameVariable = tk.StringVar(self,"")
+        self.nameEntry = tk.Entry(self,textvariable=self.nameVariable,width=47)
+        self.nameEntry.grid(column=1,columnspan=3,row=1,sticky="ws")
+        self.nameEntry.bind('<KeyRelease>', self.update)
+    
+    def fetch(self):
+        object = self.root.objectDetail
+        if object != None:
+            self.nameVariable.set(object.name)
+        else:
+            self.nameVariable.set("")
+    
+    def update(self, event):
+        object = self.root.objectDetail
+        if object != None:
+            object.set_name(self.nameVariable.get())
+        # TODO: convert object to the given StoryObject type
+        # i.e. convert from an ObjectNode to a CharacterNode
+
+        self.master.master.generate_listbox()
+        self.master.fetch()
+    
+    def reset(self):
+        self.nameVariable.set("")
 
 class Tagbox(ttk.Frame):
     def __init__(self, container):
@@ -198,7 +200,6 @@ class Tagbox(ttk.Frame):
             self.tagTable.delete(i)
         # add new tags of current object
         object = self.root.objectDetail
-        print(object.tags)
         if object != None:
             # TODO: add law/moral bias for character nodes
             if isinstance(object,StoryObjects.CharacterNode):
@@ -239,7 +240,6 @@ class Tagbox(ttk.Frame):
         self.okChangeMax.grid(column=2,row=2,sticky="nsew")
     
     def change_tags(self):
-        print("Change Tags called")
         newTagName = self.changeTagnameEntry.get()
         newTagValue = self.changeTagvalueEntry.get()
         object = self.root.objectDetail
@@ -272,71 +272,3 @@ class Tagbox(ttk.Frame):
     def reset(self):
         for i in self.tagTable.get_children():
             self.tagTable.delete(i)
-
-class GeneralSettingsBox(ttk.Frame):
-    def __init__(self, container):
-        super().__init__(master=container, borderwidth=1, relief="solid")
-        self.root = self.master.root
-        self.grid(column=0,row=0,padx=5, pady=5,sticky="news")
-
-        self.columnconfigure([0,1,2,3],weight=1)
-        self.rowconfigure([0,1],minsize=5,weight=1)
-        self.rowconfigure(2,weight=30)
-
-        self.boxLabel = tk.Label(self, text="General Settings", font='Helvetica 9 bold')
-        self.boxLabel.grid(column=0,columnspan=4,row=0,sticky="ws")
-        self.nameLabel = tk.Label(self, text="Name")
-        self.nameLabel.grid(column=0,row=1,sticky="es")
-
-        self.nameVariable = tk.StringVar(self,"")
-        self.nameEntry = tk.Entry(self,textvariable=self.nameVariable,width=47)
-        self.nameEntry.grid(column=1,columnspan=3,row=1,sticky="ws")
-        self.nameEntry.bind('<KeyRelease>', self.update)
-    
-    def fetch(self):
-        object = self.root.objectDetail
-        if object != None:
-            self.nameVariable.set(object.name)
-        else:
-            self.nameVariable.set("")
-    
-    def update(self, event):
-        object = self.root.objectDetail
-        if object != None:
-            object.set_name(self.nameVariable.get())
-
-        self.master.master.generate_listbox()
-        self.master.fetch()
-    
-    def reset(self):
-        self.nameVariable.set("")
-
-class NoteBox(ttk.Frame):
-    def __init__(self, container):
-        super().__init__(master=container, borderwidth=1, relief="solid")
-        self.root = self.master.root
-        self.grid(column=0,row=1,padx=5, pady=5,sticky="news")
-
-        self.columnconfigure(0,weight=1)
-        self.rowconfigure(0,weight=1)
-        self.rowconfigure(1,weight=100)
-
-        self.noteLabel = tk.Label(self, text="Notes", font='Helvetica 9 bold', anchor='w')
-        self.noteLabel.grid(column=0,row=0,padx=5,pady=5,sticky="sw")
-
-        self.noteVariable = tk.StringVar(self,"")
-        self.noteEntry = tk.Text(self, font='Helvetica 9')
-        self.noteEntry.grid(column=0,row=1,padx=5,pady=5,sticky='nwse')
-        self.noteEntry.bind('<KeyRelease>', self.update)
-    
-    def fetch(self):
-        self.noteEntry.delete('1.0','end')
-        object = self.root.objectDetail
-        if object != None:
-            self.noteEntry.insert('end',object.description)
-    
-    def update(self, event):
-        self.root.objectDetail.description = self.noteEntry.get('1.0','end')
-    
-    def reset(self):
-        self.noteEntry.delete('1.0','end')

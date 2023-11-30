@@ -6,8 +6,8 @@ class OptionFrame(ttk.Frame):
         super().__init__(master=container, borderwidth=1, relief="solid",height=66)
         self.root = self.master.root
         self.btn = []
-        for i in range(len(self.root.resources['btnLabels'])):
-            self.btn.append(OptionButton(self, name=self.root.resources['btnLabels'][i],btnIdx=i))
+        for i in range(len(self.root.btnLabels)):
+            self.btn.append(OptionButton(self, name=self.root.btnLabels[i],btnIdx=i))
             self.btn[i].grid(column=i,row=0,padx=1,pady=1,sticky="news")
             self.columnconfigure(i,weight=1)
 
