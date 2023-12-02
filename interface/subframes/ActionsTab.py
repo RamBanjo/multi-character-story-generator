@@ -1,8 +1,10 @@
 import tkinter as tk
 
 import tkinter.ttk as ttk
+from interface import UtilDefaults,UtilFunctions
 from application.components import StoryObjects,StoryNode
 
+# Note: abandoned for World State instead.
 '''
 As a reminder to self:
 The Actions Tab is a location to store various StoryNodes with the ability to edit, create, and destroy them at will.
@@ -96,12 +98,9 @@ class ActionsTab(ttk.Frame):
             val = int(val)
             if(val == 0 or val >= 1000000):
                 return
-            elif(val < self.maxEntityResource.get()):
-                self.entityResource = self.entityResource[0:val]
             else:
-                while len(self.entityResource) < val:
-                    self.entityResource.append(StoryNode.StoryNode(name="", internal_id=self.maxEntityResource.get()+1))
-                    self.maxEntityResource.set(self.maxEntityResource.get()+1)
+                UtilFunctions.pad_or_truncate(self.entityResource,val,UtilDefaults.DEFAULT_STORYNODE)
+                self.maxEntityResource.set(val)
             self.generate_listbox()
             self.changeMaxLevel.destroy()
 

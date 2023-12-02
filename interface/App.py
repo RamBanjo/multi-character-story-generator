@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from interface import ObjectFrame,OptionFrame,Menu,ObjectsTab,ActionsTab,UtilDefaults,UtilFunctions
+from interface import ObjectFrame,OptionFrame,Menu,UtilDefaults,UtilFunctions
+from interface.subframes import ActionsTab,ObjectsTab
 import interface.SaveResourceVariable as save
 from application.components import StoryObjects,StoryNode
 
