@@ -1,9 +1,9 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from interface import ObjectFrame,OptionFrame,Menu,UtilDefaults,UtilFunctions
-from interface.subframes import ActionsTab,ObjectsTab
+from interface.subframes import ActionsTab,ObjectsTab,WorldStateTab
 import interface.SaveResourceVariable as save
-from application.components import StoryObjects,StoryNode
+from application.components import StoryObjects,StoryNode, WorldState
 
 #tempload
 from interface import TempObjectLoad as tol
@@ -14,7 +14,7 @@ class App(tk.Tk):
         super().__init__()
         self.root = self
 
-        self.btnLabels = ["Entities","Actions","World State","Rules","Tasks","Initial Graph","Generate"]
+        self.btnLabels = ["Entities","World State","Rules","Actions","Tasks","Initial Graph","Generate"]
         self.optionNumber = save.Variable(value=-1)
         self.objectDetail = None
 
@@ -29,7 +29,9 @@ class App(tk.Tk):
             #'characters': [StoryObjects.CharacterNode("Harold", tags={"Type": "Character", "Class": "Hero", "Weapon": "Sword", "Attribute": "Holy"}, internal_id = 1, description="A man destined to be a hero.")],
             'characters': tol.all_characters,
             'maxActions': save.Variable(value=10),
-            'actions': [StoryNode.StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1, internal_id=1)]
+            'actions': [StoryNode.StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1, internal_id=1)],
+
+            'worldState': save.Variable(value=WorldState.WorldState(name="WORLD_STATE_01"))
         }
 
         UtilFunctions.pad_or_truncate(self.resources['objects'], self.resources['maxObjects'].get(), UtilDefaults.DEFAULT_OBJECT_NODE)
@@ -48,9 +50,13 @@ class App(tk.Tk):
         }
         self.objectFrame = self.subframes[9]
         self.subframes[0] = ObjectsTab.EntityTabController(self.objectFrame)
-        self.subframes[1] = ActionsTab.ActionsTab(self.objectFrame)
-        for i in range(2,7):
-            self.subframes[i] = ObjectFrame.NumberedFrame(self.objectFrame,i)
+        self.subframes[1] = WorldStateTab.WorldStateTab(self.objectFrame)
+        self.subframes[2] = ObjectFrame.NumberedFrame(self.objectFrame,2)
+        self.subframes[3] = ActionsTab.ActionsTab(self.objectFrame)
+        self.subframes[4] = ObjectFrame.NumberedFrame(self.objectFrame,4)
+        self.subframes[5] = ObjectFrame.NumberedFrame(self.objectFrame,5)
+        self.subframes[6] = ObjectFrame.NumberedFrame(self.objectFrame,6)
+        self.subframes[7] = ObjectFrame.NumberedFrame(self.objectFrame,7)
         self.subframes[8] = ObjectFrame.PlaceholdingFrame(self.objectFrame)
         self.subframes[8].grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
 
@@ -84,6 +90,8 @@ class App(tk.Tk):
         UtilFunctions.pad_or_truncate(self.resources['locations'], self.resources['maxLocations'].get(), UtilDefaults.DEFAULT_LOCATION_NODE)
         UtilFunctions.pad_or_truncate(self.resources['characters'], self.resources['maxCharacters'].get(), UtilDefaults.DEFAULT_CHARACTER_NODE)
         UtilFunctions.pad_or_truncate(self.resources['actions'], self.resources['maxActions'].get(), UtilDefaults.DEFAULT_STORYNODE)
+
+        self.resources['worldState'].set(UtilDefaults.DEFAULT_WORLDSTATE)
         
         self.subframes[0].reset()
         self.root.changeOptionNumber(8)
