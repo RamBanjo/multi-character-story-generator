@@ -1972,6 +1972,70 @@ class StoryGraph:
             list_of_tasks.append(new_task_stack)
 
         return list_of_tasks
+    
+    #To measure Cost and Preference (Cost by finding "Important" actions, and )
+    def count_story_nodes_with_tag_in_characters_story_line(self, character, desired_tag_list = [], soft_equal=False, intersect_instead_of_union=False):
+
+        list_of_nodes = self.make_story_part_list_of_one_character(character_to_extract=character)
+
+        node_with_tag_count = 0
+        for node in list_of_nodes:
+
+            node_qualifies = False
+
+            tag_list = node.tags.keys()
+
+            all_tags_found = True
+            one_tag_found = False
+
+            for check_pair in desired_tag_list:
+                story_node_tag = check_pair[0]
+                story_node_value = check_pair[1]
+                
+                all_tags_found = all_tags_found and story_node_tag in tag_list
+                one_tag_found = one_tag_found or story_node_tag in tag_list
+
+                if not soft_equal:
+                    all_tags_found = all_tags_found and node.tags[story_node_tag] == story_node_value
+                    one_tag_found = all_tags_found or node.tags[story_node_tag] == story_node_value
+            
+            if intersect_instead_of_union:
+                node_qualifies = all_tags_found
+            else:
+                node_qualifies = one_tag_found
+
+            if node_qualifies:
+                node_with_tag_count += 1
+
+        return node_with_tag_count
+
+    #To measure Uniqueness
+    def count_unique_story_nodes_in_characters_story_line(self, character):
+        
+        seen_nodes = []
+
+        list_of_nodes = self.make_story_part_list_of_one_character(character_to_extract=character)
+
+        for node in list_of_nodes:
+
+            if node not in seen_nodes:
+                seen_nodes.append(node)
+        
+        return len(seen_nodes)
+
+    # To measure Jointability
+    def count_jointable_nodes_in_characters_story_line(self, character):
+
+        joint_nodes = []
+
+        list_of_nodes = self.make_story_part_list_of_one_character(character_to_extract=character)
+
+        for node in list_of_nodes:
+
+            if node.check_if_joint_node():
+                joint_nodes.append(node)
+        
+        return len(joint_nodes)
 
 def make_list_of_changes_from_list_of_story_nodes(story_node_list):
     # print("Begin Making List of Changes")

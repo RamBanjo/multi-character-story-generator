@@ -5,7 +5,7 @@ import random
 import sys
 sys.path.insert(0,'')
 
-from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, ObjectEqualityTest, SameLocationTest, IntersectObjectExistsTest, ObjectPassesAtLeastOneTestTest, TagValueInRangeTest
+from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, ObjectEqualityTest, SameLocationTest, SomethingPassesAllGivenTestsTest, ObjectPassesAtLeastOneTestTest, TagValueInRangeTest
 from application.components.Edge import Edge
 from application.components.RelChange import ConditionalChange, RelChange, RelativeBiasChange, RelativeTagChange, TagChange, TaskAdvance, TaskCancel, TaskChange
 from application.components.StoryObjects import ObjectNode
@@ -529,7 +529,7 @@ def replace_placeholder_object_with_test_taker(test, test_taker, placeholder_obj
                 return replace_placeholder_object_with_test_taker_objequality(test, test_taker, placeholder_object)
             case TestType.OBJECT_PASSES_ONE:
                 return replace_placeholder_object_with_test_taker_pass_one_test(test, test_taker, placeholder_object)
-            case TestType.INTERSECTED_OBJECT_EXISTS:
+            case TestType.SOMETHING_PASSES_ALL:
                 return replace_placeholder_object_with_test_taker_intersected_object(test, test_taker, placeholder_object)
             case _:
                 return None
@@ -856,13 +856,13 @@ def translate_generic_test(condtest, populated_story_node):
             list_of_equivalent_condtests = translate_has_tag_test(test=condtest, node=populated_story_node)
         case TestType.IN_BIAS_RANGE:
             list_of_equivalent_condtests = translate_in_bias_range_test(test=condtest, node=populated_story_node)
-        case TestType.INTERSECTED_OBJECT_EXISTS:
+        case TestType.SOMETHING_PASSES_ALL:
             list_of_equivalent_condtests = translate_intersect_object_test(test=condtest, node=populated_story_node)
         case TestType.TAG_VALUE_IN_RANGE:
              list_of_equivalent_condtests = translate_tag_value_test(condtest, populated_story_node)
         case TestType.OBJECT_PASSES_ONE:
             list_of_equivalent_condtests = translate_one_test_test(test=condtest, node=populated_story_node)
-        case TestType.INTERSECTED_OBJECT_EXISTS:
+        case TestType.SOMETHING_PASSES_ALL:
             list_of_equivalent_condtests = translate_intersect_object_test(test=condtest, node=populated_story_node)
         case TestType.OBJECT_EQUALITY:
             list_of_equivalent_condtests = translate_object_equality_test(test=condtest, node=populated_story_node)
@@ -943,7 +943,7 @@ def translate_intersect_object_test(test, node):
     for test in test.list_of_tests_with_placeholder:
         equivalent_tests.extend(translate_generic_test(condtest=test, populated_story_node=node))
 
-    return [IntersectObjectExistsTest(list_of_tests_with_placeholder=equivalent_tests, inverse=test.inverse, score=test.score)]
+    return [SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=equivalent_tests, inverse=test.inverse, score=test.score)]
 
 def translate_one_test_test(test, node):
 

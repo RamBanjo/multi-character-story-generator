@@ -619,7 +619,7 @@ class WorldState:
                 test_result = self.bias_range_check(object_to_test=test.object_to_test, bias_axis=test.bias_axis, min_accept=test.min_accept, max_accept=test.max_accept)
             case TestType.TAG_VALUE_IN_RANGE:
                 test_result = self.tag_value_in_range_test(object_to_test=test.object_to_test, tag=test.tag, value_min = test.value_min, value_max = test.value_max)
-            case TestType.INTERSECTED_OBJECT_EXISTS:
+            case TestType.SOMETHING_PASSES_ALL:
                 test_result = self.check_at_least_one_object_pass_all_tests(test_list_with_placeholder=test.list_of_tests_with_placeholder)
             case TestType.OBJECT_PASSES_ONE:
                 test_result = self.check_if_this_object_passes_at_least_one_test(test_list_with_placeholder=test.list_of_tests_with_placeholder, object_to_test=test.object_to_test)

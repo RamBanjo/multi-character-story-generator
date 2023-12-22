@@ -14,6 +14,7 @@ from application.components.RewriteRuleWithWorldState import ContinuousJointRule
 from application.components.UtilFunctions import copy_story_node_with_extra_conditions
 from application.components.StoryGraphTwoWS import StoryGraph, calculate_score_from_char_and_unpopulated_node_with_both_slots
 from application.StoryGeneration_NewFlowchart import *
+from datetime import datetime
 
 columbo = CharacterNode(name="Columbo", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Job":"Explorer","Species":"Human", "Goal":"Explore New World","Alive":True, "PlotArmor":True, "Stranded":True}, internal_id=0)
 iris = CharacterNode(name="Iris", biases={"lawbias":0, "moralbias":0}, tags={"Type":"Character","Job":"Destroyer","Species":"Robot", "Goal":"Eradicate Living Beings", "Version":"Old", "Alive":True}, internal_id=1)
@@ -169,7 +170,7 @@ actor_with_target_or_actor_is_god = ObjectPassesAtLeastOneTestTest(list_of_tests
 # something_is_dead = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Alive", value=False)
 # actor_commands_something = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="commands", object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, soft_equal=True)
 
-# actor_commands_something_dead = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_is_dead, actor_commands_something])
+# actor_commands_something_dead = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[something_is_dead, actor_commands_something])
 
 target_count_zeros = TagChange(name="Target Count Zeros", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Count", value=0, add_or_remove=ChangeAction.ADD)
 
@@ -254,7 +255,7 @@ explore_world = StoryNode(name="Explore World", required_test_list=[actor_is_ali
 something_is_a_mob = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Type", value="Mob")
 actor_commands_something = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="commands", object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, soft_equal=True)
 somethings_count_is_greater_than_0 = TagValueInRangeTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Count", value_min=1, value_max=999)
-actor_commands_a_mob_with_greater_count = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_is_a_mob, actor_commands_something, somethings_count_is_greater_than_0])
+actor_commands_a_mob_with_greater_count = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[something_is_a_mob, actor_commands_something, somethings_count_is_greater_than_0])
 
 something_gets_kill_reason_towards_target_orders = RelChange(name="Gain Invasion Kill Reason", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="KillReason", node_b=GenericObjectNode.GENERIC_TARGET, soft_equal="FollowingOrders", add_or_remove=ChangeAction.ADD)
 if_commanded_by_actor_then_kill_target_reason = ConditionalChange(name="If Commanded then Kill Reason", list_of_condition_tests=[something_is_a_mob, actor_commands_something], list_of_changes=[something_gets_kill_reason_towards_target_orders])
@@ -269,7 +270,7 @@ somethings_faction_is_earth = HasTagTest(object_to_test=GenericObjectNode.CONDIT
 actor_shares_location_with_something = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER])
 actor_not_have_earth_army_data = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="HasEarthArmyData", value=True, inverse=True)
 
-actor_shares_location_with_mob_from_earth = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_is_a_mob, somethings_faction_is_earth, actor_shares_location_with_something])
+actor_shares_location_with_mob_from_earth = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[something_is_a_mob, somethings_faction_is_earth, actor_shares_location_with_something])
 
 actor_gains_earth_army_data = TagChange(name="Gain Earth Army Data", tag="HasEarthArmyData", value=True, object_node_name=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.ADD)
 
@@ -281,12 +282,12 @@ record_earth_army_data = StoryNode(name="Record Earth Army Data", required_test_
 
 something_has_data_of_earths_army = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="HasEarthArmyData", value=True)
 
-actor_commands_someone_with_earth_army_data = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_has_data_of_earths_army, actor_commands_something])
+actor_commands_someone_with_earth_army_data = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[something_has_data_of_earths_army, actor_commands_something])
 
 actor_commands_something = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="commands", object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, soft_equal=True)
 something_is_alive = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Alive", value=True)
 
-actor_does_not_command_anyone_alive = IntersectObjectExistsTest(list_of_tests_with_placeholder=[actor_commands_something, something_is_alive], inverse=True)
+actor_does_not_command_anyone_alive = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[actor_commands_something, something_is_alive], inverse=True)
 
 something_is_old_version = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Version", value="Old")
 something_version_is_deprecated = TagChange(name="Deprecate", object_node_name=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Version", value="Deprecated", add_or_remove=ChangeAction.ADD)
@@ -630,6 +631,7 @@ story_graph.insert_story_part(part=DEFAULT_WAIT_NODE, character=apollo, location
 
 extra_movement = [actor_is_not_stranded, actor_is_alive]
 
+start_gen_time = datetime.now()
 generated_graph = generate_story_from_starter_graph(init_storygraph=story_graph, list_of_rules=rule_list, required_story_length=5, extra_movement_requirement_list=extra_movement, verbose=True, extra_attempts=-1)
 
 print("Abridged Story Nodes")
@@ -643,6 +645,10 @@ print("==ALIEN GOD==")
 generated_graph.print_all_nodes_from_characters_storyline(alien_god)
 print("==APOLLO==")
 generated_graph.print_all_nodes_from_characters_storyline(apollo)
+finish_gen_time = datetime.now()
+
+print("xxx")
+print("Generation Time:", str(finish_gen_time-start_gen_time))
 
 # stacks = ["Attack Tatain Stack", "Get Attacked by Bots Stack", "Notice Invader Stack"]
 # for item in stacks:
