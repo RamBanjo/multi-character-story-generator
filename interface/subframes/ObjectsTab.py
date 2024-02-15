@@ -25,10 +25,18 @@ class EntityTab(ttk.Frame):
         self.label = EntityTabButtonPanel(self, self.controller)
         self.label.grid(column=0, row=0, padx=0, pady=0, sticky="nsew")
 
+        self.listboxVar = self.generateListboxStringVar()
+
+        self.listbox = tk.Listbox(self, listvariable=self.listboxVar)
+        self.listbox.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
+
         self.changeMaxBtn = ttk.Button(self,text=str("Change Maximum..."), command=self.openChangeMaximumWindow)
         self.changeMaxBtn.grid(column=0,row=2,padx=0,pady=0,sticky="nsew")
 
         self.descbox = Descbox(container=self)
+    
+    def generateListboxStringVar(self):
+        return tk.StringVar(value=("Test1", "Test2"))
     
     def items_selected(self, event):
         if(len(self.listbox.curselection()) > 0):

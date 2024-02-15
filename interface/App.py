@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from interface import ObjectFrame,OptionFrame,Menu,UtilDefaults,UtilFunctions,Mock
+from interface.Resources import Resources
 from interface.subframes import ActionsTab,WorldStateTab,ObjectsTab,EntityTabController
 from application.components import StoryObjects,StoryNode, WorldState
 
@@ -35,6 +36,8 @@ class App(tk.Tk):
 
         self.optionFrame = OptionFrame.OptionFrame(self)
         self.optionFrame.pack(side='top',fill='x',padx=5,pady=2)
+
+        self.resources = Resources()
     
     def changeOptionNumber(self, i) -> None:
         
