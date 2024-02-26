@@ -57,10 +57,10 @@ class HeldItemTagTest(ConditionTest):
 # A list of objects passing the test will be given
 # Intersect all lists, and if the list at the end has at least one object then this test will pass
 # If successful, this might even replace HeldItemTagTest as a more generic thing.
-class IntersectObjectExistsTest(ConditionTest):
+class SomethingPassesAllGivenTestsTest(ConditionTest):
     def __init__(self, list_of_tests_with_placeholder, inverse=False, score=1):
 
-        super().__init__(name="Intersect Object Exists Test", test_type=TestType.INTERSECTED_OBJECT_EXISTS, inverse=inverse, score=score)
+        super().__init__(name="Intersect Object Exists Test", test_type=TestType.SOMETHING_PASSES_ALL, inverse=inverse, score=score)
 
         self.list_of_tests_with_placeholder = list_of_tests_with_placeholder
 

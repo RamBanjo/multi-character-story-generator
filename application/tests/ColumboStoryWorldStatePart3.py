@@ -171,7 +171,7 @@ actor_with_target_or_actor_is_god = ObjectPassesAtLeastOneTestTest(list_of_tests
 # something_is_dead = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Alive", value=False)
 # actor_commands_something = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="commands", object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, soft_equal=True)
 
-# actor_commands_something_dead = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_is_dead, actor_commands_something])
+# actor_commands_something_dead = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[something_is_dead, actor_commands_something])
 
 target_count_zeros = TagChange(name="Target Count Zeros", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Count", value=0, add_or_remove=ChangeAction.ADD)
 
@@ -258,7 +258,7 @@ actor_commands_something = HasEdgeTest(object_from_test=GenericObjectNode.GENERI
 somethings_count_is_greater_than_0 = TagValueInRangeTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Count", value_min=1, value_max=999)
 something_has_no_kill_reason_towards_target = HasEdgeTest(object_from_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name_test="KillReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, inverse=True)
 
-actor_commands_a_mob_with_greater_count = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_is_a_mob, actor_commands_something, somethings_count_is_greater_than_0, something_has_no_kill_reason_towards_target])
+actor_commands_a_mob_with_greater_count = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[something_is_a_mob, actor_commands_something, somethings_count_is_greater_than_0, something_has_no_kill_reason_towards_target])
 
 something_gets_kill_reason_towards_target_orders = RelChange(name="Gain Invasion Kill Reason", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="KillReason", node_b=GenericObjectNode.GENERIC_TARGET, soft_equal="FollowingOrders", add_or_remove=ChangeAction.ADD)
 if_commanded_by_actor_then_kill_target_reason = ConditionalChange(name="If Commanded then Kill Reason", list_of_condition_tests=[something_is_a_mob, actor_commands_something], list_of_changes=[something_gets_kill_reason_towards_target_orders])
@@ -273,7 +273,7 @@ somethings_faction_is_earth = HasTagTest(object_to_test=GenericObjectNode.CONDIT
 actor_shares_location_with_something = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER])
 actor_not_have_earth_army_data = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="HasEarthArmyData", value=True, inverse=True)
 
-actor_shares_location_with_mob_from_earth = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_is_a_mob, somethings_faction_is_earth, actor_shares_location_with_something])
+actor_shares_location_with_mob_from_earth = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[something_is_a_mob, somethings_faction_is_earth, actor_shares_location_with_something])
 
 actor_gains_earth_army_data = TagChange(name="Gain Earth Army Data", tag="HasEarthArmyData", value=True, object_node_name=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.ADD)
 
@@ -285,12 +285,12 @@ record_earth_army_data = StoryNode(name="Record Earth Army Data", required_test_
 
 something_has_data_of_earths_army = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="HasEarthArmyData", value=True)
 
-actor_commands_someone_with_earth_army_data = IntersectObjectExistsTest(list_of_tests_with_placeholder=[something_has_data_of_earths_army, actor_commands_something])
+actor_commands_someone_with_earth_army_data = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[something_has_data_of_earths_army, actor_commands_something])
 
 actor_commands_something = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="commands", object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, soft_equal=True)
 something_is_alive = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Alive", value=True)
 
-actor_does_not_command_anyone_alive = IntersectObjectExistsTest(list_of_tests_with_placeholder=[actor_commands_something, something_is_alive], inverse=True)
+actor_does_not_command_anyone_alive = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[actor_commands_something, something_is_alive], inverse=True)
 
 something_is_old_version = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Version", value="Old")
 something_version_is_deprecated = TagChange(name="Deprecate", object_node_name=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="Version", value="Deprecated", add_or_remove=ChangeAction.ADD)

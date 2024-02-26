@@ -1,4 +1,6 @@
 import sys
+
+from StoryMetrics import MetricMode, MetricType, StoryMetric
 sys.path.insert(0,'')
 
 import random
@@ -1972,6 +1974,121 @@ class StoryGraph:
             list_of_tasks.append(new_task_stack)
 
         return list_of_tasks
+    
+    #To measure Cost and Preference (Cost by finding "Important" actions, Encounter by finding nodes with an "Encounter", Preference by countings things that aren't marked with "Filler" i.e. moving and waiting)
+    def count_story_nodes_with_tag_in_characters_story_line(self, character, desired_tag_list = [], soft_equal=False, intersect_instead_of_union=False):
+
+        list_of_nodes = self.make_story_part_list_of_one_character(character_to_extract=character)
+
+        node_with_tag_count = 0
+        for node in list_of_nodes:
+
+            node_qualifies = False
+
+            tag_list = node.tags.keys()
+
+            all_tags_found = True
+            one_tag_found = False
+
+            for check_pair in desired_tag_list:
+                story_node_tag = check_pair[0]
+                story_node_value = check_pair[1]
+                
+                all_tags_found = all_tags_found and story_node_tag in tag_list
+                one_tag_found = one_tag_found or story_node_tag in tag_list
+
+                if not soft_equal:
+                    all_tags_found = all_tags_found and node.tags[story_node_tag] == story_node_value
+                    one_tag_found = all_tags_found or node.tags[story_node_tag] == story_node_value
+            
+            if intersect_instead_of_union:
+                node_qualifies = all_tags_found
+            else:
+                node_qualifies = one_tag_found
+
+            if node_qualifies:
+                node_with_tag_count += 1
+
+        return node_with_tag_count
+
+    #To measure Uniqueness
+    def count_unique_story_nodes_in_characters_story_line(self, character):
+        
+        seen_nodes = []
+
+        list_of_nodes = self.make_story_part_list_of_one_character(character_to_extract=character)
+
+        for node in list_of_nodes:
+
+            if node not in seen_nodes:
+                seen_nodes.append(node)
+        
+        return len(seen_nodes)
+
+    # To measure Jointability
+    def count_jointable_nodes_in_characters_story_line(self, character):
+
+        joint_nodes = []
+
+        list_of_nodes = self.make_story_part_list_of_one_character(character_to_extract=character)
+
+        for node in list_of_nodes:
+
+            if node.check_if_joint_node():
+                joint_nodes.append(node)
+        
+        return len(joint_nodes)
+    
+    def get_metric_score(self, metric : StoryMetric):
+
+        character = self.character_objects
+        character_story_length = self.get_longest_path_length_by_character(character=character)
+
+        relevant_nodes_found = 0
+        match metric.metric_type:
+            case MetricType.COST:
+                relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("costly", True)])
+            case MetricType.UNIQUE:
+                relevant_nodes_found = self.count_unique_story_nodes_in_characters_story_line(character=character)
+            case MetricType.JOINTS:
+                relevant_nodes_found = self.count_jointable_nodes_in_characters_story_line(character=character)
+            case MetricType.PREFER:
+                relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("important_action", True)])
+
+        return round((relevant_nodes_found / character_story_length) * 100, 2)
+            
+
+    def test_if_given_node_list_will_follow_metric_rule(self, metric : StoryMetric, node_list, step, purge_count = 0):
+        
+        graphcopy = deepcopy(self)
+        if purge_count > 0:
+            graphcopy.remove_parts_by_count(start_step=step, count=purge_count, actor = metric.character_object)
+        graphcopy.insert_multiple_parts(part_list=node_list, character=metric.character_object, absolute_step=step)
+
+        current_score = self.get_metric_score(metric=metric)
+        new_score = graphcopy.get_metric_score(metric=metric)
+        score_delta = new_score - current_score
+        follows_metric_rule = False
+
+        match metric.metric_mode:
+            case MetricMode.LOWER:
+                follows_metric_rule = score_delta <= 0 or new_score <= metric.value
+            case MetricMode.HIGHER:
+                follows_metric_rule = score_delta >= 0 or new_score >= metric.value
+            case MetricMode.STABLE:
+                if current_score > metric.value:
+                    follows_metric_rule = score_delta <= 0 or new_score <= metric.value
+                elif current_score < metric.value:
+                    follows_metric_rule = score_delta <= 0 or new_score <= metric.value
+                else:
+                    follows_metric_rule = score_delta <= 5
+
+        return follows_metric_rule
+        #TODO: Test if the new score follows the metrics' rules. Reminder:
+        # Keep Lower: Decreasing the score is not allowed if doing so would take the score out of the acceptable range.
+        # Keep Higher: Increasing the score is not allowed if doing so would take the score out of the acceptable range.
+        # Keep Stable: If current score is greater than the desired score, acts as Keep Lower. If current score is lesser than the desired score, acts as Keep Higher.
+            
 
 def make_list_of_changes_from_list_of_story_nodes(story_node_list):
     # print("Begin Making List of Changes")

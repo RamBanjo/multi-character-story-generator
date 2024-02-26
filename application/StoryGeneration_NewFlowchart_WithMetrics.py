@@ -28,6 +28,10 @@ DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placehol
 # jointability (character_name, value from 0 to 100, metric mode) (Jointability is measured by Joint Nodes / total nodes)
 # cost (character_name, value from 0 to 100, metric mode) (Cost is measured by Costly Nodes / total nodes)
 #
+# Remember:
+# If an action causes an object to be removed from the game world, the cost is 1. (According to ReGEN)
+# I suppose we can count the number of costly nodes if that's the case, then?
+# 
 # There are three modes. Keep lower, keep higher, and keep stable
 # Keep Lower: If the value of the following metric isn't already lower than the specified percentage, it will try to make it lower. If it's already lower, it will try to keep it low.
 # - Increase points for nodes that would cause the value to decrease, and decrease points for nodes that would cause the value to increase
@@ -38,11 +42,9 @@ DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placehol
 # Keep Stable: A mix of both. If drastically higher or lower, will try to get +-5% within the range of the percentage.
 # - Increase points for nodes that would make it the case. Decrease points otherwise.
 #
-# 1. How much do we increase/decrease by? Or do we just make it a hard requirement?
-#
 # (The only exception is the wait node. You just can't do more fillers if you've waited for quite a bit.)
 
-def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], action_repeat_penalty = -10):
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], action_repeat_penalty = -10, metrics_requirements = [], metric_reward = 10, metric_penalty = -10):
 
     #make a copy of the graph
     if verbose:
@@ -173,6 +175,23 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                         if verbose:
                             print("The rule",rule.rule_name,"was already repeated",str(rule_application_count),"time(s), so we will deduct some score.")
                         rule_container.action_score += (rule_application_count * action_repeat_penalty)
+
+                    for metric in metrics_requirements:
+                        if metric.character_object == current_character:
+
+                            purge_count = 0
+                            if rule.remove_before_insert:
+                                purge_count = len(rule.story_condition)
+
+                            if final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=rule.story_change, step=rule_insert_index, purge_count=purge_count):
+                                if verbose:
+                                    print("The rule",rule.rule_name,"follows the metrics. Some score will be awarded.")
+                                    rule_container.action_score += metric_reward
+                            else:
+                                if verbose:
+                                    print("The rule",rule.rule_name,"violates the metrics. Some score will be deducted.")
+                                    rule_container.action_score += metric_penalty
+
 
                     acceptable_rules_with_absolute_step_and_score.append(rule_container)
 
