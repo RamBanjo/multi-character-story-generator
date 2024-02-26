@@ -1,8 +1,8 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from interface import ObjectFrame,OptionFrame,Menu,UtilDefaults,UtilFunctions,Mock
+from interface import ObjectFrame,OptionFrame,Menu,UtilDefaults,UtilFunctions
 from interface.Resources import Resources
-from interface.subframes import ActionsTab,WorldStateTab,ObjectsTab,EntityTabController
+from interface.subframes import ActionsTab,WorldstateTab,ObjectsTab,EntityTabController
 from application.components import StoryObjects,StoryNode, WorldState
 
 pageNumber = 9
@@ -24,7 +24,7 @@ class App(tk.Tk):
         self.subframes[9] = ObjectFrame.InitialFrame(self)
         self.objectFrame = self.subframes[9]
         self.subframes[0] = EntityTabController.EntityTabController(self.objectFrame)
-        self.subframes[1] = WorldStateTab.WorldStateTab(self.objectFrame)
+        self.subframes[1] = WorldstateTab.WorldstateTab(self.objectFrame)
         self.subframes[2] = ObjectFrame.NumberedFrame(self.objectFrame,2)
         self.subframes[3] = ActionsTab.ActionsTab(self.objectFrame)
         self.subframes[4] = ObjectFrame.NumberedFrame(self.objectFrame,4)

@@ -21,12 +21,13 @@ class NoteBox(ttk.Frame):
     
     def fetch(self):
         self.noteEntry.delete('1.0','end')
-        object = self.root.objectDetail
-        if object != None:
-            self.noteEntry.insert('end',object.description)
+        object = self.master.master.objectDetail
+        if object.get("notes") != None:
+            self.noteEntry.insert('end',object.get("notes"))
     
     def update(self, event):
-        self.root.objectDetail.description = self.noteEntry.get('1.0','end')
+        if(self.master.master.objectDetail.get("notes") != None):
+            self.master.master.objectDetail["notes"] = self.noteEntry.get('1.0','end')
     
     def reset(self):
         self.noteEntry.delete('1.0','end')

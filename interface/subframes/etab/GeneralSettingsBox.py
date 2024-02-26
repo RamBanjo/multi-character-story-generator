@@ -22,18 +22,19 @@ class GeneralSettingsBox(ttk.Frame):
         self.nameEntry.bind('<KeyRelease>', self.update)
     
     def fetch(self):
-        object = self.root.objectDetail
-        if object != None:
-            self.nameVariable.set(object.name)
+        object = self.master.master.objectDetail
+        name = object.get("name")
+        if name != None:
+            self.nameVariable.set(name)
         else:
             self.nameVariable.set("")
     
     def update(self, event):
-        object = self.root.objectDetail
-        if object != None:
-            object.set_name(self.nameVariable.get())
+        object = self.master.master.objectDetail
+        if object.get("name") != None:
+            object["name"] = self.nameVariable.get()
 
-        self.master.master.generate_listbox()
+        self.master.master.generateListboxStringVar()
         self.master.fetch()
     
     def reset(self):

@@ -8,12 +8,11 @@ from interface.subframes.etab.EntityTabButtonPanel import EntityTabButtonPanel
 
 
 class EntityTab(ttk.Frame):
-    def __init__(self,container,entityResource,maxEntityResource, controller):
+    def __init__(self,container,getResourceMethod,controller):
         super().__init__(master=container)
         self.root = self.master.root
         self.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
-        self.entityResource = entityResource
-        self.maxEntityResource = maxEntityResource
+        self.getResourceMethod = getResourceMethod
         self.controller = controller
 
         self.rowconfigure(0,weight=1)
@@ -25,25 +24,38 @@ class EntityTab(ttk.Frame):
         self.label = EntityTabButtonPanel(self, self.controller)
         self.label.grid(column=0, row=0, padx=0, pady=0, sticky="nsew")
 
-        self.listboxVar = self.generateListboxStringVar()
+        self.val = []
+        self.listboxVar = tk.StringVar(value="")
+        self.generateListboxStringVar()
 
         self.listbox = tk.Listbox(self, listvariable=self.listboxVar)
         self.listbox.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
+        self.listbox.bind('<<ListboxSelect>>', self.items_selected)
 
         self.changeMaxBtn = ttk.Button(self,text=str("Change Maximum..."), command=self.openChangeMaximumWindow)
         self.changeMaxBtn.grid(column=0,row=2,padx=0,pady=0,sticky="nsew")
 
+        self.objectDetail = {}
+
         self.descbox = Descbox(container=self)
     
-    def generateListboxStringVar(self):
-        return tk.StringVar(value=("Test1", "Test2"))
+    def generateListboxStringVar(self) -> None:
+        resource = self.getResourceMethod()
+        print(id(resource))
+        # parse the resource
+        self.val.clear()
+        for item in resource:
+            self.val.append(item.get("name"))
+        print(" ".join(self.val))
+        self.listboxVar.set(value=" ".join(self.val))
     
     def items_selected(self, event):
         if(len(self.listbox.curselection()) > 0):
             # get all selected indices
             selected_indices = self.listbox.curselection()[0]
             # get selected items
-            self.root.objectDetail = self.entityResource[selected_indices]
+            print(self.val[selected_indices]) #unused variable, needs to link later.
+            self.objectDetail = (self.getResourceMethod())[selected_indices]
             self.descbox.fetch()
     
     def openChangeMaximumWindow(self): 
@@ -57,7 +69,7 @@ class EntityTab(ttk.Frame):
         self.changeMaxLabel.grid(column=0,row=0,columnspan=3,padx=5,pady=5,sticky="nsew")
         self.changeMaxEntry = ttk.Entry(self.changeMaxLevel)
         self.changeMaxEntry.grid(column=0,row=1,columnspan=3,padx=5,pady=5,sticky="nsew")
-        self.changeMaxEntry.insert(0,str(self.maxEntityResource.get()))
+        self.changeMaxEntry.insert(0,str((self.getResourceMethod()).size()))
 
         self.cancelChangeMax = ttk.Button(self.changeMaxLevel, text="Cancel", command=self.changeMaxLevel.destroy)
         self.cancelChangeMax.grid(column=1,row=2,sticky="nsew")
@@ -73,8 +85,7 @@ class EntityTab(ttk.Frame):
             if(val == 0 or val >= 1000000):
                 return
             else:
-                self.maxEntityResource.set(val)
-                UtilFunctions.pad_or_truncate(self.entityResource,self.maxEntityResource.get(),UtilDefaults.DEFAULT_OF_OBJECT(self.entityResource[0]))
+                UtilFunctions.pad_or_truncate(self.entityResource,val,UtilDefaults.DEFAULT_OF_OBJECT(self.entityResource[0]))
             self.generate_listbox()
             self.changeMaxLevel.destroy()
 

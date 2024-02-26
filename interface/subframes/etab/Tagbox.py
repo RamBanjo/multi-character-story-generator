@@ -34,14 +34,14 @@ class Tagbox(ttk.Frame):
         for i in self.tagTable.get_children():
             self.tagTable.delete(i)
         # add new tags of current object
-        object = self.root.objectDetail
-        print(object.tags)
-        if object != None:
+        object = self.master.master.objectDetail
+        print(object.get("tags"))
+        if object.get("tags") != None:
             # TODO: add law/moral bias for character nodes
-            if isinstance(object,StoryObjects.CharacterNode):
-                self.tagTable.insert(parent='', index='end', values=("Law Bias", object.biases["lawbias"]))
-                self.tagTable.insert(parent='', index='end', values=("Moral Bias", object.biases["moralbias"]))
-            for key, value in object.tags.items():
+            if object.get("biases") != None:
+                self.tagTable.insert(parent='', index='end', values=("Law Bias", object.get("biases")[0]))
+                self.tagTable.insert(parent='', index='end', values=("Moral Bias", object.get("biases")[1]))
+            for key, value in object.get("tags").items():
                 if key != 'Type':
                     self.tagTable.insert(parent='', index='end', values=(key, value))
             self.tagTable.insert(parent='',index='end',values=('',''))

@@ -22,7 +22,7 @@ The following functions will be implemented:
 ...Sort of terrifying, but I have to do this in order to have any chance of passing.
 '''
 
-class WorldStateTab(ttk.Frame):
+class WorldstateTab(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
         self.root = self.master.root

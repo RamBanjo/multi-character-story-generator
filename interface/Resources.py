@@ -7,31 +7,63 @@ class Resources():
         return cls.instance
     
     def __init__(self):
-        self._maxObjects = 10
-        self._objects = {}
-        self._maxLocations = 10
-        self._locations = {}
-        self._maxCharacters = 10
-        self._characters = {}
-
-    def getMaxObjects(self) -> int:
-        return self._maxObjects
+        self._objects = [
+            {
+                "name": "Apple",
+                "notes": "",
+                "tags": {
+                    
+                }
+            },
+            {
+                "name": "Banana",
+                "notes": "",
+                "tags": {
+                    
+                }
+            }
+        ]
+        self._locations = [
+            {
+                "name": "Apothecary",
+                "notes": "",
+                "tags": {
+                    
+                }
+            },
+            {
+                "name": "Building",
+                "notes": "",
+                "tags": {
+                    
+                }
+            }
+        ]
+        self._characters = [
+            {
+                "name": "Alice",
+                "notes": "",
+                "biases": [0,0],
+                "tags": {
+                    "gender": "F"
+                }
+            },
+            {
+                "name": "Bob",
+                "notes": "",
+                "biases": [0,0],
+                "tags": {
+                    "gender": "M"
+                }
+            }
+        ]
 
     def getObjects(self) -> dict:
         return self._objects
 
-    def getMaxLocations(self) -> int:
-        return self._locations
-
     def getLocations(self) -> dict:
         return self._locations
-
-    def getMaxCharacters(self) -> int:
-        return self._maxCharacters
 
     def getCharacters(self) -> dict:
         return self._characters
 
-if __name__ == "__main__":
-    r = Resources()
-    print(r.getCharacters())
