@@ -1,5 +1,7 @@
 #We will write this story generation function based on the new flowchart.
 import sys
+
+from CharacterTask import TaskStack
 sys.path.insert(0,'')
 
 from copy import deepcopy
@@ -642,10 +644,45 @@ def make_base_graph_from_previous_graph(previous_graph: StoryGraph, graph_name):
         #We'll need to write the following functions:
 
         #Function to translate partially completed tasks into new tasks (Make sure to retain placeholder information)
+        # 1. Get the current state of the task
+        # 2. Get the steps of the task from the current step to the final step, ignoring already completed steps (These are the new steps)
+        # 3. Create a new TaskObject based on the steps we got from 2, 
+        # 4. Create a StoryNode called RecallTasks 
+
         #Creating a new "Recall Tasks" node with no targets. The character just assigns the tasks to themselves but remember where they got the tasks from.
+
+        #TODO: Unfortunately(?) this function has just been moved up to (Very Important) priority. We will also need a way to store previous graph's information (including length and metrics value)
+
+        # Wait let's try another example. Graph A has a length of 5 and a uniqueness score of 20. Graph B has a length of 3 and a uniqueness score of 33.33... Together, the storyline will be 8 long and have a uniqueness score of 25.
+        # Okay so it's a *weighted* average. We calculate 25 by doing ((5*20) + (3*33.33...))/(5+3) = 25. So we need to weigh it by the length in case of incomplete graphs.
         pass
 
     return return_graph
+
+def get_task_at_final_graph_step(story_graph : StoryGraph, character_name : str):
+
+    final_ws = story_graph.make_latest_state()
+    character_at_final_ws = final_ws.node_dict[character_name]
+    incomplete_tasks_at_final_step = []
+
+    for stack_found in character_at_final_ws.list_of_task_stacks:
+        if not stack_found.stack_is_complete():
+            
+            new_stack_name = "cont_" + stack_found.stack_name
+
+            #TODO: Should we consider partial tasks? What happens if the task contains more actions than the story's length? I suppose we never handled that...
+            #I suppose we'll disallow the task for now (make it invalid) so it doesn't mess up 
+
+            incomplete_task_list = []
+            for task in stack_found.task_stack:
+                pass
+            new_task_stack = TaskStack(stack_name=new_stack_name, task_stack=[], task_stack_requirement=stack_found.task_stack_requirement, stack_giver_name=stack_found.stack_giver_name, stack_owner_name=stack_found.stack_owner_name)
+
+
+
+        
+        pass
+    pass
     
     
     

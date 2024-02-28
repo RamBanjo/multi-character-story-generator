@@ -57,5 +57,15 @@ test_sg_cost.insert_multiple_parts(part_list=[costly_action_b, costly_action_b, 
 
 #TODO: Literal shower thoughts, but these metrics can only read and calculate what's in the current graph. We will need to make a solution for when there are multiple graphs at play...
 # - Input previous metrics?
+# Pros: Most accurate metrics
+# Cons: Will need an additional function to read metrics from multiple graphs, also I probably need to finish writing the multi graph function
+
 # - Ignore previous graph's metrics?
+# Pros: No further action will be needed, just need to connect graphs normally
+# Cons: Metrics get more inaccurate over time
+
 # - Only calculate current graph and previous graph's metrics? (The older graphs should not count it's way in the past)
+# Pros: 
+# Cons: It requires new code --- I might as well as do the first option if we're doing this option
+
+# Yeah it looks like the best choice is the first option
