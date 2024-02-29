@@ -5,7 +5,7 @@ from interface import UtilDefaults,UtilFunctions
 from application.components import WorldState, StoryNode, StoryObjects
 from interface.subframes.wstab.ButtonTray import ButtonTray
 from interface.subframes.wstab.WorldStateCanvas import WorldStateCanvas
-
+from interface.subframes.wstab.Descbox import Descbox
 
 '''
 WORLD STATE
@@ -30,9 +30,24 @@ class WorldstateTab(ttk.Frame):
 
         self.rowconfigure(0,weight=1)
         self.rowconfigure(1,weight=30)
+        self.rowconfigure(2,weight=1)
+        self.columnconfigure(0,minsize=150,weight=1)
+        self.columnconfigure(1,minsize=700,weight=50)
 
-        self.canvas = WorldStateCanvas(self) #note: packed geometry, cannot grid shit
-        self.buttons = ButtonTray(self, self.canvas)
+        self.entityLabel = ttk.Label(self, text="Entities")
+        self.entityLabel.grid(column=0,row=0)
+
+        self.listvar = []
+        self.tklistvar = None
+        self.listbox = None
+        self.descbox = Descbox(self)
+        self.generate_listbox() #instantiates the listbox, of course.
+    
+    def generate_listbox(self):
+        return
+    
+    def items_selected(self, event):
+        return
     
     def reset(self):
         print("Uhhh reset?")

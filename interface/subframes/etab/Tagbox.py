@@ -79,20 +79,18 @@ class Tagbox(ttk.Frame):
         print("Change Tags called")
         newTagName = self.changeTagnameEntry.get()
         newTagValue = self.changeTagvalueEntry.get()
-        object = self.root.objectDetail
+        object = self.master.master.objectDetail
         if(newTagName == '' and self.tag[0] == ''): #nothing lost, nothing gained
             self.changeTags.destroy()
-        elif(newTagName == "Type"):
-            ttk.Label(self.changeTags,text="Cannot change Type attribute.").grid(column=0,row=2,sticky="nsew")
         elif(self.tag[0] == newTagName): #change only the value
-            object.tags[newTagName] = newTagValue
+            object["tags"][newTagName] = newTagValue
             self.fetch()
             self.changeTags.destroy()
         else: #remove the old tag, create the new tag
             if(self.tag[0] != ''): #THERE IS AN OLD TAG
-                del object.tags[self.tag[0]]
+                del object["tags"][self.tag[0]]
             if(newTagName != ''): #THERE IS A NEW TAG
-                object.tags[newTagName] = newTagValue
+                object["tags"][newTagName] = newTagValue
                 print("Add tag",newTagName,"to",object)
             self.fetch()
             self.changeTags.destroy()
@@ -102,8 +100,8 @@ class Tagbox(ttk.Frame):
         self.delete_tag()
 
     def delete_tag(self):
-        object = self.root.objectDetail
-        del object.tags[self.tag[0]]
+        object = self.master.master.objectDetail
+        del object["tags"][self.tag[0]]
         self.fetch()
     
     def reset(self):

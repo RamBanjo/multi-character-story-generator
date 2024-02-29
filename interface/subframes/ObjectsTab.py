@@ -69,7 +69,7 @@ class EntityTab(ttk.Frame):
         self.changeMaxLabel.grid(column=0,row=0,columnspan=3,padx=5,pady=5,sticky="nsew")
         self.changeMaxEntry = ttk.Entry(self.changeMaxLevel)
         self.changeMaxEntry.grid(column=0,row=1,columnspan=3,padx=5,pady=5,sticky="nsew")
-        self.changeMaxEntry.insert(0,str((self.getResourceMethod()).size()))
+        self.changeMaxEntry.insert(0,str(len(self.getResourceMethod())))
 
         self.cancelChangeMax = ttk.Button(self.changeMaxLevel, text="Cancel", command=self.changeMaxLevel.destroy)
         self.cancelChangeMax.grid(column=1,row=2,sticky="nsew")
@@ -85,10 +85,16 @@ class EntityTab(ttk.Frame):
             if(val == 0 or val >= 1000000):
                 return
             else:
-                UtilFunctions.pad_or_truncate(self.entityResource,val,UtilDefaults.DEFAULT_OF_OBJECT(self.entityResource[0]))
-            self.generate_listbox()
+                while(len(self.getResourceMethod()) > val):
+                    self.getResourceMethod().pop()
+                while(len(self.getResourceMethod()) < val):
+                    if(self.getResourceMethod()[0].get("biases") != None):
+                        self.getResourceMethod().append({"name":"New","notes":"","biases":[0,0],"tags":{}})
+                    else:
+                        self.getResourceMethod().append({"name":"New","notes":"","tags":{}})
+            self.generateListboxStringVar()
             self.changeMaxLevel.destroy()
 
     def reset(self):
-        self.generate_listbox()
+        self.generateListboxStringVar()
         self.descbox.reset()
