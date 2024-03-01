@@ -9,6 +9,7 @@ from components.StoryGraphTwoWS import *
 
 alice = CharacterNode(name="Alice", biases={"lawbias":50, "moralbias":50})
 bob = CharacterNode(name="Bob", biases={"lawbias":0, "moralbias":-50})
+charlie = CharacterNode(name="Charlie")
 
 somewhere = LocationNode(name="Somewhere")
 
@@ -67,5 +68,11 @@ test_sg_cost.insert_multiple_parts(part_list=[costly_action_b, costly_action_b, 
 # - Only calculate current graph and previous graph's metrics? (The older graphs should not count it's way in the past)
 # Pros: 
 # Cons: It requires new code --- I might as well as do the first option if we're doing this option
+
+# - Weighted metrics that favors the present: The closer the graph is to the present the more it will affect the present
+# Pros: This would mean that metric
+# Cons: Requires user to input how much characters care about the present than the previous graph (some decay value multiplied?)
+
+# Yep we're going with the prof's suggestion with the weighted metrics. Gotta figure out how to do the decay functions...
 
 # Yeah it looks like the best choice is the first option

@@ -2,12 +2,13 @@
 import sys
 
 from CharacterTask import TaskStack
+import StoryMetrics
 sys.path.insert(0,'')
 
 from copy import deepcopy
 import random
 from application.components.ConditionTest import HasEdgeTest
-from application.components.RelChange import RelChange
+from application.components.RelChange import RelChange, TaskChange
 from application.components.RewriteRuleWithWorldState import JoiningJointRule, JointType
 
 from application.components.StoryGraphTwoWS import StoryGraph
@@ -46,7 +47,7 @@ DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placehol
 #
 # (The only exception is the wait node. You just can't do more fillers if you've waited for quite a bit.)
 
-def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], action_repeat_penalty = -10, metrics_requirements = [], metric_reward = 10, metric_penalty = -10):
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], action_repeat_penalty = -10, metrics_requirements = [], metric_reward = 10, metric_penalty = -10, previous_graph_list = []):
 
     #make a copy of the graph
     if verbose:
@@ -178,21 +179,24 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                             print("The rule",rule.rule_name,"was already repeated",str(rule_application_count),"time(s), so we will deduct some score.")
                         rule_container.action_score += (rule_application_count * action_repeat_penalty)
 
-                    for metric in metrics_requirements:
-                        if metric.character_object == current_character:
+                    if len(previous_graph_list) == 0:
+                        for metric in metrics_requirements:
+                            if metric.character_object == current_character:
 
-                            purge_count = 0
-                            if rule.remove_before_insert:
-                                purge_count = len(rule.story_condition)
+                                purge_count = 0
+                                if rule.remove_before_insert:
+                                    purge_count = len(rule.story_condition)
 
-                            if final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=rule.story_change, step=rule_insert_index, purge_count=purge_count):
-                                if verbose:
-                                    print("The rule",rule.rule_name,"follows the metrics. Some score will be awarded.")
-                                    rule_container.action_score += metric_reward
-                            else:
-                                if verbose:
-                                    print("The rule",rule.rule_name,"violates the metrics. Some score will be deducted.")
-                                    rule_container.action_score += metric_penalty
+                                if final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=rule.story_change, step=rule_insert_index, purge_count=purge_count):
+                                    if verbose:
+                                        print("The rule",rule.rule_name,"follows the metrics. Some score will be awarded.")
+                                        rule_container.action_score += metric_reward
+                                else:
+                                    if verbose:
+                                        print("The rule",rule.rule_name,"violates the metrics. Some score will be deducted.")
+                                        rule_container.action_score += metric_penalty
+                    else:
+                        pass
 
 
                     acceptable_rules_with_absolute_step_and_score.append(rule_container)
@@ -227,6 +231,17 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     print("Evaluating:", task_name, "at", attempt_index)
                 task_completeness = final_story_graph.test_task_completeness(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
                 task_valid = final_story_graph.test_task_stack_advance_validity(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
+
+# START: Checking to see if doing this task would ruin the story length. Remove if this breaks the code.
+                if task_valid and task_completeness == 'task_step_can_advance':
+
+                    current_state = final_story_graph.make_state_at_step(stopping_step=attempt_index)
+                    current_task_stack = current_state.node_dict[current_charname].get_task_stack_by_name(task_name)
+                    current_task = current_task_stack.get_current_task()
+
+                    number_of_nodes_in_current_task = len(current_task.task_actions)
+                    task_valid = task_valid and number_of_nodes_in_current_task + current_character_pathlength <= required_story_length
+# END of Length Verification
 
                 if task_valid:
                     default_task_score = 0
@@ -599,7 +614,7 @@ def perform_wait_action(target_story_graph:StoryGraph, current_character):
     
     return True
 
-def generate_multiple_graphs(initial_graph : StoryGraph, list_of_rules, required_story_length=20, max_storynodes_per_graph=5, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], action_repeat_penalty = -10):
+def generate_multiple_graphs(initial_graph : StoryGraph, list_of_rules, required_story_length=20, max_storynodes_per_graph=5, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], action_repeat_penalty = -10, metric_requirements = [], metric_reward=10, metric_penalty=-10):
     
     #NOTE: Max Storynodes per Graph includes the "Recall Tasks" node.
 
@@ -624,7 +639,7 @@ def generate_multiple_graphs(initial_graph : StoryGraph, list_of_rules, required
         if len(list_of_completed_story_graphs) == number_of_graphs_needed-1 and length_of_last_graph != 0:
             loop_graph_length = length_of_last_graph
 
-        list_of_completed_story_graphs.append(generate_story_from_starter_graph(init_storygraph=loop_init_graph, list_of_rules=list_of_rules, required_story_length=loop_graph_length, top_n=top_n, extra_attempts=extra_attempts, score_mode=score_mode, verbose=verbose, extra_movement_requirement_list=extra_movement_requirement_list, action_repeat_penalty=action_repeat_penalty))
+        list_of_completed_story_graphs.append(generate_story_from_starter_graph(init_storygraph=loop_init_graph, list_of_rules=list_of_rules, required_story_length=loop_graph_length, top_n=top_n, extra_attempts=extra_attempts, score_mode=score_mode, verbose=verbose, extra_movement_requirement_list=extra_movement_requirement_list, action_repeat_penalty=action_repeat_penalty, metrics_requirements=metric_requirements, metric_reward=metric_reward, metric_penalty=metric_penalty, previous_graph_list=list_of_completed_story_graphs))
 
     return list_of_completed_story_graphs
 
@@ -633,11 +648,15 @@ def make_base_graph_from_previous_graph(previous_graph: StoryGraph, graph_name):
     init_ws = previous_graph.make_latest_state()
 
     char_list = init_ws.get_all_actors()
-    loc_list = init_ws.get_all_locations()
 
     return_graph = StoryGraph(name=graph_name, character_objects=char_list, starting_ws=init_ws)
 
     for character in char_list:
+        new_node = make_recall_task_node_based_on_final_graph_step(story_graph=previous_graph, character_name=character.get_name())
+
+        return_graph.insert_story_part(part=new_node, character=character, location=character.get_location(), absolute_step=0)
+        
+        
         #TODO (Important): If the character had a task in the last Timestep, remove it, and modify the task so that only the uncompleted items are added in their initial step of the new graph.
         #Otherwise, have them do a normal wait action.
 
@@ -655,37 +674,42 @@ def make_base_graph_from_previous_graph(previous_graph: StoryGraph, graph_name):
 
         # Wait let's try another example. Graph A has a length of 5 and a uniqueness score of 20. Graph B has a length of 3 and a uniqueness score of 33.33... Together, the storyline will be 8 long and have a uniqueness score of 25.
         # Okay so it's a *weighted* average. We calculate 25 by doing ((5*20) + (3*33.33...))/(5+3) = 25. So we need to weigh it by the length in case of incomplete graphs.
-        pass
 
     return return_graph
 
-def get_task_at_final_graph_step(story_graph : StoryGraph, character_name : str):
+def make_recall_task_node_based_on_final_graph_step(story_graph : StoryGraph, character_name : str):
 
     final_ws = story_graph.make_latest_state()
     character_at_final_ws = final_ws.node_dict[character_name]
-    incomplete_tasks_at_final_step = []
+    equivalent_taskchanges = []
 
     for stack_found in character_at_final_ws.list_of_task_stacks:
         if not stack_found.stack_is_complete():
             
             new_stack_name = "cont_" + stack_found.stack_name
 
-            #TODO: Should we consider partial tasks? What happens if the task contains more actions than the story's length? I suppose we never handled that...
-            #I suppose we'll disallow the task for now (make it invalid) so it doesn't mess up 
+            # Since we already handled the main generator in such a way that there shouldnt be partial tasks, we can assume that
+            # There will be no tasks completed halfway in a way that only some nodes are complete
+
+            # Either all the nodes are done, or no nodes are done at all
 
             incomplete_task_list = []
             for task in stack_found.task_stack:
-                pass
-            new_task_stack = TaskStack(stack_name=new_stack_name, task_stack=[], task_stack_requirement=stack_found.task_stack_requirement, stack_giver_name=stack_found.stack_giver_name, stack_owner_name=stack_found.stack_owner_name)
+                if task.completion_step != -1:
+                    incomplete_task_list.append(task)
+            new_task_stack = TaskStack(stack_name=new_stack_name, task_stack=incomplete_task_list, task_stack_requirement=stack_found.task_stack_requirement, stack_giver_name=stack_found.stack_giver_name, stack_owner_name=stack_found.stack_owner_name)
+
+            taskchange_with_new_task = TaskChange(name="Recall Stack: "+new_task_stack.stack_name, task_giver_name=new_task_stack.stack_giver_name, task_owner_name=new_task_stack.stack_owner_name, task_stack=new_task_stack)
+            equivalent_taskchanges.append(taskchange_with_new_task)
 
 
+    node_name = "Wait"
+    if len(equivalent_taskchanges) > 0:
+        node_name = "Recall Tasks"
 
-        
-        pass
-    pass
-    
-    
-    
+    new_node = StoryNode(name=node_name, biasweight=0, tags={"Type":"Initialize"}, effects_on_next_ws=equivalent_taskchanges)
+
+    return new_node
 
                 # We have our current character and we have a list of characters whose stories can be extended because they have the shortest paths. We also have the absolute step that we will build from.
                 # We would like to find out that, with the given rule, who should be in the grouping.
