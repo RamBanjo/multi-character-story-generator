@@ -1,6 +1,5 @@
 import sys
 
-from StoryMetrics import MetricMode, MetricType, StoryMetric
 sys.path.insert(0,'')
 
 import random
@@ -14,6 +13,7 @@ from copy import deepcopy
 from application.components.UtilFunctions import *
 from application.components.UtilityEnums import GenericObjectNode, TestType
 from application.components.CharacterTask import CharacterTask, TaskStack
+from application.components.StoryMetrics import MetricMode, MetricType, StoryMetric
 
 '''
 Storygraph!
@@ -1514,6 +1514,7 @@ class StoryGraph:
 
                     #Pull the location information from cur_state
                     char_in_ws = cur_state.node_dict[story_char.get_name()]
+                    # print(char_in_ws, index)
                     location_holding_char = char_in_ws.get_holder()
                     current_step.set_location(location_holding_char)
 
@@ -1997,7 +1998,7 @@ class StoryGraph:
                 all_tags_found = all_tags_found and story_node_tag in tag_list
                 one_tag_found = one_tag_found or story_node_tag in tag_list
 
-                if not soft_equal:
+                if not soft_equal and node.tags.get(story_node_tag, None) is not None:
                     all_tags_found = all_tags_found and node.tags[story_node_tag] == story_node_value
                     one_tag_found = all_tags_found or node.tags[story_node_tag] == story_node_value
             
@@ -2039,13 +2040,12 @@ class StoryGraph:
         
         return len(joint_nodes)
     
-    def get_metric_score(self, metric : StoryMetric):
+    def get_metric_score(self, metric_type : MetricType, character:CharacterNode):
 
-        character = metric.character_objects
         character_story_length = self.get_longest_path_length_by_character(character=character)
 
         relevant_nodes_found = 0
-        match metric.metric_type:
+        match metric_type:
             case MetricType.COST:
                 relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("costly", True)])
             case MetricType.UNIQUE:
@@ -2055,7 +2055,7 @@ class StoryGraph:
             case MetricType.PREFER:
                 relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("important_action", True)])
 
-        return round((relevant_nodes_found / character_story_length) * 100, 2)
+        return round((relevant_nodes_found / character_story_length), 2) * 100
             
     # score_retention: How much the program cares about past graphs?
     # 0 score_retention (Always forgets past graphs --- only remembers the current graph)
@@ -2076,8 +2076,8 @@ class StoryGraph:
             graphcopy.remove_parts_by_count(start_step=step, count=purge_count, actor = metric.character_object)
         graphcopy.insert_multiple_parts(part_list=node_list, character=metric.character_object, absolute_step=step)
 
-        current_score = self.get_metric_score(metric=metric)
-        new_score = graphcopy.get_metric_score(metric=metric)
+        current_score = self.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
+        new_score = graphcopy.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
 
         #Index 0 has past graph's score and index 1 has that graph's length
 
@@ -2089,7 +2089,7 @@ class StoryGraph:
             past_graph_total_nodes = []
 
             for past_graph in previous_graphs:
-                this_graphscore = past_graph.get_metric_score(metric=metric)
+                this_graphscore = past_graph.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
                 this_graphlength = past_graph.get_longest_path_length_by_character(metric.character_object)
                 past_score_times_len.append(this_graphscore * this_graphlength)
                 past_graph_total_nodes.append(this_graphlength)
@@ -2122,9 +2122,9 @@ class StoryGraph:
                 if current_score > metric.value:
                     follows_metric_rule = score_delta <= 0 or new_score <= metric.value
                 elif current_score < metric.value:
-                    follows_metric_rule = score_delta <= 0 or new_score <= metric.value
+                    follows_metric_rule = score_delta >= 0 or new_score >= metric.value
                 else:
-                    follows_metric_rule = score_delta <= 5
+                    follows_metric_rule = abs(score_delta) <= 5
 
         return follows_metric_rule
         #TODO: Test if the new score follows the metrics' rules. Reminder:

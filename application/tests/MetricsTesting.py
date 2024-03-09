@@ -2,20 +2,23 @@ import sys
 
 sys.path.insert(0,'')
 
-from components.StoryMetrics import *
-from components.StoryObjects import *
-from components.WorldState import *
-from components.StoryGraphTwoWS import *
+from application.components.StoryMetrics import *
+from application.components.StoryObjects import *
+from application.components.WorldState import *
+from application.components.StoryGraphTwoWS import *
+from application.components.StoryNode import *
+from application.components.StoryMetrics import *
 
-alice = CharacterNode(name="Alice", biases={"lawbias":50, "moralbias":50})
-bob = CharacterNode(name="Bob", biases={"lawbias":0, "moralbias":-50})
-charlie = CharacterNode(name="Charlie")
+alice = CharacterNode(name="Alice", biases={"lawbias":50, "moralbias":50}, internal_id=0)
+bob = CharacterNode(name="Bob", biases={"lawbias":0, "moralbias":-50}, internal_id=1)
+charlie = CharacterNode(name="Charlie", internal_id=2)
 
-somewhere = LocationNode(name="Somewhere")
+somewhere = LocationNode(name="Somewhere", internal_id=3)
 
-test_ws = WorldState(name="Test WS", objectnodes=[alice, bob, somewhere])
+test_ws = WorldState(name="Test WS", objectnodes=[alice, bob, charlie, somewhere])
 test_ws.connect(from_node=somewhere, edge_name="holds", to_node=alice)
 test_ws.connect(from_node=somewhere, edge_name="holds", to_node=bob)
+test_ws.connect(from_node=somewhere, edge_name="holds", to_node=charlie)
 
 action_a = StoryNode(name="Action A")
 costly_action_b = StoryNode(name="Action B", tags={"Type":"Placeholder","costly":True})
@@ -29,32 +32,55 @@ test_sg_unique = StoryGraph(name="Test Unique SG", character_objects=[alice, bob
 test_sg_jointy = StoryGraph(name="Test Jointy SG", character_objects=[alice, bob], starting_ws=test_ws)
 test_sg_prefer = StoryGraph(name="Test Prefer SG", character_objects=[alice, bob], starting_ws=test_ws)
 
-#Alice's storyline has 2 costly actions and is 5 nodes long. The score should be 20.
-test_sg_cost.insert_multiple_parts(part_list=[costly_action_b, costly_action_b, action_a, important_action_c, action_d], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
-
-#Bob's storyline has no costly actions and is 5 nodes long. The score should be 0.
-
-#Charlie's storyline has only costly actions. The score should be 100.
-
 #Here is how we will want to test our Metrics Functions:
 
-# Testing measuring costs
+# Testing measuring Costly Nodes
+
+test_sg_cost.insert_multiple_parts(part_list=[action_a, costly_action_b, important_action_c, action_e, action_d], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+test_sg_cost.insert_multiple_parts(part_list=[action_a, important_action_c, action_e, action_a, action_d], character=bob, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+test_sg_cost.insert_multiple_parts(part_list=[costly_action_b, costly_action_b, costly_action_b, costly_action_b, costly_action_b], character=charlie, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+
+#Alice's storyline has 2 costly actions and is 5 nodes long. The score should be 40.
+#Bob's storyline has no costly actions and is 5 nodes long. The score should be 0.
+#Charlie's storyline has only costly actions. The score should be 100.
+
 # Scenario 1: Test Cost of a Story: See if it can count Costly Nodes properly
-# Scenario 2: Test Uniqueness of a Story: See if it can count unique nodes properly
-# Scenario 3: Test Jointability of a Story: See if it can count Joint Nodes properly
-# Scenario 4: Test Preference of a Story: See if it can count Important Nodes properly
+# Scenario 2: Test Cost Score Calculation: See if it can get the score of Cost properly
 
-# Testing score calculations
-# Scenario 1: Test Cost Score Calculation: See if it can get the score of Cost properly
+alice_cost_metric = test_sg_cost.get_metric_score(metric_type=MetricType.COST, character=alice)
+bob_cost_metric = test_sg_cost.get_metric_score(metric_type=MetricType.COST, character=bob)
+charlie_cost_metric = test_sg_cost.get_metric_score(metric_type=MetricType.COST, character=charlie)
+
+print("Alice Cost Metric (Expected 20):", alice_cost_metric)
+print("Bob Cost Metric (Expected 0):", bob_cost_metric)
+print("Charlie Cost Metric (Expected 100):", charlie_cost_metric)
+
+# Scenario 3: Test Cost Metric Rule Follow (True and False)
+
+# Keep Lower:
+# - Returns false if adding a node would increase metrics while the metric value is higher than the Metric Goal
+
+# Keep Higher:
+# - Returns false if adding a node would decrease metrics while the metric value is lower than the Metric Goal
+
+# Keep Stable:
+# - Returns false if adding a node would increase metrics while the metric value is too much higher than the Metric Goal
+# - Returns false if adding a node would decrease metrics while the metric value is too much lower than the Metric Goal
+
+# Testing Measuring Uniqueness
+# Scenario 1: Test Uniqueness of a Story: See if it can count unique nodes properly
 # Scenario 2: Test Uniqueness Score Calculation: See if it can get the score of Uniqueness properly
-# Scenario 3: Test Jointability Score Calculation: See if it can get the score of Jointability properly
-# Scenario 4: Test Preference Score Calculation: See if it can get the score of Preference properly
+# Scenario 3: Test Uniqueness Metric Rule Follow (True and False)
 
-# Testing "Follows Metric Rules" functions
-# Scenario 1: Test Cost Metric Rule Follow (True and False)
-# Scenario 2: Test Uniqueness Metric Rule Follow (True and False)
+# Testing Jointability
+# Scenario 1: Test Jointability of a Story: See if it can count Joint Nodes properly
+# Scenario 2: Test Jointability Score Calculation: See if it can get the score of Jointability properly
 # Scenario 3: Test Jointability Metric Rule Follow (True and False)
-# Scenario 4: Test Preference Metric Rule Follow (True and False)
+
+# Testing Maincharacterness
+# Scenario 1: Test Preference of a Story: See if it can count Important Nodes properly
+# Scenario 2: Test Preference Score Calculation: See if it can get the score of Preference properly
+# Scenario 3: Test Preference Metric Rule Follow (True and False)
 
 #TODO: Literal shower thoughts, but these metrics can only read and calculate what's in the current graph. We will need to make a solution for when there are multiple graphs at play...
 # - Input previous metrics?

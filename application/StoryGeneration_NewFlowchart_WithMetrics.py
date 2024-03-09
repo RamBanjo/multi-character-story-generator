@@ -1,8 +1,6 @@
 #We will write this story generation function based on the new flowchart.
 import sys
 
-from CharacterTask import TaskStack
-import StoryMetrics
 sys.path.insert(0,'')
 
 from copy import deepcopy
@@ -15,6 +13,7 @@ from application.components.StoryGraphTwoWS import StoryGraph
 from application.components.StoryNode import StoryNode
 from application.components.UtilFunctions import permute_actor_list_for_joint, permute_actor_list_for_joint_with_range_and_freesize, permute_actor_list_for_joint_with_variable_length, scrambled_sort
 from application.components.UtilityEnums import ChangeAction, GenericObjectNode
+from application.components.CharacterTask import TaskStack
 
 # DEFAULT_HOLD_EDGE_NAME = "holds"
 # DEFAULT_ADJACENCY_EDGE_NAME = "connects"
@@ -651,10 +650,13 @@ def make_base_graph_from_previous_graph(previous_graph: StoryGraph, graph_name):
 
     return_graph = StoryGraph(name=graph_name, character_objects=char_list, starting_ws=init_ws)
 
+    last_ws = previous_graph.make_latest_state()
+
     for character in char_list:
         new_node = make_recall_task_node_based_on_final_graph_step(story_graph=previous_graph, character_name=character.get_name())
 
-        return_graph.insert_story_part(part=new_node, character=character, location=character.get_location(), absolute_step=0)
+        last_location = last_ws.get_actor_current_location(actor=character)
+        return_graph.insert_story_part(part=new_node, character=character, location=last_location, absolute_step=0)
         
         
         #TODO (Important): If the character had a task in the last Timestep, remove it, and modify the task so that only the uncompleted items are added in their initial step of the new graph.
@@ -695,7 +697,7 @@ def make_recall_task_node_based_on_final_graph_step(story_graph : StoryGraph, ch
 
             incomplete_task_list = []
             for task in stack_found.task_stack:
-                if task.completion_step != -1:
+                if task.completion_step == -1:
                     incomplete_task_list.append(task)
             new_task_stack = TaskStack(stack_name=new_stack_name, task_stack=incomplete_task_list, task_stack_requirement=stack_found.task_stack_requirement, stack_giver_name=stack_found.stack_giver_name, stack_owner_name=stack_found.stack_owner_name)
 

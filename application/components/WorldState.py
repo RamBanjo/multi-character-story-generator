@@ -257,11 +257,13 @@ class WorldState:
     # Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
     # Not needed: We can simply loop through the entire list and run this function for each item in the list.
     def apply_relationship_change(self, relchange_object, reverse=False):
+        # print(relchange_object)
         if (relchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (relchange_object.add_or_remove == ChangeAction.REMOVE and reverse):
             #If the intention is to add, then we add a connection between the nodes
             #If either nodes don't exist already, then they must be added to the list of nodes.
             #Checks if either nodes already exists in the node dict
             #If it doesn't exist, add it to the node dict
+            # print(relchange_object)
             if relchange_object.node_a.get_name() not in self.node_dict:
                 self.node_dict[relchange_object.node_a.get_name()] = relchange_object.node_a
             if relchange_object.node_b.get_name() not in self.node_dict:
