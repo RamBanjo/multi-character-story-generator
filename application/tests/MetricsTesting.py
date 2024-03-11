@@ -59,13 +59,58 @@ print("Charlie Cost Metric (Expected 100):", charlie_cost_metric)
 
 # Keep Lower:
 # - Returns false if adding a node would increase metrics while the metric value is higher than the Metric Goal
+alice_cost_lower_10 = StoryMetric(metric_type=MetricType.COST, value=10, metric_mode=MetricMode.LOWER, character_object=alice)
+
+test_result = test_sg_cost.test_if_given_node_list_will_follow_metric_rule(metric=alice_cost_lower_10, node_list=[costly_action_b], step=5)
+print("Alice has Lower than 10 Cost Metric, Attempting to append a Costly node should return False: ", test_result)
+
+# - Returns true no matter what if the value is already lower, or if the value decreases while value is higher.
+alice_cost_lower_40 = StoryMetric(metric_type=MetricType.COST, value=40, metric_mode=MetricMode.LOWER, character_object=alice)
+
+test_result = test_sg_cost.test_if_given_node_list_will_follow_metric_rule(metric=alice_cost_lower_10, node_list=[action_a], step=5)
+print("Alice has Lower than 10 Cost Metric, Attempting to append a non-Costly node should return True: ", test_result)
+
+test_result = test_sg_cost.test_if_given_node_list_will_follow_metric_rule(metric=alice_cost_lower_40, node_list=[costly_action_b], step=5)
+print("Alice has Lower than 40 Cost Metric, Attempting to append a Costly node should return True: ", test_result)
+
+test_result = test_sg_cost.test_if_given_node_list_will_follow_metric_rule(metric=alice_cost_lower_40, node_list=[action_a], step=5)
+print("Alice has Lower than 40 Cost Metric, Attempting to append a non-Costly node should return True: ", test_result)
 
 # Keep Higher:
 # - Returns false if adding a node would decrease metrics while the metric value is lower than the Metric Goal
+alice_cost_higher_30 = StoryMetric(metric_type=MetricType.COST, value=30, metric_mode=MetricMode.HIGHER, character_object=alice)
+
+test_result = test_sg_cost.test_if_given_node_list_will_follow_metric_rule(metric=alice_cost_higher_30, node_list=[action_a], step=5)
+print("Alice has Higher than 30 Cost Metric, Attempting to append a non-Costly node should return False: ", test_result)
+
+# - Returns true no matter what if the value is already higher, or if the value increases while value is lower.
+alice_cost_higher_10 = StoryMetric(metric_type=MetricType.COST, value=10, metric_mode=MetricMode.HIGHER, character_object=alice)
+
+test_result = test_sg_cost.test_if_given_node_list_will_follow_metric_rule(metric=alice_cost_higher_30, node_list=[costly_action_b], step=5)
+print("Alice has Higher than 30 Cost Metric, Attempting to append a Costly node should return True: ", test_result)
+
+test_result = test_sg_cost.test_if_given_node_list_will_follow_metric_rule(metric=alice_cost_higher_10, node_list=[action_a], step=5)
+print("Alice has Higher than 10 Cost Metric, Attempting to append a non-Costly node should return True: ", test_result)
+
+test_result = test_sg_cost.test_if_given_node_list_will_follow_metric_rule(metric=alice_cost_higher_10, node_list=[costly_action_b], step=5)
+print("Alice has Higher than 10 Cost Metric, Attempting to append a Costly node should return True: ", test_result)
 
 # Keep Stable:
 # - Returns false if adding a node would increase metrics while the metric value is too much higher than the Metric Goal
 # - Returns false if adding a node would decrease metrics while the metric value is too much lower than the Metric Goal
+# - "Too Much" is currently defined as being more than 5 points away from the given goal value in the test_if_given_node_list_will_follow_metric_rule function.
+
+alice_cost_stable_0 = StoryMetric(metric_type=MetricType.COST, value=0, metric_mode=MetricMode.STABLE, character_object=alice)
+alice_cost_stable_70 = StoryMetric(metric_type=MetricType.COST, value=70, metric_mode=MetricMode.STABLE, character_object=alice)
+alice_cost_stable_20 = StoryMetric(metric_type=MetricType.COST, value=20, metric_mode=MetricMode.STABLE, character_object=alice)
+
+print("Alice has Stable 0 Cost Metric, Attempting to append a Costly node should return False: ", test_result)
+print("Alice has Stable 0 Cost Metric, Attempting to append a non-Costly node should return False: ", test_result)
+print("Alice has Stable 70 Cost Metric, Attempting to append a Costly node should return False: ", test_result)
+print("Alice has Stable 70 Cost Metric, Attempting to append a non-Costly node should return False: ", test_result)
+print("Alice has Stable 20 Cost Metric, Attempting to append a non-Costly node should return False: ", test_result)
+print("Alice has Stable 20 Cost Metric, Attempting to append a non-Costly node should return False: ", test_result)
+
 
 # Testing Measuring Uniqueness
 # Scenario 1: Test Uniqueness of a Story: See if it can count unique nodes properly
