@@ -5,7 +5,7 @@ class InitialFrame(ttk.Frame):
     def __init__(self,container):
         super().__init__(master=container, relief="solid")
         self.root = self.master.root
-        self.label = ttk.Label(self, text=str("Welcome!"), font='Helvetica 12 bold')
+        self.label = ttk.Label(self, text=str("Welcome."), font='Helvetica 12 bold')
         self.label.grid(column=0, row=0, padx=0, pady=0, sticky="nsew")
         self.pack(side='bottom',fill='both',expand=True,padx=5,pady=2)
         self.rowconfigure(0,minsize=10,weight=1)

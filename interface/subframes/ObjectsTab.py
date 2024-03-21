@@ -47,7 +47,7 @@ class EntityTab(ttk.Frame):
         for item in resource:
             self.val.append(item.get("name"))
         print(" ".join(self.val))
-        self.listboxVar.set(value=" ".join(self.val))
+        self.listboxVar.set(self.val)
     
     def items_selected(self, event):
         if(len(self.listbox.curselection()) > 0):

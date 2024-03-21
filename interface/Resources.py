@@ -1,4 +1,4 @@
-
+import itertools
 
 class Resources():
     def __new__(cls):
@@ -64,12 +64,14 @@ class Resources():
         self._locations = self._entities.get("locations")
         self._characters = self._entities.get("characters")
 
-    def getObjects(self) -> dict:
+    def getObjects(self) -> list:
         return self._objects
 
-    def getLocations(self) -> dict:
+    def getLocations(self) -> list:
         return self._locations
 
-    def getCharacters(self) -> dict:
+    def getCharacters(self) -> list:
         return self._characters
 
+    def getEntities(self) -> dict:
+        return self._entities

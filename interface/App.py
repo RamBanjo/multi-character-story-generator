@@ -12,6 +12,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.root = self
+        self.resources = Resources()
 
         self.btnLabels = ["Entities","World State","Rules","Actions","Tasks","Initial Graph","Generate"]
         self.optionNumber = -1
@@ -24,7 +25,7 @@ class App(tk.Tk):
         self.subframes[9] = ObjectFrame.InitialFrame(self)
         self.objectFrame = self.subframes[9]
         self.subframes[0] = EntityTabController.EntityTabController(self.objectFrame)
-        self.subframes[1] = WorldstateTab.WorldstateTab(self.objectFrame)
+        self.subframes[1] = WorldstateTab.WorldstateTab(self.objectFrame, self.resources.getEntities)
         self.subframes[2] = ObjectFrame.NumberedFrame(self.objectFrame,2)
         self.subframes[3] = ActionsTab.ActionsTab(self.objectFrame)
         self.subframes[4] = ObjectFrame.NumberedFrame(self.objectFrame,4)
@@ -37,12 +38,12 @@ class App(tk.Tk):
         self.optionFrame = OptionFrame.OptionFrame(self)
         self.optionFrame.pack(side='top',fill='x',padx=5,pady=2)
 
-        self.resources = Resources()
+        
     
     def changeOptionNumber(self, i) -> None:
-        
         self.optionNumber = i
         self.subframes[i].tkraise()
+        self.objectFrame.label.config(text = self.btnLabels[i])
         return
     
     def destroy(self) -> None:

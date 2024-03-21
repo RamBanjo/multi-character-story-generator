@@ -1,7 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from interface.subframes.wstab.GeneralSettingsBox import GeneralSettingsBox
-from interface.subframes.wstab.Tagbox import Tagbox
 
 class Descbox(ttk.Frame):
     def __init__(self, container):
@@ -15,12 +14,9 @@ class Descbox(ttk.Frame):
         self.columnconfigure(1,minsize=300,weight=1)
 
         self.generalsettings = GeneralSettingsBox(self)
-        self.taglist = Tagbox(self)
 
     def fetch(self):
-        self.taglist.fetch()
         self.generalsettings.fetch()
     
     def reset(self):
-        self.taglist.reset()
         self.generalsettings.reset()

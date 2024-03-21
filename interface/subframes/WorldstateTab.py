@@ -23,10 +23,11 @@ The following functions will be implemented:
 '''
 
 class WorldstateTab(ttk.Frame):
-    def __init__(self, container):
+    def __init__(self, container, getResourceMethod):
         super().__init__(container)
         self.root = self.master.root
         self.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
+        self.getResourceMethod = getResourceMethod
 
         self.rowconfigure(0,weight=1)
         self.rowconfigure(1,weight=30)
@@ -37,17 +38,50 @@ class WorldstateTab(ttk.Frame):
         self.entityLabel = ttk.Label(self, text="Entities")
         self.entityLabel.grid(column=0,row=0)
 
-        self.listvar = []
-        self.tklistvar = None
-        self.listbox = None
+        self.val = []
+        self.listboxVar = tk.StringVar(value="")
+        self.generateListboxStringVar()
+
+        self.listbox = tk.Listbox(self, listvariable=self.listboxVar)
+        self.listbox.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
+        self.listbox.bind('<<ListboxSelect>>', self.items_selected)
+
         self.descbox = Descbox(self)
-        self.generate_listbox() #instantiates the listbox, of course.
     
-    def generate_listbox(self):
-        return
+    def generateListboxStringVar(self) -> None:
+        resource = self.getResourceMethod()
+        print(id(resource))
+        # parse the resource
+        self.val.clear()
+        self.val.append("-- Objects --")
+        for item in resource.get("objects"):
+            self.val.append(item.get("name"))
+        self.val.append("-- Locations --")
+        for item in resource.get("locations"):
+            self.val.append(item.get("name"))
+        self.val.append("-- Characters --")
+        for item in resource.get("characters"):
+            self.val.append(item.get("name"))
+        print(" ".join(self.val))
+        self.listboxVar.set(self.val)
     
     def items_selected(self, event):
-        return
+        if(len(self.listbox.curselection()) > 0):
+            # get all selected indices
+            resource = self.getResourceMethod()
+            selected_indices = self.listbox.curselection()[0]
+            if self.listbox.get(selected_indices) == "-- Objects --" or self.listbox.get(selected_indices) == "-- Locations --" or self.listbox.get(selected_indices) == "-- Characters --":
+                return
+            # get selected items
+            print(self.val[selected_indices]) #unused variable, needs to link later.
+            if selected_indices < len(resource.get("objects")):
+                self.objectDetail = resource.get("objects")[selected_indices - 1]
+            elif selected_indices < len(resource.get("objects")) + len(resource.get("locations")):
+                self.objectDetail = resource.get("locations")[selected_indices - len(resource.get("objects")) - 2]
+            else:
+                self.objectDetail = resource.get("characters")[selected_indices - len(resource.get("objects")) - len(resource.get("locations")) - 3]
+            
+            self.descbox.fetch()
     
     def reset(self):
         print("Uhhh reset?")
