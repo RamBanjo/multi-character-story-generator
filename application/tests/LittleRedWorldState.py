@@ -107,6 +107,8 @@ reds_world_state.connect(from_node=random_forest, edge_name="holds", to_node=gol
 
 actor_is_alive = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Alive", value=True)
 target_is_alive = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=True)
+actor_is_not_unconscious =HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="Unconscious", value=True, inverse=True)
+target_is_not_unconscious = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Unconscious", value=True, inverse=True)
 
 actor_eats_children = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="EatsChildren", value=True)
 target_is_child = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Age", value="Child")
@@ -142,7 +144,8 @@ fight = StoryNode(name="Fight", tags={"Type":"Fight"}, charcount=1, target_count
 # Defeat (A defeated character becomes unconscious)
 # Unconscious characters cannot act, but they can wake up after a while. (With Patternless Rule)
 
-defeat = StoryNode(name="Defeat", tags={"Type":"Fight"}, charcount=1, target_count=1)
+target_becomes_unconscious = TagChange(name="Target Becomes Unconscious", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Unconscious", value=True, add_or_remove=ChangeAction.ADD)
+defeat = StoryNode(name="Defeat", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_and_target_shares_location], effects_on_next_ws=[target_becomes_unconscious])
 
 # Threaten (Can cause the target to either become scared or become defiant, either way this forms a new relationship between target and actor)
 # Become Scared
