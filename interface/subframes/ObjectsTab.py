@@ -94,6 +94,9 @@ class EntityTab(ttk.Frame):
                         self.getResourceMethod().append({"name":"New","notes":"","tags":{}})
             self.generateListboxStringVar()
             self.changeMaxLevel.destroy()
+    
+    def fetch(self):
+        self.generateListboxStringVar()
 
     def reset(self):
         self.generateListboxStringVar()

@@ -1,8 +1,10 @@
 import tkinter as tk
 
 import tkinter.ttk as ttk
+from interface.Resources import Resources
 from interface import UtilDefaults,UtilFunctions
 from application.components import WorldState, StoryNode, StoryObjects
+from interface.Resources import Resources
 from interface.subframes.wstab.ButtonTray import ButtonTray
 from interface.subframes.wstab.WorldStateCanvas import WorldStateCanvas
 from interface.subframes.wstab.Descbox import Descbox
@@ -23,11 +25,11 @@ The following functions will be implemented:
 '''
 
 class WorldstateTab(ttk.Frame):
-    def __init__(self, container, getResourceMethod):
+    def __init__(self, container):
         super().__init__(container)
         self.root = self.master.root
         self.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
-        self.getResourceMethod = getResourceMethod
+        self.getResourceMethod = self.root.resources.getEntities
 
         self.rowconfigure(0,weight=1)
         self.rowconfigure(1,weight=30)
@@ -50,7 +52,6 @@ class WorldstateTab(ttk.Frame):
     
     def generateListboxStringVar(self) -> None:
         resource = self.getResourceMethod()
-        print(id(resource))
         # parse the resource
         self.val.clear()
         self.val.append("-- Objects --")
@@ -62,7 +63,6 @@ class WorldstateTab(ttk.Frame):
         self.val.append("-- Characters --")
         for item in resource.get("characters"):
             self.val.append(item.get("name"))
-        print(" ".join(self.val))
         self.listboxVar.set(self.val)
     
     def items_selected(self, event):
@@ -73,15 +73,16 @@ class WorldstateTab(ttk.Frame):
             if self.listbox.get(selected_indices) == "-- Objects --" or self.listbox.get(selected_indices) == "-- Locations --" or self.listbox.get(selected_indices) == "-- Characters --":
                 return
             # get selected items
-            print(self.val[selected_indices]) #unused variable, needs to link later.
-            if selected_indices < len(resource.get("objects")):
+            if selected_indices < len(resource.get("objects"))+1:
                 self.objectDetail = resource.get("objects")[selected_indices - 1]
-            elif selected_indices < len(resource.get("objects")) + len(resource.get("locations")):
+            elif selected_indices < len(resource.get("objects")) + len(resource.get("locations")) + 2:
                 self.objectDetail = resource.get("locations")[selected_indices - len(resource.get("objects")) - 2]
             else:
                 self.objectDetail = resource.get("characters")[selected_indices - len(resource.get("objects")) - len(resource.get("locations")) - 3]
-            
-            self.descbox.fetch()
+            self.descbox.fetch(self.objectDetail)
+    
+    def fetch(self):
+        self.generateListboxStringVar()
     
     def reset(self):
         print("Uhhh reset?")

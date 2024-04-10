@@ -14,6 +14,11 @@ class EntityTabController():
     
     def tkraise(self):
         self.tabs[self.currentTab].tkraise()
+    
+    def fetch(self):
+        self.tabs[0].fetch()
+        self.tabs[1].fetch()
+        self.tabs[2].fetch()
 
     def changeEntityTab(self, i):
         self.currentTab = i

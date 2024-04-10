@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from interface.subframes.wstab.GeneralSettingsBox import GeneralSettingsBox
+from interface.subframes.wstab.Linkbox import Linkbox
 
 class Descbox(ttk.Frame):
     def __init__(self, container):
@@ -14,9 +15,11 @@ class Descbox(ttk.Frame):
         self.columnconfigure(1,minsize=300,weight=1)
 
         self.generalsettings = GeneralSettingsBox(self)
+        self.linkbox = Linkbox(self)
 
-    def fetch(self):
-        self.generalsettings.fetch()
+    def fetch(self, objectDetail):
+        self.generalsettings.fetch(objectDetail)
+        self.linkbox.fetch(objectDetail)
     
     def reset(self):
         self.generalsettings.reset()

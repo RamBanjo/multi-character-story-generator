@@ -18,26 +18,15 @@ class GeneralSettingsBox(ttk.Frame):
         self.nameLabel.grid(column=0,row=1,sticky="es")
 
         self.nameVariable = tk.StringVar(self,"")
-        self.nameEntry = tk.Entry(self,textvariable=self.nameVariable,width=47)
+        self.nameEntry = tk.Entry(self,textvariable=self.nameVariable,width=47, state="readonly")
         self.nameEntry.grid(column=1,columnspan=3,row=1,sticky="ws")
-        self.nameEntry.bind('<KeyRelease>', self.update)
     
-    def fetch(self):
-        object = self.root.objectDetail
+    def fetch(self, object):
+        self.objectDetail = object
         if object != None:
-            self.nameVariable.set(object.name)
+            self.nameVariable.set(object.get("name"))
         else:
             self.nameVariable.set("")
-    
-    def update(self, event):
-        object = self.root.objectDetail
-        if object != None:
-            object.set_name(self.nameVariable.get())
-        # TODO: convert object to the given StoryObject type
-        # i.e. convert from an ObjectNode to a CharacterNode
-
-        self.master.master.generate_listbox()
-        self.master.fetch()
     
     def reset(self):
         self.nameVariable.set("")
