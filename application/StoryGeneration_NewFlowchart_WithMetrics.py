@@ -143,6 +143,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         # The choosing will be like this:
         # 1. From List of Valid Rewrite Rules: Top 5 Rules
         # 2. From List of Valid Task Advancements: Top 5 Advancements (Task Cancels also go here)
+        # TODO: Is it possible to accumulate task cancels into one big cancel task that cancels all failed tasks?
         # 3. If List 2 is empty, We will throw a "Advance towards task location" as one of the possible outcomes in addition to List 1
         # "Advance Towards Task Location" has no score but will always be included along with the Top 5 of the Valid Rewrite Rules
         # It can be weighted to make it more likely in settings
@@ -331,6 +332,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         # The solution might lie in checking the attempt move towards quest
         if force_move_towards_quest_into_top_n:
             final_abs_step = final_story_graph.get_longest_path_length_by_character(character=current_character)
+
             move_towards_quest_container = StoryGenerationActionContainer(action_name="Move Towards Task Location", action_descriptor="Default", action_object=None, action_score=0, perform_index=final_abs_step)
             top_n_valid_actions.append(move_towards_quest_container)
 
@@ -548,56 +550,81 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
 
     current_ws = target_story_graph.make_state_at_step(movement_index)[0]
     char_from_ws = current_ws.node_dict.get(current_character.get_name())
-    optimal_location_object = current_ws.get_optimal_location_towards_task(current_character)
+    optimal_location_object_list = []
+    best_score_so_far = -999
+    optimal_move_actions_with_best_score = []
+    optimal_location_object_list.extend(current_ws.get_optimal_location_towards_task(current_character, return_all_possibilities=True))
     current_location_of_character = current_ws.get_actor_current_location(current_character)
 
-    #if we're in the same location then we don't need to do the things below. Since we don't want to move locations this should return False.
-    if optimal_location_object.get_name() == current_location_of_character.get_name():
+    #If we're in the same location then we don't need to do the things below. Since we don't want to move locations this should return False.
+    if current_location_of_character.get_name() in optimal_location_object_list:
         return False
     
     # go_to_new_location_change = RelChange("Go to Task Loc", node_a=optimal_location_object, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=character_at_step, add_or_remove=ChangeAction.ADD)
     
-    optimal_location_name = optimal_location_object.get_name()
-    go_to_new_location_change = RelChange(name="Go To Task Loc", node_a=optimal_location_object, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, value=None, add_or_remove=ChangeAction.ADD)
+    #Repeat until we find valid location or if we run out of locations
+    while len(optimal_location_object_list) > 0:
 
-    # not_be_in_current_location_change = RelChange("Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=character_at_step, add_or_remove=ChangeAction.REMOVE)
-    not_be_in_current_location_change = RelChange(name="Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.REMOVE, soft_equal=True, value=None)
+        optimal_location_object = optimal_location_object_list[0]
+        optimal_location_name = optimal_location_object.get_name()
 
-    target_location_adjacent_to_current_location = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_LOCATION, edge_name_test=current_ws.DEFAULT_ADJACENCY_EDGE_NAME, object_to_test=optimal_location_object, soft_equal=True)
-    all_requirements = deepcopy(extra_movement_requirements)
-    all_requirements.append(target_location_adjacent_to_current_location)
-    
-    # move_towards_task_location_node = StoryNode("Move Towards Task Location", biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[go_to_new_location_change, not_be_in_current_location_change], required_test_list=[target_location_adjacent_to_current_location])
-    
-    # TODO: Since we want to make the scores matter here... What are some things we are able to do to make the scores matter? As of now, scores don't seem to matter much.
-    # 1. Add a score requirement + a chance to fail if the score doesn't meet requirement? (Harder to test)
-    # 2. Score Negative = Fail, thats it (Not very customizable)
-    # 3. Score under given threshold (Requires an extra parameter)
+        go_to_new_location_change = RelChange(name="Go To Task Loc", node_a=optimal_location_object, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, value=None, add_or_remove=ChangeAction.ADD)
 
-    # Will make it 3 for now but will discuss with Professor later
+        # not_be_in_current_location_change = RelChange("Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=character_at_step, add_or_remove=ChangeAction.REMOVE)
+        not_be_in_current_location_change = RelChange(name="Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.REMOVE, soft_equal=True, value=None)
 
-    move_towards_task_location_node = StoryNode(name="Move Towards "+optimal_location_name, biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[not_be_in_current_location_change, go_to_new_location_change], required_test_list=all_requirements, suggested_test_list=suggested_movement_requirements)
-
-    # TODO: why not translate the stuff here to something valid
-
-    #We have made our custom move towards task location node. We will check to see if it's a valid move to move to that location.
-    movement_validity = target_story_graph.check_continuation_validity(actor=char_from_ws, abs_step_to_cont_from=movement_index, cont_list=[move_towards_task_location_node])
-    
-    # if char_from_ws.get_name() == "Alien God":
-    #     for item in all_requirements:
-    #         print(item)
-    #     print("Alien God Movement Valid (Should be False):", movement_validity)
-
-    if movement_validity:
+        target_location_adjacent_to_current_location = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_LOCATION, edge_name_test=current_ws.DEFAULT_ADJACENCY_EDGE_NAME, object_to_test=optimal_location_object, soft_equal=True)
+        all_requirements = deepcopy(extra_movement_requirements)
+        all_requirements.append(target_location_adjacent_to_current_location)
         
+        # move_towards_task_location_node = StoryNode("Move Towards Task Location", biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[go_to_new_location_change, not_be_in_current_location_change], required_test_list=[target_location_adjacent_to_current_location])
+        
+        # TODO: Since we want to make the scores matter here... What are some things we are able to do to make the scores matter? As of now, scores don't seem to matter much.
+        # 1. Add a score requirement + a chance to fail if the score doesn't meet requirement? (Harder to test)
+        # 2. Score Negative = Fail, thats it (Not very customizable)
+        # 3. Score under given threshold (Requires an extra parameter)
+
+        # Will make it 3 for now but will discuss with Professor later
+
+        move_towards_task_location_node = StoryNode(name="Move Towards "+optimal_location_name, biasweight=0, tags={"Type":"Movement"}, charcount=1, effects_on_next_ws=[not_be_in_current_location_change, go_to_new_location_change], required_test_list=all_requirements, suggested_test_list=suggested_movement_requirements)
+
+        # TODO: why not translate the stuff here to something valid
+
+        #We have made our custom move towards task location node. We will check to see if it's a valid move to move to that location.
+        movement_validity = target_story_graph.check_continuation_validity(actor=char_from_ws, abs_step_to_cont_from=movement_index, cont_list=[move_towards_task_location_node])
+        
+        # if char_from_ws.get_name() == "Alien God":
+        #     for item in all_requirements:
+        #         print(item)
+        #     print("Alien God Movement Valid (Should be False):", movement_validity)
+
+        calc_score = -999
+
         if len(suggested_movement_requirements) > 0:
             calc_score = target_story_graph.calculate_score_from_char_and_cont(actor=char_from_ws, insert_index=movement_index, contlist=[move_towards_task_location_node], purge_count=0, mode=score_calc_mode)
             if calc_score < minimum_action_score_for_valid_movement:
-                return False
+                movement_validity = False
+            
+        if movement_validity:
+            if len(suggested_movement_requirements) <= 0:
+                target_story_graph.insert_story_part(part=move_towards_task_location_node, character=char_from_ws, absolute_step=movement_index)
+                return True
+            else:
+                if calc_score > best_score_so_far:
+                    best_score_so_far = calc_score
+                    optimal_move_actions_with_best_score.clear()
 
-        target_story_graph.insert_story_part(part=move_towards_task_location_node, character=char_from_ws, absolute_step=movement_index)
-        return True
+                if calc_score >= best_score_so_far:
+                    optimal_move_actions_with_best_score.append(move_towards_task_location_node)
+
+        optimal_location_object_list.pop(0)
     
+    if len(suggested_movement_requirements) > 0 and len(optimal_move_actions_with_best_score) > 0:
+        
+        final_chosen_action_node = random.choice(optimal_move_actions_with_best_score)
+        target_story_graph.insert_story_part(part=final_chosen_action_node, character=char_from_ws, absolute_step=movement_index)
+        return True
+
     return False
     
 # def cycle_attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character):

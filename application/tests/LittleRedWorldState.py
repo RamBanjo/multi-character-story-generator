@@ -8,6 +8,7 @@ from application.components.StoryGraphTwoWS import *
 from application.components.StoryNode import *
 from application.components.RelChange import *
 from application.components.UtilityEnums import *
+from application.components.RewriteRuleWithWorldState import *
 
 from application.StoryGeneration_NewFlowchart_WithMetrics import make_base_graph_from_previous_graph
 
@@ -171,10 +172,11 @@ actor_becomes_defiant_of_target = RelChange(name="Actor fears Target", node_a=Ge
 actor_defies_target = StoryNode(name="Actor becomes defiant of Target", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, effects_on_next_ws=[actor_becomes_defiant_of_target], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location])
 
 # Attack (Can lead to a fight, killing, or can lead to the target escaping from the attacker)
-actor_attacks_target = StoryNode(name="Actor attacks Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location])
+# Someone would attack target if they have a reason to kill the other person, or if 
+actor_attacks_target = StoryNode(name="Actor attacks Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location], suggested_test_list=[])
 
-# Escape from Attacker
-actor_escapes_from_attacking_target = StoryNode(name="Actor flees Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location], effects_on_next_ws=[actor_becomes_scared_of_target])
+# Escape from Attacker (This makes them scared of attacker, and thus more likely to run away)
+actor_escapes_from_attacking_target = StoryNode(name="Actor Flees Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location], effects_on_next_ws=[actor_becomes_scared_of_target])
 
 # Get Armed (Requires Red to have some fear of the wolf and share location with Mom)
 
@@ -248,7 +250,7 @@ kill_for_rod = StoryNode(name="Kill for Rod", tags={"Type":"Murder", "costly":Tr
 actor_shares_location_with_rod = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, protection_pillar])
 location_no_longer_holds_rod = RelChange(name="Location Stop Hold Rod", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name="holds", node_b=protection_pillar, add_or_remove=ChangeAction.REMOVE)
 
-take_rod = StoryNode(name="Take Rod", tags={"Type":"Find Treasure"}, charcount=1, required_test_list=[rod_is_not_active_check, actor_shares_location_with_rod], effects_on_next_ws=[actor_holds_rod, location_no_longer_holds_rod])
+take_rod = StoryNode(name="Take Rod", tags={"Type":"Find Treasure"}, charcount=1, target=[protection_pillar], required_test_list=[rod_is_not_active_check, actor_shares_location_with_rod], effects_on_next_ws=[actor_holds_rod, location_no_longer_holds_rod])
 
 # Install Rod (If a house has a rod installed, other characters cannot destroy the house. Rod becomes active. It cannot be picked up in the active state.)
 actor_holds_rod_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="holds", object_to_test=protection_pillar)
@@ -312,31 +314,56 @@ drop_other_actor = StoryNode(name="Actor Drops Target", tags={"Type":"Fight"}, c
 character_likes_treasure_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="LikesTreasure", value=True)
 target_is_a_treasure = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="Valuable", value=True)
 
-#TODO: Make one for each treasure
-take_treasure = StoryNode(name="Take Treasure", tags={"Type":"Collect"}, required_test_list=[character_likes_treasure_check, target_is_a_treasure, actor_and_target_shares_location], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
+take_singing_harp = StoryNode(name="Take Harp", tags={"Type":"Collect"}, actor=[GenericObjectNode.TASK_OWNER], target=[singing_harp], required_test_list=[character_likes_treasure_check, target_is_a_treasure, actor_and_target_shares_location], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
+take_golden_goose = StoryNode(name="Take Goose", tags={"Type":"Collect"}, actor=[GenericObjectNode.TASK_OWNER], target=[golden_goose], required_test_list=[character_likes_treasure_check, target_is_a_treasure, actor_and_target_shares_location], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
 
 # Pick Up Knowledge Trinket (If the character LikesKnowledge and shares location with a KnowledgeObject, they will pick it up)
 character_likes_knowledge_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="LikesKnowledge", value=True)
 target_is_a_knowledge = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="KnowledgeObject", value=True)
 
 #TODO: Make one for each knowledge object
-take_knowledge_object = StoryNode(name="Take Knowledge Object", tags={"Type":"Collect"}, required_test_list=[character_likes_knowledge_check, target_is_a_knowledge, actor_and_target_shares_location], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
+take_knowledge_object = StoryNode(name="Take Knowledge Object", tags={"Type":"Collect"}, actor=[GenericObjectNode.TASK_OWNER], target=[columbo_diary], required_test_list=[character_likes_knowledge_check, target_is_a_knowledge, actor_and_target_shares_location], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
 
 # Gain Consciousness (Unconscious characters wakes up. They must not currently be carried.)
 actor_becomes_conscious = TagChange(name="Actor Becomes Conscious", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag="Unconscious", value=True, add_or_remove=ChangeAction.REMOVE)
 gain_consciousness = StoryNode(name="Gain Consciousness", tags={"Type":"Awaken"}, charcount=1, required_test_list=[actor_is_unconscious], effects_on_next_ws=[actor_becomes_conscious])
 
 # Rules
-# Rule: Someone who fears another character will want to run away from whoever they are fearing --- just run away to an adjacent location (IDK how to handle this)
 # Rule: Defeat -> Kill
+defeat_into_kill = ContinuousJointRule(base_joint=defeat, joint_node=kill_another_actor, rule_name="Defeat Into Kill")
+
 # Rule: Defeat -> Eat
+defeat_into_eat = ContinuousJointRule(base_joint=defeat, joint_node=eat_and_kill, rule_name="Defeat Into Eat")
+
 # Rule: Defeat -> Kidnap
+defeat_into_kidnap = ContinuousJointRule(base_joint=defeat, joint_node=kidnap_target, rule_name="Defeat Into Kidnap")
+
 # Rule: Scare -> Fear Scarer (more likely for children) / Defy Scarer (more likely for adults)
+scare_into_fear = ContinuousJointRule(base_joint=scare, joint_node=actor_scared_of_target, rule_name="Scare Into Fear")
+scare_into_defy = ContinuousJointRule(base_joint=scare, joint_node=actor_defies_target, rule_name="Scare Into Defy")
+
 # Rule: (Patternless) -> Get task to find treasure / knowledge object
+
+random_forest_not_holding_diary_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=columbo_diary, inverse=False)
+find_diary_task = CharacterTask(task_name="Find Diary Task", task_actions=[take_knowledge_object], task_location_name="Random Forest", avoidance_state=[random_forest_not_holding_diary])
+
+random_forest_has_diary 
+
+find_diary_task_stack = TaskStack(stack_name="Find Diary Stack", task_stack=[find_diary_task], task_stack_requirement=)
+get_find_diary_stack = TaskChange()
+
+character_gains_diary_task_memory
+character_doesnt_have_diary_task_memory_check
+patternless_get_find_diary_task = RewriteRule()
+patternless_get_find_goose_task = RewriteRule()
+patternless_get_find_harp_task = RewriteRule()
+
 # Rule: Witness Home Destruction -> Attack
-# Rule: Attack -> Attacker Defeated or Defender Defeated
+witness_home_destruction_into_attack = ContinuousJointRule(base_joint=witness_home_destruction, joint_node=attack_home_intruder, rule_name="Witness Home Destruction Into Attack")
+
+# Rule: Attack -> Attacker Defeated or Defender Defeated (No need to put this --- it will automatically pick a character to be defeated)
 # Rule: Attack -> Defeat and Take Rod (if the Attacker didn't have rod, but the Defender does)
-# Rule: 
+# Rule: (Patternless) -> Attack (This will happen automatically from ็ave Attack Reason)
 
 # Generic Quests
 # Find Rod Quest (We assume characters already know about the rod and will try to get there.)
