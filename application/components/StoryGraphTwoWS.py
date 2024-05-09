@@ -1,6 +1,5 @@
 import sys
 
-from StoryMetrics import MetricMode, MetricType, StoryMetric
 sys.path.insert(0,'')
 
 import random
@@ -14,6 +13,7 @@ from copy import deepcopy
 from application.components.UtilFunctions import *
 from application.components.UtilityEnums import GenericObjectNode, TestType
 from application.components.CharacterTask import CharacterTask, TaskStack
+from application.components.StoryMetrics import MetricMode, MetricType, StoryMetric
 
 '''
 Storygraph!
@@ -1514,6 +1514,7 @@ class StoryGraph:
 
                     #Pull the location information from cur_state
                     char_in_ws = cur_state.node_dict[story_char.get_name()]
+                    # print(char_in_ws, index)
                     location_holding_char = char_in_ws.get_holder()
                     current_step.set_location(location_holding_char)
 
@@ -1997,7 +1998,7 @@ class StoryGraph:
                 all_tags_found = all_tags_found and story_node_tag in tag_list
                 one_tag_found = one_tag_found or story_node_tag in tag_list
 
-                if not soft_equal:
+                if not soft_equal and node.tags.get(story_node_tag, None) is not None:
                     all_tags_found = all_tags_found and node.tags[story_node_tag] == story_node_value
                     one_tag_found = all_tags_found or node.tags[story_node_tag] == story_node_value
             
@@ -2039,13 +2040,12 @@ class StoryGraph:
         
         return len(joint_nodes)
     
-    def get_metric_score(self, metric : StoryMetric):
+    def get_metric_score(self, metric_type : MetricType, character:CharacterNode):
 
-        character = self.character_objects
         character_story_length = self.get_longest_path_length_by_character(character=character)
 
         relevant_nodes_found = 0
-        match metric.metric_type:
+        match metric_type:
             case MetricType.COST:
                 relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("costly", True)])
             case MetricType.UNIQUE:
@@ -2055,18 +2055,77 @@ class StoryGraph:
             case MetricType.PREFER:
                 relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("important_action", True)])
 
-        return round((relevant_nodes_found / character_story_length) * 100, 2)
+        return round((relevant_nodes_found / character_story_length), 2) * 100
             
+    # score_retention: How much the program cares about past graphs?
+    # 0 score_retention (Always forgets past graphs --- only remembers the current graph)
+    # 1 score_retention (Always remembers past graphs)
+    # Any number in between: Past graph's scores are multiplied by that value to the power of the number of graphs that succeeds it.
 
-    def test_if_given_node_list_will_follow_metric_rule(self, metric : StoryMetric, node_list, step, purge_count = 0):
+    # Example: score_retention 0.8 with 5 graph would mean this:
+    # Graph 1 * 0.8^4
+    # Graph 2 * 0.8^3
+    # Graph 3 * 0.8^2
+    # Graph 4 * 0.8^1
+    # Graph 5 * 0.8^0
+    
+    def get_multigraph_metric_score(self, metric_type:MetricType, character:CharacterNode, previous_graphs = [], score_retention = 0):
+        
+        current_score = self.get_metric_score(metric_type=metric_type, character=character)
+
+        if score_retention > 1:
+            score_retention = 1
+        if score_retention < 0:
+            score_retention = 0
+
+        if len(previous_graphs) > 0 and score_retention > 0:
+            past_score_times_len = []
+            forgotten_past_score_times_len = []
+            past_graph_total_nodes = []
+            forgotten_past_graph_total_nodes = []
+
+            for past_graph in previous_graphs:
+                this_graphscore = past_graph.get_metric_score(metric_type=metric_type, character=character)
+                this_graphlength = past_graph.get_longest_path_length_by_character(character)
+                past_score_times_len.append(this_graphscore * this_graphlength)
+                past_graph_total_nodes.append(this_graphlength)
+
+            forgetfulness_exponent = len(past_score_times_len)
+
+            for index in range(0, len(previous_graphs)):
+                
+                forgetfulness_multiplier = math.pow(score_retention, forgetfulness_exponent)
+                forgotten_past_score_times_len.append(past_score_times_len[index] * forgetfulness_multiplier)
+                forgotten_past_graph_total_nodes.append(past_graph_total_nodes[index] * forgetfulness_multiplier)
+                forgetfulness_exponent -= 1
+
+            current_graphlength = self.get_longest_path_length_by_character(character=character)
+            current_score_multed = current_score * self.get_longest_path_length_by_character(character=character)
+            current_score = sum(forgotten_past_score_times_len, start=current_score_multed) / sum(forgotten_past_graph_total_nodes, start=current_graphlength)
+
+        return current_score
+
+    def test_if_given_node_list_will_follow_metric_rule(self, metric : StoryMetric, node_list, step, purge_count = 0, previous_graphs = [], score_retention = 0, verbose = False):
         
         graphcopy = deepcopy(self)
         if purge_count > 0:
             graphcopy.remove_parts_by_count(start_step=step, count=purge_count, actor = metric.character_object)
         graphcopy.insert_multiple_parts(part_list=node_list, character=metric.character_object, absolute_step=step)
 
-        current_score = self.get_metric_score(metric=metric)
-        new_score = graphcopy.get_metric_score(metric=metric)
+        current_score = self.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
+        new_score = graphcopy.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
+
+        #Index 0 has past graph's score and index 1 has that graph's length
+
+        #This works like how it would used to as long as there is a score_retention of greater than 0 and no previous graph.
+        if len(previous_graphs) > 0 and score_retention > 0:
+            
+            current_score = self.get_multigraph_metric_score(metric_type=metric.metric_type, character=metric.character_object, previous_graphs=previous_graphs, score_retention=score_retention)
+            new_score = graphcopy.get_multigraph_metric_score(metric_type=metric.metric_type, character=metric.character_object, previous_graphs=previous_graphs, score_retention=score_retention)
+
+            if verbose:
+                print("Calculated Scores (current -> new) :", current_score, "->", new_score)
+
         score_delta = new_score - current_score
         follows_metric_rule = False
 
@@ -2079,10 +2138,11 @@ class StoryGraph:
                 if current_score > metric.value:
                     follows_metric_rule = score_delta <= 0 or new_score <= metric.value
                 elif current_score < metric.value:
-                    follows_metric_rule = score_delta <= 0 or new_score <= metric.value
+                    follows_metric_rule = score_delta >= 0 or new_score >= metric.value
                 else:
-                    follows_metric_rule = score_delta <= 5
-
+                    follows_metric_rule = abs(score_delta) <= 5
+        if verbose:
+            print("follows_metric_rule value:", follows_metric_rule)
         return follows_metric_rule
         #TODO: Test if the new score follows the metrics' rules. Reminder:
         # Keep Lower: Decreasing the score is not allowed if doing so would take the score out of the acceptable range.

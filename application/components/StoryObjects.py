@@ -83,6 +83,7 @@ class ObjectNode:
     #This assumes that only one thing (location or character) can hold another item at a time.
     def get_holder(self, holds_rel_name = "holds"):
         holds_edge = self.get_incoming_edge(holds_rel_name)
+        # print(holds_edge)
         return holds_edge[0].from_node
 
     def get_list_of_things_held_by_this_item(self, holds_rel_name = "holds"):

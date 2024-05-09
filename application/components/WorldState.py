@@ -257,11 +257,13 @@ class WorldState:
     # Make it address for the case where the input is a list instead of a node. All of the members of the list would need to be addressed.
     # Not needed: We can simply loop through the entire list and run this function for each item in the list.
     def apply_relationship_change(self, relchange_object, reverse=False):
+        # print(relchange_object)
         if (relchange_object.add_or_remove == ChangeAction.ADD and not reverse) or (relchange_object.add_or_remove == ChangeAction.REMOVE and reverse):
             #If the intention is to add, then we add a connection between the nodes
             #If either nodes don't exist already, then they must be added to the list of nodes.
             #Checks if either nodes already exists in the node dict
             #If it doesn't exist, add it to the node dict
+            # print(relchange_object)
             if relchange_object.node_a.get_name() not in self.node_dict:
                 self.node_dict[relchange_object.node_a.get_name()] = relchange_object.node_a
             if relchange_object.node_b.get_name() not in self.node_dict:
@@ -891,7 +893,7 @@ class WorldState:
         actor_from_ws = self.node_dict[actor.get_name()]
         return actor_from_ws.get_incoming_edge(self.DEFAULT_HOLD_EDGE_NAME)[0].from_node
     
-    def get_optimal_location_towards_task(self, actor, verbose=False):
+    def get_optimal_location_towards_task(self, actor, verbose=False, return_all_possibilities=False):
         actor_from_ws = self.node_dict[actor.name]        
         actor_task_stacks = actor_from_ws.list_of_task_stacks
         current_location = self.get_actor_current_location(actor=actor)
@@ -923,6 +925,8 @@ class WorldState:
         if current_location.get_name() in names_of_reachable_locations_with_tasks:
             if verbose:
                 print("Current location has a task.")
+            if return_all_possibilities:
+                return [current_location]
             return current_location
         
         #If there aren't anywhere with tasks, return one random reachable location.
@@ -931,6 +935,9 @@ class WorldState:
             valid_locations.append(current_location)
             if verbose:
                 print("There are no reachable locations with tasks found.")
+
+            if return_all_possibilities:
+                return valid_locations
             return random.choice(valid_locations)
         
         #If there's no tasks in the current location, look for tasks that are in adjacent locations.
@@ -947,6 +954,8 @@ class WorldState:
             if len(names_of_adjacent_locations_with_tasks) > 0:
                 if verbose:
                     print("At least one adjacent location has a task.")
+                if return_all_possibilities:
+                    return [self.node_dict[x] for x in names_of_adjacent_locations_with_tasks]
                 return self.node_dict[random.choice(list(names_of_adjacent_locations_with_tasks))]
             
         #If all previous tests fail, then we need to find the closest path towards the next task, because there certainly is one that doesn't include our own.
@@ -995,7 +1004,10 @@ class WorldState:
 
         #This line finds the locations adjacent to current location that have the least distance between itself and at least one of the task locations
         next_location_candidate_names = [x[0] for x in min_distance_of_adj_loc_dict.items() if x[1] == overall_min_dist_towards_task]
-            
+        
+        if return_all_possibilities:
+            return [self.node_dict[x] for x in next_location_candidate_names]
+        
         return self.node_dict[random.choice(next_location_candidate_names)]
 
     def get_all_locations(self):
