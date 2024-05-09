@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from interface.subframes.wstab.RelInfobox import RelInfobox
 from interface.subframes.wstab.GeneralSettingsBox import GeneralSettingsBox
 from interface.subframes.wstab.Linkbox import Linkbox
 
@@ -16,6 +17,7 @@ class Descbox(ttk.Frame):
 
         self.generalsettings = GeneralSettingsBox(self)
         self.linkbox = Linkbox(self)
+        self.relinfobox = RelInfobox(self)
 
     def fetch(self, objectDetail):
         self.generalsettings.fetch(objectDetail)

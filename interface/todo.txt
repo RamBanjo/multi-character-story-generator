@@ -1,5 +1,0 @@
-- user interface complete
-    (in 16 Jan 2024)
-
-- create data structure corresponding to frontend and api
-

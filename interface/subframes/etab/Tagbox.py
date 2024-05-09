@@ -35,7 +35,6 @@ class Tagbox(ttk.Frame):
             self.tagTable.delete(i)
         # add new tags of current object
         object = self.master.master.objectDetail
-        print(object.get("tags"))
         if object.get("tags") != None:
             # TODO: add law/moral bias for character nodes
             if object.get("biases") != None:

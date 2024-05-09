@@ -64,27 +64,6 @@ class Resources():
         self._locations = self._entities.get("locations")
         self._characters = self._entities.get("characters")
 
-        self._connections = [
-            {
-                "name": "Connects",
-                "fromEntityType": "locations",
-                "toEntityType": "locations",
-                "is2way": True
-            },
-            {
-                "name": "Holds",
-                "fromEntityType": "any",
-                "toEntityType": "objects",
-                "is2way": False
-            },
-            {
-                "name": "Lovers",
-                "fromEntityType": "characters",
-                "toEntityType": "characters",
-                "is2way": True
-            }
-        ]
-
         #WorldstateTab
         self._relations = [
             {
@@ -97,7 +76,11 @@ class Resources():
                     "entityType": "characters",
                     "entityId": 1
                 },
-                "connectionId": 2
+                "connection": {
+                    "name": "Lovers",
+                    "params": "Childhood Friends",
+                    "is2way": True
+                }
             },
             {
                 # Alice holds an apple.
@@ -109,7 +92,27 @@ class Resources():
                     "entityType": "objects",
                     "entityId": 0
                 },
-                "connectionId": 1
+                "connection": {
+                    "name": "Holds",
+                    "params": "Right Hand",
+                    "is2way": False
+                }
+            },
+            {
+                # Apothecary and Building are adjacent.
+                "fromEntityId": {
+                    "entityType": "locations",
+                    "entityId": 0
+                },
+                "toEntityId": {
+                    "entityType": "locations",
+                    "entityId": 1
+                },
+                "connection": {
+                    "name": "Connects",
+                    "params": "On Land",
+                    "is2way": True
+                }
             }
         ]
 
@@ -142,11 +145,11 @@ class Resources():
         else:
             return self.getObjectFromId(entityId.get("entityId"))
 
-    def getConnections(self) -> list:
-        return self._connections
-    
-    def getConnectionFromId(self, connectionId: int) -> dict:
-        return self._connections[connectionId]
-
     def getRelations(self) -> list:
         return self._relations
+
+    def getRelationFromId(self, relationId: int) -> dict:
+        return self._relations[relationId]
+    
+    def addRelation(self, newRel: dict) -> None:
+        self._relations.append(newRel)

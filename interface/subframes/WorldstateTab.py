@@ -12,15 +12,15 @@ from interface.subframes.wstab.Descbox import Descbox
 '''
 WORLD STATE
 A canvas that is composed of the following:
-- All of the Entities that is meant to exist in this story.
-- All of the connections between said Entities, either uni- or bidirectional.
+- All of the Entities that is meant to exist in this story. (ALL OF THEM)
+- All of the connections between said Entities, either uni- or bidirectional. (done)
 - Uhh... I think that's it?
 
 The following functions will be implemented:
-- The ability to add and delete StoryObjects (with a button)
-- The ability to add and delete connections between StoryObjects
-- The ability to modify properties of connections (name and direction)
-- The ability to display all of these in a single canvas.
+- The ability to add and delete StoryObjects (with a button) (NO NEED, ALL OF THEM IS HERE)
+- The ability to add and delete connections between StoryObjects (doing, -> DropdownTab)
+- The ability to modify properties of connections (name and direction) (doing, -> RelInfoBox)
+- The ability to display all of these in a single canvas. (NOT DOING)
 ...Sort of terrifying, but I have to do this in order to have any chance of passing.
 '''
 

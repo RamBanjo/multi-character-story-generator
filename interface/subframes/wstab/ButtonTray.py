@@ -1,7 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from interface.subframes.wstab.DetailedViewTopLevel import DetailedViewTopLevel
-from interface.subframes.wstab.DropdownTabController import DropdownTabController
 
 class ButtonTray(ttk.Frame):
     def __init__(self, container, targetCanvas):
@@ -16,7 +15,6 @@ class ButtonTray(ttk.Frame):
     
     def onClickAddEntity(self):
         self.topLevel = tk.Toplevel(self)
-        self.dropdowntab = DropdownTabController(self.topLevel, self.root)
     
     def onClickDetailedView(self):
         self.topLevel = DetailedViewTopLevel(self)
