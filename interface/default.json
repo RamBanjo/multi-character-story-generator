@@ -1,0 +1,99 @@
+{
+    "entities": {
+      "objects": [
+        {
+          "name": "Apple",
+          "notes": "",
+          "tags": {}
+        },
+        {
+          "name": "Banana",
+          "notes": "",
+          "tags": {}
+        }
+      ],
+      "locations": [
+        {
+          "name": "Apothecary",
+          "notes": "",
+          "tags": {}
+        },
+        {
+          "name": "Building",
+          "notes": "",
+          "tags": {}
+        }
+      ],
+      "characters": [
+        {
+          "name": "Alice",
+          "notes": "",
+          "biases": [
+            0,
+            0
+          ],
+          "tags": {
+            "gender": "F"
+          }
+        },
+        {
+          "name": "Bob",
+          "notes": "",
+          "biases": [
+            0,
+            0
+          ],
+          "tags": {
+            "gender": "M"
+          }
+        }
+      ]
+    },
+    "relations": [
+      {
+        "fromEntityId": {
+          "entityType": "characters",
+          "entityId": 0
+        },
+        "toEntityId": {
+          "entityType": "characters",
+          "entityId": 1
+        },
+        "connection": {
+          "name": "Lovers",
+          "params": "Childhood Friends",
+          "is2way": true
+        }
+      },
+      {
+        "fromEntityId": {
+          "entityType": "characters",
+          "entityId": 0
+        },
+        "toEntityId": {
+          "entityType": "objects",
+          "entityId": 0
+        },
+        "connection": {
+          "name": "Holds",
+          "params": "Right Hand",
+          "is2way": false
+        }
+      },
+      {
+        "fromEntityId": {
+          "entityType": "locations",
+          "entityId": 0
+        },
+        "toEntityId": {
+          "entityType": "locations",
+          "entityId": 1
+        },
+        "connection": {
+          "name": "Connects",
+          "params": "On Land",
+          "is2way": true
+        }
+      }
+    ]
+}

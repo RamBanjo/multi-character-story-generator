@@ -13,14 +13,33 @@ class Menu(tk.Menu):
         self.filemenu = tk.Menu(self,tearoff=0)
         self.add_cascade(label="File",menu=self.filemenu)
         
-        self.filemenu.add_command(label="New", command=self.reset)
-        self.filemenu.add_command(label="Open")
-        self.filemenu.add_command(label="Save")
-        self.filemenu.add_command(label="Save As...")
-        self.filemenu.add_command(label="Export As...")
+        self.filemenu.add_command(label="New", command=self.new)
+        self.filemenu.add_command(label="Import", command=self.importResource)
+        self.filemenu.add_command(label="Export", command=self.exportResource)
         self.filemenu.add_command(label="Quit", command=container.quit)
-
-        self.projectFile = None
     
-    def reset(self) -> None:
-        self.root.reset()
+    def new(self) -> None:
+        self.root.clear()
+    
+    def exportResource(self) -> None:
+        fileFormat = [('JSON Object', '*.json')]
+        filename = filedialog.asksaveasfilename(filetypes=fileFormat, defaultextension=fileFormat)
+
+        if(not filename):
+            return
+        file = open(filename,mode="w")
+        file.write(json.dumps(self.root.resources.getResourceDict(), ensure_ascii=False, indent=2))
+        
+        file.close()
+
+    def importResource(self) -> None:
+        fileFormat = [('JSON Object', '*.json')]
+        filename = filedialog.askopenfilename(filetypes=fileFormat, defaultextension=fileFormat)
+
+        if(not filename):
+            return
+        
+        file = open(filename,mode="r")
+        self.root.resources.setResourceDict(json.loads(file.read()))
+        file.close()
+        self.root.changeOptionNumber(0)

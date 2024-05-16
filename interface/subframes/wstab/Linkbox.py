@@ -64,6 +64,8 @@ class Linkbox(ttk.Frame):
             self.tagTable.insert(parent='', index='end', values=(i, relFromEntity["name"], arrow, relToEntity["name"], relConnection["name"]))
     
     def onClick(self, event):
+        if(len(self.tagTable.selection()) == 0):
+            return
         tag = self.tagTable.item(self.tagTable.selection()[0],'values')
         print(tag)
         self.master.relinfobox.fetch(tag)

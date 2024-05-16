@@ -6,11 +6,10 @@ class EntityTabController():
         # note: this is not a Tk class, so it is not in the tree. It will still inherit some attributes, but it does not get gridded.
         self.root = master.root
         self.tabs = [None,None,None]
-        r = Resources()
         self.currentTab = 0
-        self.tabs[0] = EntityTab(master, r.getObjects,self)
-        self.tabs[1] = EntityTab(master, r.getLocations,self)
-        self.tabs[2] = EntityTab(master, r.getCharacters, self)
+        self.tabs[0] = EntityTab(master, "objects",self)
+        self.tabs[1] = EntityTab(master, "locations",self)
+        self.tabs[2] = EntityTab(master, "characters", self)
     
     def tkraise(self):
         self.tabs[self.currentTab].tkraise()

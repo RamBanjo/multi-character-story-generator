@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from interface import ObjectFrame,OptionFrame,Menu,UtilDefaults,UtilFunctions
+from interface import ObjectFrame,OptionFrame,Menu,UtilFunctions
 from interface.Resources import Resources
 from interface.subframes import ActionsTab,WorldstateTab,ObjectsTab,EntityTabController
 from application.components import StoryObjects,StoryNode, WorldState
@@ -13,6 +13,9 @@ class App(tk.Tk):
         super().__init__()
         self.root = self
         self.resources = Resources()
+
+        self.menu = Menu.Menu(self)
+        self.config(menu=self.menu)
 
         self.btnLabels = ["Entities","World State","Rules","Actions","Tasks","Initial Graph","Generate"]
         self.optionNumber = -1
@@ -37,10 +40,9 @@ class App(tk.Tk):
 
         self.optionFrame = OptionFrame.OptionFrame(self)
         self.optionFrame.pack(side='top',fill='x',padx=5,pady=2)
-
-        
     
     def changeOptionNumber(self, i) -> None:
+        print("change called")
         self.optionNumber = i
         self.subframes[i].fetch()
         self.subframes[i].tkraise()
@@ -49,3 +51,7 @@ class App(tk.Tk):
     
     def destroy(self) -> None:
         super().destroy()
+
+    def clear(self) -> None:
+        self.resources.clear()
+        self.changeOptionNumber(0)

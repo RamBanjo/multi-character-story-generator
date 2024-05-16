@@ -117,5 +117,6 @@ class CreateRelationFrame(ttk.Frame):
         newRel["toEntityId"]["entityId"] = int(toEntityTag[:-1])
         
         self.root.resources.addRelation(newRel)
+        self.master.master.master.master.fetch()
         self.master.destroy()
         return

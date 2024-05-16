@@ -2,7 +2,7 @@ import tkinter as tk
 
 import tkinter.ttk as ttk
 from interface.Resources import Resources
-from interface import UtilDefaults,UtilFunctions
+from interface import UtilFunctions
 from application.components import WorldState, StoryNode, StoryObjects
 from interface.Resources import Resources
 from interface.subframes.wstab.ButtonTray import ButtonTray
@@ -30,6 +30,7 @@ class WorldstateTab(ttk.Frame):
         self.root = self.master.root
         self.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
         self.getResourceMethod = self.root.resources.getEntities
+        self.objectDetail = None
 
         self.rowconfigure(0,weight=1)
         self.rowconfigure(1,weight=30)
@@ -83,6 +84,7 @@ class WorldstateTab(ttk.Frame):
     
     def fetch(self):
         self.generateListboxStringVar()
+        self.descbox.fetch(self.objectDetail)
     
     def reset(self):
         print("Uhhh reset?")

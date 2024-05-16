@@ -1,7 +1,7 @@
 import tkinter as tk
 
 import tkinter.ttk as ttk
-from interface import UtilDefaults,UtilFunctions
+from interface import UtilFunctions
 from application.components import StoryObjects,StoryNode
 from interface.subframes.atab.Descbox import Descbox
 

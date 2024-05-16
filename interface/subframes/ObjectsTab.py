@@ -2,17 +2,17 @@ import tkinter as tk
 
 import tkinter.ttk as ttk
 from application.components import StoryObjects
-from interface import UtilDefaults,UtilFunctions
+from interface import UtilFunctions
 from interface.subframes.etab.Descbox import Descbox
 from interface.subframes.etab.EntityTabButtonPanel import EntityTabButtonPanel
 
 
 class EntityTab(ttk.Frame):
-    def __init__(self,container,getResourceMethod,controller):
+    def __init__(self,container,entityType,controller):
         super().__init__(master=container)
         self.root = self.master.root
         self.grid(column=0, row=1, padx=0, pady=0, sticky="nsew")
-        self.getResourceMethod = getResourceMethod
+        self.entityType = entityType
         self.controller = controller
 
         self.rowconfigure(0,weight=1)
@@ -26,6 +26,8 @@ class EntityTab(ttk.Frame):
 
         self.val = []
         self.listboxVar = tk.StringVar(value="")
+
+        print(self.entityType)
         self.generateListboxStringVar()
 
         self.listbox = tk.Listbox(self, listvariable=self.listboxVar)
@@ -40,13 +42,10 @@ class EntityTab(ttk.Frame):
         self.descbox = Descbox(container=self)
     
     def generateListboxStringVar(self) -> None:
-        resource = self.getResourceMethod()
-        print(id(resource))
         # parse the resource
         self.val.clear()
-        for item in resource:
+        for item in self.root.resources.getResourceDict().get("entities").get(self.entityType):
             self.val.append(item.get("name"))
-        print(" ".join(self.val))
         self.listboxVar.set(self.val)
     
     def items_selected(self, event):
@@ -55,7 +54,7 @@ class EntityTab(ttk.Frame):
             selected_indices = self.listbox.curselection()[0]
             # get selected items
             print(self.val[selected_indices]) #unused variable, needs to link later.
-            self.objectDetail = (self.getResourceMethod())[selected_indices]
+            self.objectDetail = self.root.resources.getResourceDict().get("entities").get(self.entityType)[selected_indices]
             self.descbox.fetch()
     
     def openChangeMaximumWindow(self): 
@@ -69,7 +68,7 @@ class EntityTab(ttk.Frame):
         self.changeMaxLabel.grid(column=0,row=0,columnspan=3,padx=5,pady=5,sticky="nsew")
         self.changeMaxEntry = ttk.Entry(self.changeMaxLevel)
         self.changeMaxEntry.grid(column=0,row=1,columnspan=3,padx=5,pady=5,sticky="nsew")
-        self.changeMaxEntry.insert(0,str(len(self.getResourceMethod())))
+        self.changeMaxEntry.insert(0,str(len(self.root.resources.getResourceDict().get("entities").get(self.entityType))))
 
         self.cancelChangeMax = ttk.Button(self.changeMaxLevel, text="Cancel", command=self.changeMaxLevel.destroy)
         self.cancelChangeMax.grid(column=1,row=2,sticky="nsew")
@@ -85,15 +84,16 @@ class EntityTab(ttk.Frame):
             if(val == 0 or val >= 1000000):
                 return
             else:
-                while(len(self.getResourceMethod()) > val):
-                    self.getResourceMethod().pop()
-                while(len(self.getResourceMethod()) < val):
-                    if(self.getResourceMethod()[0].get("biases") != None):
-                        self.getResourceMethod().append({"name":"New","notes":"","biases":[0,0],"tags":{}})
+                while(len(self.root.resources.getResourceDict().get("entities").get(self.entityType)) > val):
+                    self.root.resources.getResourceDict().get("entities").get(self.entityType).pop()
+                while(len(self.root.resources.getResourceDict().get("entities").get(self.entityType)) < val):
+                    if(self.entityType == "characters"):
+                        self.root.resources.getResourceDict().get("entities").get(self.entityType).append({"name":"New","notes":"","biases":[0,0],"tags":{}})
                     else:
-                        self.getResourceMethod().append({"name":"New","notes":"","tags":{}})
+                        self.root.resources.getResourceDict().get("entities").get(self.entityType).append({"name":"New","notes":"","tags":{}})
             self.generateListboxStringVar()
             self.changeMaxLevel.destroy()
+            self.root.resources.refreshRelations()
     
     def fetch(self):
         self.generateListboxStringVar()
