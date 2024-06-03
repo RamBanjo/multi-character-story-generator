@@ -545,7 +545,7 @@ class StoryGraph:
                     
                 return self.calculate_score_from_char_and_cont(actor=actor, insert_index=task_perform_index, contlist=translated_nodes, has_joint_in_contlist=True, mode=mode)
             case "task_step_already_completed":
-                return 0
+                return 
             case _:
                 return DEFAULT_INVALID_SCORE
 
@@ -567,6 +567,8 @@ class StoryGraph:
             graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=contlist, main_character=actor, abs_step=insert_index)
         else:
             graphcopy.insert_multiple_parts(part_list=contlist, character = actor, absolute_step=insert_index, targets=target_list)
+
+        graphcopy.fill_in_locations_on_self()
 
         #This is the part where score calculations are done.
         #Since we already added actor information when calling insert_multiple_parts and insert_multiple_parts_with_joint_and_nonjoint we don't have to add actor information here again.
@@ -1276,6 +1278,42 @@ class StoryGraph:
         for thing in self.make_story_part_list_of_one_character(character_to_extract=actor):
             print(thing)
 
+    def return_all_nodes_from_characters_storyline_as_stringlist_prettyformat(self, actor):
+        return_list = []
+        return_list.append("ENTIRE STORYLINE OF " + actor.get_name() + " IN " + self.name)
+        for thing in self.make_story_part_list_of_one_character(character_to_extract=actor):
+            return_list.append(str(thing) + " " + str(thing.abs_step))
+            return_list.append("Node Name: " + thing.get_name())
+            return_list.append("Timestep " + str(thing.timestep))
+            return_list.append("Actors: " + thing.get_actor_names())
+            return_list.append("Targets: " + thing.get_target_names())
+            return_list.append("Location: " + thing.location.get_name())
+            return_list.append("----------")
+
+        return return_list
+
+    def print_graph_nodes_to_text_file(self, directory, verbose = False):
+        if verbose:
+            print("Printing Results to Text Files...")
+
+        for actor in self.character_objects:
+            if verbose:
+                print("Current Character:", actor.get_name())
+            stringlist = self.return_all_nodes_from_characters_storyline_as_stringlist_prettyformat(actor=actor)
+            
+            path_name = directory + actor.get_name() + ".txt"
+            f = open(path_name, "w")
+
+            for thing in stringlist:
+                f.write(thing)
+                f.write("\n")
+            
+            if verbose:
+                print("Character Done:", actor.get_name())
+
+        if verbose:
+            print("Finish printing results.")
+
     def print_all_nodes_from_characters_storyline_beautiful_format(self, actor):
         print("ENTIRE STORYLINE OF", actor.get_name(), "IN", self.name)
         step = 0
@@ -1762,8 +1800,6 @@ class StoryGraph:
 
             return True
         else:
-
-            previous_story_node = self.story_parts.get((actor_name, abs_step-1))
             match advance_valid[1]:
 
                 # WS 0 -> Step 0 -> WS 1 -> Step 1 -> WS 2 (Final)...
@@ -1789,18 +1825,29 @@ class StoryGraph:
                         print("Task Step is Already Completed, Task Auto Advanced")
                     task_advance_name = "task_advance_for_" + actor_name + "_" + task_stack_name
 
-                    if advance_stack_object not in last_story_node.effects_on_next_ws:
-                        advance_stack_object = TaskAdvance(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
-                    previous_story_node.effects_on_next_ws.append(advance_stack_object)
+                    advance_stack_object = TaskAdvance(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
+
+                    current_task = task_stack_object.get_current_task()
+                    task_advance_node = StoryNode(name=task_advance_name, effects_on_next_ws=[advance_stack_object], required_test_list=current_task.goal_state)
+
+                    self.insert_story_part(part=task_advance_node, character=actor_object, absolute_step=abs_step)
+                    self.fill_in_locations_on_self()
+                    # previous_story_node.effects_on_next_ws.append(advance_stack_object)
                     return True
                 
                 #Get the story node at this step and add task_cancel to it
                 case "task_step_already_failed":
                     if verbose:
                         print("Task Step is Already Failed, Task Cancelled")
-                    task_advance_name = "task_cancel_for_" + actor_name + "_" + task_stack_name
-                    cancel_stack_object = TaskCancel(name=task_advance_name, actor_name=actor_name, task_stack_name=task_stack_name)
-                    previous_story_node.effects_on_next_ws.append(cancel_stack_object)
+                    task_cancel_name = "task_cancel_for_" + actor_name + "_" + task_stack_name
+                    cancel_stack_object = TaskCancel(name=task_cancel_name, actor_name=actor_name, task_stack_name=task_stack_name)
+
+                    current_task = task_stack_object.get_current_task()
+                    cancel_task_node = StoryNode(name=task_cancel_name, effects_on_next_ws=[cancel_stack_object], required_test_list=current_task.avoidance_state)
+
+                    self.insert_story_part(part=cancel_task_node, character=actor_object, absolute_step=abs_step)
+                    self.fill_in_locations_on_self()
+                    # previous_story_node.effects_on_next_ws.append(cancel_stack_object)
                     return True
                 
                 #Nothing is modified because the task cannot be advanced here
@@ -1825,6 +1872,9 @@ class StoryGraph:
 
         if latest_actor.get_task_stack_by_name(task_stack_name) is None:
             return "not_exist"
+
+        if latest_actor.get_task_stack_by_name(task_stack_name).remove_from_pool:
+            return "already_cancelled"
 
         #Get the current task step, see how far the task has progressed
         last_task_step = self.find_last_step_of_task_stack_from_actor(task_stack_name=task_stack_name, actor_name=actor_name)

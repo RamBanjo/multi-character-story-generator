@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Grandma IN Initial Story Graph
+Actor Gets Diary Task (Actors: Grandma) 0
+Node Name: Actor Gets Diary Task
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Grandma House
+----------
+Scheme Leader Gives Tasks (Actors: Grandma) 1
+Node Name: Scheme Leader Gives Tasks
+Timestep 0
+Actors: Grandma
+Targets: Wolf
+Location: Grandma House
+----------
+Move Towards Forest Village (Actors: Grandma) 2
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Grandma House
+----------
+Actor attacks Target (Actors: Papa Bear) 3
+Node Name: Actor attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Grandma
+Location: Forest Village
+----------
+Move Towards Bear House (Actors: Grandma) 4
+Node Name: Move Towards Bear House
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Forest Village
+----------

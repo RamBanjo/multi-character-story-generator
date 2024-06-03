@@ -65,7 +65,7 @@ class RelChange(SomeChange):
         return return_dict
 
     def __str__(self):
-        return "RelChange: " + str(self.node_a) + " --(" + str(self.edge_name) + ")--> " + str(self.node_b) + " (Value: " + str(self.value) +", TwoWay: " + str(self.two_way) + ", SoftEqual: " + str(self.soft_equal) + ", ChangeAction: " + str(self.add_or_remove) + ")"
+        return str(self.name) + " RelChange: " + str(self.node_a) + " --(" + str(self.edge_name) + ")--> " + str(self.node_b) + " (Value: " + str(self.value) +", TwoWay: " + str(self.two_way) + ", SoftEqual: " + str(self.soft_equal) + ", ChangeAction: " + str(self.add_or_remove) + ")"
 
 class TagChange(SomeChange):
     def __init__(self, name, object_node_name, tag, value, add_or_remove: ChangeAction, **kwargs):

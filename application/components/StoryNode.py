@@ -75,7 +75,8 @@ class StoryNode:
         self.location = new_location
 
     def add_actor(self, new_actor):
-        self.actor.append(new_actor)
+        if new_actor not in self.actor:
+            self.actor.append(new_actor)
 
     def remove_actor(self, remove_actor):
         self.actor.remove(remove_actor)
@@ -84,7 +85,8 @@ class StoryNode:
         self.actor = []
 
     def add_target(self, new_target):
-        self.target.append(new_target)
+        if new_target not in self.target:
+            self.target.append(new_target)
     
     def remove_target(self, remove_target):
         self.target.remove(remove_target)

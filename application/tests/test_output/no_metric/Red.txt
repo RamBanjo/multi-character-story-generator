@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph
+Tell Mom Wolf Real (Actors: Red) 0
+Node Name: Tell Mom Wolf Real
+Timestep 0
+Actors: Red
+Targets: Red's Mom
+Location: Red House
+----------
+Get Visit Place Task (Actors: Red) 1
+Node Name: Get Visit Place Task
+Timestep 0
+Actors: Red
+Targets: 
+Location: Red House
+----------
+Tell Mom Wolf Real (Actors: Red) 2
+Node Name: Tell Mom Wolf Real
+Timestep 0
+Actors: Red
+Targets: Red's Mom
+Location: Red House
+----------
+Move Towards Plains Village (Actors: Red) 3
+Node Name: Move Towards Plains Village
+Timestep 0
+Actors: Red
+Targets: 
+Location: Red House
+----------
+Move Towards Forest Path (Actors: Red) 4
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Red
+Targets: 
+Location: Plains Village
+----------

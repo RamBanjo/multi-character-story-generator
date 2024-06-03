@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Red) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Grandma House
+----------
+Visiting Place (Actors: Red) 1
+Node Name: Visiting Place
+Timestep 0
+Actors: Red
+Targets: 
+Location: Grandma House
+----------
+Move Towards Forest Village (Actors: Red) 2
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Red
+Targets: Forest Village
+Location: Grandma House
+----------
+Move Towards Forest Path (Actors: Red) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Red
+Targets: Forest Path
+Location: Forest Village
+----------
+Move Towards Witch Candy House (Actors: Red) 4
+Node Name: Move Towards Witch Candy House
+Timestep 0
+Actors: Red
+Targets: Witch Candy House
+Location: Forest Village
+----------

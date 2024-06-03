@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Hunter IN Initial Story Graph Continuation # 1
+Wait (Actors: Hunter) 0
+Node Name: Wait
+Timestep 0
+Actors: Hunter
+Targets: 
+Location: Forest Path
+----------
+Move Towards Random Forest (Actors: Hunter) 1
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Hunter
+Targets: Random Forest
+Location: Forest Path
+----------
+Move Towards Forest Path (Actors: Hunter) 2
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Hunter
+Targets: Forest Path
+Location: Random Forest
+----------
+Move Towards Random Forest (Actors: Hunter) 3
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Hunter
+Targets: Random Forest
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Hunter) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Hunter
+Targets: Mountain Valley
+Location: Forest Path
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Alice IN Test SG
+Get Trading Task (Actors: Alice) 0
+Node Name: Get Trading Task
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Alice House
+----------
+Move Towards Hub (Actors: Alice) 1
+Node Name: Move Towards Hub
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Alice House
+----------
+Move Towards Bob House (Actors: Alice) 2
+Node Name: Move Towards Bob House
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Hub
+----------
+Trade Items (Actors: Alice) 3
+Node Name: Trade Items
+Timestep 0
+Actors: Alice
+Targets: Bob
+Location: Bob House
+----------
+Wait (Actors: Alice) 4
+Node Name: Wait
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Bob House
+----------

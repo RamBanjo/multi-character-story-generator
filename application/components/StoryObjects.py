@@ -172,6 +172,9 @@ class CharacterNode(ObjectNode):
         stack_to_remove = self.get_task_stack_by_name(stack_name=task_stack_name)
         self.list_of_task_stacks.remove(stack_to_remove)
 
+    def remove_all_task_stacks(self):
+        self.list_of_task_stacks.clear()
+
     '''Returns the first task in the task stack with the same name. If none can be found, returns None'''
     def get_task_stack_by_name(self, stack_name):
 

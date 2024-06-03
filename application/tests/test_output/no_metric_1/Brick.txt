@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph
+Get Rod Quest for Brick (Actors: Brick) 0
+Node Name: Get Rod Quest for Brick
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Brick House
+----------
+Move Towards Forest Village (Actors: Brick) 1
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Brick House
+----------
+Actor Gets Harp Task (Actors: Brick) 2
+Node Name: Actor Gets Harp Task
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Forest Village
+----------
+Actor Gets Goose Task (Actors: Brick) 3
+Node Name: Actor Gets Goose Task
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Brick) 4
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Forest Village
+----------

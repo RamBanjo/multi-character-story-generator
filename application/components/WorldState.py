@@ -279,6 +279,7 @@ class WorldState:
             #If the intention is to remove, then we remove this specific edge between the nodes (if it exists)
             #Don't delete the nodes, though
             #Check if this exact edge between these exact nodes exists
+            
             node_a_retrieved = self.node_dict.get(relchange_object.node_a.get_name(), None)
             node_b_retrieved = self.node_dict.get(relchange_object.node_b.get_name(), None) #if self.check_connection(node_a=node_a_retrieved, node_b=node_b_retrieved, edge_name=relchange_object.edge_name, edge_value=relchange_object.value, soft_equal=relchange_object.soft_equal):
             
@@ -361,9 +362,9 @@ class WorldState:
 
         #The character performing this task and the character who gave this task aren't legible placeholders
 
-        if task_stack_object.stack_giver_name is not None:
+        if task_stack_object.stack_giver_name in eligible_character_names:
             eligible_character_names.remove(task_stack_object.stack_giver_name)
-        if task_stack_object.stack_owner_name is not None:
+        if task_stack_object.stack_owner_name in eligible_character_names:
             eligible_character_names.remove(task_stack_object.stack_owner_name)
         
         task_stack_object.make_placeholder_string_list()
@@ -424,6 +425,9 @@ class WorldState:
 
                 if task_index > 0:
                     for story_node in task_stack_object.task_stack[task_index-1].task_actions:
+
+                        story_node.location = current_location
+
                         for change in story_node.effects_on_next_ws:
                             equivalent_change = translate_generic_change(change=change, populated_story_node=story_node)
 
@@ -600,8 +604,6 @@ class WorldState:
     def test_story_compatibility_with_conditiontest(self, test):
 
         #Check what kind of test is going to be done here
-
-        # print(test.test_type)
         test_type = test.test_type
         test_result = False
         
@@ -1009,6 +1011,12 @@ class WorldState:
             return [self.node_dict[x] for x in next_location_candidate_names]
         
         return self.node_dict[random.choice(next_location_candidate_names)]
+    
+    def make_all_actors_forget_tasks(self):
+        all_actors = self.get_all_actors()
+
+        for actor in all_actors:
+            actor.remove_all_task_stacks()
 
     def get_all_locations(self):
         return [x for x in self.node_dict.values() if type(x) == LocationNode]
