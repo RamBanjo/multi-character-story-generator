@@ -7,8 +7,24 @@ from statistics import mean
 from application.components.UtilFunctions import get_actor_object_from_list_with_actor_name, replace_multiple_placeholders_with_multiple_change_havers, replace_multiple_placeholders_with_multiple_test_takers, replace_pair_value_with_actual_actors
 
 #, required_tags_list = [], unwanted_tags_list = [], bias_range = dict(), required_test_list = [], suggested_test_list = [], required_tags_list_target = [], unwanted_tags_list_target = [], bias_range_target = dict(), suggested_included_tags = [], suggested_excluded_tags = [], suggested_bias_range = dict(), suggested_included_tags_target = [], suggested_excluded_tags_target = [], suggested_bias_range_target = dict(), condition_tests = [],
+
+'''
+name: The name of this action.
+biasweight: The score that the StoryGenerator will get if a character performs this action. The higher it is, the more likely this action will be performed.
+tags: Tags that describe this StoryNode. Some important tags to note are as follow:
+    'costly':True: Marks the StoryNode as Costly, which makes Cost StoryMetric count this StoryNode as Costly.
+    'important_action':True: Marks the StoryNode as an Important Action, which makes the Preference StoryMetric count this StoryNode as Important
+charcount: How many characters can perform this action. 1 by default. Can be set as a tuple of 2 ints (inclusive range) or -1 (freesized)
+target_count: How many CharacterNode can be targeted by this action. 0 by default. Similarly to charcount, can be set as a tuple of 2 ints or -1.
+timestep: The timestep that this StoryNode is in. When the StoryGraph looks for a pattern of certain storynodes being in a certain order, it will ignore the pattern if there is a timestep difference in one of the storynodes being checked.
+actor: List of actors performing this action. Length should be equal to charcount.
+target: List of targets this action is being performed on. Length should be equal to target_count.
+effects_on_next_ws: List of Changes that will occur after this action was taken.
+required_test_list: List of ConditionTests that must return True for this action to be valid.
+suggested_test_list: List of ConditionTests that will grant extra points (likeliness to be chosen) if they return True.
+'''
 class StoryNode:
-    def __init__(self, name, biasweight=0, tags={"Type":"Placeholder"}, charcount=1, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_test_list = [], suggested_test_list = [], internal_id:int = 0, **kwargs):
+    def __init__(self, name:str, biasweight:int = 0, tags:dict = {"Type":"Placeholder"}, charcount = 1, target_count = 0, timestep = 0, actor = [], target = [], effects_on_next_ws = [], required_test_list = [], suggested_test_list = [], internal_id:int = 0, **kwargs):
         
         #the name of this action.
         self.name = name
@@ -36,14 +52,6 @@ class StoryNode:
 
         #the location where this story happens. If it's a template, then it should be None.
         self.location = None
-        
-        #dict of nodes that leads to this node. Each entry has character's unique ID as key and points to
-        #the node that character performed before arriving at this node.
-        # self.previous_nodes = dict()
-        
-        #dict of nodes that continue from here. Each entry has character's unique ID as key and points to
-        #the node that character will perform after leaving this node.
-        # self.next_nodes = dict()
 
         #timestep property. For template storynodes it will be 0. But once it is assigned to the story the number will never change.
         #This will prevent stories from different timestep from being blended together.
@@ -132,211 +140,7 @@ class StoryNode:
 
     def __ge__(self, rhs):
         return self.get_name() >= rhs.get_name()
-    '''
-    This function adds next_node as the next node for the character object character_reference
 
-    It will also add self as one of next_node's previous nodes! Convenient!
-    '''
-    # def add_next_node(self, next_node, character_reference):
-
-    #     char_name = None
-
-    #     if character_reference is not None:
-    #         char_name = character_reference.get_name()
-
-    #     self.next_nodes[char_name] = next_node
-
-    #     next_node.previous_nodes[char_name] = self
-    #     #next_node.add_actor(character_reference)
-
-
-    '''
-    First, it removes itself from next_node's previous nodes
-
-    Then, it removes next_node from its own next nodes
-    '''
-    # def remove_next_node(self, character_reference):
-        
-    #     char_name = None
-
-    #     if character_reference is not None:
-    #         char_name = character_reference.get_name()
-
-    #     next_node = self.next_nodes[char_name]
-
-    #     del next_node.previous_nodes[char_name]
-    #     del self.next_nodes[char_name]
-
-    # This will test the tests in the required_tests that feature the character's name after replacing all actor placeholders with the character themself.
-    # Deprecation of this function???
-    # def check_character_compatibility(self, character_node):
-
-    #     compatibility = True
-
-    #     #Check if the character contains tags in Required Tags (not compatible if false)
-
-    #     #print("Before All Tests", compatibility)
-    #     # if self.required_tags_list is not None:
-    #     #     for tag_tuple in self.required_tags_list:
-    #     #         compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1])
-
-    #     # #Check if character contains tags in Unwanted Tags (not compatible if true)
-
-    #     # #print("After Req Tags Test", compatibility)
-    #     # if self.unwanted_tags_list is not None:
-    #     #     for tag_tuple in self.unwanted_tags_list:
-    #     #         compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1])
-        
-    #     # #print("After Unwanted Tags Test", compatibility)
-    #     # #Check if character's bias is within the acceptable range (not compatible if false)
-    #     # if self.bias_range is not None:
-    #     #     for bias in self.bias_range:
-    #     #         char_bias_value = character_node.biases[bias]
-    #     #         compatibility = compatibility and char_bias_value >= self.bias_range[bias][0]
-    #     #         compatibility = compatibility and char_bias_value <= self.bias_range[bias][1]
-        
-    #     #print("After Bias Range Test", compatibility)
-    #     #If the character passes all three tests, then return true. Otherwise, return false
-    #     return compatibility
-        
-    # def check_character_compatibility_for_many_characters(self, list_of_chars):
-    #     compatibility = True
-
-    #     for character_node in list_of_chars:
-    #         compatibility = compatibility and self.check_character_compatibility(character_node)
-
-    #     return compatibility
-
-    # def check_target_compatibility(self, character_node, verbose = False):
-        
-    #     compatibility = True
-
-    #     #Check if the character contains tags in Required Tags (not compatible if false)
-
-    #     if self.required_tags_list_target is not None:
-    #         for tag_tuple in self.required_tags_list_target:
-    #             compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1])
-    #             if verbose:
-    #                 print("Result of required tags test", compatibility)
-
-    #     #Check if character contains tags in Unwanted Tags (not compatible if true)
-
-    #     if self.unwanted_tags_list_target is not None:
-    #         for tag_tuple in self.unwanted_tags_list_target:
-    #             compatibility = compatibility and (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1])
-    #             if verbose:
-    #                 print("Result of unwanted tags test", compatibility)
-        
-    #     #Check if character's bias is within the acceptable range (not compatible if false)
-    #     if self.bias_range_target is not None:
-    #         for bias in self.bias_range_target:
-    #             char_bias_value = character_node.biases[bias]
-    #             compatibility = compatibility and char_bias_value >= self.bias_range_target[bias][0]
-    #             if verbose:
-    #                 print("Result of lower bound bias test", compatibility)
-    #                 print(compatibility)
-    #             compatibility = compatibility and char_bias_value <= self.bias_range_target[bias][1]
-    #             if verbose:
-    #                 print("Result of upper bound bias test", compatibility)
-    #                 print(compatibility)
-
-    #     #If the character passes all three tests, then return true. Otherwise, return false
-    #     return compatibility 
-
-    # def check_target_compatibility_for_many_characters(self, list_of_chars):
-    #     compatibility = True
-
-    #     for character_node in list_of_chars:
-    #         compatibility = compatibility and self.check_target_compatibility(character_node)
-
-    #     return compatibility
-
-    # def calculate_bonus_weight_score(self, character_node):
-
-    #     if not self.check_character_compatibility(character_node=character_node):
-    #         return -999
-        
-    #     score = 0
-
-    #     if self.suggested_included_tags is not None:
-    #         for tag_tuple in self.suggested_included_tags:
-    #             if (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1]):
-    #                 score += 1
-
-    #     if self.suggested_excluded_tags is not None:
-    #         for tag_tuple in self.suggested_excluded_tags:
-    #             if (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1]):
-    #                 score += 1
-
-    #     if self.suggested_bias_range is not None:
-    #         for bias in self.suggested_bias_range:
-    #             char_bias_value = character_node.biases[bias]
-    #             if char_bias_value >= self.suggested_bias_range[bias][0] and char_bias_value <= self.suggested_bias_range[bias][1]:
-    #                 score += 1
-
-    #     return score
-    
-    # def calculate_bonus_weight_score_target(self, character_node):
-
-    #     if not self.check_target_compatibility(character_node=character_node):
-    #         return -999
-
-    #     score = 0
-
-    #     if self.suggested_included_tags_target is not None:
-    #         for tag_tuple in self.suggested_included_tags_target:
-    #             if (character_node.tags.get(tag_tuple[0], None) == tag_tuple[1]):
-    #                 score += 1
-
-    #     if self.suggested_excluded_tags_target is not None:
-    #         for tag_tuple in self.suggested_excluded_tags_target:
-    #             if (character_node.tags.get(tag_tuple[0], None) != tag_tuple[1]):
-    #                 score += 1
-
-    #     if self.suggested_bias_range_target is not None:
-    #         for bias in self.suggested_bias_range_target:
-    #             char_bias_value = character_node.biases[bias]
-    #             if char_bias_value >= self.suggested_bias_range_target[bias][0] and char_bias_value <= self.suggested_bias_range_target[bias][1]:
-    #                 score += 1
-
-    #     return score
-
-    # def calculate_weight_score(self, character_node, involve_target=False, mode=0):
-    #     '''
-    #     If max_between_actor_target is set to True AND there are slots for the target, then instead of only doing the bonus weight score for the actor part, it will also calculate the target part and choose max between the two.
-    #     '''
-
-    #     if involve_target and self.target_count > 0:
-
-    #         if self.calculate_bonus_weight_score(character_node) == -999 and self.calculate_bonus_weight_score_target(character_node) == -999:
-    #             return -999
-            
-    #         if self.calculate_bonus_weight_score(character_node) == -999:
-    #             return self.calculate_bonus_weight_score_target(character_node) + self.biasweight
-            
-    #         if self.calculate_bonus_weight_score_target(character_node) == -999:
-    #             return self.calculate_bonus_weight_score(character_node) + self.biasweight
-
-    #         if mode == 1:
-    #             return mean([self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)]) + self.biasweight
-            
-    #         return max(self.calculate_bonus_weight_score(character_node), self.calculate_bonus_weight_score_target(character_node)) + self.biasweight
-
-    #     return self.calculate_bonus_weight_score(character_node) + self.biasweight
-
-    # #Also, we should probably make a function that returns true if either the target compat gets approved or the actor compat gets approved, for the purposes of joint rules
-    # #Use case for this: When we are testing a joint node for a character, we should test if they'd work in either slot because we don't know which slot they would go to.
-    # def check_actor_or_target_compatibility(self, character_node):
-    #     return self.check_character_compatibility(character_node) or self.check_target_compatibility(character_node)
-    
-    # def check_actor_or_target_compatibility_for_many_characters(self, list_of_chars):
-    #     compatibility = True
-
-    #     for character_node in list_of_chars:
-    #         compatibility = compatibility and self.check_actor_or_target_compatibility(character_node)
-
-    #     return compatibility
-    
     def check_if_joint_node(self):
         
         #If this node allows more than 1 character or allows more than 1 target which is an actor then it is a joint node.

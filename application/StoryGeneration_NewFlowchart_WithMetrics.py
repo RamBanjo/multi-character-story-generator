@@ -162,7 +162,6 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 if verbose:
                     print("Currently evaluating:", rule.rule_name, "at", rule_insert_index)
                 rule_score = final_story_graph.calculate_score_from_rule_char_and_cont(actor=current_character, insert_index=rule_insert_index, rule = rule, mode=0)
-
                 
                 #We can use the rule score itself to test whether or not a rule is suitable.
                 #In the event of a normal rule, if one node is invalid the entire sequence will return -999, which lets us know the rule isn't valid.
@@ -227,6 +226,8 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
             for attempt_index in range(0, current_character_pathlength+1):
                 if verbose:
                     print("Evaluating:", task_name, "at", attempt_index)
+                
+                #TODO: Hey, since we already have the task_stack_advance_validity test task_completeness, why do we have to test for both again?
                 task_completeness = final_story_graph.test_task_completeness(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
                 task_valid = final_story_graph.test_task_stack_advance_validity(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
 
@@ -544,6 +545,7 @@ def attempt_apply_task(stack_name, attempt_index, target_story_graph, current_ch
     return advance_success
 
 # TODO (Testing): Test this function
+# TODO (Optimization): This function takes quite a while to run, we need to figure out why.
 # Will return True if changes are made to the story graph and False if not.
 def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character, movement_index, extra_movement_requirements = [], suggested_movement_requirements=[], minimum_action_score_for_valid_movement = 0, score_calc_mode=0, random_optimal_pick = False):
 
@@ -558,15 +560,13 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
     #If we're in the same location then we don't need to do the things below. Since we don't want to move locations this should return False.
     if current_location_of_character.get_name() in optimal_location_object_list:
         return False
-    
-    # go_to_new_location_change = RelChange("Go to Task Loc", node_a=optimal_location_object, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=character_at_step, add_or_remove=ChangeAction.ADD)
-    
+
     #Repeat until we find valid location or if we run out of locations
     while len(optimal_location_object_list) > 0:
         
         choice_no = 0
-        if random_optimal_pick:
-            choice_no = random.randint(0, len(optimal_location_object_list))
+        if random_optimal_pick and len(optimal_location_object_list) > 1:
+            choice_no = random.randint(0, len(optimal_location_object_list)-1)
 
         optimal_location_object = optimal_location_object_list[choice_no]
         optimal_location_name = optimal_location_object.get_name()
@@ -576,7 +576,8 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
         # not_be_in_current_location_change = RelChange("Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=character_at_step, add_or_remove=ChangeAction.REMOVE)
         not_be_in_current_location_change = RelChange(name="Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.REMOVE, soft_equal=True, value=None)
 
-        target_location_adjacent_to_current_location = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_LOCATION, edge_name_test=current_ws.DEFAULT_ADJACENCY_EDGE_NAME, object_to_test=optimal_location_object, soft_equal=True)
+        target_location_adjacent_to_current_location = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_LOCATION, edge_name_test=current_ws.DEFAULT_ADJACENCY_EDGE_NAME, object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
+        
         all_requirements = deepcopy(extra_movement_requirements)
         all_requirements.append(target_location_adjacent_to_current_location)
         

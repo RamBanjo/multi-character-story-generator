@@ -90,7 +90,7 @@ class WorldState:
 
         node_a_retrieved = self.node_dict.get(node_a.get_name(), None)
         node_b_retrieved = self.node_dict.get(node_b.get_name(), None)
-
+        
         if node_a_retrieved is None or node_b_retrieved is None:
             return False
 
@@ -606,7 +606,7 @@ class WorldState:
         #Check what kind of test is going to be done here
         test_type = test.test_type
         test_result = False
-        
+
         match test_type:
             case TestType.HELD_ITEM_TAG:
                 test_result = self.held_item_tag_check(holder_test=test.holder_to_test, value_test=test.tag_to_test, tag_test=test.value_to_test)

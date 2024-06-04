@@ -456,7 +456,6 @@ class StoryGraph:
                     insert_point += len(rule.story_condition)
                     
                 cont_valid = self.check_continuation_validity(actor=actor, abs_step_to_cont_from=insert_point, cont_list=rule.story_change, target_list=rule.target_list, purge_count=purge_count)
-
             pattern_found_at_step = pattern_found_at_step and cont_valid
 
         else:
@@ -1504,7 +1503,6 @@ class StoryGraph:
                         for current_test_to_check in equivalent_tests:
                             # print(current_test_to_check)
                             if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
-                                
                                 # print("failed test", current_test_to_check)
                                 return False
         return True

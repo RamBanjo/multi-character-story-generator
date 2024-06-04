@@ -60,7 +60,7 @@ magic_temple = LocationNode(name="Magic Temple", tags={"Type":"Location", "Home"
 red_house = LocationNode(name="Red House", tags={"Type":"Location", "Home":True, "Demolished":False}, internal_id=27)
 hunter_house = LocationNode(name="Hunter House", tags={"Type":"Location", "Home":True, "Demolished":False}, internal_id=28)
 
-list_of_objects = [red, wolf, brick_pig,grandma, hunter, mom, wood_pig, papabear, witch, protection_pillar, columbo_diary, golden_goose, singing_harp, forest_village, bear_house, grandma_house, brick_pig_house, witch_candy_house, random_forest, forest_path, plains_village, mountain_valley, mountain_village, wood_pig_house, magic_temple, red_house, hunter_house]
+list_of_objects = [red, wolf, brick_pig, grandma, hunter, mom, wood_pig, papabear, witch, protection_pillar, columbo_diary, golden_goose, singing_harp, forest_village, bear_house, grandma_house, brick_pig_house, witch_candy_house, random_forest, forest_path, plains_village, mountain_valley, mountain_village, wood_pig_house, magic_temple, red_house, hunter_house]
 
 reds_world_state = WorldState(name="Reds World State", objectnodes=list_of_objects)
 
@@ -374,65 +374,37 @@ patternless_into_stop_fear = RewriteRule(story_condition=[], story_change=[stop_
 list_of_rules.append(patternless_into_stop_fear)
 
 # Rule: (Patternless) -> Get task to find treasure / knowledge object
-def make_find_item_rule(item_to_find, item_type, item_liking_tag, location_holding_item):
+def make_find_item_rule(item_to_find, item_liking_tag, location_holding_item):
     
     character_likes_item_type_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag=item_liking_tag, value=True)
-    take_quest_item = StoryNode(name="Take Quest Item", tags={"Type":"Collect"}, actor=[GenericObjectNode.TASK_OWNER], target=[item_to_find], required_test_list=[character_likes_item_type_check, actor_is_alive], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
+    take_quest_item = StoryNode(name="Take Quest Item", tags={"Type":"Collect"}, actor=[GenericObjectNode.TASK_OWNER], target=[item_to_find], required_test_list=[actor_is_alive, actor_is_not_unconscious], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
 
-    location_no_longer_has_item_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=columbo_diary, inverse=True)
+    location_no_longer_has_item_check = HasEdgeTest(object_from_test=location_holding_item, edge_name_test="holds", object_to_test=item_to_find, inverse=True)
     find_item_task = CharacterTask(task_name="Find Item Quest", task_actions=[take_quest_item], task_location_name=location_holding_item.get_name(), avoidance_state=[location_no_longer_has_item_check])
 
-    location_has_item_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=columbo_diary)
+    location_has_item_check = HasEdgeTest(object_from_test=location_holding_item, edge_name_test="holds", object_to_test=item_to_find)
     
     memory_name = item_to_find.get_name() + "Memory"
-    character_no_quest_memory_check = HasTagTest(object_to_test=GenericObjectNode.TASK_OWNER, tag=memory_name, value=True, inverse=True)
-    character_gains_quest_memory_chenge = TagChange(name="Gain Task Quest Memory", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag=memory_name, value=True, add_or_remove=ChangeAction.ADD)
+    character_no_quest_memory_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag=memory_name, value=True, inverse=True)
+    character_gains_quest_memory_change = TagChange(name="Gain Task Quest Memory", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag=memory_name, value=True, add_or_remove=ChangeAction.ADD)
 
     find_item_stack = TaskStack(stack_name="Find Item Stack", task_stack=[find_item_task], task_stack_requirement=[])
-# random_forest_not_holding_diary_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=columbo_diary, inverse=False)
-# find_diary_task = CharacterTask(task_name="Find Diary Task", task_actions=[take_knowledge_object], task_location_name="Random Forest", avoidance_state=[random_forest_not_holding_diary_check])
 
-# random_forest_has_diary_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=columbo_diary)
+    find_item_change = TaskChange(name="Find Item TaskChange", task_stack=find_item_stack, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_giver_name=GenericObjectNode.GENERIC_ACTOR)
 
-# find_diary_task_stack = TaskStack(stack_name="Find Diary Stack", task_stack=[find_diary_task], task_stack_requirement=[])
-# get_find_diary_stack = TaskChange(name="Get Find Diary Stack", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=find_diary_task_stack)
+    get_find_item_task_node = StoryNode(name="Gain Find Item Quest", tags={"Type":"GetTask"}, effects_on_next_ws=[find_item_change, character_gains_quest_memory_change], required_test_list=[character_no_quest_memory_check, location_has_item_check, character_likes_item_type_check])
 
-# character_gains_diary_task_memory = TagChange(name="Remember Diary Task", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag="HasDiaryTaskMemory", value=True, add_or_remove=ChangeAction.ADD)
-# character_doesnt_have_diary_task_memory_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="HasDiaryTaskMemory", value=True, inverse=True)
-# actor_gets_diary_task_action = StoryNode(name="Actor Gets Diary Task", tags={"Type":"GetTask"}, required_test_list=[character_doesnt_have_diary_task_memory_check, character_likes_knowledge_check, actor_is_alive, random_forest_has_diary_check], effects_on_next_ws=[character_gains_diary_task_memory])
+    patternless_into_find_item_node = RewriteRule(story_condition=[], story_change=[get_find_item_task_node], name="Patternless into Find Item Task Node")
 
-# patternless_get_find_diary_task = RewriteRule(story_condition=[], story_change=[actor_gets_diary_task_action], name="Patternless Find Diary")
+    return patternless_into_find_item_node
 
-# random_forest_not_holding_goose_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=golden_goose, inverse=False)
-# find_goose_task = CharacterTask(task_name="Find Goose Task", task_actions=[take_golden_goose], task_location_name="Random Forest", avoidance_state=[random_forest_not_holding_goose_check])
+patternless_get_find_harp_task = make_find_item_rule(item_to_find=singing_harp, item_liking_tag="LikesTreasure", location_holding_item=random_forest)
+patternless_get_find_diary_task = make_find_item_rule(item_to_find=columbo_diary, item_liking_tag="LikesKnowledge", location_holding_item=random_forest)
+patternless_get_find_goose_task = make_find_item_rule(item_to_find=golden_goose, item_liking_tag="LikesTreasure", location_holding_item=random_forest)
 
-# random_forest_has_goose_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=golden_goose)
-
-# find_goose_task_stack = TaskStack(stack_name="Find Goose Stack", task_stack=[find_goose_task], task_stack_requirement=[])
-# get_find_goose_stack = TaskChange(name="Get Find Goose Stack", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=find_goose_task_stack)
-
-# character_gains_goose_task_memory = TagChange(name="Remember Goose Task", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag="HasGooseTaskMemory", value=True, add_or_remove=ChangeAction.ADD)
-# character_doesnt_have_goose_task_memory_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="HasGooseTaskMemory", value=True, inverse=True)
-# actor_gets_goose_task_action = StoryNode(name="Actor Gets Goose Task", tags={"Type":"GetTask"}, required_test_list=[character_doesnt_have_goose_task_memory_check, character_likes_treasure_check, actor_is_alive, random_forest_has_goose_check], effects_on_next_ws=[character_gains_goose_task_memory])
-
-# patternless_get_find_goose_task = RewriteRule(story_condition=[], story_change=[actor_gets_goose_task_action], name="Patternless Find Goose")
-
-# random_forest_not_holding_harp_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=singing_harp, inverse=False)
-# find_harp_task = CharacterTask(task_name="Find Harp Task", task_actions=[take_singing_harp], task_location_name="Random Forest", avoidance_state=[random_forest_not_holding_harp_check])
-
-# random_forest_has_harp_check = HasEdgeTest(object_from_test=random_forest, edge_name_test="holds", object_to_test=singing_harp)
-
-# find_harp_task_stack = TaskStack(stack_name="Find Harp Stack", task_stack=[find_harp_task], task_stack_requirement=[])
-# get_find_harp_stack = TaskChange(name="Get Find Harp Stack", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=find_harp_task_stack)
-
-# character_gains_harp_task_memory = TagChange(name="Remember Harp Task", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag="HasHarpTaskMemory", value=True, add_or_remove=ChangeAction.ADD)
-# character_doesnt_have_harp_task_memory_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="HasHarpTaskMemory", value=True, inverse=True)
-# actor_gets_harp_task_action = StoryNode(name="Actor Gets Harp Task", tags={"Type":"GetTask"}, required_test_list=[character_doesnt_have_harp_task_memory_check, character_likes_treasure_check, actor_is_alive, random_forest_has_harp_check], effects_on_next_ws=[character_gains_harp_task_memory])
-
-# patternless_get_find_harp_task = RewriteRule(story_condition=[], story_change=[actor_gets_harp_task_action], name="Patternless Find Harp")
-# list_of_rules.append(patternless_get_find_harp_task)
-# list_of_rules.append(patternless_get_find_diary_task)
-# list_of_rules.append(patternless_get_find_goose_task)
+list_of_rules.append(patternless_get_find_harp_task)
+list_of_rules.append(patternless_get_find_diary_task)
+list_of_rules.append(patternless_get_find_goose_task)
 
 # Rule: Patternless into Witness Home Destruction
 patternless_witness_home_destruction = JoiningJointRule(base_actions=None, joint_node=witness_home_destruction, rule_name="Patternless Join Witness Home Destruction")
@@ -720,19 +692,19 @@ movement_requirement = [actor_is_alive, actor_is_not_unconscious]
 #Uncomment each block for the desired result
 #No Metrics
 
-generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, movement_requirement=movement_requirement)
-base_folder_name = "no_metric"
+generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=15, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=False)
+base_folder_name = "no_metric_try_replicate_bug"
 
 # x0 Retention
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, movement_requirement=movement_requirement, metric_retention=0)
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0)
 # base_folder_name = "x0_metric"
 
 # x0.5 Retention
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, movement_requirement=movement_requirement, metric_retention=0.5)
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0.5)
 # base_folder_name = "xhalf_metric"
 
 # x1 Retention
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, movement_requirement=movement_requirement, metric_retention=1)
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=1)
 # base_folder_name = "x1_metric"
 
 finish_gen_time = datetime.now()
@@ -746,7 +718,7 @@ graphcounter = 1
 
 for generated_graph in generated_graph_list:
     print("Cycle Number:", str(graphcounter))
-    fullpath = base_directory + base_folder_name + "/" + str(graphcounter) + "_"
+    fullpath = base_directory + base_folder_name + "/" + str(graphcounter) + "/"
     if not os.path.exists(fullpath):
         os.makedirs(fullpath)
 
@@ -765,3 +737,6 @@ print("Generation Complete! Yippee!!")
 
 # 3. Something is wrong with the obtain item quests. Fix those.
 # Might want to delete all those and rewrite it as function. Write them in isolation before integrating it into the main code.
+# DONE: It should work now, it's worked in isolation before.
+
+#TODO: It seems that for some reason patternless rules take longer to check. Or is it because it's not a joint rule? WAit nvm Attack Into Defeat also takes a while
