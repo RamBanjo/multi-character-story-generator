@@ -17,7 +17,7 @@ from application.components.RelChange import *
 from application.components.UtilityEnums import *
 from application.components.RewriteRuleWithWorldState import *
 
-from application.StoryGeneration_NewFlowchart_WithMetrics import generate_story_from_starter_graph, make_base_graph_from_previous_graph, generate_multiple_graphs
+from application.StoryGeneration_NewFlowchart_WithMetrics import generate_story_from_starter_graph, make_base_graph_from_previous_graph, generate_multiple_graphs, attempt_move_towards_task_loc
 
 alice = CharacterNode(name="Alice", internal_id=0)
 bob = ObjectNode(name="Bob", tags={"Type":"NoStoryCharacter"}, internal_id=1)
@@ -94,27 +94,49 @@ test_sg.insert_story_part(part=get_trading_task_node, character=alice, location=
 
 # test_sg.print_all_node_beautiful_format()
 
-start_gen_time = datetime.now()
+# start_gen_time = datetime.now()
+
+attempt_move_towards_task_loc(target_story_graph=test_sg, current_character=alice, movement_index=1)
+attempt_move_towards_task_loc(target_story_graph=test_sg, current_character=alice, movement_index=2)
+test_sg.attempt_advance_task_stack(task_stack_name="Trading Up Laptop", actor_name="Alice", abs_step=3, verbose=True)
+attempt_move_towards_task_loc(target_story_graph=test_sg, current_character=alice, movement_index=4)
+attempt_move_towards_task_loc(target_story_graph=test_sg, current_character=alice, movement_index=5)
+test_sg.attempt_advance_task_stack(task_stack_name="Trading Up Laptop", actor_name="Alice", abs_step=6, verbose=True)
+
+
+new_sg = make_base_graph_from_previous_graph(previous_graph=test_sg, graph_name="Next Graph")
+attempt_move_towards_task_loc(target_story_graph=new_sg, current_character=alice, movement_index=1)
+attempt_move_towards_task_loc(target_story_graph=new_sg, current_character=alice, movement_index=2)
+new_sg.attempt_advance_task_stack(task_stack_name="Trading Up Laptop", actor_name="Alice", abs_step=3, verbose=True)
+attempt_move_towards_task_loc(target_story_graph=new_sg, current_character=alice, movement_index=4)
+attempt_move_towards_task_loc(target_story_graph=new_sg, current_character=alice, movement_index=5)
+new_sg.attempt_advance_task_stack(task_stack_name="Trading Up Laptop", actor_name="Alice", abs_step=6, verbose=True)
+attempt_move_towards_task_loc(target_story_graph=new_sg, current_character=alice, movement_index=7)
+attempt_move_towards_task_loc(target_story_graph=new_sg, current_character=alice, movement_index=8)
+attempt_move_towards_task_loc(target_story_graph=new_sg, current_character=alice, movement_index=9)
+
+new_sg.print_all_node_beautiful_format()
+
 # new_graph = generate_story_from_starter_graph(init_storygraph=test_sg, list_of_rules=[], required_story_length=5, verbose=True)
 
-list_of_graphs = generate_multiple_graphs(initial_graph=test_sg, list_of_rules=[], required_story_length=30, max_storynodes_per_graph=5, verbose=True)
+# list_of_graphs = generate_multiple_graphs(initial_graph=test_sg, list_of_rules=[], required_story_length=30, max_storynodes_per_graph=5, verbose=True)
 
-finish_gen_time = datetime.now()
+# finish_gen_time = datetime.now()
 
-print("xxx")
-print("Generation Time:", str(finish_gen_time-start_gen_time))
+# print("xxx")
+# print("Generation Time:", str(finish_gen_time-start_gen_time))
 
-# new_graph.print_all_node_beautiful_format()
-# # new_graph.make_latest_state().print_all_edges()
+# # new_graph.print_all_node_beautiful_format()
+# # # new_graph.make_latest_state().print_all_edges()
 
-# latest_alice = new_graph.make_latest_state().node_dict.get("Alice")
-# print(latest_alice)
+# # latest_alice = new_graph.make_latest_state().node_dict.get("Alice")
+# # print(latest_alice)
 
-graphno = 1
-for graph in list_of_graphs:
+# graphno = 1
+# for graph in list_of_graphs:
 
-    cur_dir = "application/tests/test_output/multigraph_exam/graph_" + str(graphno) + "/" 
-    graph.print_graph_nodes_to_text_file(directory=cur_dir)
-    graphno += 1
+#     cur_dir = "application/tests/test_output/multigraph_exam/graph_" + str(graphno) + "/" 
+#     graph.print_graph_nodes_to_text_file(directory=cur_dir)
+#     graphno += 1
 
 # print(new_graph.make_latest_state().node_dict["Alice"].get_list_of_things_held_by_this_item()[0])

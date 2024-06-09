@@ -69,6 +69,10 @@ class StoryGraph:
         # Whenever a task with a preset dict here is being added, use that preset dict as input
         self.placeholder_dicts_of_tasks = dict()
 
+        # Contains a tuple of Actor Name and Cancelled Task Name
+        # Once a task is cancelled it goes in here. No Cancelled Tasks must be advanced.
+        self.cancelled_tasks = []
+
     def export_object_as_dict(self) -> dict:
 
         export_dict = dict()
@@ -1310,6 +1314,7 @@ class StoryGraph:
             if verbose:
                 print("Character Done:", actor.get_name())
 
+        f.close()
         if verbose:
             print("Finish printing results.")
 
@@ -1325,6 +1330,7 @@ class StoryGraph:
             print("Location:", thing.location.get_name())
             print("----------")
 
+    #TODO: Skip certain parts of this check if patternless? Make it a preliminary check?
     def check_for_pattern_in_storyline(self, pattern_to_test, character_to_extract, verbose=False):
 
         #preliminary check: check if the character exists inside of the storyline, return false if it does not
@@ -1335,7 +1341,9 @@ class StoryGraph:
         #The only difference is that we will require way, way less inputs.
         character_storyline = self.make_story_part_list_of_one_character(character_to_extract)
 
-        #print(character_storyline)
+        #if there is no pattern, then there is always a pattern.
+        if len(pattern_to_test) == 0:
+            return True, range(0, len(character_storyline)+1)
 
         list_of_subgraph_locs = []
 
@@ -1457,6 +1465,8 @@ class StoryGraph:
         graphcopy.update_list_of_changes()
         graphcopy.refresh_longest_path_length()
 
+        # graphcopy.print_all_node_beautiful_format()
+
         #We delegate the checking of worldstates fo the worldstate validity function
         validity = graphcopy.check_worldstate_validity_on_own_graph(abs_step_to_cont_from)
         del(graphcopy)
@@ -1499,7 +1509,7 @@ class StoryGraph:
                     for current_test_to_convert in current_step.required_test_list:
 
                         equivalent_tests = translate_generic_test(current_test_to_convert, current_step)
-
+                        # print(equivalent_tests)
                         for current_test_to_check in equivalent_tests:
                             # print(current_test_to_check)
                             if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
@@ -1710,7 +1720,7 @@ class StoryGraph:
                     current_story_part.actor = []
                     newnode = self.insert_story_part(part=current_story_part, character=main_character, location=current_location, absolute_step=current_insert_index)
 
-                    
+    #TODO (Optimization): Do something to remove the test_task_stack_advance_validity because we've already tested the validity before 
     def attempt_advance_task_stack(self, task_stack_name, actor_name, abs_step, verbose=False):
         # Get the Task Stack Object.
         
@@ -1844,6 +1854,9 @@ class StoryGraph:
                     cancel_task_node = StoryNode(name=task_cancel_name, effects_on_next_ws=[cancel_stack_object], required_test_list=current_task.avoidance_state)
 
                     self.insert_story_part(part=cancel_task_node, character=actor_object, absolute_step=abs_step)
+
+                    cancel_tuple = (actor_name, task_stack_name)
+                    self.cancelled_tasks.append(cancel_tuple)
                     self.fill_in_locations_on_self()
                     # previous_story_node.effects_on_next_ws.append(cancel_stack_object)
                     return True
@@ -1871,8 +1884,9 @@ class StoryGraph:
         if latest_actor.get_task_stack_by_name(task_stack_name) is None:
             return "not_exist"
 
-        if latest_actor.get_task_stack_by_name(task_stack_name).remove_from_pool:
-            return "already_cancelled"
+        actor_stack_tuple = (actor_name, task_stack_name)
+        if latest_actor.get_task_stack_by_name(task_stack_name).remove_from_pool or actor_stack_tuple in self.cancelled_tasks:
+            return "removed_from_pool"
 
         #Get the current task step, see how far the task has progressed
         last_task_step = self.find_last_step_of_task_stack_from_actor(task_stack_name=task_stack_name, actor_name=actor_name)

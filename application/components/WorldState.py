@@ -146,6 +146,10 @@ class WorldState:
 
         #new edge
         new_edge = Edge(edge_name, from_node, to_node, value)
+        
+        #don't add if there are dupes
+        if new_edge in self.edges:
+            return
 
         #add stuff to the nodes
         from_node.add_outgoing_edge(new_edge)
@@ -499,7 +503,7 @@ class WorldState:
         if task_stack is None:
             return False
         
-        if not task_stack.mark_current_task_as_complete(abs_step):
+        if not task_stack.mark_current_task_as_complete(completion_step = abs_step):
             return False
 
         return True
@@ -528,6 +532,31 @@ class WorldState:
         for edge in self.edges:
             print("- {}".format(edge))
         print("======")
+
+    def return_all_edges_as_string_list(self):
+        string_list = []
+        string_list.append("=== List of Edges in {} ===".format(self.name))
+        for edge in self.edges:
+            string_list.append("- {}".format(edge))
+        
+        return string_list
+    
+    def print_wsedges_to_text_file(self, directory, verbose = False):
+        if verbose:
+            print("Printing World State...")
+
+        strings_to_print = self.return_all_edges_as_string_list()
+
+        path_name = directory + self.name + ".txt"
+        f = open(path_name, "w")
+
+        for thing in strings_to_print:
+            f.write(thing)
+            f.write("\n")
+
+        f.close()    
+        if verbose:
+            print("Finish printing results.")
 
     def test_story_compatibility_with_storynode(self, story_node):
 
@@ -897,7 +926,7 @@ class WorldState:
     
     def get_optimal_location_towards_task(self, actor, verbose=False, return_all_possibilities=False):
         actor_from_ws = self.node_dict[actor.name]        
-        actor_task_stacks = actor_from_ws.list_of_task_stacks
+        actor_task_stacks = [x for x in actor_from_ws.list_of_task_stacks if not x.remove_from_pool]
         current_location = self.get_actor_current_location(actor=actor)
         
         names_of_locations_with_tasks = set()

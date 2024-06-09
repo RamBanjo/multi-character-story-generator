@@ -10,7 +10,7 @@ from application.components.RelChange import *
 from application.components.UtilityEnums import *
 from application.components.RewriteRuleWithWorldState import *
 
-from application.StoryGeneration_NewFlowchart_WithMetrics import attempt_move_towards_task_loc, perform_wait_action
+from application.StoryGeneration_NewFlowchart_WithMetrics import attempt_move_towards_task_loc, perform_wait_action, make_base_graph_from_previous_graph
 #The Illusion of Free Choice...
 
 alice = CharacterNode(name="Alice", internal_id=0)
@@ -44,9 +44,16 @@ testsg.fill_in_locations_on_self()
 #Since we gave bonus points for fun place and minus points for exercise place, we expect Alice to go to either the Concert or the Arcade.
 
 #In the event that minimum points requirement of more than 10 is needed, we would see that there is no valid options because the points requirement for FunPlace is too low
-movement_success = attempt_move_towards_task_loc(target_story_graph=testsg, current_character=alice, movement_index=1, suggested_movement_requirements=suggested_movements, minimum_action_score_for_valid_movement=20)
+movement_success = attempt_move_towards_task_loc(target_story_graph=testsg, current_character=alice, movement_index=1, suggested_movement_requirements=suggested_movements, minimum_action_score_for_valid_movement=10)
 print("Attempt Movement Success:", movement_success)
 
 testsg.fill_in_locations_on_self()
 
-testsg.print_all_node_beautiful_format()
+# testsg.print_all_node_beautiful_format()
+
+next_sg = make_base_graph_from_previous_graph(previous_graph=testsg, graph_name="Other Graph")
+
+next_sg.print_all_node_beautiful_format()
+
+movement_success = attempt_move_towards_task_loc(target_story_graph=next_sg, current_character=alice, movement_index=1, suggested_movement_requirements=suggested_movements)
+print("Attempt Movement Success:", movement_success)

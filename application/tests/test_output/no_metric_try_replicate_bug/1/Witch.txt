@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph
+Gain Find Item Quest (Actors: Witch) 0
+Node Name: Gain Find Item Quest
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Village
+----------
+Get Rod Quest for Witch (Actors: Witch) 1
+Node Name: Get Rod Quest for Witch
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Witch) 2
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Witch
+Targets: Forest Path
+Location: Forest Village
+----------
+Move Towards Random Forest (Actors: Witch) 3
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Witch
+Targets: Random Forest
+Location: Forest Path
+----------
+Take Quest Item (Actors: Witch) 4
+Node Name: Take Quest Item
+Timestep 0
+Actors: Witch
+Targets: Columbo's Diary
+Location: Random Forest
+----------

@@ -46,7 +46,24 @@ DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placehol
 #
 # (The only exception is the wait node. You just can't do more fillers if you've waited for quite a bit.)
 
-def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], suggested_movement_requirement_list=[], minimum_move_req_score = 0 , action_repeat_penalty = -10, metrics_requirements = [], metric_reward = 50, metric_penalty = -50, previous_graph_list = [], metric_retention=0, task_movement_random = False):
+'''
+init_storygraph: The initial Story Graph that the generation will be based on.
+list_of_rules: The list of rules that the generator can apply to the graph.
+required_story_length: How long the resulting StoryGraph should at least be (in nodes). Result may be greater than this value, but it will not be lesser.
+top_n: When choosing an action to do, the generator will pick from the best scoring n actions.
+extra_attempts: How many times the generator will attempt to find a valid action before giving up and having the character do nothing (wait). If set to -1 it will never give up.
+score_mode: There are two score modes. Score Mode 0 will pick the highest node in the rule as that rule's score. Score Mode 1 will average the scores of all nodes in the rule.
+verbose: If set to True, the console will print what the generator is currently doing.
+extra_movement_requirement_list: List of ConditionTests that a character must fulfill in order to perform a move action. You can use GenericObjectNode.GENERIC_ACTOR to refer to the moving character, GenericObjectNode.GENERIC_LOCATION to refer to the current location, and GenericObjectNode.GENERIC_TARGEt to refer to the target location that is being moved into.
+suggested_movement_requirement_list: Same as above, but passing the tests grand the score listed in the test. The highest score movements will be prioritized.
+minimum_move_req_score: If set to None, then there is no minimum score. Otherwise, it will use the score from suggested_movement_requirement_list score and exclude certain movements that don't score enough.
+action_repeat_penalty: This amount of points will be deducted if the same rule is applied multiple itmes in the same storyline.
+metrics_requirements: List of StoryMetrics. The metric requirements that controls how the characters choose their actions.
+metric_reward: Extra points granted for following the metrics_requirements.
+metric_penalty: Points deducted for not following the metrics_requirements.
+task_movement_random: If set to True, when a character is attempting to move, they will choose randomly. If set to False it will always choose the first available location.
+'''
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], suggested_movement_requirement_list=[], minimum_move_req_score = None , action_repeat_penalty = -10, metrics_requirements = [], metric_reward = 50, metric_penalty = -50, previous_graph_list = [], metric_retention=0, task_movement_random = False):
 
     #make a copy of the graph
     if verbose:
@@ -228,10 +245,12 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     print("Evaluating:", task_name, "at", attempt_index)
                 
                 #TODO: Hey, since we already have the task_stack_advance_validity test task_completeness, why do we have to test for both again?
-                task_completeness = final_story_graph.test_task_completeness(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
-                task_valid = final_story_graph.test_task_stack_advance_validity(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
+                
+                # task_completeness = final_story_graph.test_task_completeness(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
+                task_valid, task_completeness = final_story_graph.test_task_stack_advance_validity(task_stack_name=task_name, actor_name=current_charname, abs_step=attempt_index)
 
 # START: Checking to see if doing this task would ruin the story length. Remove if this breaks the code.
+# Do I really need Length Verification? I mean, we didn't do length verification for regular rules, and we did say it's the *minimum* story length
                 if task_valid and task_completeness == 'task_step_can_advance':
 
                     current_state = final_story_graph.make_state_at_step(stopping_step=attempt_index)[0]
@@ -242,29 +261,30 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     task_valid = task_valid and number_of_nodes_in_current_task + current_character_pathlength <= required_story_length
 # END of Length Verification
 
-                if task_valid:
-                    default_task_score = 0
-                    action_chosen = "Do Nothing"
-                    match task_completeness:
-                        case 'task_step_already_completed':
-                            action_chosen = "Advance Task"
-                        case 'task_step_already_failed':
-                            action_chosen = "Cancel Task"
-                            default_task_score = 999
-                            cancel_count += 1
-                        case 'task_step_can_advance':
+                # if task_valid:
+                default_task_score = 0
+                action_chosen = "Do Nothing"
+                match task_completeness:
+                    case 'task_step_already_completed':
+                        action_chosen = "Advance Task"
+                    case 'task_step_already_failed':
+                        action_chosen = "Cancel Task"
+                        default_task_score = 999
+                        cancel_count += 1
+                    case 'task_step_can_advance':
+                        if task_valid:
                             action_chosen = "Perform Task"
                             default_task_score = final_story_graph.calculate_score_from_next_task_in_task_stack(actor_name=current_charname, task_stack_name=task_name, task_perform_index=attempt_index, mode=score_mode)
-                        case _:
-                            default_task_score = -999
+                    case _:
+                        default_task_score = -999
                     
-                    if action_chosen != "Do Nothing":
-   
-                        task_container = StoryGenerationActionContainer(action_name=action_chosen, action_object=task_name, action_descriptor=task_name, action_score=default_task_score, perform_index=attempt_index)
-                        list_of_available_tasks.append(task_container)
+                if action_chosen != "Do Nothing":
 
-                        if verbose:
-                            print("Found acceptable Task-related action:", task_container.scoreless_string())
+                    task_container = StoryGenerationActionContainer(action_name=action_chosen, action_object=task_name, action_descriptor=task_name, action_score=default_task_score, perform_index=attempt_index)
+                    list_of_available_tasks.append(task_container)
+
+                    if verbose:
+                        print("Found acceptable Task-related action:", task_container.scoreless_string())
 
         if verbose:
             print("Acceptable task-related actions found:", len(list_of_available_tasks))
@@ -364,7 +384,9 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                 waiting_step = 0
                 if latest_action is not None:
                     waiting_step = latest_action.timestep
-                final_story_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=current_character, timestep=waiting_step)
+
+                waiting_abs_step = final_story_graph.get_longest_path_length_by_character(character=current_character)
+                final_story_graph.insert_story_part(part=DEFAULT_WAIT_NODE, character=current_character, absolute_step=waiting_abs_step, timestep=waiting_step)
                 chosen_action_container = None
                 action_for_character_found = True
             else:
@@ -547,7 +569,7 @@ def attempt_apply_task(stack_name, attempt_index, target_story_graph, current_ch
 # TODO (Testing): Test this function
 # TODO (Optimization): This function takes quite a while to run, we need to figure out why.
 # Will return True if changes are made to the story graph and False if not.
-def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character, movement_index, extra_movement_requirements = [], suggested_movement_requirements=[], minimum_action_score_for_valid_movement = 0, score_calc_mode=0, random_optimal_pick = False):
+def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_character, movement_index, extra_movement_requirements = [], suggested_movement_requirements=[], minimum_action_score_for_valid_movement = None, score_calc_mode=0, random_optimal_pick = False):
 
     current_ws = target_story_graph.make_state_at_step(movement_index)[0]
     char_from_ws = current_ws.node_dict.get(current_character.get_name())
@@ -572,8 +594,6 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
         optimal_location_name = optimal_location_object.get_name()
 
         go_to_new_location_change = RelChange(name="Go To Task Loc", node_a=GenericObjectNode.GENERIC_TARGET, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, value=None, add_or_remove=ChangeAction.ADD)
-
-        # not_be_in_current_location_change = RelChange("Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=character_at_step, add_or_remove=ChangeAction.REMOVE)
         not_be_in_current_location_change = RelChange(name="Leave Current Loc", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name=current_ws.DEFAULT_HOLD_EDGE_NAME, node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.REMOVE, soft_equal=True, value=None)
 
         target_location_adjacent_to_current_location = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_LOCATION, edge_name_test=current_ws.DEFAULT_ADJACENCY_EDGE_NAME, object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
@@ -596,7 +616,7 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
 
         #We have made our custom move towards task location node. We will check to see if it's a valid move to move to that location.
         movement_validity = target_story_graph.check_continuation_validity(actor=char_from_ws, abs_step_to_cont_from=movement_index, cont_list=[move_towards_task_location_node])
-        
+        # print(movement_validity)
         # if char_from_ws.get_name() == "Alien God":
         #     for item in all_requirements:
         #         print(item)
@@ -606,8 +626,8 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
 
         if len(suggested_movement_requirements) > 0:
             calc_score = target_story_graph.calculate_score_from_char_and_cont(actor=char_from_ws, insert_index=movement_index, contlist=[move_towards_task_location_node], purge_count=0, mode=score_calc_mode, target_list=[[optimal_location_object]])
-            if calc_score < minimum_action_score_for_valid_movement:
-                movement_validity = False
+            if minimum_action_score_for_valid_movement is not None:
+                movement_validity = movement_validity and calc_score >= minimum_action_score_for_valid_movement
             
         if movement_validity:
             if len(suggested_movement_requirements) <= 0:
@@ -623,6 +643,8 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
                     optimal_move_actions_with_best_score.append(move_towards_task_location_node)
 
         optimal_location_object_list.pop(0)
+
+    print()
     
     if len(suggested_movement_requirements) > 0 and len(optimal_move_actions_with_best_score) > 0:
         
@@ -747,7 +769,7 @@ def make_recall_task_node_based_on_final_graph_step(story_graph : StoryGraph, ch
     equivalent_taskchanges = []
 
     for stack_found in character_at_final_ws.list_of_task_stacks:
-        if not stack_found.stack_is_complete():
+        if not stack_found.stack_is_complete() and not stack_found.remove_from_pool:
             
             new_stack_name = stack_found.stack_name
 
@@ -758,7 +780,7 @@ def make_recall_task_node_based_on_final_graph_step(story_graph : StoryGraph, ch
 
             incomplete_task_list = []
             for task in stack_found.task_stack:
-                if task.completion_step == -1:
+                if not task.task_complete_status:
                     incomplete_task_list.append(task)
             new_task_stack = TaskStack(stack_name=new_stack_name, task_stack=incomplete_task_list, task_stack_requirement=stack_found.task_stack_requirement, stack_giver_name=stack_found.stack_giver_name, stack_owner_name=stack_found.stack_owner_name)
 

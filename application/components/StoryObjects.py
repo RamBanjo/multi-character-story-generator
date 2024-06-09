@@ -1,6 +1,11 @@
 import sys
 sys.path.insert(0,'')
 
+'''
+name: Name that this object will be referred to as. Assumed to be unique.
+tags: Tags of this object, as a dict.
+internal_id: Internal ID of the Object Node. Assumed to be unique. (Prevents duplication).
+'''
 class ObjectNode:
     def __init__(self, name:str, tags:dict={"Type": "Object"}, internal_id:int=0, display_name:str=None, description:str="", **kwargs):
         

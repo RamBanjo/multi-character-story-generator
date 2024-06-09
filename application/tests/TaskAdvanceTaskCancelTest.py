@@ -11,7 +11,7 @@ from application.components.RelChange import *
 from application.components.UtilityEnums import *
 from application.components.RewriteRuleWithWorldState import *
 
-from application.StoryGeneration_NewFlowchart_WithMetrics import generate_multiple_graphs, generate_story_from_starter_graph, make_base_graph_from_previous_graph
+from application.StoryGeneration_NewFlowchart_WithMetrics import generate_multiple_graphs, generate_story_from_starter_graph, make_base_graph_from_previous_graph, attempt_move_towards_task_loc
 import os
 
 
@@ -27,11 +27,20 @@ bob = CharacterNode(name="Bob", internal_id=1)
 charlie = CharacterNode(name="Charlie", tags={"Type":"Character", "Alive":False}, internal_id=2)
 
 somewhere = LocationNode(name="Somewhere", internal_id=3)
+somehwere_else = LocationNode(name = "Somewhere Else", internal_id=4)
+not_here = LocationNode(name= "Not Here", internal_id=5)
+there = LocationNode(name= "There", internal_id=6)
+everywhere = LocationNode(name="Everywhere", internal_id=7)
 
-test_ws = WorldState(name="Test WS", objectnodes=[alice, bob, charlie, somewhere])
+test_ws = WorldState(name="Test WS", objectnodes=[alice, bob, charlie, somewhere, somehwere_else, not_here, there, everywhere])
 test_ws.connect(from_node=somewhere, edge_name="holds", to_node=alice)
 test_ws.connect(from_node=somewhere, edge_name="holds", to_node=bob)
 test_ws.connect(from_node=somewhere, edge_name="holds", to_node=charlie)
+
+test_ws.doubleconnect(from_node=somewhere, edge_name="connects", to_node=somehwere_else)
+test_ws.doubleconnect(from_node=somewhere, edge_name="connects", to_node=not_here)
+test_ws.doubleconnect(from_node=somewhere, edge_name="connects", to_node=there)
+test_ws.doubleconnect(from_node=somewhere, edge_name="connects", to_node=everywhere)
 
 charlie_is_dead = HasTagTest(object_to_test="charlie", tag="Alive", value=False)
 charlie_is_charlie = ObjectEqualityTest(object_list=[charlie, "charlie"])
@@ -55,4 +64,13 @@ test_sg.insert_story_part(part=get_murder_node, character=bob, location=somewher
 test_sg.attempt_advance_task_stack("Protect Stack", actor_name="Alice", abs_step=1, verbose=True)
 test_sg.attempt_advance_task_stack("Murder Stack", actor_name="Bob", abs_step=1, verbose=True)
 
+print("movement attempt", attempt_move_towards_task_loc(target_story_graph=test_sg, current_character=alice, movement_index=2))
+
 test_sg.print_all_node_beautiful_format()
+
+# There seems to be a problem with characters not being able to move after cancelling a task?
+# DONE: Apparently the tasks that are already cancelled were still being considered as one of the optimal movement locations, thats why characters couldn't leave.
+# This problem also persists with already completed tasks.
+
+#There also seems to be a problem with characters being unable to leave their locations after getting to graph 3 for some reason.
+
