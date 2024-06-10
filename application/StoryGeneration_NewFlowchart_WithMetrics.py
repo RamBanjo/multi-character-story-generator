@@ -581,6 +581,7 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
 
     #If we're in the same location then we don't need to do the things below. Since we don't want to move locations this should return False.
     if current_location_of_character.get_name() in optimal_location_object_list:
+        print("Already In Current Place:", current_location_of_character.get_name())
         return False
 
     #Repeat until we find valid location or if we run out of locations
@@ -615,7 +616,8 @@ def attempt_move_towards_task_loc(target_story_graph:StoryGraph, current_charact
         # TODO: why not translate the stuff here to something valid
 
         #We have made our custom move towards task location node. We will check to see if it's a valid move to move to that location.
-        movement_validity = target_story_graph.check_continuation_validity(actor=char_from_ws, abs_step_to_cont_from=movement_index, cont_list=[move_towards_task_location_node])
+        movement_validity = target_story_graph.check_continuation_validity(actor=char_from_ws, abs_step_to_cont_from=movement_index, cont_list=[move_towards_task_location_node])    
+        print("Movement Success:", movement_validity, current_location_of_character.get_name(), optimal_location_name)
         # print(movement_validity)
         # if char_from_ws.get_name() == "Alien God":
         #     for item in all_requirements:
@@ -732,7 +734,7 @@ def make_base_graph_from_previous_graph(previous_graph: StoryGraph, graph_name):
     char_list = init_ws.get_all_actors()
     init_ws.make_all_actors_forget_tasks()
 
-    return_graph = StoryGraph(name=graph_name, character_objects=char_list, starting_ws=init_ws)
+    return_graph = StoryGraph(name=graph_name, character_objects=char_list, starting_ws=init_ws, always_true_tests=previous_graph.always_true_tests)
 
     for character in char_list:
         new_node = make_recall_task_node_based_on_final_graph_step(story_graph=previous_graph, character_name=character.get_name())

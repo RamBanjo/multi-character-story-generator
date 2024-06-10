@@ -131,7 +131,7 @@ class SameLocationTest(ConditionTest):
 
 #TODO (Extra Features): Hey, DoubleEdge test is very similar to normal Edge. What if we remove DoubleEdgeTest and add two-sided to DoubleEdgeTest instead.
 class HasEdgeTest(ConditionTest):
-    def __init__(self, object_from_test, edge_name_test, object_to_test, value_test = None, soft_equal = False, two_way = False, inverse = False, score=1):
+    def __init__(self, object_from_test, edge_name_test, object_to_test, value_test = None, soft_equal = False, two_way = False, inverse = False, unique_incoming_test = False, unique_outgoing_test = False, only_test_uniqueness = False, score=1):
 
         super().__init__("Has Edge Test", test_type=TestType.HAS_EDGE, inverse=inverse, score=score)
 
@@ -141,6 +141,9 @@ class HasEdgeTest(ConditionTest):
         self.value_test = value_test
         self.soft_equal = soft_equal
         self.two_way = two_way
+        self.unique_incoming_test = unique_incoming_test
+        self.unique_outgoing_test = unique_outgoing_test
+        self.only_test_uniqueness = only_test_uniqueness
 
     def __str__(self):
         return self.name + " (" + str(self.object_from_test) + " " + str(self.edge_name_test) + " " + str(self.object_to_test) + ", " + "inverse = " + str(self.inverse) + ")"

@@ -53,7 +53,7 @@ Only two world states will be kept: The starting world state and the worldstate 
 DEFAULT_INVALID_SCORE = -999
 
 class StoryGraph:
-    def __init__(self, name, character_objects, starting_ws):
+    def __init__(self, name, character_objects, starting_ws, always_true_tests = []):
         self.name = name
         self.character_objects = character_objects
         self.story_parts = dict()
@@ -72,6 +72,8 @@ class StoryGraph:
         # Contains a tuple of Actor Name and Cancelled Task Name
         # Once a task is cancelled it goes in here. No Cancelled Tasks must be advanced.
         self.cancelled_tasks = []
+
+        self.always_true_tests = []
 
     def export_object_as_dict(self) -> dict:
 
@@ -535,8 +537,6 @@ class StoryGraph:
                 current_ws = self.make_state_at_step(task_perform_index)[0]
                 actor = current_ws.node_dict[actor_name]
 
-                self.find_last_step_of_task_stack_from_actor
-
                 task_stack_obj = actor.get_task_stack_by_name(task_stack_name)
                 current_task = task_stack_obj.get_current_task()
 
@@ -547,8 +547,6 @@ class StoryGraph:
                     translated_nodes.append(replace_placeholders_in_story_node(story_node=node, placeholder_dict=self.placeholder_dicts_of_tasks[(actor_name, task_stack_name)], list_of_actor_objects=self.character_objects)) 
                     
                 return self.calculate_score_from_char_and_cont(actor=actor, insert_index=task_perform_index, contlist=translated_nodes, has_joint_in_contlist=True, mode=mode)
-            case "task_step_already_completed":
-                return 
             case _:
                 return DEFAULT_INVALID_SCORE
 
@@ -1478,43 +1476,34 @@ class StoryGraph:
     def check_worldstate_validity_on_own_graph(self, start_step=0):
         self.refresh_longest_path_length()
 
-        for check_index in range(start_step, self.longest_path_length):
+        for check_index in range(start_step, self.longest_path_length+1):
 
             #Make the world state
             current_ws_and_validity = self.make_state_at_step(check_index)
-
-            # if not current_ws_and_validity[1]:
-            #     return False
-
             current_ws = current_ws_and_validity[0]
 
-            for current_char in self.character_objects:
-                current_step = self.story_parts.get((current_char.get_name(), check_index))
-                current_char_at_current_step = current_ws.node_dict[current_char.get_name()]
+            for always_test in self.always_true_tests:
+                if not current_ws.test_story_compatibility_with_conditiontest(always_test):
+                    return False
 
-                if current_step is not None:
+            if check_index < self.longest_path_length:
+                for current_char in self.character_objects:
+                    current_step = self.story_parts.get((current_char.get_name(), check_index))
+                    current_char_at_current_step = current_ws.node_dict[current_char.get_name()]
 
-                    if (current_char_at_current_step not in current_step.actor) and (current_char_at_current_step not in current_step.target):
-                        return False
+                    if current_step is not None:
 
-                    #These two are outdated, because character compatibility and target compatibility are already merged into test_story_compatibility_with_conditiontest 
-                    # if current_char_at_current_step in current_step.actor:
-                    #     if not current_step.check_character_compatibility(current_char_at_current_step):
-                    #         return False
-
-                    # if current_char_at_current_step in current_step.target:
-                    #     if not current_step.check_target_compatibility(current_char_at_current_step):
-                    #         return False
-
-                    for current_test_to_convert in current_step.required_test_list:
-
-                        equivalent_tests = translate_generic_test(current_test_to_convert, current_step)
-                        # print(equivalent_tests)
-                        for current_test_to_check in equivalent_tests:
-                            # print(current_test_to_check)
-                            if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
-                                # print("failed test", current_test_to_check)
-                                return False
+                        if (current_char_at_current_step not in current_step.actor) and (current_char_at_current_step not in current_step.target):
+                            return False
+                        
+                        for current_test_to_convert in current_step.required_test_list:
+                            equivalent_tests = translate_generic_test(current_test_to_convert, current_step)
+                            # print(equivalent_tests)
+                            for current_test_to_check in equivalent_tests:
+                                # print(current_test_to_check)
+                                if not current_ws.test_story_compatibility_with_conditiontest(current_test_to_check):
+                                    # print("failed test", current_test_to_check)
+                                    return False
         return True
 
     def make_list_of_nodes_at_step(self, abs_step):

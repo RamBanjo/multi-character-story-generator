@@ -110,6 +110,24 @@ class WorldState:
     def check_double_connection(self, node_a: ObjectNode, node_b: ObjectNode, edge_name=None, edge_value=None, soft_equal = False):
         return self.check_connection(node_a, node_b, edge_name, edge_value, soft_equal) and self.check_connection(node_b, node_a, edge_name, edge_value, soft_equal)
 
+    def check_unique_incoming(self, node: ObjectNode, edge_name : str):
+        node_retrieved = self.node_dict.get(node.get_name(), None)
+
+        if node_retrieved is None:
+            return False
+        
+        list_of_incoming = node_retrieved.get_incoming_edge(edgename = edge_name)
+        return len(list_of_incoming) == 1
+    
+    def check_unique_outgoing(self, node: ObjectNode, edge_name : str):
+        node_retrieved = self.node_dict.get(node.get_name(), None)
+
+        if node_retrieved is None:
+            return False
+        
+        list_of_outgoing = node_retrieved.get_outgoing_edge(edgename = edge_name)
+        return len(list_of_outgoing) == 1
+
     def list_location_adjacencies(self):
         print("Location Adjacencies:")
 
@@ -642,10 +660,15 @@ class WorldState:
             case TestType.SAME_LOCATION:
                 test_result = self.same_location_check(check_list=test.list_to_test)
             case TestType.HAS_EDGE:
-                if not test.two_way:
-                    test_result = self.check_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
-                else:
-                    test_result = self.check_double_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
+                if not test.only_test_uniqueness:
+                    if not test.two_way:
+                        test_result = self.check_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
+                    else:
+                        test_result = self.check_double_connection(node_a=test.object_from_test, node_b=test.object_to_test, edge_name=test.edge_name_test, edge_value=test.value_test, soft_equal=test.soft_equal)
+                if test.unique_incoming_test:
+                    test_result = self.check_unique_incoming(node=test.object_to_test, edge_name=test.edge_name_test)
+                if test.unique_outgoing_test:
+                    test_result = self.check_unique_outgoing(node=test.object_from_test, edge_name=test.edge_name_test)
             case TestType.HAS_TAG:
                 test_result = self.has_tag_test(object_to_test=test.object_to_test, tag=test.tag, value=test.value, soft_equal=test.soft_equal)
             case TestType.IN_BIAS_RANGE:
@@ -972,7 +995,6 @@ class WorldState:
             return random.choice(valid_locations)
         
         #If there's no tasks in the current location, look for tasks that are in adjacent locations.
-
         adjacent_locations = current_location.get_adjacent_locations_list(adjacent_rel_name=self.DEFAULT_ADJACENCY_EDGE_NAME, return_as_objects=True)
 
         names_of_adjacent_locations = set()

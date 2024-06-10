@@ -1,31 +1,31 @@
 ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 2
-Recall Tasks (Actors: Brick) 0
-Node Name: Recall Tasks
+Wait (Actors: Brick) 0
+Node Name: Wait
 Timestep 0
 Actors: Brick
 Targets: 
-Location: Random Forest
+Location: Forest Path
 ----------
-task_cancel_for_Brick_Find Item Stack (Actors: Brick) 1
-Node Name: task_cancel_for_Brick_Find Item Stack
+Move Towards Forest Village (Actors: Brick) 1
+Node Name: Move Towards Forest Village
 Timestep 0
 Actors: Brick
-Targets: 
-Location: Random Forest
+Targets: Forest Village
+Location: Forest Path
 ----------
 Move Towards Forest Path (Actors: Brick) 2
 Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Brick
 Targets: Forest Path
-Location: Random Forest
+Location: Forest Village
 ----------
-Wait (Actors: Brick) 3
-Node Name: Wait
+Move Towards Random Forest (Actors: Brick) 3
+Node Name: Move Towards Random Forest
 Timestep 0
 Actors: Brick
-Targets: 
-Location: Random Forest
+Targets: Random Forest
+Location: Forest Path
 ----------
 Move Towards Forest Path (Actors: Brick) 4
 Node Name: Move Towards Forest Path

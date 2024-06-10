@@ -1,9 +1,9 @@
 ENTIRE STORYLINE OF Wolf IN Initial Story Graph
-Scheme Leader Gives Tasks (Actors: Grandma) 0
-Node Name: Scheme Leader Gives Tasks
+Wait (Actors: Wolf) 0
+Node Name: Wait
 Timestep 0
-Actors: Grandma
-Targets: Wolf
+Actors: Wolf
+Targets: 
 Location: Forest Village
 ----------
 Move Towards Forest Path (Actors: Wolf) 1
@@ -13,24 +13,24 @@ Actors: Wolf
 Targets: Forest Path
 Location: Forest Village
 ----------
-Move Towards Plains Village (Actors: Wolf) 2
-Node Name: Move Towards Plains Village
+Move Towards Random Forest (Actors: Wolf) 2
+Node Name: Move Towards Random Forest
 Timestep 0
 Actors: Wolf
-Targets: Plains Village
+Targets: Random Forest
 Location: Forest Path
 ----------
-Move Towards Forest Path (Actors: Wolf) 3
+Wait (Actors: Wolf) 3
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Random Forest
+----------
+Move Towards Forest Path (Actors: Wolf) 4
 Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Wolf
 Targets: Forest Path
-Location: Plains Village
-----------
-Move Towards Mountain Valley (Actors: Wolf) 4
-Node Name: Move Towards Mountain Valley
-Timestep 0
-Actors: Wolf
-Targets: Mountain Valley
-Location: Forest Path
+Location: Random Forest
 ----------

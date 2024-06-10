@@ -4,33 +4,33 @@ Node Name: Wait
 Timestep 0
 Actors: Papa Bear
 Targets: 
-Location: Magic Temple
+Location: Mountain Valley
 ----------
-Move Towards Mountain Valley (Actors: Papa Bear) 1
+Move Towards Magic Temple (Actors: Papa Bear) 1
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Papa Bear
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Move Towards Mountain Valley (Actors: Papa Bear) 2
 Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Papa Bear
 Targets: Mountain Valley
 Location: Magic Temple
 ----------
-Wait (Actors: Papa Bear) 2
-Node Name: Wait
+Move Towards Magic Temple (Actors: Papa Bear) 3
+Node Name: Move Towards Magic Temple
 Timestep 0
 Actors: Papa Bear
-Targets: 
-Location: Magic Temple
+Targets: Magic Temple
+Location: Mountain Valley
 ----------
-Move Towards Mountain Valley (Actors: Papa Bear) 3
+Move Towards Mountain Valley (Actors: Papa Bear) 4
 Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Papa Bear
 Targets: Mountain Valley
-Location: Magic Temple
-----------
-Wait (Actors: Papa Bear) 4
-Node Name: Wait
-Timestep 0
-Actors: Papa Bear
-Targets: 
 Location: Magic Temple
 ----------

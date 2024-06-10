@@ -52,8 +52,9 @@ actor_starts_holding_target = RelChange(name="Actor Starts Holding Target", node
 
 def make_find_item_rule(item_to_find, item_liking_tag, location_holding_item):
     
-    character_likes_item_type_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag=item_liking_tag, value=True)
-    take_quest_item = StoryNode(name="Take Quest Item", tags={"Type":"Collect"}, actor=[GenericObjectNode.TASK_OWNER], target=[item_to_find], required_test_list=[actor_is_alive, actor_is_not_unconscious], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
+    current_location_has_item_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_LOCATION, edge_name_test="holds", object_to_test=item_to_find)
+
+    take_quest_item = StoryNode(name="Take Quest Item ("+item_to_find.get_name()+")", tags={"Type":"Collect"}, actor=[GenericObjectNode.TASK_OWNER], target=[item_to_find], required_test_list=[actor_is_alive, actor_is_not_unconscious, current_location_has_item_check], effects_on_next_ws=[actor_starts_holding_target, location_stops_holding_target])
 
     location_no_longer_has_item_check = HasEdgeTest(object_from_test=location_holding_item, edge_name_test="holds", object_to_test=item_to_find, inverse=True)
     find_item_task = CharacterTask(task_name="Find Item Quest", task_actions=[take_quest_item], task_location_name=location_holding_item.get_name(), avoidance_state=[location_no_longer_has_item_check])
@@ -64,11 +65,12 @@ def make_find_item_rule(item_to_find, item_liking_tag, location_holding_item):
     character_no_quest_memory_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag=memory_name, value=True, inverse=True)
     character_gains_quest_memory_change = TagChange(name="Gain Task Quest Memory", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag=memory_name, value=True, add_or_remove=ChangeAction.ADD)
 
-    find_item_stack = TaskStack(stack_name="Find Item Stack", task_stack=[find_item_task], task_stack_requirement=[])
+    find_item_stack = TaskStack(stack_name="Find Item Stack ("+item_to_find.get_name()+")", task_stack=[find_item_task], task_stack_requirement=[])
 
     find_item_change = TaskChange(name="Find Item TaskChange", task_stack=find_item_stack, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_giver_name=GenericObjectNode.GENERIC_ACTOR)
 
-    get_find_item_task_node = StoryNode(name="Gain Find Item Quest", tags={"Type":"GetTask"}, effects_on_next_ws=[find_item_change, character_gains_quest_memory_change], required_test_list=[character_no_quest_memory_check, location_has_item_check, character_likes_item_type_check])
+    character_likes_item_type_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag=item_liking_tag, value=True)
+    get_find_item_task_node = StoryNode(name="Gain Find Item Quest ("+item_to_find.get_name()+")", tags={"Type":"GetTask"}, effects_on_next_ws=[find_item_change, character_gains_quest_memory_change], required_test_list=[character_no_quest_memory_check, location_has_item_check, character_likes_item_type_check])
 
     patternless_into_find_item_node = RewriteRule(story_condition=[], story_change=[get_find_item_task_node], name="Patternless into Find Item Task Node")
 

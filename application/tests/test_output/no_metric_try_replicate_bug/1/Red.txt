@@ -1,36 +1,36 @@
 ENTIRE STORYLINE OF Red IN Initial Story Graph
-Get Visit Place Task for Red (Actors: Red) 0
-Node Name: Get Visit Place Task for Red
+Wait (Actors: Red) 0
+Node Name: Wait
 Timestep 0
 Actors: Red
 Targets: 
 Location: Plains Village
 ----------
-Move Towards Forest Path (Actors: Red) 1
+Wait (Actors: Red) 1
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Plains Village
+----------
+Move Towards Forest Path (Actors: Red) 2
 Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Red
 Targets: Forest Path
 Location: Plains Village
 ----------
-Move Towards Forest Village (Actors: Red) 2
-Node Name: Move Towards Forest Village
+Move Towards Mountain Valley (Actors: Red) 3
+Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Red
-Targets: Forest Village
+Targets: Mountain Valley
 Location: Forest Path
 ----------
-Visiting Place (Actors: Red) 3
-Node Name: Visiting Place
+Move Towards Magic Temple (Actors: Red) 4
+Node Name: Move Towards Magic Temple
 Timestep 0
 Actors: Red
-Targets: 
-Location: Forest Village
-----------
-Move Towards Forest Path (Actors: Red) 4
-Node Name: Move Towards Forest Path
-Timestep 0
-Actors: Red
-Targets: Forest Path
-Location: Forest Village
+Targets: Magic Temple
+Location: Mountain Valley
 ----------
