@@ -73,7 +73,7 @@ class StoryGraph:
         # Once a task is cancelled it goes in here. No Cancelled Tasks must be advanced.
         self.cancelled_tasks = []
 
-        self.always_true_tests = []
+        self.always_true_tests = always_true_tests
 
     def export_object_as_dict(self) -> dict:
 
@@ -419,6 +419,7 @@ class StoryGraph:
                 # TaskCancelChange will call apply_task_cancel_change from the traveling_state
                 # if change.changetype == ChangeType.TASKCHANGE:
                     # print(index, change)
+                # print(world_state_validity, change.changetype)
                 match change.changetype:              
                     case ChangeType.CONDCHANGE:
                         world_state_validity = world_state_validity and traveling_state.apply_conditional_change(change, frozen_current_state)
@@ -430,7 +431,6 @@ class StoryGraph:
                         world_state_validity = world_state_validity and traveling_state.apply_task_cancel_change(taskcancelchange_object=change)
                     case _:
                         world_state_validity = world_state_validity and traveling_state.apply_some_change(change)
-
         return traveling_state, world_state_validity
 
     # Join Joint and Cont Joint: The score is the max between the actor slot and the target slot.
@@ -1439,7 +1439,7 @@ class StoryGraph:
         #Preliminary: Check if the actor is found in the list, if not then it's false
         if actor not in self.character_objects:
             return False
-
+        
         graphcopy = deepcopy(self)
 
         # We need a "Make Location List" function in here
@@ -1452,7 +1452,7 @@ class StoryGraph:
         if has_joint_in_contlist:
             graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=cont_list, main_character=actor, abs_step=abs_step_to_cont_from)
         else:
-            graphcopy.insert_multiple_parts(cont_list, actor, None, abs_step_to_cont_from, targets=target_list)
+            graphcopy.insert_multiple_parts(part_list=cont_list, character=actor, location_list=None, absolute_step=abs_step_to_cont_from, targets=target_list)
 
         if perform_dupe_check:
             for node in cont_list:
@@ -1467,6 +1467,7 @@ class StoryGraph:
 
         #We delegate the checking of worldstates fo the worldstate validity function
         validity = graphcopy.check_worldstate_validity_on_own_graph(abs_step_to_cont_from)
+
         del(graphcopy)
 
         return validity

@@ -6,25 +6,25 @@ Actors: Wolf
 Targets: 
 Location: Magic Temple
 ----------
-Wait (Actors: Wolf) 1
-Node Name: Wait
-Timestep 0
-Actors: Wolf
-Targets: 
-Location: Magic Temple
-----------
-Move Towards Mountain Valley (Actors: Wolf) 2
+Move Towards Mountain Valley (Actors: Wolf) 1
 Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Wolf
 Targets: Mountain Valley
 Location: Magic Temple
 ----------
-Move Towards Magic Temple (Actors: Wolf) 3
-Node Name: Move Towards Magic Temple
+Wait (Actors: Wolf) 2
+Node Name: Wait
 Timestep 0
 Actors: Wolf
-Targets: Magic Temple
+Targets: 
+Location: Mountain Valley
+----------
+Wait (Actors: Wolf) 3
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
 Location: Mountain Valley
 ----------
 Wait (Actors: Wolf) 4
@@ -32,5 +32,5 @@ Node Name: Wait
 Timestep 0
 Actors: Wolf
 Targets: 
-Location: Magic Temple
+Location: Mountain Valley
 ----------

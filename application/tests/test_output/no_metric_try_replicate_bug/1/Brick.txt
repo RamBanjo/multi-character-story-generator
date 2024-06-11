@@ -27,10 +27,10 @@ Actors: Brick
 Targets: Magic Temple
 Location: Mountain Valley
 ----------
-Take Rod (Actors: Brick) 4
-Node Name: Take Rod
+Wait (Actors: Brick) 4
+Node Name: Wait
 Timestep 0
 Actors: Brick
-Targets: Protection Pillar
+Targets: 
 Location: Magic Temple
 ----------

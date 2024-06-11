@@ -6,31 +6,31 @@ Actors: Wolf
 Targets: 
 Location: Forest Village
 ----------
-Move Towards Forest Path (Actors: Wolf) 1
+Wait (Actors: Wolf) 1
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Wolf) 2
 Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Wolf
 Targets: Forest Path
 Location: Forest Village
 ----------
-Move Towards Random Forest (Actors: Wolf) 2
-Node Name: Move Towards Random Forest
+Move Towards Mountain Valley (Actors: Wolf) 3
+Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Wolf
-Targets: Random Forest
+Targets: Mountain Valley
 Location: Forest Path
 ----------
-Wait (Actors: Wolf) 3
-Node Name: Wait
+Move Towards Magic Temple (Actors: Wolf) 4
+Node Name: Move Towards Magic Temple
 Timestep 0
 Actors: Wolf
-Targets: 
-Location: Random Forest
-----------
-Move Towards Forest Path (Actors: Wolf) 4
-Node Name: Move Towards Forest Path
-Timestep 0
-Actors: Wolf
-Targets: Forest Path
-Location: Random Forest
+Targets: Magic Temple
+Location: Mountain Valley
 ----------

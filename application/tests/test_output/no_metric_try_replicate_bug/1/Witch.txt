@@ -27,10 +27,10 @@ Actors: Witch
 Targets: Magic Temple
 Location: Mountain Valley
 ----------
-Take Rod (Actors: Witch) 4
-Node Name: Take Rod
+Wait (Actors: Witch) 4
+Node Name: Wait
 Timestep 0
 Actors: Witch
-Targets: Protection Pillar
+Targets: 
 Location: Magic Temple
 ----------

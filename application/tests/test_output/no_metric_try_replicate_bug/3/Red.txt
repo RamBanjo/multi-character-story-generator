@@ -4,33 +4,33 @@ Node Name: Wait
 Timestep 0
 Actors: Red
 Targets: 
-Location: Mountain Valley
+Location: Random Forest
 ----------
-Move Towards Magic Temple (Actors: Red) 1
-Node Name: Move Towards Magic Temple
+Move Towards Forest Path (Actors: Red) 1
+Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Red
-Targets: Magic Temple
-Location: Mountain Valley
+Targets: Forest Path
+Location: Random Forest
 ----------
-Wait (Actors: Red) 2
-Node Name: Wait
-Timestep 0
-Actors: Red
-Targets: 
-Location: Magic Temple
-----------
-Move Towards Mountain Valley (Actors: Red) 3
+Move Towards Mountain Valley (Actors: Red) 2
 Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Red
 Targets: Mountain Valley
-Location: Magic Temple
+Location: Forest Path
 ----------
-Move Towards Magic Temple (Actors: Red) 4
-Node Name: Move Towards Magic Temple
+Move Towards Forest Path (Actors: Red) 3
+Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Red
-Targets: Magic Temple
+Targets: Forest Path
 Location: Mountain Valley
+----------
+Move Towards Mountain Valley (Actors: Red) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Red
+Targets: Mountain Valley
+Location: Forest Path
 ----------

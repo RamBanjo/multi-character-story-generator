@@ -4,33 +4,33 @@ Node Name: Wait
 Timestep 0
 Actors: Grandma
 Targets: 
-Location: Forest Path
+Location: Plains Village
 ----------
-Move Towards Plains Village (Actors: Grandma) 1
-Node Name: Move Towards Plains Village
-Timestep 0
-Actors: Grandma
-Targets: Plains Village
-Location: Forest Path
-----------
-Move Towards Forest Path (Actors: Grandma) 2
+Move Towards Forest Path (Actors: Grandma) 1
 Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Grandma
 Targets: Forest Path
 Location: Plains Village
 ----------
-Move Towards Random Forest (Actors: Grandma) 3
-Node Name: Move Towards Random Forest
+Move Towards Mountain Valley (Actors: Grandma) 2
+Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Grandma
-Targets: Random Forest
+Targets: Mountain Valley
 Location: Forest Path
 ----------
-Move Towards Forest Path (Actors: Grandma) 4
-Node Name: Move Towards Forest Path
+Move Towards Magic Temple (Actors: Grandma) 3
+Node Name: Move Towards Magic Temple
 Timestep 0
 Actors: Grandma
-Targets: Forest Path
-Location: Random Forest
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Wait (Actors: Grandma) 4
+Node Name: Wait
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Magic Temple
 ----------

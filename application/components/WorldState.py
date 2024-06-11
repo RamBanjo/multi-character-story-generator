@@ -539,6 +539,8 @@ class WorldState:
         
         task_stack.remove_from_pool = True
 
+        return True
+
     def print_all_nodes(self):
         print("=== List of Nodes in {} ===".format(self.name))
         for node in self.node_dict:
