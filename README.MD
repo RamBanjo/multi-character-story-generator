@@ -211,3 +211,57 @@ finish_gen_time = datetime.now()
 print("xxx")
 print("Generation Time:", str(finish_gen_time-start_gen_time))
 ```
+
+Multigraph generation is recommended for longer stories. The generation time increases with length exponentially, so splitting the story into multiple small graphs is recommended for longer stories.
+
+```py
+
+finish_gen_time = datetime.now()
+
+generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules = list_of_rules, required_story_length=30, max_storynodes_per_graph=5)
+
+finish_gen_time = datetime.now()
+print("xxx")
+print("Generation Time:", str(finish_gen_time-start_gen_time))
+```
+
+## 11. Display output, or record to text file.
+
+Decide on how you want to see your results. The StoryGraph has a function that can print all of the nodes within it.
+
+```py
+
+# Usage on single graph
+generated_graph.print_all_node_beautiful_format()
+
+# Usage on list of graphs
+for subgraph in generated_graph_list:
+    subgraph.print_all_node_beautiful_format()
+```
+
+For larger stories that may be difficult to read in the console, we recommend writing to a text file.
+
+```py
+base_directory = "application/tests/test_output/"
+
+# Usage on Single Graph
+base_folder_name = "single_graph"
+single_graph_directory = base_directory + base_folder_name + "/"
+generated_graph.print_graph_nodes_to_text_file(directory=single_graph_directory, verbose=True)
+
+# Usage on Multiple Graphs (this will also print the final world state of each subgraph)
+graphcounter = 1
+base_folder_name = "multi_graph"
+
+for subgraph in generated_graph_list:
+    print("Cycle Number:", str(graphcounter))
+    fullpath = base_directory + base_folder_name + "/" + str(graphcounter) + "/"
+    if not os.path.exists(fullpath):
+        os.makedirs(fullpath)
+
+    subgraph.print_graph_nodes_to_text_file(directory=fullpath, verbose=True)
+    latest_ws = subgraph.make_latest_state()
+    latest_ws.print_wsedges_to_text_file(directory=fullpath, verbose=True)
+
+    graphcounter += 1
+```

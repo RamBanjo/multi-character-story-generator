@@ -18,3 +18,6 @@ class StoryMetric:
         self.value = value
         self.metric_mode = metric_mode
         self.character_object = character_object
+
+    def __str__(self) -> str:
+        return self.metric_type.name + " " + self.metric_mode.name + " " + str(self.value) + " for " + self.character_object.get_name()

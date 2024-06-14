@@ -197,20 +197,48 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                         rule_container.action_score += (rule_application_count * action_repeat_penalty)
 
                     for metric in metrics_requirements:
+
+                        test_splitjoint = False
+
                         if metric.character_object == current_character:
-
+                            
                             purge_count = 0
-                            if rule.remove_before_insert:
-                                purge_count = len(rule.story_condition)
+                            followup_nodes_list = []
+                            if not rule.is_joint_rule:
 
-                            if final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=rule.story_change, step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list):
-                                if verbose:
-                                    print("The rule",rule.rule_name,"follows the metrics. Some score will be awarded.")
-                                    rule_container.action_score += metric_reward
+                                followup_nodes_list = rule.story_condition
+                                if rule.remove_before_insert:
+                                    purge_count = len(rule.story_condition)
+
                             else:
+                                match rule.joint_type:
+                                    case JointType.SPLIT:
+                                        test_splitjoint = True
+                                    case _:
+                                        followup_nodes_list = [rule.joint_node]
+                            
+                            pass_metric_test = False
+
+                            if not test_splitjoint:
+                                pass_metric_test = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=followup_nodes_list, step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list)
+                            else:
+                                #We consider the splitting joint rule to be following the metric if at least one of the continuations follow the metric.
+                                follow_metric_exists = False
+
+                                for node in rule.split_list:
+                                    check_result = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=[node], step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list)
+                                    follow_metric_exists = follow_metric_exists or check_result
+
+                                pass_metric_test = follow_metric_exists
+
+                            if pass_metric_test:
                                 if verbose:
-                                    print("The rule",rule.rule_name,"violates the metrics. Some score will be deducted.")
-                                    rule_container.action_score += metric_penalty
+                                        print("The rule",rule.rule_name,"follows the metrics:", str(metric), "(Some score will be awarded.)")
+                                        rule_container.action_score += metric_reward
+                                else:
+                                    if verbose:
+                                        print("The rule",rule.rule_name,"violates the metrics.", str(metric), "(Some score will be deducted.)")
+                                        rule_container.action_score += metric_penalty
 
 
                     acceptable_rules_with_absolute_step_and_score.append(rule_container)

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph
+Scheme Leader Gives Tasks (Actors: Grandma) 0
+Node Name: Scheme Leader Gives Tasks
+Timestep 0
+Actors: Grandma
+Targets: Wolf
+Location: Forest Village
+----------
+Actor Attacks Target (Actors: Wolf) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Forest Village
+----------
+Wait (Actors: Wolf) 2
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Village
+----------
+Witness Wolf (Actors: Red) 3
+Node Name: Witness Wolf
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Village
+----------
+Wait (Actors: Wolf) 4
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Village
+----------

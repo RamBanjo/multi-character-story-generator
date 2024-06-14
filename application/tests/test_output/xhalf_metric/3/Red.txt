@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 2
+Get Tell Mom Wolf Quest (Actors: Red) 0
+Node Name: Get Tell Mom Wolf Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Actor Attacks Target (Actors: Wolf) 1
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Path
+----------
+Get Tell Mom Wolf Quest (Actors: Red) 2
+Node Name: Get Tell Mom Wolf Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Wait (Actors: Red) 3
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Get Tell Mom Wolf Quest (Actors: Red) 4
+Node Name: Get Tell Mom Wolf Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------

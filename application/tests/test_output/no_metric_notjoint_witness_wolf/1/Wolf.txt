@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph
+Actor attacks Target (Actors: Wolf) 0
+Node Name: Actor attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Forest Village
+----------
+Actor Scares Target (Actors: Wolf) 1
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Forest Village
+----------
+Actor becomes scared of Target (Actors: Witch) 2
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Forest Village
+----------
+Scheme Leader Gives Tasks (Actors: Grandma) 3
+Node Name: Scheme Leader Gives Tasks
+Timestep 0
+Actors: Grandma
+Targets: Wolf
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Wolf) 4
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Wolf
+Targets: Forest Path
+Location: Forest Village
+----------

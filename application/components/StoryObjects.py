@@ -39,7 +39,8 @@ class ObjectNode:
         self.tags[attribute] = new_value
 
     def remove_tag(self, attribute:str):
-        del self.tags[attribute]
+        if attribute in self.tags.keys():
+            del self.tags[attribute]
 
     def get_name(self):
         return self.name

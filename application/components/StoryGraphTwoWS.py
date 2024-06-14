@@ -1970,6 +1970,9 @@ class StoryGraph:
 
         equivalent_taskchange = translate_generic_taskchange(taskchange_object, story_node)
 
+        if len(equivalent_taskchange) == 0:
+            return False, None
+
         new_task_stack.stack_giver_name = equivalent_taskchange[0].task_giver_name
         new_task_stack.stack_owner_name = equivalent_taskchange[0].task_owner_name
 
@@ -2159,10 +2162,20 @@ class StoryGraph:
 
     def test_if_given_node_list_will_follow_metric_rule(self, metric : StoryMetric, node_list, step, purge_count = 0, previous_graphs = [], score_retention = 0, verbose = False):
         
+        has_joint_node = False
+
+        for node in node_list:
+            has_joint_node = has_joint_node or node.check_if_joint_node()
+
+
         graphcopy = deepcopy(self)
         if purge_count > 0:
-            graphcopy.remove_parts_by_count(start_step=step, count=purge_count, actor = metric.character_object)
-        graphcopy.insert_multiple_parts(part_list=node_list, character=metric.character_object, absolute_step=step)
+            graphcopy.remove_parts_by_count(start_step=step, count=purge_count, actor = metric.character_object)\
+            
+        if has_joint_node:
+            graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=node_list, main_character=metric.character_object, abs_step=step)
+        else:
+            graphcopy.insert_multiple_parts(part_list=node_list, character=metric.character_object, absolute_step=step)
 
         current_score = self.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
         new_score = graphcopy.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
