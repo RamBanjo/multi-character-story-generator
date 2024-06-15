@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 4
+Wait (Actors: Brick) 0
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Brick) 1
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Brick
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Move Towards Mountain Valley (Actors: Brick) 2
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Brick
+Targets: Mountain Valley
+Location: Magic Temple
+----------
+Move Towards Forest Path (Actors: Brick) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Brick
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Forest Village (Actors: Brick) 4
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Brick
+Targets: Forest Village
+Location: Forest Path
+----------
