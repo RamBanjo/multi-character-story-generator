@@ -788,6 +788,7 @@ def translate_generic_taskchange(change, populated_story_node):
 
             equivalent_changes.append(TaskChange(name=change.name, task_giver_name=giver_name_adjusted, task_owner_name=owner_name_adjusted, task_stack=change.task_stack))
             # print(equivalent_changes[0], equivalent_changes[0].task_stack.stack_name)
+
     return equivalent_changes
 
 def translate_generic_taskadvance(change, populated_story_node):

@@ -172,6 +172,15 @@ class StoryNode:
 
         return return_dict
     
+    def return_stripped_story_node(self):
+
+        nodecopy = deepcopy(self)
+        nodecopy.effects_on_next_ws = []
+        nodecopy.required_test_list = []
+        nodecopy.suggested_test_list = []
+
+        return nodecopy
+    
 def replace_placeholders_in_story_node(story_node:StoryNode, placeholder_dict:dict, list_of_actor_objects=[]):
     #Things that must be replaced:
     # - Actors
