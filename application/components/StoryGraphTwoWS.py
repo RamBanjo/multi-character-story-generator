@@ -123,9 +123,6 @@ class StoryGraph:
 
         character_from_ws = relevant_ws.node_dict[char_name]
 
-        # if char_name == "Amil":
-        #     print("Amil Tasks at Step (He is Actor)", absolute_step, character_from_ws.get_incomplete_task_stack_names())
-
         new_part.add_actor(character_from_ws)
         new_part.timestep = timestep
         new_part.abs_step = absolute_step
@@ -138,9 +135,6 @@ class StoryGraph:
             new_part.set_location(location_from_ws)
 
         for target in targets:
-            
-            # if type(target) == CharacterNode and target.name == "Amil":
-            #     print("Amil Tasks at Step (He is Target)", absolute_step, target.get_incomplete_task_stack_names())
 
             target_from_ws = relevant_ws.node_dict[target.get_name()]
             new_part.add_target(target_from_ws)
@@ -160,12 +154,11 @@ class StoryGraph:
             new_part.effects_on_next_ws.append(change_copy)
 
             #Look I don't know why these have to be assigned again but apparently they do. Sue me.
-
+        
         for i in range(0, len(new_part.effects_on_next_ws)):
             if new_part.effects_on_next_ws[i].changetype == ChangeType.TASKCHANGE:
                 stack_name = new_part.effects_on_next_ws[i].task_stack.stack_name
                 new_part.effects_on_next_ws[i].task_stack.copy_all_attributes(modded_taskobj_list[stack_name])
-
 
         self.add_to_story_part_dict(character_name=char_name, abs_step=absolute_step, story_part=new_part)
 
@@ -1970,6 +1963,7 @@ class StoryGraph:
 
         equivalent_taskchange = translate_generic_taskchange(taskchange_object, story_node)
 
+        
         if len(equivalent_taskchange) == 0:
             return False, None
 
@@ -2169,13 +2163,17 @@ class StoryGraph:
 
 
         graphcopy = deepcopy(self)
+
+        stripped_node_list = []
+        for node in node_list:
+            stripped_node_list.append(node.return_stripped_story_node())
+
         if purge_count > 0:
-            graphcopy.remove_parts_by_count(start_step=step, count=purge_count, actor = metric.character_object)\
-            
+            graphcopy.remove_parts_by_count(start_step=step, count=purge_count, actor = metric.character_object)
         if has_joint_node:
-            graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=node_list, main_character=metric.character_object, abs_step=step)
+            graphcopy.insert_multiple_parts_with_joint_and_nonjoint(node_list=stripped_node_list, main_character=metric.character_object, abs_step=step)
         else:
-            graphcopy.insert_multiple_parts(part_list=node_list, character=metric.character_object, absolute_step=step)
+            graphcopy.insert_multiple_parts(part_list=stripped_node_list, character=metric.character_object, absolute_step=step)
 
         current_score = self.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
         new_score = graphcopy.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)

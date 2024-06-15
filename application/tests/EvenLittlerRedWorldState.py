@@ -71,6 +71,8 @@ reds_world_state.connect(from_node=random_forest, edge_name="holds", to_node=gol
 
 reds_world_state.connect(from_node=wolf, edge_name="has_attack_reason", to_node=red, value="eating_children")
 reds_world_state.connect(from_node=wolf, edge_name="has_attack_reason", to_node=brick_pig, value="eating_children")
+reds_world_state.connect(from_node=witch, edge_name="has_attack_reason", to_node=red, value="eating_children")
+reds_world_state.connect(from_node=witch, edge_name="has_attack_reason", to_node=brick_pig, value="eating_children")
 
 # Actions
 # Eat (It's a messy action.)
@@ -665,6 +667,19 @@ movement_suggestion.append(target_location_has_someone_actor_fears_reward)
 
 someone_is_grandma = ObjectEqualityTest(object_list=[GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, grandma])
 after_scaring_forest_resident_want_to_meet_grandma_reward = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[actor_has_scared_bear_check, actor_has_scared_witch_check, actor_has_scared_witch_check, target_holds_someone, someone_is_grandma, actor_has_no_reportscare_memory_check], score=300)
+movement_suggestion.append(after_scaring_forest_resident_want_to_meet_grandma_reward)
+
+actor_is_wolf = ObjectEqualityTest(object_list=[GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, wolf])
+def make_want_to_approach_forest_resident_test(forest_resident_object):
+    someone_is_forest_resident = ObjectEqualityTest(object_list=[GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, forest_resident_object])
+    actor_has_not_scared_forest_resident_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="HasScared", object_to_test=forest_resident_object, soft_equal=True, inverse=True)
+    before_scaring_resident_want_to_meet_reward = SomethingPassesAllGivenTestsTest(list_of_tests_with_placeholder=[actor_is_wolf, someone_is_forest_resident, actor_has_not_scared_forest_resident_check], score=200)
+
+    return before_scaring_resident_want_to_meet_reward
+
+movement_suggestion.append(make_want_to_approach_forest_resident_test(papabear))
+movement_suggestion.append(make_want_to_approach_forest_resident_test(witch))
+movement_suggestion.append(make_want_to_approach_forest_resident_test(brick_pig))
 
 # TODO: Generate graphs with these memories
 # 1. No Metrics
@@ -699,7 +714,7 @@ start_gen_time = datetime.now()
 #Uncomment each block for the desired result
 #No Metrics
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes)
-# base_folder_name = "no_metric_2"
+# base_folder_name = "no_metric_4"
 
 # x0 Retention
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0, extra_move_changes=extra_move_changes)
@@ -710,8 +725,8 @@ start_gen_time = datetime.now()
 # base_folder_name = "xhalf_metric"
 
 # x1 Retention
-generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=1, extra_move_changes=extra_move_changes)
-base_folder_name = "x1_metric"
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=1, extra_move_changes=extra_move_changes)
+# base_folder_name = "x1_metric"
 
 finish_gen_time = datetime.now()
 

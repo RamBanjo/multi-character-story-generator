@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 4
+Actor Attacks Target (Actors: Witch) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Mountain Valley
+----------
+Wait (Actors: Brick) 1
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Mountain Valley
+----------
+Actor Attacks Target (Actors: Witch) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Brick) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Brick
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Forest Village (Actors: Brick) 4
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Brick
+Targets: Forest Village
+Location: Forest Path
+----------

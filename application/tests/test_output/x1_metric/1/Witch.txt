@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph
+Get Rod Quest for Witch (Actors: Witch) 0
+Node Name: Get Rod Quest for Witch
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Village
+----------
+Actor Scares Target (Actors: Wolf) 1
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Witch) 2
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Witch
+Targets: Forest Path
+Location: Forest Village
+----------
+Actor Attacks Target (Actors: Witch) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Witch) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Witch
+Targets: Mountain Valley
+Location: Forest Path
+----------
