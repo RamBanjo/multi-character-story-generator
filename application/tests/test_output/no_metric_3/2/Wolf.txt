@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 1
+Actor Attacks Target (Actors: Wolf) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Village
+----------
+Wait (Actors: Wolf) 1
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Wolf) 2
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Wolf
+Targets: Forest Path
+Location: Forest Village
+----------
+Move Towards Mountain Valley (Actors: Wolf) 3
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Wolf
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Actor becomes scared of Target (Actors: Papa Bear) 4
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Mountain Valley
+----------

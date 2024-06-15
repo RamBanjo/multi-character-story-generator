@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 4
+Actor Attacks Target (Actors: Papa Bear) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Wolf) 1
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Magic Temple
+----------
+Wait (Actors: Wolf) 2
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Papa Bear) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Wolf) 4
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Magic Temple
+----------
