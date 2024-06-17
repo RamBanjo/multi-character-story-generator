@@ -220,13 +220,13 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                             pass_metric_test = False
 
                             if not test_splitjoint:
-                                pass_metric_test = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=followup_nodes_list, step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list)
+                                pass_metric_test = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=followup_nodes_list, step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list, verbose=verbose)
                             else:
                                 #We consider the splitting joint rule to be following the metric if at least one of the continuations follow the metric.
                                 follow_metric_exists = False
 
                                 for node in rule.split_list:
-                                    check_result = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=[node], step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list)
+                                    check_result = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=[node], step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list, verbose=verbose)
                                     follow_metric_exists = follow_metric_exists or check_result
 
                                 pass_metric_test = follow_metric_exists

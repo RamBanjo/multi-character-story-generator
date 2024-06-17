@@ -2104,6 +2104,7 @@ class StoryGraph:
             case MetricType.PREFER:
                 relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("important_action", True)])
 
+        print((relevant_nodes_found / character_story_length))
         return round((relevant_nodes_found / character_story_length), 2) * 100
             
     # score_retention: How much the program cares about past graphs?
@@ -2177,7 +2178,6 @@ class StoryGraph:
 
         current_score = self.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
         new_score = graphcopy.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
-
         #Index 0 has past graph's score and index 1 has that graph's length
 
         #This works like how it would used to as long as there is a score_retention of greater than 0 and no previous graph.
@@ -2186,10 +2186,10 @@ class StoryGraph:
             current_score = self.get_multigraph_metric_score(metric_type=metric.metric_type, character=metric.character_object, previous_graphs=previous_graphs, score_retention=score_retention)
             new_score = graphcopy.get_multigraph_metric_score(metric_type=metric.metric_type, character=metric.character_object, previous_graphs=previous_graphs, score_retention=score_retention)
 
-            if verbose:
-                print("Calculated Scores (current -> new) :", current_score, "->", new_score)
-
         score_delta = new_score - current_score
+
+        if verbose:
+            print("Calculated Scores (current -> new) :", current_score, "->", new_score, "Score Delta:", score_delta)
         follows_metric_rule = False
 
         match metric.metric_mode:

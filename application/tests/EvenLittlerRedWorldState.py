@@ -717,16 +717,16 @@ start_gen_time = datetime.now()
 # base_folder_name = "no_metric_4"
 
 # x0 Retention
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0, extra_move_changes=extra_move_changes)
-# base_folder_name = "x0_metric_2"
+generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0, extra_move_changes=extra_move_changes)
+base_folder_name = "x0_metric_3"
 
 # x0.5 Retention
-generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0.5, extra_move_changes=extra_move_changes)
-base_folder_name = "xhalf_metric_2"
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0.5, extra_move_changes=extra_move_changes)
+# base_folder_name = "xhalf_metric_2"
 
 # x1 Retention
-generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=1, extra_move_changes=extra_move_changes)
-base_folder_name = "x1_metric_2"
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=1, extra_move_changes=extra_move_changes)
+# base_folder_name = "x1_metric_2"
 
 finish_gen_time = datetime.now()
 
@@ -756,3 +756,15 @@ print("Generation Complete! Yippee!!")
 # It might have to do with the attempt_move_towards_task_loc function
 # It has to do with the task stacks that's for sure. I just don't know how they interact...
 # It's very likely that the errors in moving around from location to location has to do with the task cancellation nodes. This problem is not replicated when no tasks are cancelled.
+
+# Discussion:
+# The metrics don't seem to do much in changing the generation. According to the generation logs, every single action passes the metric rules, even though we have tested that the metric rules can properly be measured in the stories.
+# - There aren't enough nodes with the labels that count towards the metrics. This meant that:
+#      - If a Metric is LOWER, then the metric is already satisfied (because the nodes that would increase the metrics don't get added often)
+#      - If a Metric is HIGHER, then the metric would give a good score either if the new node is not less than the current value or if the new node stays within the higher range. Since the value is almost always 0, then all the actions will always be given a good score.
+#      - STABLE has the same problem with HIGHER.
+# - The stories should be the same, they're based on the same rules. We should expect the same parts to appear, but the order a bit different
+#
+# Despite there being rules that allow it, the characters don't end up using certain rules at all.
+# - Some rules can only be applied if a pattern exists, and the patterns are not guaranteed to show up
+#   - This meant that it's not possible for certain actions to be done if its prerequisites are not done.
