@@ -96,13 +96,16 @@ target_is_child = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, ta
 target_becomes_dead = TagChange(name="Target Becomes Dead", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Alive", value=False, add_or_remove=ChangeAction.ADD)
 target_leaves_no_corpse = TagChange(name="Target Leaves No Body", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="NoCorpse", value=True, add_or_remove=ChangeAction.ADD)
 
-eat_and_kill = StoryNode(name="Eat and Kill", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_leaves_no_corpse], required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, actor_eats_children, target_is_child, actor_and_target_shares_location])
+actor_has_defeatinteraction_target_twoway = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="DefeatInteractionOccured", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True)
+actor_loses_defeatinteraction_target_twoway = RelChange(name="Actor Loses Twoway DefeatInteraction", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="DefeatInteractionOccured", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.REMOVE, soft_equal=True, two_way=True)
+
+eat_and_kill = StoryNode(name="Eat and Kill", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_leaves_no_corpse, actor_loses_defeatinteraction_target_twoway], required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, actor_eats_children, target_is_child, actor_and_target_shares_location, actor_has_defeatinteraction_target_twoway])
 
 # Kill (Needs to carry weapon, wolf's weapon is his claws)
-actor_has_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="KillReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, score=30)
-actor_has_killing_tool = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="CanKill", value=None, soft_equal=True, score=10)
+actor_has_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="KillReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, score=50)
+actor_has_killing_tool = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="CanKill", value=None, soft_equal=True, score=50)
 
-kill_another_actor = StoryNode(name="Actor Kills Actor", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location], suggested_test_list=[actor_has_killing_tool, actor_has_reason_to_kill_target])
+kill_another_actor = StoryNode(name="Actor Kills Actor", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, actor_loses_defeatinteraction_target_twoway], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, actor_has_defeatinteraction_target_twoway], suggested_test_list=[actor_has_killing_tool, actor_has_reason_to_kill_target])
 
 # Scare (Makes a character leave home, works on children and adults, has a chance to cause adults to fight back instead (This is a Rule))
 
@@ -119,7 +122,14 @@ scare_action = StoryNode(name="Actor Scares Target", tags={"Type":"Threaten"}, c
 # Unconscious characters cannot act, but they can wake up after a while. (With Patternless Rule)
 
 target_becomes_unconscious = TagChange(name="Target Becomes Unconscious", object_node_name=GenericObjectNode.GENERIC_TARGET, tag="Unconscious", value=True, add_or_remove=ChangeAction.ADD)
-defeat_action = StoryNode(name="Defeat", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious], effects_on_next_ws=[target_becomes_unconscious])
+
+actor_gain_defeatinteraction_target_twoway = RelChange(name="Actor Gains DefeatInteraction TwoWay", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="DefeatInteractionOccured", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, two_way=True)
+actor_loses_attackinteraction_target_twoway = RelChange(name="Remove TwoWay AttackInteraction", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="AttackInteractionOccured", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.REMOVE, soft_equal=True, two_way=True)
+
+actor_has_attackinteraction_target_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="AttackInteractionOccured", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True)
+actor_has_no_defeatinteraction_target_twoway = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="DefeatInteractionOccured", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True, inverse=True)
+
+defeat_action = StoryNode(name="Defeat", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_has_no_defeatinteraction_target_twoway, actor_has_attackinteraction_target_check], effects_on_next_ws=[target_becomes_unconscious, actor_gain_defeatinteraction_target_twoway, actor_loses_attackinteraction_target_twoway])
 
 # Threaten (Can cause the target to either become scared or become defiant, either way this forms a new relationship between target and actor)
 # Become Scared
@@ -144,7 +154,11 @@ actor_defies_target = StoryNode(name="Actor becomes defiant of Target", tags={"T
 # Attack (Can lead to a fight, killing, or can lead to the target escaping from the attacker)
 # Someone would attack target if they have a reason to kill the other person, or if they are evil
 actor_has_reason_to_attack_target_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="has_attack_reason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
-actor_attacks_target = StoryNode(name="Actor Attacks Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_has_reason_to_attack_target_check], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool])
+actor_has_no_attack_interaction_target_twoway = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="AttackInteractionOccured", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True, inverse=True)
+actor_gains_attack_interaction_target_twoway = RelChange(name="Gain Twoway AttackInteraction", node_a=GenericObjectNode.GENERIC_ACTOR, node_b=GenericObjectNode.GENERIC_TARGET, edge_name="AttackInteractionOccured", add_or_remove=ChangeAction.ADD, two_way=True)
+actor_has_less_than_minus_50_moralbias = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", max_accept=-50, score=50)
+
+actor_attacks_target = StoryNode(name="Actor Attacks Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_has_no_attack_interaction_target_twoway, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_has_reason_to_attack_target_check], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool, actor_has_less_than_minus_50_moralbias], effects_on_next_ws=[actor_gains_attack_interaction_target_twoway])
 
 # Escape from Attacker (This makes them scared of attacker, and thus more likely to run away)
 # actor_escapes_from_attacking_target = StoryNode(name="Actor Flees Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_not_fear_target_check], effects_on_next_ws=[actor_becomes_scared_of_target])
@@ -158,7 +172,7 @@ actor_not_destroying_home_change = TagChange(name="Actor stops Destroying Home",
 target_is_destroying_house_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="DestroyingHome", value=True)
 
 # Attack Intruder (If sharing location with home destruction tag character)
-# actor_gain_attack_reason_homedestroy = RelChange(name="Actor Gains Attack Reason Defiant", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="has_attack_reason", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, value="anger_destroyhome")
+actor_gain_attack_reason_homedestroy = RelChange(name="Actor Gains Attack Reason Defiant", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="has_attack_reason", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, value="anger_destroyhome")
 killreason_homedestroyanger = RelChange(name="Gain Kill Reason HomeDestroy", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="KillReason", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, value="anger_destroyhome")
 # attack_home_intruder = StoryNode(name="Attack Home Intruder", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, target_is_destroying_house_check], effects_on_next_ws=[killreason_homedestroyanger])
 
@@ -191,13 +205,13 @@ target_holds_rod_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_
 target_no_longer_holds_rod = RelChange(name="Target Stop Hold Rod", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="holds", node_b=protection_pillar, soft_equal=True, add_or_remove=ChangeAction.REMOVE)
 actor_holds_rod = RelChange(name="Actor Hold Rod", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=protection_pillar, add_or_remove=ChangeAction.ADD)
 
-defeat_and_take_rod_target_unconscious = StoryNode(name="Defeat and Steal Rod", tags={"Type":"Fight"}, biasweight=100, charcount=1, target_count=-1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, target_holds_rod_check], effects_on_next_ws=[target_becomes_unconscious, target_no_longer_holds_rod, actor_holds_rod])
+defeat_and_take_rod_target_unconscious = StoryNode(name="Defeat and Steal Rod", tags={"Type":"Fight"}, biasweight=100, charcount=1, target_count=-1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, target_holds_rod_check, actor_has_no_attack_interaction_target_twoway], effects_on_next_ws=[target_becomes_unconscious, target_no_longer_holds_rod, actor_holds_rod, actor_loses_attackinteraction_target_twoway])
 # actor_takes_rod_while_target_flees = StoryNode(name="Actor Takes Rod While Target Flees", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check], effects_on_next_ws=[actor_becomes_scared_of_target, target_no_longer_holds_rod, actor_holds_rod])
 
 character_less_than_minus80_lawful_rewarded = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moral", max_accept=-80, score=20)
 character_more_than_minus80_lawful_punished = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moral", min_accept=-80, score=-100)
 
-kill_for_rod = StoryNode(name="Kill for Rod", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_no_longer_holds_rod, actor_holds_rod], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool])
+kill_for_rod = StoryNode(name="Kill for Rod", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_no_longer_holds_rod, actor_holds_rod, actor_loses_defeatinteraction_target_twoway], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check, actor_has_defeatinteraction_target_twoway], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool])
 
 # Take Rod if rod is on ground (you can also take from other people's houses)
 actor_shares_location_with_rod = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, protection_pillar])
@@ -234,7 +248,7 @@ notice_no_grandma = StoryNode(name="Notice Missing Grandma", tags={"Type":"Witne
 
 # Witness House Destruction
 actor_is_destroying_home_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="DestroyingHome", value=True)
-witness_home_destruction = StoryNode(name="Witnessing Home Destruction", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_is_destroying_home_check], effects_on_next_ws=[killreason_homedestroyanger, actor_not_destroying_home_change])
+witness_home_destruction = StoryNode(name="Witnessing Home Destruction", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_is_destroying_home_check], effects_on_next_ws=[killreason_homedestroyanger, actor_gain_attack_reason_homedestroy, actor_not_destroying_home_change])
 
 # Kidnap (carries another unconscious character, holding them instead of the location. Characters can only hold one character at a time)
 
@@ -248,7 +262,7 @@ actor_starts_grabbing_target = RelChange(name="Actor Starts Holding Target", nod
 
 gain_killreason_kidnapper = RelChange(name="Gain Kill Reason Kidnapper", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="KillReason", node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.ADD, value="self_defense_kidnapper")
 
-kidnap_target = StoryNode(name="Actor Kidnaps Target", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_unconscious, actor_and_target_shares_location, actor_not_grab_character_test], effects_on_next_ws=[actor_starts_grabbing_target])
+kidnap_target = StoryNode(name="Actor Kidnaps Target", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_unconscious, actor_and_target_shares_location, actor_not_grab_character_test, actor_has_defeatinteraction_target_twoway], effects_on_next_ws=[actor_starts_grabbing_target, actor_loses_defeatinteraction_target_twoway])
 
 # Drop Character (places down an unconscious character you are currently holding)
 
@@ -269,20 +283,24 @@ gain_consciousness = StoryNode(name="Gain Consciousness", tags={"Type":"Awaken"}
 list_of_rules = []
 
 # Rule: Defeat -> Kill
-defeat_into_kill = ContinuousJointRule(base_joint=defeat_action, joint_node=kill_another_actor, rule_name="Defeat Into Kill")
-list_of_rules.append(defeat_into_kill)
+# defeat_into_kill = ContinuousJointRule(base_joint=defeat_action, joint_node=kill_another_actor, rule_name="Defeat Into Kill")
+patternless_into_kill = JoiningJointRule(base_actions=[], joint_node=kill_another_actor, rule_name="Patternless into Kill")
+list_of_rules.append(patternless_into_kill)
 
 # Rule: Defeat -> Kill for Rod
-defeat_into_kill_rod = ContinuousJointRule(base_joint=defeat_action, joint_node=kill_for_rod, rule_name="Defeat into Kill For Rod")
-list_of_rules.append(defeat_into_kill_rod)
+# defeat_into_kill_rod = ContinuousJointRule(base_joint=defeat_action, joint_node=kill_for_rod, rule_name="Defeat into Kill For Rod")
+patternless_into_killrod = JoiningJointRule(base_actions=[], joint_node=kill_for_rod, rule_name="Patternless into Kill for Rod")
+list_of_rules.append(patternless_into_killrod)
 
 # Rule: Defeat -> Eat
-defeat_into_eat = ContinuousJointRule(base_joint=defeat_action, joint_node=eat_and_kill, rule_name="Defeat Into Eat")
-list_of_rules.append(defeat_into_eat)
+# defeat_into_eat = ContinuousJointRule(base_joint=defeat_action, joint_node=eat_and_kill, rule_name="Defeat Into Eat")
+patternless_into_eat = JoiningJointRule(base_actions=[], joint_node=eat_and_kill, rule_name="Patternless into Eat and Kill")
+list_of_rules.append(patternless_into_eat)
 
 # Rule: Defeat -> Kidnap
-defeat_into_kidnap = ContinuousJointRule(base_joint=defeat_action, joint_node=kidnap_target, rule_name="Defeat Into Kidnap")
-list_of_rules.append(defeat_into_kidnap)
+# defeat_into_kidnap = ContinuousJointRule(base_joint=defeat_action, joint_node=kidnap_target, rule_name="Defeat Into Kidnap")
+patternless_into_kidnap = JoiningJointRule(base_actions=[], joint_node=kidnap_target, rule_name="Patternless into Kidnap")
+list_of_rules.append(patternless_into_kidnap)
 
 # Rule: (Patternless) -> Scare
 patternless_into_scare = JoiningJointRule(base_actions=None, joint_node=scare_action, rule_name="Patternless into Scare")
@@ -351,26 +369,28 @@ list_of_rules.append(patternless_get_find_diary_task)
 list_of_rules.append(patternless_get_find_goose_task)
 
 # Rule: Patternless into Witness Home Destruction
-destroy_home_into_witness_home_destruction = JoiningJointRule(base_actions=None, joint_node=witness_home_destruction, rule_name="Patternless Join Witness Home Destruction")
+destroy_home_into_witness_home_destruction = JoiningJointRule(base_actions=[], joint_node=witness_home_destruction, rule_name="Patternless Join Witness Home Destruction")
 list_of_rules.append(destroy_home_into_witness_home_destruction)
 
 # Rule: Witness Home Destruction into Attack
-witness_home_destruction_into_attack = ContinuousJointRule(base_joint=witness_home_destruction, joint_node=actor_attacks_target, rule_name="Witness Home Destruction Into Attack")
-list_of_rules.append(witness_home_destruction_into_attack)
+# witness_home_destruction_into_attack = ContinuousJointRule(base_joint=witness_home_destruction, joint_node=actor_attacks_target, rule_name="Witness Home Destruction Into Attack")
+# list_of_rules.append(witness_home_destruction_into_attack)
 
 # Rule: (Patternless) -> Attack
-patternless_attack = JoiningJointRule(base_actions=None, joint_node=actor_attacks_target, rule_name="Patternless Attack Target")
+patternless_attack = JoiningJointRule(base_actions=[], joint_node=actor_attacks_target, rule_name="Patternless Attack Target")
 list_of_rules.append(patternless_attack)
 
 # Rule: Attack -> Attacker Defeated or Defender Defeated (No need to put this --- it will automatically pick a character to be defeated)
 
-attack_into_defeat = ContinuousJointRule(base_joint=actor_attacks_target, joint_node=defeat_action, rule_name="Attack into Defeat")
-list_of_rules.append(attack_into_defeat)
+# attack_into_defeat = ContinuousJointRule(base_joint=actor_attacks_target, joint_node=defeat_action, rule_name="Attack into Defeat")
+patternless_into_defeat = JoiningJointRule(base_actions=[], joint_node=defeat_action, rule_name="Patternless into Defeat")
+list_of_rules.append(patternless_into_defeat)
 
 # Rule: Attack -> Defeat and Take Rod (if the Attacker didn't have rod, but the Defender does)
 
-attack_into_defeatrod = ContinuousJointRule(base_joint=actor_attacks_target, joint_node=defeat_and_take_rod_target_unconscious, rule_name="Attack into Defeat (Rod)")
-list_of_rules.append(attack_into_defeatrod)
+# attack_into_defeatrod = ContinuousJointRule(base_joint=actor_attacks_target, joint_node=defeat_and_take_rod_target_unconscious, rule_name="Attack into Defeat (Rod)")
+patternless_into_defeat_rod = JoiningJointRule(base_actions=[], joint_node=defeat_and_take_rod_target_unconscious, rule_name="Patternless into Defeat (Rod)")
+list_of_rules.append(patternless_into_defeat_rod)
 
 # Rule: Patternless -> Rebuild Home
 patternless_into_rebuild_pig_home = RewriteRule(story_condition=[], story_change=[pig_rebuild_home], name="Patternless into Pig Rebuild Home")
@@ -768,3 +788,11 @@ print("Generation Complete! Yippee!!")
 # Despite there being rules that allow it, the characters don't end up using certain rules at all.
 # - Some rules can only be applied if a pattern exists, and the patterns are not guaranteed to show up
 #   - This meant that it's not possible for certain actions to be done if its prerequisites are not done.
+#
+# We must define more actions as costly / important actions, but which ones do we define?
+#
+# How to fix the Continuous Joint: Use Edges!
+# AttackInteraction: This edge is given to characters who interacted with each other previously with an Attack node.
+# Change Defeat into a patternless join with the condition that the actor and the target is doubleconnected by AttackInteraction. This removes the AttackInteraction.
+# Defeat will now give DefeatInteraction
+# Killing and Kidnapping now requires DefeatInteraction, and will remove it upon doing said action

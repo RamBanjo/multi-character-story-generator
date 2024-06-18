@@ -710,7 +710,7 @@ def translate_generic_relchange(relchange, populated_story_node):
 
     for lhs_item in lhs_list:
         for rhs_item in rhs_list:
-            newchange = RelChange(name = relchange.name, node_a=lhs_item, edge_name=relchange.edge_name, node_b=rhs_item, value=relchange.value, add_or_remove=relchange.add_or_remove, soft_equal=relchange.soft_equal)
+            newchange = RelChange(name = relchange.name, node_a=lhs_item, edge_name=relchange.edge_name, node_b=rhs_item, value=relchange.value, add_or_remove=relchange.add_or_remove, soft_equal=relchange.soft_equal, two_way=relchange.two_way)
             list_of_equivalent_relchanges.append(newchange)
 
     return list_of_equivalent_relchanges

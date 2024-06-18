@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Wait (Actors: Wolf) 0
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Wolf) 1
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Wolf
+Targets: Forest Path
+Location: Forest Village
+----------
+Move Towards Mountain Valley (Actors: Wolf) 2
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Wolf
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Move Towards Magic Temple (Actors: Wolf) 3
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Wolf
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Move Towards Mountain Valley (Actors: Wolf) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Wolf
+Targets: Mountain Valley
+Location: Magic Temple
+----------

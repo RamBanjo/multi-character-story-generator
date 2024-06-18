@@ -2104,7 +2104,7 @@ class StoryGraph:
             case MetricType.PREFER:
                 relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("important_action", True)])
 
-        print((relevant_nodes_found / character_story_length))
+        # print((relevant_nodes_found / character_story_length))
         return round((relevant_nodes_found / character_story_length), 2) * 100
             
     # score_retention: How much the program cares about past graphs?
