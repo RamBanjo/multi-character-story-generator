@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Eat and Kill (Actors: Wolf) 0
+Node Name: Eat and Kill
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Plains Village
+----------
+Wait (Actors: Wolf) 1
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Plains Village
+----------
+Move Towards Forest Path (Actors: Wolf) 2
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Wolf
+Targets: Forest Path
+Location: Plains Village
+----------
+Actor Attacks Target (Actors: Papa Bear) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Forest Path
+----------
+Move Towards Forest Village (Actors: Wolf) 4
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Wolf
+Targets: Forest Village
+Location: Forest Path
+----------
