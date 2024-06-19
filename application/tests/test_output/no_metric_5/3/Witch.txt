@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 2
+Defeat and Steal Rod (Actors: Witch) 0
+Node Name: Defeat and Steal Rod
+Timestep 0
+Actors: Witch
+Targets: Papa Bear
+Location: Magic Temple
+----------
+Recall Tasks (Actors: Witch) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+task_cancel_for_Witch_Rod Quest (Actors: Witch) 2
+Node Name: task_cancel_for_Witch_Rod Quest
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 3
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Witch) 4
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Magic Temple
+----------

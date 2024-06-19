@@ -205,13 +205,14 @@ target_holds_rod_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_
 target_no_longer_holds_rod = RelChange(name="Target Stop Hold Rod", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="holds", node_b=protection_pillar, soft_equal=True, add_or_remove=ChangeAction.REMOVE)
 actor_holds_rod = RelChange(name="Actor Hold Rod", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=protection_pillar, add_or_remove=ChangeAction.ADD)
 
-defeat_and_take_rod_target_unconscious = StoryNode(name="Defeat and Steal Rod", tags={"Type":"Fight"}, biasweight=100, charcount=1, target_count=-1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, target_holds_rod_check, actor_has_no_attack_interaction_target_twoway], effects_on_next_ws=[target_becomes_unconscious, target_no_longer_holds_rod, actor_holds_rod, actor_loses_attackinteraction_target_twoway])
+actor_owns_forest_home = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="OwnsForestHome", value=True)
+defeat_and_take_rod_target_unconscious = StoryNode(name="Defeat and Steal Rod", tags={"Type":"Fight"}, biasweight=100, charcount=1, target_count=-1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, target_holds_rod_check, actor_has_no_defeatinteraction_target_twoway,  actor_has_attackinteraction_target_check, actor_owns_forest_home], effects_on_next_ws=[target_becomes_unconscious, target_no_longer_holds_rod, actor_holds_rod, actor_loses_attackinteraction_target_twoway])
 # actor_takes_rod_while_target_flees = StoryNode(name="Actor Takes Rod While Target Flees", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check], effects_on_next_ws=[actor_becomes_scared_of_target, target_no_longer_holds_rod, actor_holds_rod])
 
 character_less_than_minus80_lawful_rewarded = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moral", max_accept=-80, score=20)
 character_more_than_minus80_lawful_punished = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moral", min_accept=-80, score=-100)
 
-kill_for_rod = StoryNode(name="Kill for Rod", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_no_longer_holds_rod, actor_holds_rod, actor_loses_defeatinteraction_target_twoway], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check, actor_has_defeatinteraction_target_twoway], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool])
+kill_for_rod = StoryNode(name="Kill for Rod", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_no_longer_holds_rod, actor_holds_rod, actor_loses_defeatinteraction_target_twoway, actor_owns_forest_home], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check, actor_has_defeatinteraction_target_twoway], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool])
 
 # Take Rod if rod is on ground (you can also take from other people's houses)
 actor_shares_location_with_rod = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, protection_pillar])
@@ -278,8 +279,13 @@ drop_other_actor = StoryNode(name="Actor Drops Target", tags={"Type":"Fight"}, c
 actor_becomes_conscious = TagChange(name="Actor Becomes Conscious", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag="Unconscious", value=True, add_or_remove=ChangeAction.REMOVE)
 gain_consciousness = StoryNode(name="Gain Consciousness", tags={"Type":"Awaken"}, charcount=1, required_test_list=[actor_is_unconscious, actor_is_alive], effects_on_next_ws=[actor_becomes_conscious])
 
-# Rules
+# Forgive (Removes memory of defeat interaction between two characters, so that the actor does not have to kill the target)
+actor_has_pos_moral_bias_rewarded = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", min_accept=0, score=50)
+actor_has_no_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="KillReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, inverse=True)
 
+forgive_action = StoryNode(name="Forgiveness", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, target_is_unconscious, actor_has_defeatinteraction_target_twoway, actor_has_no_reason_to_kill_target], effects_on_next_ws=[actor_loses_defeatinteraction_target_twoway], suggested_test_list=[actor_has_pos_moral_bias_rewarded])
+
+# Rules
 list_of_rules = []
 
 # Rule: Defeat -> Kill
@@ -415,6 +421,11 @@ list_of_rules.append(patternless_into_drop_other_actor)
 
 # Rule: Patternless -> Gain Consciousness
 patternless_into_gain_consciousness = RewriteRule(name="Patternless into Gain Consciousness", story_condition=[], story_change=[gain_consciousness])
+list_of_rules.append(patternless_into_gain_consciousness)
+
+# Rule: Patternless -> Forgive
+patternless_into_forgive = JoiningJointRule(base_actions=[], joint_node=forgive_action, rule_name="Patternless into Forgiveness")
+list_of_rules.append(patternless_into_forgive)
 
 # Generic Quests
 # Find Rod Quest (We assume characters already know about the rod and will try to get there.)
@@ -733,12 +744,12 @@ start_gen_time = datetime.now()
 # generated_graph = generate_story_from_starter_graph(init_storygraph=initial_graph, list_of_rules=list_of_rules, required_story_length=5, verbose=True, extra_attempts=-1)
 #Uncomment each block for the desired result
 #No Metrics
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes)
-# base_folder_name = "no_metric_4"
+generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes)
+base_folder_name = "no_metric_6"
 
 # x0 Retention
-generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0, extra_move_changes=extra_move_changes)
-base_folder_name = "x0_metric_3"
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0, extra_move_changes=extra_move_changes)
+# base_folder_name = "x0_metric_3"
 
 # x0.5 Retention
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0.5, extra_move_changes=extra_move_changes)

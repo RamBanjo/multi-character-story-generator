@@ -73,6 +73,10 @@ print(reds_world_state.test_story_compatibility_with_conditiontest(test=HasEdgeT
 
 reds_world_state.apply_relationship_change(relchange_object=RelChange(name="AttackInteraction RedWolf", node_a=red, edge_name="AttackInteractionOccured", node_b=wolf, add_or_remove=ChangeAction.ADD, two_way=True))
 
-testchange = RelChange(name="Gain Twoway AttackInteraction", node_a=red, node_b=wolf, edge_name="AttackInteractionOccured", add_or_remove=ChangeAction.ADD, two_way=True)
 
-reds_world_state.apply_relationship_change(testchange)
+testchange = RelChange(name="Gain Twoway AttackInteraction", node_a=GenericObjectNode.GENERIC_ACTOR, node_b=GenericObjectNode.GENERIC_TARGET, edge_name="AttackInteractionOccured", add_or_remove=ChangeAction.ADD, two_way=True)
+some_action = StoryNode(name="Some Action", charcount=1, target_count=1, actor=[red], target=[wolf], effects_on_next_ws=[testchange])
+
+new_change = translate_generic_change(change=testchange, populated_story_node=some_action)
+
+print(new_change[0])
