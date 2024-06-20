@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Papa Bear IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Papa Bear) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Papa Bear) 1
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Papa Bear
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Wait (Actors: Papa Bear) 2
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Papa Bear) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Magic Temple
+----------
+task_cancel_for_Papa Bear_Rod Quest (Actors: Papa Bear) 4
+Node Name: task_cancel_for_Papa Bear_Rod Quest
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------

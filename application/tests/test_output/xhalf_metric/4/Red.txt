@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Gain Consciousness (Actors: Red) 0
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Red
+Targets: 
+Location: Mountain Valley
+----------
+Get Tell Mom Wolf Quest (Actors: Red) 1
+Node Name: Get Tell Mom Wolf Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Mountain Valley
+----------
+Recall Tasks (Actors: Red) 2
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Mountain Valley
+----------
+Defeat (Actors: Red) 3
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Mountain Valley
+----------
+Forgiveness (Actors: Red) 4
+Node Name: Forgiveness
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Mountain Valley
+----------
