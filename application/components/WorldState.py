@@ -950,7 +950,7 @@ class WorldState:
         actor_from_ws = self.node_dict[actor.get_name()]
         return actor_from_ws.get_incoming_edge(self.DEFAULT_HOLD_EDGE_NAME)[0].from_node
     
-    def get_optimal_location_towards_task(self, actor, verbose=False, return_all_possibilities=False):
+    def get_optimal_location_towards_task(self, actor, verbose=False, return_all_possibilities=False, extra_probability_to_wait_if_no_valid = 0):
         actor_from_ws = self.node_dict[actor.name]        
         actor_task_stacks = [x for x in actor_from_ws.list_of_task_stacks if not x.remove_from_pool]
         current_location = self.get_actor_current_location(actor=actor)
@@ -993,8 +993,18 @@ class WorldState:
             if verbose:
                 print("There are no reachable locations with tasks found.")
 
+            if extra_probability_to_wait_if_no_valid > 0:
+                diceroll = random.random()
+                if diceroll <= extra_probability_to_wait_if_no_valid:
+                    if verbose:
+                        print("The RNG says: Make This One Wait")
+                    if return_all_possibilities:
+                        return [current_location]
+                    return current_location
+
             if return_all_possibilities:
                 return valid_locations
+            
             return random.choice(valid_locations)
         
         #If there's no tasks in the current location, look for tasks that are in adjacent locations.

@@ -19,15 +19,15 @@ import os
 #But some of these characters do need to take actions sometimes...
 
 #Only the characters who can act will be classified as characters, The rest will become Object Nodes with Type "NoStoryCharacter"
-red = CharacterNode(name="Red", tags={"Type":"Character", "Age":"Child", "Alive":True}, internal_id=0)
-wolf = CharacterNode(name="Wolf", biases={"moralbias":-50, "lawbias":-50}, tags={"Type":"Character", "Age":"Adult", "EatsChildren":True, "EatsNonChildren":True, "Alive":True, "CanKill":"Fangs"}, internal_id=1)
+red = CharacterNode(name="Red", tags={"Type":"Character", "Age":"Child", "Alive":True, "OwnsForestHome":True}, internal_id=0)
+wolf = CharacterNode(name="Wolf", biases={"moralbias":-50, "lawbias":-50}, tags={"Type":"Character", "Age":"Adult", "EatsChildren":True, "EatsNonChildren":True, "Alive":True, "CanKill":"Fangs", "IsScary":True}, internal_id=1)
 brick_pig = CharacterNode(name="Brick", biases={"moralbias":50, "lawbias":50}, tags={"Type":"Character", "Age":"Adult", "Pacifist":True, "Alive":True, "LikesTreasure":True, "OwnsForestHome":True}, internal_id=2)
 grandma = CharacterNode(name="Grandma", biases={"moralbias":-50, "lawbias":0}, tags={"Type":"Character", "Age":"Adult", "Alive":True, "LikesKnowledge":True, "CanKill":"Knife"}, internal_id=3)
 
 mom = ObjectNode(name="Red's Mom", tags={"Type":"NoStoryCharacter", "Age":"Adult", "Alive":True}, internal_id=5)
 
-papabear = CharacterNode(name="Papa Bear", tags={"Type":"Character", "Age":"Adult", "Alive":True, "CanKill":"Claws", "OwnsForestHome":True}, internal_id=8)
-witch = CharacterNode(name="Witch", biases={"moralbias":-50, "lawbias":0}, tags={"Type":"Character", "Age":"Adult", "Alive":True, "EatsChildren":True, "LikesKnowledge":True, "CanKill":"Magic", "OwnsForestHome":True}, internal_id=11)
+papabear = CharacterNode(name="Papa Bear", tags={"Type":"Character", "Age":"Adult", "Alive":True, "CanKill":"Claws", "OwnsForestHome":True, "IsScary":True}, internal_id=8)
+witch = CharacterNode(name="Witch", biases={"moralbias":-50, "lawbias":0}, tags={"Type":"Character", "Age":"Adult", "Alive":True, "EatsChildren":True, "LikesKnowledge":True, "CanKill":"Magic", "OwnsForestHome":True, "IsScary":True}, internal_id=11)
 
 protection_pillar = ObjectNode(name="Protection Pillar", tags={"Type":"Object", "ProtectsHomes":True, "Active":False}, internal_id=12)
 columbo_diary = ObjectNode(name="Columbo's Diary", tags={"Type":"Object", "KnowledgeObject":True}, internal_id=13)
@@ -35,19 +35,19 @@ golden_goose = ObjectNode(name="Golden Goose", tags={"Type":"Object", "Valuable"
 singing_harp = ObjectNode(name="Singing Harp", tags={"Type":"Object", "Valuable":True}, internal_id=15)
 
 forest_village = LocationNode(name="Forest Village", tags={"Type":"Location"}, internal_id=15)
-random_forest = LocationNode(name="Random Forest", tags={"Type":"Location", "PigHomeStanding":True, "BearHomeStanding":True, "WitchHomeStanding":True}, internal_id=20)
+random_forest = LocationNode(name="Random Forest", tags={"Type":"Location", "PigHomeStanding":True, "BearHomeStanding":True, "WitchHomeStanding":True, "RedHomeStanding":True}, internal_id=20)
 forest_path = LocationNode(name="Forest Path", tags={"Type":"Location"}, internal_id=21)
-plains_village = LocationNode(name="Plains Village", tags={"Type":"Location"}, internal_id=22)
+# plains_village = LocationNode(name="Plains Village", tags={"Type":"Location"}, internal_id=22)
 mountain_valley = LocationNode(name="Mountain Valley", tags={"Type":"Location"}, internal_id=24)
 magic_temple = LocationNode(name="Magic Temple", tags={"Type":"Location"}, internal_id=26)
 
-list_of_objects = [red, wolf, brick_pig, grandma, mom, papabear, witch, protection_pillar, columbo_diary, golden_goose, singing_harp, forest_village, random_forest, forest_path, plains_village, mountain_valley, magic_temple]
+list_of_objects = [red, wolf, brick_pig, grandma, mom, papabear, witch, protection_pillar, columbo_diary, golden_goose, singing_harp, forest_village, random_forest, forest_path, mountain_valley, magic_temple]
 
 reds_world_state = WorldState(name="Reds World State", objectnodes=list_of_objects)
 
 reds_world_state.doubleconnect(from_node=forest_village, edge_name="connects", to_node=forest_path)
 reds_world_state.doubleconnect(from_node=random_forest, edge_name="connects", to_node=forest_path)
-reds_world_state.doubleconnect(from_node=plains_village, edge_name="connects", to_node=forest_path)
+# reds_world_state.doubleconnect(from_node=plains_village, edge_name="connects", to_node=forest_path)
 reds_world_state.doubleconnect(from_node=mountain_valley, edge_name="connects", to_node=forest_path)
 reds_world_state.doubleconnect(from_node=mountain_valley, edge_name="connects", to_node=magic_temple)
 
@@ -56,8 +56,8 @@ reds_world_state.connect(from_node=red, edge_name="child_of", to_node=mom)
 reds_world_state.connect(from_node=grandma, edge_name="parent_of", to_node=mom)
 reds_world_state.connect(from_node=mom, edge_name="child_of", to_node=grandma)
 
-reds_world_state.connect(from_node=plains_village, edge_name="holds", to_node=mom)
-reds_world_state.connect(from_node=plains_village, edge_name="holds", to_node=red)
+reds_world_state.connect(from_node=forest_village, edge_name="holds", to_node=mom)
+reds_world_state.connect(from_node=forest_village, edge_name="holds", to_node=red)
 reds_world_state.connect(from_node=forest_village, edge_name="holds", to_node=grandma)
 reds_world_state.connect(from_node=forest_village, edge_name="holds", to_node=papabear)
 reds_world_state.connect(from_node=forest_village, edge_name="holds", to_node=witch)
@@ -99,17 +99,18 @@ target_leaves_no_corpse = TagChange(name="Target Leaves No Body", object_node_na
 actor_has_defeatinteraction_target_twoway = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="DefeatInteractionOccured", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True)
 actor_loses_defeatinteraction_target_twoway = RelChange(name="Actor Loses Twoway DefeatInteraction", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="DefeatInteractionOccured", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.REMOVE, soft_equal=True, two_way=True)
 
-eat_and_kill = StoryNode(name="Eat and Kill", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_leaves_no_corpse, actor_loses_defeatinteraction_target_twoway], required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, actor_eats_children, target_is_child, actor_and_target_shares_location, actor_has_defeatinteraction_target_twoway])
+actor_stops_grabbing_target = RelChange(name="Actor Stops Grabbing Target", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="grabs", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.REMOVE)
+eat_and_kill = StoryNode(name="Eat and Kill", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_leaves_no_corpse, actor_loses_defeatinteraction_target_twoway, actor_stops_grabbing_target], required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, actor_eats_children, target_is_child, actor_and_target_shares_location, actor_has_defeatinteraction_target_twoway])
 
 # Kill (Needs to carry weapon, wolf's weapon is his claws)
-actor_has_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="KillReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, score=50)
+actor_has_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="has_kill_reason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, score=50)
 actor_has_killing_tool = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="CanKill", value=None, soft_equal=True, score=50)
 
-kill_another_actor = StoryNode(name="Actor Kills Actor", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, actor_loses_defeatinteraction_target_twoway], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, actor_has_defeatinteraction_target_twoway], suggested_test_list=[actor_has_killing_tool, actor_has_reason_to_kill_target])
+kill_another_actor = StoryNode(name="Actor Kills Actor", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, actor_loses_defeatinteraction_target_twoway, actor_stops_grabbing_target], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, actor_has_defeatinteraction_target_twoway], suggested_test_list=[actor_has_killing_tool, actor_has_reason_to_kill_target])
 
 # Scare (Makes a character leave home, works on children and adults, has a chance to cause adults to fight back instead (This is a Rule))
 
-actor_has_reason_to_scare_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="ScareReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
+actor_has_reason_to_scare_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="has_scare_reason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True)
 
 #Hey, maybe we should make becoming scared to be a thing on its own? A rule? Just a suggestion
 
@@ -129,7 +130,7 @@ actor_loses_attackinteraction_target_twoway = RelChange(name="Remove TwoWay Atta
 actor_has_attackinteraction_target_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="AttackInteractionOccured", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True)
 actor_has_no_defeatinteraction_target_twoway = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="DefeatInteractionOccured", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, two_way=True, inverse=True)
 
-defeat_action = StoryNode(name="Defeat", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_has_no_defeatinteraction_target_twoway, actor_has_attackinteraction_target_check], effects_on_next_ws=[target_becomes_unconscious, actor_gain_defeatinteraction_target_twoway, actor_loses_attackinteraction_target_twoway])
+defeat_action = StoryNode(name="Defeat", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_has_no_defeatinteraction_target_twoway, actor_has_attackinteraction_target_check], effects_on_next_ws=[target_becomes_unconscious, actor_gain_defeatinteraction_target_twoway, actor_loses_attackinteraction_target_twoway])
 
 # Threaten (Can cause the target to either become scared or become defiant, either way this forms a new relationship between target and actor)
 # Become Scared
@@ -158,7 +159,12 @@ actor_has_no_attack_interaction_target_twoway = HasEdgeTest(object_from_test=Gen
 actor_gains_attack_interaction_target_twoway = RelChange(name="Gain Twoway AttackInteraction", node_a=GenericObjectNode.GENERIC_ACTOR, node_b=GenericObjectNode.GENERIC_TARGET, edge_name="AttackInteractionOccured", add_or_remove=ChangeAction.ADD, two_way=True)
 actor_has_less_than_minus_50_moralbias = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", max_accept=-50, score=50)
 
-actor_attacks_target = StoryNode(name="Actor Attacks Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_has_no_attack_interaction_target_twoway, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_has_reason_to_attack_target_check], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool, actor_has_less_than_minus_50_moralbias], effects_on_next_ws=[actor_gains_attack_interaction_target_twoway])
+something_is_target = ObjectEqualityTest(object_list=[GenericObjectNode.GENERIC_TARGET, GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER])
+something_is_scary = HasTagTest(object_to_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, tag="IsScary", value=True)
+something_gains_scare_reason = RelChange(name="Something Gains Scare Reason", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="has_scare_reason", node_b=GenericObjectNode.GENERIC_ACTOR, value="self_defense", add_or_remove=ChangeAction.ADD)
+if_target_is_scary_target_gains_scare_reason = ConditionalChange(name="Target Gains ScareReason if Scary", list_of_condition_tests=[something_is_target, something_is_scary], list_of_changes=[something_gains_scare_reason])
+
+actor_attacks_target = StoryNode(name="Actor Attacks Target", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_has_no_attack_interaction_target_twoway, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_has_reason_to_attack_target_check], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool, actor_has_less_than_minus_50_moralbias], effects_on_next_ws=[actor_gains_attack_interaction_target_twoway, if_target_is_scary_target_gains_scare_reason])
 
 # Escape from Attacker (This makes them scared of attacker, and thus more likely to run away)
 # actor_escapes_from_attacking_target = StoryNode(name="Actor Flees Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_not_fear_target_check], effects_on_next_ws=[actor_becomes_scared_of_target])
@@ -173,7 +179,7 @@ target_is_destroying_house_check = HasTagTest(object_to_test=GenericObjectNode.G
 
 # Attack Intruder (If sharing location with home destruction tag character)
 actor_gain_attack_reason_homedestroy = RelChange(name="Actor Gains Attack Reason Defiant", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="has_attack_reason", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, value="anger_destroyhome")
-killreason_homedestroyanger = RelChange(name="Gain Kill Reason HomeDestroy", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="KillReason", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, value="anger_destroyhome")
+killreason_homedestroyanger = RelChange(name="Gain Kill Reason HomeDestroy", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="has_kill_reason", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD, value="anger_destroyhome")
 # attack_home_intruder = StoryNode(name="Attack Home Intruder", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, target_is_destroying_house_check], effects_on_next_ws=[killreason_homedestroyanger])
 
 # Rebuild House (House must have been destroyed)
@@ -191,6 +197,7 @@ def make_rebuild_home (homeowner_object, home_tag):
 pig_rebuild_home = make_rebuild_home(homeowner_object=brick_pig, home_tag="PigHomeStanding")
 bear_rebuild_home = make_rebuild_home(homeowner_object=papabear, home_tag="BearHomeStanding")
 witch_rebuild_home = make_rebuild_home(homeowner_object=witch, home_tag="WitchHomeStanding")
+red_rebuild_homse = make_rebuild_home(homeowner_object=red, home_tag="RedHomeStanding")
 
 # Fight for Rod (if sharing location with someone else carrying rod and not scared of target, must be morally questionible)
 # character_less_than_50_lawful_rewarded = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moral", max_accept=-50, score=20)
@@ -206,19 +213,19 @@ target_no_longer_holds_rod = RelChange(name="Target Stop Hold Rod", node_a=Gener
 actor_holds_rod = RelChange(name="Actor Hold Rod", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=protection_pillar, add_or_remove=ChangeAction.ADD)
 
 actor_owns_forest_home = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="OwnsForestHome", value=True)
-defeat_and_take_rod_target_unconscious = StoryNode(name="Defeat and Steal Rod", tags={"Type":"Fight"}, biasweight=100, charcount=1, target_count=-1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, target_holds_rod_check, actor_has_no_defeatinteraction_target_twoway,  actor_has_attackinteraction_target_check, actor_owns_forest_home], effects_on_next_ws=[target_becomes_unconscious, target_no_longer_holds_rod, actor_holds_rod, actor_loses_attackinteraction_target_twoway])
+defeat_and_take_rod_target_unconscious = StoryNode(name="Defeat and Steal Rod", tags={"Type":"Fight"}, biasweight=100, charcount=1, target_count=-1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, target_holds_rod_check, actor_has_no_defeatinteraction_target_twoway,  actor_has_attackinteraction_target_check], effects_on_next_ws=[target_becomes_unconscious, target_no_longer_holds_rod, actor_holds_rod, actor_loses_attackinteraction_target_twoway])
 # actor_takes_rod_while_target_flees = StoryNode(name="Actor Takes Rod While Target Flees", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check], effects_on_next_ws=[actor_becomes_scared_of_target, target_no_longer_holds_rod, actor_holds_rod])
 
-character_less_than_minus80_lawful_rewarded = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moral", max_accept=-80, score=20)
-character_more_than_minus80_lawful_punished = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moral", min_accept=-80, score=-100)
+character_less_than_minus80_lawful_rewarded = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", max_accept=-80, score=20)
+character_more_than_minus80_lawful_punished = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", min_accept=-80, score=-100)
 
-kill_for_rod = StoryNode(name="Kill for Rod", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_no_longer_holds_rod, actor_holds_rod, actor_loses_defeatinteraction_target_twoway, actor_owns_forest_home], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check, actor_has_defeatinteraction_target_twoway], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool])
+kill_for_rod = StoryNode(name="Kill for Rod", tags={"Type":"Murder", "costly":True}, charcount=1, target_count=1, effects_on_next_ws=[target_becomes_dead, target_no_longer_holds_rod, actor_holds_rod, actor_loses_defeatinteraction_target_twoway, actor_stops_grabbing_target], required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check, actor_has_defeatinteraction_target_twoway], suggested_test_list=[actor_has_reason_to_kill_target, actor_has_killing_tool, character_less_than_minus80_lawful_rewarded, character_more_than_minus80_lawful_punished])
 
 # Take Rod if rod is on ground (you can also take from other people's houses)
 actor_shares_location_with_rod = SameLocationTest(list_to_test=[GenericObjectNode.GENERIC_ACTOR, protection_pillar])
 location_no_longer_holds_rod = RelChange(name="Location Stop Hold Rod", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name="holds", node_b=protection_pillar, soft_equal=True, add_or_remove=ChangeAction.REMOVE)
 
-take_rod_from_location = StoryNode(name="Take Rod", tags={"Type":"Find Rod"}, charcount=1, actor=[GenericObjectNode.TASK_OWNER], location = magic_temple, target=[protection_pillar], required_test_list=[actor_is_alive, actor_is_not_unconscious, actor_shares_location_with_rod], effects_on_next_ws=[actor_holds_rod, location_no_longer_holds_rod])
+take_rod_from_location = StoryNode(name="Take Rod", tags={"Type":"Find Rod", "important_action":True}, charcount=1, actor=[GenericObjectNode.TASK_OWNER], location = magic_temple, target=[protection_pillar], required_test_list=[actor_is_alive, actor_is_not_unconscious, actor_shares_location_with_rod], effects_on_next_ws=[actor_holds_rod, location_no_longer_holds_rod])
 
 # Tell Mom about Missing Grandma (Must have witnessed wolf in grandma's house)
 # Gives Kill Reason towards Wolf, also gives CanKill to Red
@@ -233,11 +240,11 @@ actor_not_know_wolf_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_
 actor_knows_wolf_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="SeenWolf", value=True)
 
 actor_gains_killing_tool = TagChange(name="Gain Killing Tool", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag="CanKill", value="Knife", add_or_remove=ChangeAction.ADD)
-actor_gains_kill_reason_to_wolf_for_grandma_endanger = RelChange(name="Wolf Kill Reason for Grandma Endanger", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="KillReason", value="GrandmaEndanger", node_b=wolf, add_or_remove=ChangeAction.ADD)
+actor_gains_kill_reason_to_wolf_for_grandma_endanger = RelChange(name="Wolf Kill Reason for Grandma Endanger", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="has_kill_reason", value="GrandmaEndanger", node_b=wolf, add_or_remove=ChangeAction.ADD)
 
 # This node should convince the Bear (who is now a normal character) to start hunting the wolf.
 bear_gets_wolf_attack_reason = RelChange(name="Bear Has Kill Reason to attack Wolf", node_a=papabear, edge_name="has_attack_reason", node_b=wolf, add_or_remove=ChangeAction.ADD, value="kill_order")
-bear_gets_kill_command = RelChange(name="Bear Has Kill Reason to Wolf", node_a=papabear, edge_name="KillReason", node_b=wolf, add_or_remove=ChangeAction.ADD, value="kill_order")
+bear_gets_kill_command = RelChange(name="Bear Has Kill Reason to Wolf", node_a=papabear, edge_name="has_kill_reason", node_b=wolf, add_or_remove=ChangeAction.ADD, value="kill_order")
 
 target_is_wolf = ObjectEqualityTest(object_list=[GenericObjectNode.GENERIC_TARGET, wolf])
 witness_wolf = StoryNode(name="Witness Wolf", tags={"Type":"Witness"}, charcount=1, target_count=1, required_test_list=[actor_is_red, actor_is_alive, actor_is_not_unconscious, target_is_alive, target_is_not_unconscious, target_is_wolf, actor_not_know_wolf_check, actor_and_target_shares_location], effects_on_next_ws=[actor_seenwolf_change])
@@ -248,8 +255,8 @@ location_not_hold_grandma = HasEdgeTest(object_from_test=GenericObjectNode.GENER
 notice_no_grandma = StoryNode(name="Notice Missing Grandma", tags={"Type":"Witness"}, charcount=1, required_test_list=[actor_is_red, actor_is_alive, actor_is_not_unconscious, location_is_grandma_home, location_not_hold_grandma, actor_knows_wolf_check, actor_not_know_missing_grandma_check], effects_on_next_ws=[actor_missingrandma_change])
 
 # Witness House Destruction
-actor_is_destroying_home_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="DestroyingHome", value=True)
-witness_home_destruction = StoryNode(name="Witnessing Home Destruction", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, actor_is_destroying_home_check], effects_on_next_ws=[killreason_homedestroyanger, actor_gain_attack_reason_homedestroy, actor_not_destroying_home_change])
+target_is_destroying_home_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_TARGET, tag="DestroyingHome", value=True)
+witness_home_destruction = StoryNode(name="Witnessing Home Destruction", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, target_is_destroying_home_check], effects_on_next_ws=[killreason_homedestroyanger, actor_gain_attack_reason_homedestroy, actor_not_destroying_home_change])
 
 # Kidnap (carries another unconscious character, holding them instead of the location. Characters can only hold one character at a time)
 
@@ -261,9 +268,10 @@ location_stops_holding_target = RelChange(name="Location Stops Holding Target", 
 actor_starts_holding_target = RelChange(name="Actor Starts Holding Target", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD)
 actor_starts_grabbing_target = RelChange(name="Actor Starts Holding Target", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="grabs", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD)
 
-gain_killreason_kidnapper = RelChange(name="Gain Kill Reason Kidnapper", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="KillReason", node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.ADD, value="self_defense_kidnapper")
+gain_killreason_kidnapper = RelChange(name="Gain Kill Reason Kidnapper", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="has_kill_reason", node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.ADD, value="self_defense_kidnapper")
 
-kidnap_target = StoryNode(name="Actor Kidnaps Target", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_unconscious, actor_and_target_shares_location, actor_not_grab_character_test, actor_has_defeatinteraction_target_twoway], effects_on_next_ws=[actor_starts_grabbing_target, actor_loses_defeatinteraction_target_twoway])
+actor_has_negative_moral_bias = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", max_accept=0)
+kidnap_target = StoryNode(name="Actor Kidnaps Target", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_unconscious, actor_and_target_shares_location, actor_not_grab_character_test, actor_has_defeatinteraction_target_twoway, actor_has_negative_moral_bias], effects_on_next_ws=[actor_starts_grabbing_target, actor_loses_defeatinteraction_target_twoway])
 
 # Drop Character (places down an unconscious character you are currently holding)
 
@@ -271,19 +279,24 @@ actor_grab_character_test = SomethingPassesAllGivenTestsTest(list_of_tests_with_
 
 actor_grabs_target_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="grabs", object_to_test=GenericObjectNode.GENERIC_TARGET)
 location_starts_holding_target = RelChange(name="Location Starts Holding Target", node_a=GenericObjectNode.GENERIC_LOCATION, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.ADD)
-actor_stops_grabbing_target = RelChange(name="Actor Stops Grabbing Target", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=GenericObjectNode.GENERIC_TARGET, add_or_remove=ChangeAction.REMOVE)
 
 drop_other_actor = StoryNode(name="Actor Drops Target", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, actor_is_not_unconscious, actor_grabs_target_check], effects_on_next_ws=[actor_stops_grabbing_target])
 
 # Gain Consciousness (Unconscious characters wakes up. They must not currently be carried.)
+something_grabs_actor = HasEdgeTest(object_from_test=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name_test="grabs", object_to_test=GenericObjectNode.GENERIC_ACTOR, soft_equal=True)
+something_stops_grabbing_actor = RelChange(name="Something stops Grabbing Actor", node_a=GenericObjectNode.CONDITION_TESTOBJECT_PLACEHOLDER, edge_name="grabs", node_b=GenericObjectNode.GENERIC_ACTOR, add_or_remove=ChangeAction.REMOVE, soft_equal=True)
+
+if_something_is_grabbing_then_dont = ConditionalChange(name="Stop Being Grabbed", list_of_condition_tests=[something_grabs_actor], list_of_changes=[something_stops_grabbing_actor])
 actor_becomes_conscious = TagChange(name="Actor Becomes Conscious", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag="Unconscious", value=True, add_or_remove=ChangeAction.REMOVE)
-gain_consciousness = StoryNode(name="Gain Consciousness", tags={"Type":"Awaken"}, charcount=1, required_test_list=[actor_is_unconscious, actor_is_alive], effects_on_next_ws=[actor_becomes_conscious])
+
+gain_consciousness = StoryNode(name="Gain Consciousness", tags={"Type":"Awaken"}, charcount=1, required_test_list=[actor_is_unconscious, actor_is_alive], effects_on_next_ws=[actor_becomes_conscious, if_something_is_grabbing_then_dont])
 
 # Forgive (Removes memory of defeat interaction between two characters, so that the actor does not have to kill the target)
 actor_has_pos_moral_bias_rewarded = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", min_accept=0, score=50)
-actor_has_no_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="KillReason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, inverse=True)
+actor_has_no_reason_to_kill_target = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="has_kill_reason", object_to_test=GenericObjectNode.GENERIC_TARGET, soft_equal=True, inverse=True)
 
-forgive_action = StoryNode(name="Forgiveness", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, target_is_unconscious, actor_has_defeatinteraction_target_twoway, actor_has_no_reason_to_kill_target], effects_on_next_ws=[actor_loses_defeatinteraction_target_twoway], suggested_test_list=[actor_has_pos_moral_bias_rewarded])
+forgive_action = StoryNode(name="Forgiveness", tags={"Type":"Fight", "important_action":True}, charcount=1, target_count=1, required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, target_is_unconscious, actor_has_defeatinteraction_target_twoway, actor_has_no_reason_to_kill_target, actor_has_pos_moral_bias_rewarded], effects_on_next_ws=[actor_loses_defeatinteraction_target_twoway])
+evil_forgiveness = StoryNode(name="Evil Forgiveness", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, target_is_unconscious, actor_has_defeatinteraction_target_twoway, actor_has_no_reason_to_kill_target, actor_has_negative_moral_bias], effects_on_next_ws=[actor_loses_defeatinteraction_target_twoway])
 
 # Rules
 list_of_rules = []
@@ -402,10 +415,12 @@ list_of_rules.append(patternless_into_defeat_rod)
 patternless_into_rebuild_pig_home = RewriteRule(story_condition=[], story_change=[pig_rebuild_home], name="Patternless into Pig Rebuild Home")
 patternless_into_rebuild_bear_home = RewriteRule(story_condition=[], story_change=[bear_rebuild_home], name="Patternless into Bear Rebuild Home")
 patternless_into_rebuild_witch_home = RewriteRule(story_condition=[], story_change=[witch_rebuild_home], name="Patternless into Witch Rebuild Home")
+patternless_into_rebuild_red_home = RewriteRule(story_condition=[], story_change=[red_rebuild_homse], name="Patternless into Red Rebuild Home")
 
 list_of_rules.append(patternless_into_rebuild_pig_home)
 list_of_rules.append(patternless_into_rebuild_bear_home)
 list_of_rules.append(patternless_into_rebuild_witch_home)
+list_of_rules.append(patternless_into_rebuild_red_home)
 
 # Rule: Patternless -> Witness Wolf
 patternless_into_witness_wolf = JoiningJointRule(base_actions=[], joint_node=witness_wolf, rule_name="Patternless into Witness Wolf")
@@ -425,7 +440,9 @@ list_of_rules.append(patternless_into_gain_consciousness)
 
 # Rule: Patternless -> Forgive
 patternless_into_forgive = JoiningJointRule(base_actions=[], joint_node=forgive_action, rule_name="Patternless into Forgiveness")
+patternless_into_evil_forgive = JoiningJointRule(base_actions=[], joint_node=evil_forgiveness, rule_name="Patternless into Evil Forgiveness")
 list_of_rules.append(patternless_into_forgive)
+list_of_rules.append(patternless_into_evil_forgive)
 
 # Generic Quests
 # Find Rod Quest (We assume characters already know about the rod and will try to get there.)
@@ -462,6 +479,9 @@ def create_rod_task_node_for_homeowner(character_object):
 brick_rod_quest_node = create_rod_task_node_for_homeowner(character_object=brick_pig)
 papa_bear_rod_quest_node = create_rod_task_node_for_homeowner(character_object=papabear)
 witch_rod_quest_node = create_rod_task_node_for_homeowner(character_object=witch)
+grandma_rod_quest_node = create_rod_task_node_for_homeowner(character_object=grandma)
+red_rod_quest_node = create_rod_task_node_for_homeowner(character_object=red)
+wolf_rod_quest_node = create_rod_task_node_for_homeowner(character_object=wolf)
 
 def create_visit_place_storynode(task_owner, place_to_visit, additional_conditions_to_start_quest=[], additional_ws_change_in_visiting_node = [], additional_goal_state_check = []):
 
@@ -492,11 +512,11 @@ red_get_visit_grandma_task_node = create_visit_place_storynode(task_owner=red, p
 
 actor_stops_fearing_wolf = RelChange(name="Actor Stops Fearing Wolf", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="fears", node_b=wolf, add_or_remove=ChangeAction.REMOVE, soft_equal=True)
 
-taskowner_not_fear_wolf_check = HasEdgeTest(object_from_test=GenericObjectNode.TASK_OWNER, edge_name_test="fears", object_to_test=wolf, inverse=True)
-brick_visit_wood_when_fearing_wolf = create_visit_place_storynode(task_owner=brick_pig, place_to_visit=plains_village, additional_conditions_to_start_quest=[actor_fears_wolf_check], additional_ws_change_in_visiting_node=[actor_stops_fearing_wolf], additional_goal_state_check=[taskowner_not_fear_wolf_check])
+# taskowner_not_fear_wolf_check = HasEdgeTest(object_from_test=GenericObjectNode.TASK_OWNER, edge_name_test="fears", object_to_test=wolf, inverse=True)
+# brick_visit_wood_when_fearing_wolf = create_visit_place_storynode(task_owner=brick_pig, place_to_visit=plains_village, additional_conditions_to_start_quest=[actor_fears_wolf_check], additional_ws_change_in_visiting_node=[actor_stops_fearing_wolf], additional_goal_state_check=[taskowner_not_fear_wolf_check])
 
-patternless_into_wood_visit = RewriteRule(story_condition=[], story_change=[brick_visit_wood_when_fearing_wolf], name="Patternless into Wood Pig Visitation")
-list_of_rules.append(patternless_into_wood_visit)
+# patternless_into_wood_visit = RewriteRule(story_condition=[], story_change=[brick_visit_wood_when_fearing_wolf], name="Patternless into Wood Pig Visitation")
+# list_of_rules.append(patternless_into_wood_visit)
 
 # # Brick-Specific Quest
 # # Run from Wolf to Wood House ()
@@ -536,9 +556,9 @@ list_of_rules.append(patternless_into_wood_visit)
 # # Report All Residents Scared
 
 # # Scheme Together (Characters must both have negative moral bias.)
-target_gain_scarereason_witch_homeowner = RelChange(name="Scare Reason Gain", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="ScareReason", value="ForestHomeowner", node_b=witch, add_or_remove=ChangeAction.ADD)
-target_gain_scarereason_bear_homeowner = RelChange(name="Scare Reason Gain", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="ScareReason", value="ForestHomeowner", node_b=papabear, add_or_remove=ChangeAction.ADD)
-target_gain_scarereason_brick_homeowner = RelChange(name="Scare Reason Gain", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="ScareReason", value="ForestHomeowner", node_b=brick_pig, add_or_remove=ChangeAction.ADD)
+target_gain_scarereason_witch_homeowner = RelChange(name="Scare Reason Gain", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="has_scare_reason", value="ForestHomeowner", node_b=witch, add_or_remove=ChangeAction.ADD)
+target_gain_scarereason_bear_homeowner = RelChange(name="Scare Reason Gain", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="has_scare_reason", value="ForestHomeowner", node_b=papabear, add_or_remove=ChangeAction.ADD)
+target_gain_scarereason_brick_homeowner = RelChange(name="Scare Reason Gain", node_a=GenericObjectNode.GENERIC_TARGET, edge_name="has_scare_reason", value="ForestHomeowner", node_b=brick_pig, add_or_remove=ChangeAction.ADD)
 all_scare_reasons = [target_gain_scarereason_witch_homeowner, target_gain_scarereason_bear_homeowner, target_gain_scarereason_brick_homeowner]
 
 scheme_leader_gives_task = StoryNode(name="Scheme Leader Gives Tasks", tags={"Type":"GiveTask"}, charcount=1, target_count=1, effects_on_next_ws=all_scare_reasons, required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_alive, target_is_not_unconscious])
@@ -548,7 +568,6 @@ actor_has_scared_witch_check = HasEdgeTest(object_from_test=GenericObjectNode.GE
 actor_has_scared_bear_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="HasScared", object_to_test=papabear)
 actor_has_scared_brick_check = HasEdgeTest(object_from_test=GenericObjectNode.GENERIC_ACTOR, edge_name_test="HasScared", object_to_test=brick_pig)
 
-# #TODO: Home cannot be destroyed if the owner is holding the protection rod
 def destroy_house_taskchanges(home_tag_name, homeowner_object):
     
     homeowner_not_holding_magical_rod_check = HasEdgeTest(object_from_test=homeowner_object, edge_name_test="holds", object_to_test=protection_pillar, soft_equal=True, inverse=True)
@@ -556,7 +575,7 @@ def destroy_house_taskchanges(home_tag_name, homeowner_object):
     home_tag_destroy_change = TagChange(name="Destroy Someone's Home", object_node_name=GenericObjectNode.GENERIC_LOCATION, tag=home_tag_name, value=False, add_or_remove=ChangeAction.ADD)
     home_tag_destroyed_check = HasTagTest(object_to_test=forest_village, tag=home_tag_name, value=False)
 
-    node_name = "Actor Destroys House" + homeowner_object.get_name()
+    node_name = "Actor Destroys House " + homeowner_object.get_name()
     actor_destroys_house = StoryNode(name=node_name, actor=[GenericObjectNode.TASK_OWNER], tags={"Type":"Destruction", "costly":True}, required_test_list=[actor_is_alive, actor_is_not_unconscious, homeowner_not_holding_magical_rod_check], effects_on_next_ws=[actor_is_destroying_home_change, home_tag_destroy_change])
 
     destroy_home_task = CharacterTask(task_name="Destroy Home Task", task_actions=[actor_destroys_house], task_location_name="Forest Village", goal_state=[home_tag_destroyed_check])
@@ -570,9 +589,11 @@ def destroy_house_taskchanges(home_tag_name, homeowner_object):
 destroy_witch_house_taskchange = destroy_house_taskchanges(home_tag_name="WitchHomeStanding", homeowner_object=witch)
 destroy_brickhouse_taskchange = destroy_house_taskchanges(home_tag_name="PigHomeStanding", homeowner_object=brick_pig)
 destroy_bearhouse_taskchange = destroy_house_taskchanges(home_tag_name="BearHomeStanding", homeowner_object=papabear)
+destroy_redhouse_taskchange = destroy_house_taskchanges(home_tag_name="RedHomeStanding", homeowner_object=red)
+
 report_scared_forest_memory_gain = TagChange(name="Report Scared Memory", object_node_name=GenericObjectNode.GENERIC_ACTOR, tag="ScaredForestReportMemory", value=True, add_or_remove=ChangeAction.ADD)
 
-all_destroyhouse_taskchanges = [destroy_bearhouse_taskchange, destroy_brickhouse_taskchange, destroy_witch_house_taskchange, report_scared_forest_memory_gain]
+all_destroyhouse_taskchanges = [destroy_bearhouse_taskchange, destroy_brickhouse_taskchange, destroy_witch_house_taskchange, destroy_redhouse_taskchange, report_scared_forest_memory_gain]
 
 actor_has_no_reportscare_memory_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="ScaredForestReportMemory", value=True, inverse=True)
 
@@ -584,7 +605,7 @@ list_of_rules.append(patternless_into_report_scared_forest)
 
 # #In hindsight, maybe these could have been quests (since Mom only exists in one place)
 tell_mom_wolf_exists = StoryNode(name="Tell Mom Wolf Real", tags={"Type":"Conversation"}, actor=[GenericObjectNode.TASK_OWNER], target=[mom], charcount=1, required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_not_unconscious], effects_on_next_ws=[actor_gains_killing_tool])
-tell_mom_wolf_task = CharacterTask(task_name="Tell Mom Wolf Task", task_actions=[tell_mom_wolf_exists], task_location_name="Plains Village")
+tell_mom_wolf_task = CharacterTask(task_name="Tell Mom Wolf Task", task_actions=[tell_mom_wolf_exists], task_location_name="Forest Village")
 tell_mom_wolf_stack = TaskStack(stack_name="Tell Mom Wolf Stack", task_stack=[tell_mom_wolf_task])
 tell_mom_wolf_taskchange = TaskChange(name="Tell Mom Wolf TaskChange", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=tell_mom_wolf_stack)
 tell_mom_wolf_questmemory_not_exist_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="TellMomWolfQuestMemory", value=True, inverse=True)
@@ -592,7 +613,7 @@ tell_mom_wolf_questmemory_not_exist_change = TagChange(name="Tell Mom Wolf Quest
 tell_mom_wolf_getquest = StoryNode(name="Get Tell Mom Wolf Quest", effects_on_next_ws=[tell_mom_wolf_taskchange, tell_mom_wolf_questmemory_not_exist_change], required_test_list=[tell_mom_wolf_questmemory_not_exist_check, actor_is_alive, actor_knows_wolf_check, actor_is_red, actor_is_not_unconscious])
 
 tell_mom_missing_grandma = StoryNode(name="Tell Mom Missing Grandma", tags={"Type":"Conversation"}, actor=[GenericObjectNode.TASK_OWNER], target=[mom], charcount=1, required_test_list=[actor_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, target_is_actors_parent, actor_knows_missing_grandma_check], effects_on_next_ws=[bear_gets_kill_command, bear_gets_wolf_attack_reason])
-tell_mom_grandma_task = CharacterTask(task_name="Tell Mom Missing Grandma Task", task_actions=[tell_mom_missing_grandma], task_location_name="Plains Village")
+tell_mom_grandma_task = CharacterTask(task_name="Tell Mom Missing Grandma Task", task_actions=[tell_mom_missing_grandma], task_location_name="Forest Village")
 tell_mom_grandma_stack = TaskStack(stack_name="Tell Mom Missing Grandma Stack", task_stack=[tell_mom_grandma_task])
 tell_mom_grandma_taskchange = TaskChange(name="Tell Mom Grandma TaskChange", task_giver_name=GenericObjectNode.GENERIC_ACTOR, task_owner_name=GenericObjectNode.GENERIC_ACTOR, task_stack=tell_mom_grandma_stack)
 tell_mom_grandma_questmemory_not_exist_check = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="TellMomGrandmaQuestMemory", value=True, inverse=True)
@@ -623,8 +644,6 @@ list_of_rules.append(patternless_into_tell_mom_missing_grandma)
 # Hunter: Wait
 # Wolf: Get task to kick the bears, the pig, and the witch out from home
 
-# TODO: Chases and runnning-aways aren't properly defined yet. What do we do with those?
-
 DEFAULT_WAIT_NODE = StoryNode(name="Wait", biasweight=0, tags= {"Type":"Placeholder"}, charcount=1)
 
 always_true_list = []
@@ -640,8 +659,14 @@ always_true_list.append(make_only_one_holder_test(singing_harp))
 list_of_actors = [red, wolf, brick_pig, grandma, papabear, witch]
 
 initial_graph = StoryGraph(name="Initial Story Graph", character_objects=list_of_actors, starting_ws=reds_world_state, always_true_tests=always_true_list)
-initial_graph.add_story_part(part=red_get_visit_grandma_task_node, character=red, location=plains_village)
+initial_graph.add_story_part(part=red_get_visit_grandma_task_node, character=red, location=forest_village)
+initial_graph.add_story_part(part=red_rod_quest_node, character=red, location=forest_village)
+
 initial_graph.insert_joint_node(joint_node=scheme_leader_gives_task, main_actor=grandma, targets=[wolf], location=forest_village)
+
+initial_graph.add_story_part(part=wolf_rod_quest_node, character=wolf, location=forest_village)
+initial_graph.add_story_part(part=grandma_rod_quest_node, character=grandma, location=forest_village)
+
 initial_graph.add_story_part(part=brick_rod_quest_node, character=brick_pig, location=forest_village)
 initial_graph.add_story_part(part=papa_bear_rod_quest_node, character=papabear, location=forest_village)
 initial_graph.add_story_part(part=witch_rod_quest_node, character=witch, location=forest_village)
@@ -653,7 +678,6 @@ initial_graph.add_story_part(part=witch_rod_quest_node, character=witch, locatio
 # initial_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=papabear, location=forest_village)
 # initial_graph.add_story_part(part=DEFAULT_WAIT_NODE, character=witch, location=forest_village)
 
-#TODO: Put the Metric Requirements in a list here, so that we can include it as an option when we want to generate with Metrics
 metric_requirements = []
 
 red_has_more_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.HIGHER, character_object=red)
@@ -741,23 +765,25 @@ extra_move_changes.append(if_actor_grabs_something_then_something_changes_locati
 
 start_gen_time = datetime.now()
 
+wait_prob_name_dict = {"Grandma":0.5, "Witch":0.5, "Papa Bear":0.5}
+
 # generated_graph = generate_story_from_starter_graph(init_storygraph=initial_graph, list_of_rules=list_of_rules, required_story_length=5, verbose=True, extra_attempts=-1)
 #Uncomment each block for the desired result
 #No Metrics
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes)
-# base_folder_name = "no_metric_6"
+generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
+base_folder_name = "no_metric"
 
 # x0 Retention
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0, extra_move_changes=extra_move_changes)
-# base_folder_name = "x0_metric_4"
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=0, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
+# base_folder_name = "x0_metric"
 
 # x0.5 Retention
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=0.5, extra_move_changes=extra_move_changes)
-# base_folder_name = "xhalf_metric_3"
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=0.5, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
+# base_folder_name = "xhalf_metric"
 
 # x1 Retention
-generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, metric_retention=1, extra_move_changes=extra_move_changes)
-base_folder_name = "x1_metric_3"
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=1, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
+# base_folder_name = "x1_metric"
 
 finish_gen_time = datetime.now()
 
@@ -807,3 +833,19 @@ print("Generation Complete! Yippee!!")
 # Change Defeat into a patternless join with the condition that the actor and the target is doubleconnected by AttackInteraction. This removes the AttackInteraction.
 # Defeat will now give DefeatInteraction
 # Killing and Kidnapping now requires DefeatInteraction, and will remove it upon doing said action
+
+###
+# Forgiveness - Make Evil Forgiveness that is not considered an important action. Only Good Characters can perform normal Forgiveness, and only Evil Characters can perform Evil Forgiveness
+# DONE, Evil Forgiveness is now a thing
+
+# Non-Main Characters should want to Wait more than move around
+# DONE, we can now use charname_extra_prob_dict in the generator functions to have someone wait
+
+# Bear and Witch can Scare another Actor
+# DONE, they are now defined as scary, and they have the opportunity to scare the attacker when attacked
+
+# Move LittleRed's Home into the Forest Village and remove Plains Village
+# DONE
+
+# Now everyone knows about the Magic Rod (even the wolf!)
+# DONE
