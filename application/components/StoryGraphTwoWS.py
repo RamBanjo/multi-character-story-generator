@@ -1309,6 +1309,34 @@ class StoryGraph:
         if verbose:
             print("Finish printing results.")
 
+    def print_metric_of_each_character_to_text_file(self, directory, previous_graphs=[], retention = 0, verbose=False):
+        if verbose:
+            print("Printing Metrics to Text Files...")
+
+        for actor in self.character_objects:
+            if verbose:
+                print("Current Character:", actor.get_name())
+
+            stringlist = []
+            stringlist.append("Metric Information for Storyline of " + actor.get_name() + " in " + self.name)
+
+            for metric_type in MetricType:
+                stringlist.append(metric_type.name + ": " + str(self.get_multigraph_metric_score(metric_type=metric_type, character=actor, previous_graphs=previous_graphs, score_retention=retention)))
+
+            path_name = directory + actor.get_name() + "Metrics.txt"
+            f = open(path_name, "w")
+
+            for thing in stringlist:
+                f.write(thing)
+                f.write("\n")
+            
+            if verbose:
+                print("Character Done:", actor.get_name())
+
+        f.close()
+        if verbose:
+            print("Finish printing metrics.")            
+
     def print_all_nodes_from_characters_storyline_beautiful_format(self, actor):
         print("ENTIRE STORYLINE OF", actor.get_name(), "IN", self.name)
         step = 0

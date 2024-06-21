@@ -313,13 +313,13 @@ list_of_rules.append(patternless_into_killrod)
 
 # Rule: Defeat -> Eat
 # defeat_into_eat = ContinuousJointRule(base_joint=defeat_action, joint_node=eat_and_kill, rule_name="Defeat Into Eat")
-patternless_into_eat = JoiningJointRule(base_actions=[], joint_node=eat_and_kill, rule_name="Patternless into Eat and Kill")
-list_of_rules.append(patternless_into_eat)
+# patternless_into_eat = JoiningJointRule(base_actions=[], joint_node=eat_and_kill, rule_name="Patternless into Eat and Kill")
+# list_of_rules.append(patternless_into_eat)
 
 # Rule: Defeat -> Kidnap
-# defeat_into_kidnap = ContinuousJointRule(base_joint=defeat_action, joint_node=kidnap_target, rule_name="Defeat Into Kidnap")
-patternless_into_kidnap = JoiningJointRule(base_actions=[], joint_node=kidnap_target, rule_name="Patternless into Kidnap")
-list_of_rules.append(patternless_into_kidnap)
+# # defeat_into_kidnap = ContinuousJointRule(base_joint=defeat_action, joint_node=kidnap_target, rule_name="Defeat Into Kidnap")
+# patternless_into_kidnap = JoiningJointRule(base_actions=[], joint_node=kidnap_target, rule_name="Patternless into Kidnap")
+# list_of_rules.append(patternless_into_kidnap)
 
 # Rule: (Patternless) -> Scare
 patternless_into_scare = JoiningJointRule(base_actions=None, joint_node=scare_action, rule_name="Patternless into Scare")
@@ -349,8 +349,8 @@ actor_not_share_location_with_feared_character = SomethingPassesAllGivenTestsTes
 
 stop_fear = StoryNode(name="Stop Fearing Everything", effects_on_next_ws=[actor_stops_fearing_all_feared_characters], required_test_list=[actor_not_share_location_with_feared_character])
 
-patternless_into_stop_fear = RewriteRule(story_condition=[], story_change=[stop_fear], name="Patternless into Stop Fear")
-list_of_rules.append(patternless_into_stop_fear)
+# patternless_into_stop_fear = RewriteRule(story_condition=[], story_change=[stop_fear], name="Patternless into Stop Fear")
+# list_of_rules.append(patternless_into_stop_fear)
 
 # Rule: (Patternless) -> Get task to find treasure / knowledge object
 def make_find_item_rule(item_to_find, item_liking_tag, location_holding_item):
@@ -431,8 +431,8 @@ patternless_into_notice_no_grandma = RewriteRule(story_condition=[], story_chang
 list_of_rules.append(patternless_into_notice_no_grandma)
 
 # Rule: Patternless -> Drop Actor
-patternless_into_drop_other_actor = JoiningJointRule(base_actions=[], joint_node=drop_other_actor, rule_name="Patternless into Drop Character")
-list_of_rules.append(patternless_into_drop_other_actor)
+# patternless_into_drop_other_actor = JoiningJointRule(base_actions=[], joint_node=drop_other_actor, rule_name="Patternless into Drop Character")
+# list_of_rules.append(patternless_into_drop_other_actor)
 
 # Rule: Patternless -> Gain Consciousness
 patternless_into_gain_consciousness = RewriteRule(name="Patternless into Gain Consciousness", story_condition=[], story_change=[gain_consciousness])
@@ -770,20 +770,24 @@ wait_prob_name_dict = {"Grandma":0.5, "Witch":0.5, "Papa Bear":0.5}
 # generated_graph = generate_story_from_starter_graph(init_storygraph=initial_graph, list_of_rules=list_of_rules, required_story_length=5, verbose=True, extra_attempts=-1)
 #Uncomment each block for the desired result
 #No Metrics
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
-# base_folder_name = "no_metric"
+retention = 0
+generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
+base_folder_name = "no_metric"
 
 # x0 Retention
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=0, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
+retention = 0
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
 # base_folder_name = "x0_metric"
 
 # x0.5 Retention
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=0.5, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
+retention = 0.5
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
 # base_folder_name = "xhalf_metric"
 
 # x1 Retention
-generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=1, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
-base_folder_name = "x1_metric"
+retention = 1
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
+# base_folder_name = "x1_metric"
 
 finish_gen_time = datetime.now()
 
@@ -801,6 +805,7 @@ for generated_graph in generated_graph_list:
         os.makedirs(fullpath)
 
     generated_graph.print_graph_nodes_to_text_file(directory=fullpath, verbose=True)
+    generated_graph.print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=retention)
     latest_ws = generated_graph.make_latest_state()
     latest_ws.print_wsedges_to_text_file(directory=fullpath, verbose=True)
 

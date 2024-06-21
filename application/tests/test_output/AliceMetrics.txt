@@ -1,0 +1,5 @@
+Metric Information for Storyline of Alice in Multigraph Cost C
+COST: 33.333333333333336
+UNIQUE: 20.0
+JOINTS: 0.0
+PREFER: 0.0
