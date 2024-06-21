@@ -695,9 +695,9 @@ red_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, val
 brickpig_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, value=40, metric_mode=MetricMode.HIGHER, character_object=brick_pig)
 wolf_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, value=40, metric_mode=MetricMode.HIGHER, character_object=wolf)
 
-grandma_has_more_than_20_joint = StoryMetric(metric_type=MetricType.JOINTS, value=20, metric_mode=MetricMode.HIGHER, character_object=grandma)
+red_has_more_than_20_joint = StoryMetric(metric_type=MetricType.JOINTS, value=20, metric_mode=MetricMode.HIGHER, character_object=red)
 
-metric_requirements = [red_has_more_than_20_main, brick_has_more_than_20_main, wolf_has_more_than_20_main, brick_less_than_20_cost_metric, wolf_more_than_20_cost_metric, red_has_more_than_40_uniqueness, brickpig_has_more_than_40_uniqueness, wolf_has_more_than_40_uniqueness, grandma_has_more_than_20_joint, papa_has_less_than_20_main, witch_has_less_than_20_main, grandma_has_less_than_20_main]
+metric_requirements = [red_has_more_than_20_main, brick_has_more_than_20_main, wolf_has_more_than_20_main, brick_less_than_20_cost_metric, wolf_more_than_20_cost_metric, red_has_more_than_40_uniqueness, brickpig_has_more_than_40_uniqueness, wolf_has_more_than_40_uniqueness, red_has_more_than_20_joint, papa_has_less_than_20_main, witch_has_less_than_20_main, grandma_has_less_than_20_main]
 
 #important_actions:
 # Defying Target
