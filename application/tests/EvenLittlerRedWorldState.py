@@ -814,12 +814,12 @@ for generated_graph in generated_graph_list:
 fullpath = base_directory + base_folder_name + "/final_metrics_retention_1/"
 if not os.path.exists(fullpath):
     os.makedirs(fullpath)
-generated_graph[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=1)
+generated_graph[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=1, include_true_uniqueness = True)
 
 fullpath = base_directory + base_folder_name + "/final_metrics_retention_based_on_graph/"
 if not os.path.exists(fullpath):
     os.makedirs(fullpath)
-generated_graph[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=retention)
+generated_graph[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=retention, include_true_uniqueness = True)
 
 print("Generation Complete! Yippee!!")
 
