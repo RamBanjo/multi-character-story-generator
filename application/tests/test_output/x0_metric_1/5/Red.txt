@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 4
+Wait (Actors: Red) 0
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
+Forgiveness (Actors: Red) 1
+Node Name: Forgiveness
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Wolf) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Magic Temple
+----------
+Defeat and Steal Rod (Actors: Red) 3
+Node Name: Defeat and Steal Rod
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Magic Temple
+----------
+Wait (Actors: Red) 4
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
