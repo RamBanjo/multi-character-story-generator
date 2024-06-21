@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 4
+Wait (Actors: Witch) 0
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Forgiveness (Actors: Red) 1
+Node Name: Forgiveness
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Magic Temple
+----------
+Gain Consciousness (Actors: Witch) 2
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 3
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 4
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
