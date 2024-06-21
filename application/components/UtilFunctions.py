@@ -1021,6 +1021,21 @@ def scrambled_sort(list_to_sort, key, reverse):
 
     return scramble_sorted_list
 
+def get_multigraph_true_uniqueness(character, graph_list : list = []):
+    
+    all_nodes = []
+    seen_nodes = []
+
+    for graph in graph_list:
+        list_of_nodes = graph.make_story_part_list_of_one_character(character_to_extract=character)
+        for node in list_of_nodes:
+            if node not in seen_nodes:
+                seen_nodes.append(node)
+            all_nodes.append(node)
+    
+    # print(seen_nodes)
+    return len(seen_nodes) / len(all_nodes)
+
 # def translate_generic_has_doubleedge_test(test, node):
     
 #     list_of_equivalent_tests = []

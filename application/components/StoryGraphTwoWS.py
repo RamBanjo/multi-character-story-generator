@@ -1309,7 +1309,7 @@ class StoryGraph:
         if verbose:
             print("Finish printing results.")
 
-    def print_metric_of_each_character_to_text_file(self, directory, previous_graphs=[], retention = 0, verbose=False):
+    def print_metric_of_each_character_to_text_file(self, directory, previous_graphs=[], retention = 0, verbose=False, include_true_uniqueness = False):
         if verbose:
             print("Printing Metrics to Text Files...")
 
@@ -1322,6 +1322,12 @@ class StoryGraph:
 
             for metric_type in MetricType:
                 stringlist.append(metric_type.name + ": " + str(self.get_multigraph_metric_score(metric_type=metric_type, character=actor, previous_graphs=previous_graphs, score_retention=retention)))
+            
+            all_graphs = previous_graphs
+            all_graphs.append(self)
+
+            if include_true_uniqueness:
+                stringlist.append("TRUE_UNIQUE: " + str(get_multigraph_true_uniqueness(character=actor, graph_list=all_graphs)))
 
             path_name = directory + actor.get_name() + "Metrics.txt"
             f = open(path_name, "w")
@@ -1329,7 +1335,7 @@ class StoryGraph:
             for thing in stringlist:
                 f.write(thing)
                 f.write("\n")
-            
+
             if verbose:
                 print("Character Done:", actor.get_name())
 

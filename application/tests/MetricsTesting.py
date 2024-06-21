@@ -256,12 +256,12 @@ multigraph_cost_part_c.insert_multiple_parts(part_list=[costly_action_b, costly_
 # Graph C cost is 60
 
 print()
-print("Score if Retention is 1:", multigraph_cost_part_c.get_multigraph_metric_score(metric_type=MetricType.COST, character=alice, previous_graphs=[multigraph_cost_part_a, multigraph_cost_part_b], score_retention=1))
-print("Score if Retention is 0.5:", multigraph_cost_part_c.get_multigraph_metric_score(metric_type=MetricType.COST, character=alice, previous_graphs=[multigraph_cost_part_a, multigraph_cost_part_b], score_retention=0.5))
+# print("Score if Retention is 1:", multigraph_cost_part_c.get_multigraph_metric_score(metric_type=MetricType.UNIQUE, character=alice, previous_graphs=[multigraph_cost_part_a, multigraph_cost_part_b], score_retention=1)) #shouldn't this be 2/15?
+# print("Score if Retention is 0.5:", multigraph_cost_part_c.get_multigraph_metric_score(metric_type=MetricType.UNIQUE, character=alice, previous_graphs=[multigraph_cost_part_a, multigraph_cost_part_b], score_retention=0.5))
 
 # list_of_graphs = [multigraph_cost_part_a, multigraph_cost_part_b, multigraph_cost_part_c]
 
-# multigraph_cost_part_c.print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=[], verbose=True, retention=1)
+multigraph_cost_part_c.print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=[multigraph_cost_part_a, multigraph_cost_part_b], verbose=True, retention=1, include_true_uniqueness=True)
 
 # test_list = [1,2,3,4,5]
 # print(test_list[:1])
