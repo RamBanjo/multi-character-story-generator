@@ -430,7 +430,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                     print("Performing Action:", str(chosen_action_container))
                 match action_type:
                     case "Apply Rule":
-                        action_for_character_found = attempt_apply_rule(rule_object=chosen_action_container.action_object, perform_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, character_object=current_character, shortest_path_charname_list=shortest_path_character_names_list)
+                        action_for_character_found = attempt_apply_rule(rule_object=chosen_action_container.action_object, perform_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, character_object=current_character, shortest_path_charname_list=shortest_path_character_names_list, verbose=verbose)
                     case "Advance Task":
                         action_for_character_found = attempt_apply_task(stack_name=chosen_action_container.action_object, attempt_index=chosen_action_container.perform_index, target_story_graph=final_story_graph, current_character=current_character)
                     case "Perform Task":
@@ -484,7 +484,7 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
         final_story_graph.update_list_of_changes()
         final_story_graph.fill_in_locations_on_self()
 
-def attempt_apply_rule(rule_object, perform_index, target_story_graph, character_object, shortest_path_charname_list):
+def attempt_apply_rule(rule_object, perform_index, target_story_graph, character_object, shortest_path_charname_list, verbose=False):
 
     apply_rule_success = False
 
@@ -512,7 +512,7 @@ def attempt_apply_rule(rule_object, perform_index, target_story_graph, character
             #At no point in apply rewrite rule or check for pattern in storyline does the continuation validity get checked so we need to check for continuation validity.
             #If the application of the rule is successful, then this should return true.
             #Checking for continuation validity already exists within Apply Rewrite Rule, so we don't have to do anything extra here.
-        apply_rule_success = target_story_graph.apply_rewrite_rule(rule=current_rule, character=character_object, abs_step=current_index)
+        apply_rule_success = target_story_graph.apply_rewrite_rule(rule=current_rule, character=character_object, abs_step=current_index, verbose=verbose)
 
     else:
         applicable_character_names = []

@@ -1,0 +1,5 @@
+Metric Information for Storyline of Alice in Initial Graph Continuation # 2
+COST: 0.0
+UNIQUE: 57.142857142857146
+JOINTS: 0.0
+PREFER: 42.857142857142854

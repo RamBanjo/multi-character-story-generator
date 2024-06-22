@@ -771,9 +771,9 @@ wait_prob_name_dict = {"Grandma":0.3, "Witch":0.3, "Papa Bear":0.3}
 # generated_graph = generate_story_from_starter_graph(init_storygraph=initial_graph, list_of_rules=list_of_rules, required_story_length=5, verbose=True, extra_attempts=-1)
 #Uncomment each block for the desired result
 #No Metrics
-# retention = 0
-# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
-# base_folder_name = "no_metric"
+retention = 0
+generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
+base_folder_name = "no_metric_3"
 
 # x0 Retention
 # retention = 0
@@ -795,6 +795,8 @@ finish_gen_time = datetime.now()
 print("xxx")
 print("Generation Time:", str(finish_gen_time-start_gen_time))
 
+# generated_graph_list = [initial_graph]
+
 base_directory = "application/tests/test_output/"
 
 graphcounter = 1
@@ -802,11 +804,15 @@ graphcounter = 1
 for generated_graph in generated_graph_list:
     print("Cycle Number:", str(graphcounter))
     fullpath = base_directory + base_folder_name + "/" + str(graphcounter) + "/"
+    metric_path = fullpath + "/metrics/"
+
     if not os.path.exists(fullpath):
         os.makedirs(fullpath)
+    if not os.path.exists(metric_path):
+        os.makedirs(metric_path)
 
     generated_graph.print_graph_nodes_to_text_file(directory=fullpath, verbose=True)
-    generated_graph.print_metric_of_each_character_to_text_file(directory=fullpath + "/metrics/", previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=retention)
+    generated_graph.print_metric_of_each_character_to_text_file(directory=metric_path, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=retention)
     latest_ws = generated_graph.make_latest_state()
     latest_ws.print_wsedges_to_text_file(directory=fullpath, verbose=True)
 
@@ -823,6 +829,9 @@ if not os.path.exists(fullpath):
 generated_graph_list[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:-1], verbose=True, retention=retention, include_true_uniqueness = True)
 
 print("Generation Complete! Yippee!!")
+# print(len(generated_graph_list))
+# for graph in generated_graph_list:
+#     print(graph.name)
 
 #TODO: Things to Consider:
 # 1. Something is preventing Papa Bear from moving from the Mountain Valley to Forest Path. Check to see what it is.

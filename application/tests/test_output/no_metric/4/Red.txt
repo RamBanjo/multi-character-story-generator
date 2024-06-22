@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Witness Wolf (Actors: Red) 0
+Node Name: Witness Wolf
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Magic Temple
+----------
+Wait (Actors: Red) 1
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
+Actor Kills Actor (Actors: Witch) 2
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Magic Temple
+----------
+Wait (Actors: Red) 3
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Red) 4
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------

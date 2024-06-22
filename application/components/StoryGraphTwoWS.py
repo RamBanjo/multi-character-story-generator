@@ -53,7 +53,7 @@ Only two world states will be kept: The starting world state and the worldstate 
 DEFAULT_INVALID_SCORE = -999
 
 class StoryGraph:
-    def __init__(self, name, character_objects, starting_ws, always_true_tests = []):
+    def __init__(self, name, character_objects, starting_ws, always_true_tests = None):
         self.name = name
         self.character_objects = character_objects
         self.story_parts = dict()
@@ -1309,7 +1309,7 @@ class StoryGraph:
         if verbose:
             print("Finish printing results.")
 
-    def print_metric_of_each_character_to_text_file(self, directory, previous_graphs=[], retention = 0, verbose=False, include_true_uniqueness = False):
+    def print_metric_of_each_character_to_text_file(self, directory, previous_graphs=None, retention = 0, verbose=False, include_true_uniqueness = False):
         if verbose:
             print("Printing Metrics to Text Files...")
 
@@ -1323,8 +1323,9 @@ class StoryGraph:
             for metric_type in MetricType:
                 stringlist.append(metric_type.name + ": " + str(self.get_multigraph_metric_score(metric_type=metric_type, character=actor, previous_graphs=previous_graphs, score_retention=retention)))
             
-            all_graphs = deepcopy(previous_graphs)
-            # all_graphs = previous_graphs
+            all_graphs = []
+            if previous_graphs != None:
+               all_graphs.extend(previous_graphs)
             all_graphs.append(self)
 
             if include_true_uniqueness:
@@ -1512,9 +1513,10 @@ class StoryGraph:
             current_ws_and_validity = self.make_state_at_step(check_index)
             current_ws = current_ws_and_validity[0]
 
-            for always_test in self.always_true_tests:
-                if not current_ws.test_story_compatibility_with_conditiontest(always_test):
-                    return False
+            if self.always_true_tests != None:
+                for always_test in self.always_true_tests:
+                    if not current_ws.test_story_compatibility_with_conditiontest(always_test):
+                        return False
 
             if check_index < self.longest_path_length:
                 for current_char in self.character_objects:
@@ -2155,7 +2157,7 @@ class StoryGraph:
     # Graph 4 * 0.8^1
     # Graph 5 * 0.8^0
     
-    def get_multigraph_metric_score(self, metric_type:MetricType, character:CharacterNode, previous_graphs = [], score_retention = 0):
+    def get_multigraph_metric_score(self, metric_type:MetricType, character:CharacterNode, previous_graphs = None, score_retention:float = 0.0):
         
         current_score = self.get_metric_score(metric_type=metric_type, character=character)
 
@@ -2164,30 +2166,21 @@ class StoryGraph:
         if score_retention < 0:
             score_retention = 0
 
-        if len(previous_graphs) > 0 and score_retention > 0:
-            past_score_times_len = []
-            forgotten_past_score_times_len = []
-            past_graph_total_nodes = []
-            forgotten_past_graph_total_nodes = []
+        if previous_graphs != None and score_retention > 0:
 
-            for past_graph in previous_graphs:
-                this_graphscore = past_graph.get_metric_score(metric_type=metric_type, character=character)
-                this_graphlength = past_graph.get_longest_path_length_by_character(character)
-                past_score_times_len.append(this_graphscore * this_graphlength)
-                past_graph_total_nodes.append(this_graphlength)
-
-            forgetfulness_exponent = len(past_score_times_len)
+            forgotten_past_score = []
+            past_scores = [past_graph.get_metric_score(metric_type=metric_type, character=character) for past_graph in previous_graphs]
+            final_divider = 1.0
 
             for index in range(0, len(previous_graphs)):
                 
+                forgetfulness_exponent = (len(previous_graphs) - index)
                 forgetfulness_multiplier = score_retention ** forgetfulness_exponent
-                forgotten_past_score_times_len.append(past_score_times_len[index] * forgetfulness_multiplier)
-                forgotten_past_graph_total_nodes.append(past_graph_total_nodes[index] * forgetfulness_multiplier)
-                forgetfulness_exponent -= 1
+                forgotten_past_score.append(past_scores[index] * forgetfulness_multiplier)
+                final_divider += forgetfulness_multiplier
 
-            current_graphlength = self.get_longest_path_length_by_character(character=character)
-            current_score_multed = current_score * current_graphlength
-            current_score = sum(forgotten_past_score_times_len, start=current_score_multed) / sum(forgotten_past_graph_total_nodes, start=current_graphlength)
+            forgotten_past_score.append(current_score)
+            current_score = sum(forgotten_past_score) / final_divider
 
         return current_score
 

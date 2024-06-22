@@ -1,0 +1,5 @@
+Metric Information for Storyline of Papa Bear in Initial Story Graph Continuation # 2
+COST: 0.0
+UNIQUE: 79.5275590551181
+JOINTS: 39.05511811023622
+PREFER: 19.68503937007874
