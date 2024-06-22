@@ -1323,7 +1323,8 @@ class StoryGraph:
             for metric_type in MetricType:
                 stringlist.append(metric_type.name + ": " + str(self.get_multigraph_metric_score(metric_type=metric_type, character=actor, previous_graphs=previous_graphs, score_retention=retention)))
             
-            all_graphs = previous_graphs
+            all_graphs = deepcopy(previous_graphs)
+            # all_graphs = previous_graphs
             all_graphs.append(self)
 
             if include_true_uniqueness:
@@ -1339,6 +1340,7 @@ class StoryGraph:
             if verbose:
                 print("Character Done:", actor.get_name())
 
+        del(all_graphs)
         f.close()
         if verbose:
             print("Finish printing metrics.")            
@@ -2139,7 +2141,7 @@ class StoryGraph:
                 relevant_nodes_found = self.count_story_nodes_with_tag_in_characters_story_line(character=character, desired_tag_list=[("important_action", True)])
 
         # print((relevant_nodes_found / character_story_length))
-        return round((relevant_nodes_found / character_story_length), 2) * 100
+        return (relevant_nodes_found / character_story_length) * 100
             
     # score_retention: How much the program cares about past graphs?
     # 0 score_retention (Always forgets past graphs --- only remembers the current graph)
@@ -2178,13 +2180,13 @@ class StoryGraph:
 
             for index in range(0, len(previous_graphs)):
                 
-                forgetfulness_multiplier = math.pow(score_retention, forgetfulness_exponent)
+                forgetfulness_multiplier = score_retention ** forgetfulness_exponent
                 forgotten_past_score_times_len.append(past_score_times_len[index] * forgetfulness_multiplier)
                 forgotten_past_graph_total_nodes.append(past_graph_total_nodes[index] * forgetfulness_multiplier)
                 forgetfulness_exponent -= 1
 
             current_graphlength = self.get_longest_path_length_by_character(character=character)
-            current_score_multed = current_score * self.get_longest_path_length_by_character(character=character)
+            current_score_multed = current_score * current_graphlength
             current_score = sum(forgotten_past_score_times_len, start=current_score_multed) / sum(forgotten_past_graph_total_nodes, start=current_graphlength)
 
         return current_score

@@ -246,22 +246,75 @@ test_ws_only_alice = WorldState(name="Just Alice. (OK)", objectnodes=[alice, som
 multigraph_cost_part_a = StoryGraph(name="Multigraph Cost A", character_objects=[alice], starting_ws=test_ws_only_alice)
 multigraph_cost_part_b = StoryGraph(name="Multigraph Cost B", character_objects=[alice], starting_ws=test_ws_only_alice)
 multigraph_cost_part_c = StoryGraph(name="Multigraph Cost C", character_objects=[alice], starting_ws=test_ws_only_alice)
+multigraph_cost_part_d = StoryGraph(name="Multigraph Cost D", character_objects=[alice], starting_ws=test_ws_only_alice)
+multigraph_cost_part_e = StoryGraph(name="Multigraph Cost E", character_objects=[alice], starting_ws=test_ws_only_alice)
+multigraph_cost_part_f = StoryGraph(name="Multigraph Cost E", character_objects=[alice], starting_ws=test_ws_only_alice)
+multigraph_cost_part_g = StoryGraph(name="Multigraph Cost E", character_objects=[alice], starting_ws=test_ws_only_alice)
+multigraph_cost_part_h = StoryGraph(name="Multigraph Cost E", character_objects=[alice], starting_ws=test_ws_only_alice)
+multigraph_cost_part_i = StoryGraph(name="Multigraph Cost E", character_objects=[alice], starting_ws=test_ws_only_alice)
 
-multigraph_cost_part_a.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a, action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
-multigraph_cost_part_b.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a, action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
-multigraph_cost_part_c.insert_multiple_parts(part_list=[costly_action_b, costly_action_b, costly_action_b, costly_action_b, costly_action_b], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_a.insert_multiple_parts(part_list=[joint_node_g, action_a, action_a, action_a, action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_b.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a,action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_c.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a,action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_d.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a,action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_e.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a,action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_f.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a,action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_g.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a,action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_h.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a,action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
+multigraph_cost_part_i.insert_multiple_parts(part_list=[action_a, action_a, action_a, action_a,action_a], character=alice, location_list=[somewhere, somewhere, somewhere, somewhere, somewhere])
 
+
+
+# print(multigraph_cost_part_a.get_longest_path_length_by_character(alice))
+# print(multigraph_cost_part_b.get_longest_path_length_by_character(alice))
+# print(multigraph_cost_part_c.get_longest_path_length_by_character(alice))
+# print(multigraph_cost_part_d.get_longest_path_length_by_character(alice))
+# print(multigraph_cost_part_e.get_longest_path_length_by_character(alice))
 # Graph A cost is 20
 # Graph B cost is 40
 # Graph C cost is 60
 
-print()
-# print("Score if Retention is 1:", multigraph_cost_part_c.get_multigraph_metric_score(metric_type=MetricType.UNIQUE, character=alice, previous_graphs=[multigraph_cost_part_a, multigraph_cost_part_b], score_retention=1)) #shouldn't this be 2/15?
-# print("Score if Retention is 0.5:", multigraph_cost_part_c.get_multigraph_metric_score(metric_type=MetricType.UNIQUE, character=alice, previous_graphs=[multigraph_cost_part_a, multigraph_cost_part_b], score_retention=0.5))
+list_of_graphs = [multigraph_cost_part_a, multigraph_cost_part_b, multigraph_cost_part_c, multigraph_cost_part_d, multigraph_cost_part_e]
 
-# list_of_graphs = [multigraph_cost_part_a, multigraph_cost_part_b, multigraph_cost_part_c]
+# print()
+print("Score if Retention is 1:", list_of_graphs[-1].get_multigraph_metric_score(metric_type=MetricType.JOINTS, character=alice, previous_graphs=list_of_graphs[:-1], score_retention=1)) 
+print("Score if Retention is 0.5:", list_of_graphs[-1].get_multigraph_metric_score(metric_type=MetricType.JOINTS, character=alice, previous_graphs=list_of_graphs[:-1], score_retention=0.5))
 
-multigraph_cost_part_c.print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=[multigraph_cost_part_a, multigraph_cost_part_b], verbose=True, retention=1, include_true_uniqueness=True)
+print(get_multigraph_true_uniqueness(character=alice, graph_list=list_of_graphs))
 
-# test_list = [1,2,3,4,5]
-# print(test_list[:1])
+# list_of_graphs[-1].print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=list_of_graphs[:-1], verbose=True, retention=1, include_true_uniqueness=True)
+# list_of_graphs[-1].print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=list_of_graphs[:-1], verbose=True, retention=1, include_true_uniqueness=True)
+
+# class TestThing:
+#     def __init__(self) -> None:
+#         self.bloop = 2
+
+
+# def append_list_test(my_list:list):
+#     new_list = my_list
+#     new_list.append(TestThing())
+
+# test_list = [TestThing(), TestThing(), TestThing()]
+# append_list_test(test_list[:1])
+# append_list_test(test_list[:2])
+# print(test_list)
+
+# print(test_list[:4])
+# print(test_list[:-1])
+
+# def get_multigraph_true_uniqueness(graph_list : list = []):
+    
+#     all_nodes = []
+#     seen_nodes = []
+
+#     for graph in graph_list:
+#         # list_of_nodes = graph.make_story_part_list_of_one_character(character_to_extract=character)
+#         for node in graph:
+#             if node not in seen_nodes:
+#                 seen_nodes.append(node)
+#             all_nodes.append(node)
+    
+#     # print(seen_nodes)
+#     return len(seen_nodes) / len(all_nodes)
+
+# print(get_multigraph_true_uniqueness([[1,2,3,1,2], [1,2,3,1,2], [4,5,4,4,4]]))

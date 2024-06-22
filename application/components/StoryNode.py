@@ -143,8 +143,11 @@ class StoryNode:
 
     def check_if_joint_node(self):
         
+        if type(self.charcount) == tuple() or type(self.target_count) == tuple():
+            return True
+
         #If this node allows more than 1 character or allows more than 1 target which is an actor then it is a joint node.
-        return self.charcount > 1 or self.target_count > 0
+        return self.charcount > 1 or self.target_count > 0 or self.charcount == -1 or self.target_count == -1
     
     def export_object_as_dict(self) -> dict:
         return_dict = dict()
