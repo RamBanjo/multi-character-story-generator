@@ -1,20 +1,20 @@
 ENTIRE STORYLINE OF Grandma IN Initial Story Graph
-Gain Find Item Quest (Columbo's Diary) (Actors: Grandma) 0
-Node Name: Gain Find Item Quest (Columbo's Diary)
-Timestep 0
-Actors: Grandma
-Targets: 
-Location: Forest Village
-----------
-Scheme Leader Gives Tasks (Actors: Grandma) 1
+Scheme Leader Gives Tasks (Actors: Grandma) 2
 Node Name: Scheme Leader Gives Tasks
 Timestep 0
 Actors: Grandma
 Targets: Wolf
 Location: Forest Village
 ----------
-Get Rod Quest for Grandma (Actors: Grandma) 2
+Get Rod Quest for Grandma (Actors: Grandma) 1
 Node Name: Get Rod Quest for Grandma
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Forest Village
+----------
+Gain Find Item Quest (Columbo's Diary) (Actors: Grandma) 2
+Node Name: Gain Find Item Quest (Columbo's Diary)
 Timestep 0
 Actors: Grandma
 Targets: 

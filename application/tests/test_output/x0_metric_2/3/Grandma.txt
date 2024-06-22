@@ -4,33 +4,33 @@ Node Name: Recall Tasks
 Timestep 0
 Actors: Grandma
 Targets: 
-Location: Magic Temple
+Location: Mountain Valley
 ----------
-task_cancel_for_Grandma_Rod Quest (Actors: Grandma) 1
+Move Towards Magic Temple (Actors: Grandma) 1
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Grandma
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+task_cancel_for_Grandma_Rod Quest (Actors: Grandma) 2
 Node Name: task_cancel_for_Grandma_Rod Quest
 Timestep 0
 Actors: Grandma
 Targets: 
 Location: Magic Temple
 ----------
-Wait (Actors: Grandma) 2
-Node Name: Wait
+Move Towards Mountain Valley (Actors: Grandma) 3
+Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Grandma
-Targets: 
+Targets: Mountain Valley
 Location: Magic Temple
 ----------
-Wait (Actors: Grandma) 3
-Node Name: Wait
+Move Towards Forest Path (Actors: Grandma) 4
+Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Grandma
-Targets: 
-Location: Magic Temple
-----------
-Wait (Actors: Grandma) 4
-Node Name: Wait
-Timestep 0
-Actors: Grandma
-Targets: 
-Location: Magic Temple
+Targets: Forest Path
+Location: Mountain Valley
 ----------

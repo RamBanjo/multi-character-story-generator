@@ -4,33 +4,33 @@ Node Name: Recall Tasks
 Timestep 0
 Actors: Red
 Targets: 
-Location: Mountain Valley
+Location: Forest Path
 ----------
-Move Towards Magic Temple (Actors: Red) 1
+Move Towards Mountain Valley (Actors: Red) 1
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Red
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Move Towards Magic Temple (Actors: Red) 2
 Node Name: Move Towards Magic Temple
 Timestep 0
 Actors: Red
 Targets: Magic Temple
 Location: Mountain Valley
 ----------
-task_cancel_for_Red_Rod Quest (Actors: Red) 2
+task_cancel_for_Red_Rod Quest (Actors: Red) 3
 Node Name: task_cancel_for_Red_Rod Quest
 Timestep 0
 Actors: Red
 Targets: 
 Location: Magic Temple
 ----------
-Move Towards Mountain Valley (Actors: Red) 3
-Node Name: Move Towards Mountain Valley
+Wait (Actors: Red) 4
+Node Name: Wait
 Timestep 0
 Actors: Red
-Targets: Mountain Valley
+Targets: 
 Location: Magic Temple
-----------
-Move Towards Magic Temple (Actors: Red) 4
-Node Name: Move Towards Magic Temple
-Timestep 0
-Actors: Red
-Targets: Magic Temple
-Location: Mountain Valley
 ----------

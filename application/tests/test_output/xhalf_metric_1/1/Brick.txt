@@ -1,6 +1,6 @@
 ENTIRE STORYLINE OF Brick IN Initial Story Graph
-Gain Find Item Quest (Singing Harp) (Actors: Brick) 0
-Node Name: Gain Find Item Quest (Singing Harp)
+Gain Find Item Quest (Golden Goose) (Actors: Brick) 0
+Node Name: Gain Find Item Quest (Golden Goose)
 Timestep 0
 Actors: Brick
 Targets: 
@@ -13,24 +13,24 @@ Actors: Brick
 Targets: 
 Location: Forest Village
 ----------
-Actor Scares Target (Actors: Wolf) 2
-Node Name: Actor Scares Target
+Gain Find Item Quest (Singing Harp) (Actors: Brick) 2
+Node Name: Gain Find Item Quest (Singing Harp)
 Timestep 0
-Actors: Wolf
-Targets: Brick
+Actors: Brick
+Targets: 
 Location: Forest Village
 ----------
-Actor Attacks Target (Actors: Wolf) 3
-Node Name: Actor Attacks Target
-Timestep 0
-Actors: Wolf
-Targets: Brick
-Location: Forest Village
-----------
-Move Towards Forest Path (Actors: Brick) 4
+Move Towards Forest Path (Actors: Brick) 3
 Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Brick
 Targets: Forest Path
 Location: Forest Village
+----------
+Move Towards Random Forest (Actors: Brick) 4
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Brick
+Targets: Random Forest
+Location: Forest Path
 ----------

@@ -27,10 +27,10 @@ Actors: Papa Bear
 Targets: 
 Location: Mountain Valley
 ----------
-Wait (Actors: Papa Bear) 4
-Node Name: Wait
+Move Towards Forest Path (Actors: Papa Bear) 4
+Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Papa Bear
-Targets: 
+Targets: Forest Path
 Location: Mountain Valley
 ----------

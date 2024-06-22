@@ -6,15 +6,15 @@ Actors: Witch
 Targets: 
 Location: Magic Temple
 ----------
-Defeat (Actors: Red) 1
-Node Name: Defeat
+Wait (Actors: Witch) 1
+Node Name: Wait
 Timestep 0
-Actors: Red
-Targets: Witch
+Actors: Witch
+Targets: 
 Location: Magic Temple
 ----------
-Gain Consciousness (Actors: Witch) 2
-Node Name: Gain Consciousness
+Wait (Actors: Witch) 2
+Node Name: Wait
 Timestep 0
 Actors: Witch
 Targets: 
@@ -27,10 +27,10 @@ Actors: Witch
 Targets: 
 Location: Magic Temple
 ----------
-Actor Attacks Target (Actors: Witch) 4
-Node Name: Actor Attacks Target
+Wait (Actors: Witch) 4
+Node Name: Wait
 Timestep 0
 Actors: Witch
-Targets: Red
+Targets: 
 Location: Magic Temple
 ----------
