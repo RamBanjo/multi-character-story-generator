@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Actor Attacks Target (Actors: Brick) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Mountain Valley
+----------
+Wait (Actors: Wolf) 1
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
+Actor Kills Actor (Actors: Wolf) 2
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Wolf) 3
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Wolf
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Actor Scares Target (Actors: Wolf) 4
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Magic Temple
+----------

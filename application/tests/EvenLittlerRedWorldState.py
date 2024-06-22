@@ -783,7 +783,7 @@ base_folder_name = "no_metric_3"
 # x0.5 Retention
 # retention = 0.5
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
-# base_folder_name = "xhalf_metric"
+# base_folder_name = "xhalf_metric_1"
 
 # x1 Retention
 # retention = 1
