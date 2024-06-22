@@ -274,16 +274,19 @@ multigraph_cost_part_i.insert_multiple_parts(part_list=[action_a, action_a, acti
 # Graph B cost is 40
 # Graph C cost is 60
 
-list_of_graphs = [multigraph_cost_part_a, multigraph_cost_part_b, multigraph_cost_part_c, multigraph_cost_part_d, multigraph_cost_part_e]
+previous_graphs = [multigraph_cost_part_b, multigraph_cost_part_c, multigraph_cost_part_d, multigraph_cost_part_e]
 
-# print()
-print("Score if Retention is 1:", list_of_graphs[-1].get_multigraph_metric_score(metric_type=MetricType.JOINTS, character=alice, previous_graphs=list_of_graphs[:-1], score_retention=1)) 
-print("Score if Retention is 0.5:", list_of_graphs[-1].get_multigraph_metric_score(metric_type=MetricType.JOINTS, character=alice, previous_graphs=list_of_graphs[:-1], score_retention=0.5))
+# # print()
+# print("Score if Retention is 1:", list_of_graphs[-1].get_multigraph_metric_score(metric_type=MetricType.JOINTS, character=alice, previous_graphs=previous_graphs, score_retention=1)) 
+# print("Score if Retention is 0.5:", list_of_graphs[-1].get_multigraph_metric_score(metric_type=MetricType.JOINTS, character=alice, previous_graphs=previous_graphs, score_retention=0.5))
 
-print(get_multigraph_true_uniqueness(character=alice, graph_list=list_of_graphs))
+# print(get_multigraph_true_uniqueness(character=alice, graph_list=multigraph_cost_part_a))
 
-# list_of_graphs[-1].print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=list_of_graphs[:-1], verbose=True, retention=1, include_true_uniqueness=True)
-# list_of_graphs[-1].print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=list_of_graphs[:-1], verbose=True, retention=1, include_true_uniqueness=True)
+# multigraph_cost_part_a.print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=previous_graphs, verbose=True, retention=1, include_true_uniqueness=True)
+# multigraph_cost_part_a.print_metric_of_each_character_to_text_file(directory="application/tests/test_output/", previous_graphs=previous_graphs, verbose=True, retention=1, include_true_uniqueness=True)
+# print(len(previous_graphs))
+# for graph in previous_graphs:
+#     print(graph.name)
 
 # class TestThing:
 #     def __init__(self) -> None:

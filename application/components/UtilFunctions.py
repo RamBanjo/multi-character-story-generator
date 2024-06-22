@@ -1033,7 +1033,7 @@ def get_multigraph_true_uniqueness(character, graph_list : list = []):
                 seen_nodes.append(node)
             all_nodes.append(node)
     
-    # print(seen_nodes)
+    # print(len(seen_nodes), len(all_nodes))
     return len(seen_nodes) / len(all_nodes) * 100
 
 # def translate_generic_has_doubleedge_test(test, node):

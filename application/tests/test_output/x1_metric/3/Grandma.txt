@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Grandma IN Initial Story Graph Continuation # 2
+Recall Tasks (Actors: Grandma) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Magic Temple
+----------
+task_cancel_for_Grandma_Rod Quest (Actors: Grandma) 1
+Node Name: task_cancel_for_Grandma_Rod Quest
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Magic Temple
+----------
+Move Towards Mountain Valley (Actors: Grandma) 2
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Grandma
+Targets: Mountain Valley
+Location: Magic Temple
+----------
+Move Towards Forest Path (Actors: Grandma) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Grandma
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Random Forest (Actors: Grandma) 4
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Grandma
+Targets: Random Forest
+Location: Forest Path
+----------

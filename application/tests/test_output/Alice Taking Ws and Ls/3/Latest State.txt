@@ -1,0 +1,2 @@
+=== List of Edges in Latest State ===
+- Hub --holds--> Alice (Value: None)

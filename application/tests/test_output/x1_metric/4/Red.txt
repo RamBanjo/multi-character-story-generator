@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Recall Tasks (Actors: Red) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Red) 1
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Red
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Actor Attacks Target (Actors: Witch) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Red) 3
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Red
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+task_cancel_for_Red_Rod Quest (Actors: Red) 4
+Node Name: task_cancel_for_Red_Rod Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
