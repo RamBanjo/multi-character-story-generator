@@ -213,7 +213,7 @@ target_no_longer_holds_rod = RelChange(name="Target Stop Hold Rod", node_a=Gener
 actor_holds_rod = RelChange(name="Actor Hold Rod", node_a=GenericObjectNode.GENERIC_ACTOR, edge_name="holds", node_b=protection_pillar, add_or_remove=ChangeAction.ADD)
 
 actor_owns_forest_home = HasTagTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, tag="OwnsForestHome", value=True)
-defeat_and_take_rod_target_unconscious = StoryNode(name="Defeat and Steal Rod", tags={"Type":"Fight"}, biasweight=100, charcount=1, target_count=-1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, target_holds_rod_check, actor_has_no_defeatinteraction_target_twoway,  actor_has_attackinteraction_target_check], effects_on_next_ws=[target_becomes_unconscious, target_no_longer_holds_rod, actor_holds_rod, actor_loses_attackinteraction_target_twoway])
+defeat_and_take_rod_target_unconscious = StoryNode(name="Defeat and Steal Rod", tags={"Type":"Fight"}, biasweight=100, charcount=1, target_count=1, required_test_list=[actor_and_target_shares_location, actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, target_holds_rod_check, actor_has_no_defeatinteraction_target_twoway,  actor_has_attackinteraction_target_check], effects_on_next_ws=[target_becomes_unconscious, target_no_longer_holds_rod, actor_holds_rod, actor_loses_attackinteraction_target_twoway])
 # actor_takes_rod_while_target_flees = StoryNode(name="Actor Takes Rod While Target Flees", tags={"Type":"Fight"}, charcount=1, target_count=1, required_test_list=[actor_is_alive, target_is_alive, actor_is_not_unconscious, target_is_not_unconscious, actor_and_target_shares_location, target_holds_rod_check], effects_on_next_ws=[actor_becomes_scared_of_target, target_no_longer_holds_rod, actor_holds_rod])
 
 character_less_than_minus80_lawful_rewarded = InBiasRangeTest(object_to_test=GenericObjectNode.GENERIC_ACTOR, bias_axis="moralbias", max_accept=-80, score=20)
@@ -735,6 +735,7 @@ def make_want_to_approach_forest_resident_test(forest_resident_object):
 movement_suggestion.append(make_want_to_approach_forest_resident_test(papabear))
 movement_suggestion.append(make_want_to_approach_forest_resident_test(witch))
 movement_suggestion.append(make_want_to_approach_forest_resident_test(brick_pig))
+movement_suggestion.append(make_want_to_approach_forest_resident_test(red))
 
 # TODO: Generate graphs with these memories
 # 1. No Metrics
@@ -765,7 +766,7 @@ extra_move_changes.append(if_actor_grabs_something_then_something_changes_locati
 
 start_gen_time = datetime.now()
 
-wait_prob_name_dict = {"Grandma":0.5, "Witch":0.5, "Papa Bear":0.5}
+wait_prob_name_dict = {"Grandma":0.3, "Witch":0.3, "Papa Bear":0.3}
 
 # generated_graph = generate_story_from_starter_graph(init_storygraph=initial_graph, list_of_rules=list_of_rules, required_story_length=5, verbose=True, extra_attempts=-1)
 #Uncomment each block for the desired result
@@ -775,9 +776,9 @@ wait_prob_name_dict = {"Grandma":0.5, "Witch":0.5, "Papa Bear":0.5}
 # base_folder_name = "no_metric"
 
 # x0 Retention
-retention = 0
-generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
-base_folder_name = "x0_metric_2"
+# retention = 0
+# generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
+# base_folder_name = "x0_metric"
 
 # x0.5 Retention
 # retention = 0.5
@@ -805,7 +806,7 @@ for generated_graph in generated_graph_list:
         os.makedirs(fullpath)
 
     generated_graph.print_graph_nodes_to_text_file(directory=fullpath, verbose=True)
-    generated_graph.print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=retention)
+    generated_graph.print_metric_of_each_character_to_text_file(directory=fullpath + "/metrics/", previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=retention)
     latest_ws = generated_graph.make_latest_state()
     latest_ws.print_wsedges_to_text_file(directory=fullpath, verbose=True)
 
@@ -814,12 +815,12 @@ for generated_graph in generated_graph_list:
 fullpath = base_directory + base_folder_name + "/final_metrics_retention_1/"
 if not os.path.exists(fullpath):
     os.makedirs(fullpath)
-generated_graph_list[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=1, include_true_uniqueness = True)
+generated_graph_list[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:-1], verbose=True, retention=1, include_true_uniqueness = True)
 
 fullpath = base_directory + base_folder_name + "/final_metrics_retention_based_on_graph/"
 if not os.path.exists(fullpath):
     os.makedirs(fullpath)
-generated_graph_list[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:graphcounter-1], verbose=True, retention=retention, include_true_uniqueness = True)
+generated_graph_list[-1].print_metric_of_each_character_to_text_file(directory=fullpath, previous_graphs=generated_graph_list[:-1], verbose=True, retention=retention, include_true_uniqueness = True)
 
 print("Generation Complete! Yippee!!")
 
