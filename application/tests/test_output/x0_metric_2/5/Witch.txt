@@ -6,31 +6,31 @@ Actors: Witch
 Targets: 
 Location: Magic Temple
 ----------
-Actor Kills Actor (Actors: Witch) 1
-Node Name: Actor Kills Actor
+Wait (Actors: Witch) 1
+Node Name: Wait
 Timestep 0
 Actors: Witch
-Targets: Red
+Targets: 
 Location: Magic Temple
 ----------
-Move Towards Mountain Valley (Actors: Witch) 2
-Node Name: Move Towards Mountain Valley
+Wait (Actors: Witch) 2
+Node Name: Wait
 Timestep 0
 Actors: Witch
-Targets: Mountain Valley
+Targets: 
 Location: Magic Temple
 ----------
-Move Towards Magic Temple (Actors: Witch) 3
-Node Name: Move Towards Magic Temple
+Wait (Actors: Witch) 3
+Node Name: Wait
 Timestep 0
 Actors: Witch
-Targets: Magic Temple
-Location: Mountain Valley
+Targets: 
+Location: Magic Temple
 ----------
-Defeat (Actors: Witch) 4
-Node Name: Defeat
+Wait (Actors: Witch) 4
+Node Name: Wait
 Timestep 0
 Actors: Witch
-Targets: Brick
+Targets: 
 Location: Magic Temple
 ----------

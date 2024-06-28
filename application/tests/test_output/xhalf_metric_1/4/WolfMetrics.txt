@@ -1,5 +1,0 @@
-Metric Information for Storyline of Wolf in Initial Story Graph Continuation # 3
-COST: 15.483870967741936
-UNIQUE: 97.41935483870968
-JOINTS: 51.61290322580645
-PREFER: 18.70967741935484

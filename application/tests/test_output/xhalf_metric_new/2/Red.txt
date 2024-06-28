@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Red) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Get Tell Mom Grandma Quest (Actors: Red) 1
+Node Name: Get Tell Mom Grandma Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Tell Mom Missing Grandma (Actors: Red) 2
+Node Name: Tell Mom Missing Grandma
+Timestep 0
+Actors: Red
+Targets: Red's Mom
+Location: Forest Village
+----------
+Tell Mom Wolf Real (Actors: Red) 3
+Node Name: Tell Mom Wolf Real
+Timestep 0
+Actors: Red
+Targets: Red's Mom
+Location: Forest Village
+----------
+Visiting Place (Actors: Red) 4
+Node Name: Visiting Place
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 4
+Defeat (Actors: Red) 0
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Mountain Valley
+----------
+Get Tell Mom Wolf Quest (Actors: Red) 1
+Node Name: Get Tell Mom Wolf Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Mountain Valley
+----------
+Wait (Actors: Red) 2
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Red) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Red
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Forest Village (Actors: Red) 4
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Red
+Targets: Forest Village
+Location: Forest Path
+----------

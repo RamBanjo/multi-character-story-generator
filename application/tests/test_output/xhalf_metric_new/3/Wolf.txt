@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 2
+Recall Tasks (Actors: Wolf) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Actor Kills Actor (Actors: Wolf) 1
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Magic Temple
+----------
+task_cancel_for_Wolf_Rod Quest (Actors: Wolf) 2
+Node Name: task_cancel_for_Wolf_Rod Quest
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Actor Scares Target (Actors: Wolf) 4
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Wolf) 4
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Magic Temple
+----------

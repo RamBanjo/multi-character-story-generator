@@ -1,36 +1,36 @@
 ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 2
-Actor becomes defiant of Target (Actors: Papa Bear) 0
-Node Name: Actor becomes defiant of Target
-Timestep 0
-Actors: Papa Bear
-Targets: Wolf
-Location: Magic Temple
-----------
-Recall Tasks (Actors: Wolf) 1
+Recall Tasks (Actors: Wolf) 0
 Node Name: Recall Tasks
 Timestep 0
 Actors: Wolf
 Targets: 
-Location: Magic Temple
+Location: Forest Path
 ----------
-Actor Scares Target (Actors: Wolf) 3
-Node Name: Actor Scares Target
+Move Towards Mountain Valley (Actors: Wolf) 1
+Node Name: Move Towards Mountain Valley
 Timestep 0
 Actors: Wolf
-Targets: Witch
-Location: Magic Temple
+Targets: Mountain Valley
+Location: Forest Path
 ----------
-Witness Wolf (Actors: Red) 3
-Node Name: Witness Wolf
+Move Towards Magic Temple (Actors: Wolf) 2
+Node Name: Move Towards Magic Temple
 Timestep 0
-Actors: Red
-Targets: Wolf
-Location: Magic Temple
+Actors: Wolf
+Targets: Magic Temple
+Location: Mountain Valley
 ----------
-task_cancel_for_Wolf_Rod Quest (Actors: Wolf) 4
+task_cancel_for_Wolf_Rod Quest (Actors: Wolf) 3
 Node Name: task_cancel_for_Wolf_Rod Quest
 Timestep 0
 Actors: Wolf
 Targets: 
+Location: Magic Temple
+----------
+Move Towards Mountain Valley (Actors: Wolf) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Wolf
+Targets: Mountain Valley
 Location: Magic Temple
 ----------

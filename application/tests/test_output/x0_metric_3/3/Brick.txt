@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 2
+Gain Find Item Quest (Golden Goose) (Actors: Brick) 0
+Node Name: Gain Find Item Quest (Golden Goose)
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Recall Tasks (Actors: Brick) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Take Quest Item (Singing Harp) (Actors: Brick) 2
+Node Name: Take Quest Item (Singing Harp)
+Timestep 0
+Actors: Brick
+Targets: Singing Harp
+Location: Random Forest
+----------
+Wait (Actors: Brick) 3
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Take Quest Item (Golden Goose) (Actors: Brick) 4
+Node Name: Take Quest Item (Golden Goose)
+Timestep 0
+Actors: Brick
+Targets: Golden Goose
+Location: Random Forest
+----------
