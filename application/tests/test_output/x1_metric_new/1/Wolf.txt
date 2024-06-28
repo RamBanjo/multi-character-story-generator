@@ -15,13 +15,9 @@ Location: Forest Village
 ----------
 Scheme Leader Gives Tasks (Actors: Grandma) 2
 Node Name: Scheme Leader Gives Tasks
-Get Rod Quest for Wolf (Actors: Wolf) 2
-Node Name: Get Rod Quest for Wolf
 Timestep 0
 Actors: Grandma
 Targets: Wolf
-Actors: Wolf
-Targets: 
 Location: Forest Village
 ----------
 Actor Scares Target (Actors: Wolf) 3
@@ -29,13 +25,12 @@ Node Name: Actor Scares Target
 Timestep 0
 Actors: Wolf
 Targets: Witch
-Targets: Red
 Location: Forest Village
 ----------
-Defeat (Actors: Wolf) 4
-Node Name: Defeat
+Get Rod Quest for Wolf (Actors: Wolf) 4
+Node Name: Get Rod Quest for Wolf
 Timestep 0
 Actors: Wolf
-Targets: Red
+Targets: 
 Location: Forest Village
 ----------
