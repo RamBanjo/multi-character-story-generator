@@ -13,19 +13,13 @@ Actors: Brick
 Targets: 
 Location: Forest Village
 ----------
-<<<<<<<< HEAD:application/tests/test_output/x0_metric/1/Brick.txt
 Actor Attacks Target (Actors: Wolf) 2
 Node Name: Actor Attacks Target
-========
-Gain Find Item Quest (Singing Harp) (Actors: Brick) 2
-Node Name: Gain Find Item Quest (Singing Harp)
->>>>>>>> aaad91e11632bff96e7a76b8bdb0657971f6cd4b:application/tests/test_output/xhalf_metric_1/1/Brick.txt
 Timestep 0
-Actors: Brick
-Targets: 
+Actors: Wolf
+Targets: Brick
 Location: Forest Village
 ----------
-<<<<<<<< HEAD:application/tests/test_output/x0_metric/1/Brick.txt
 Actor Scares Target (Actors: Wolf) 3
 Node Name: Actor Scares Target
 Timestep 0
@@ -34,19 +28,9 @@ Targets: Brick
 Location: Forest Village
 ----------
 Move Towards Forest Path (Actors: Brick) 4
-========
-Move Towards Forest Path (Actors: Brick) 3
->>>>>>>> aaad91e11632bff96e7a76b8bdb0657971f6cd4b:application/tests/test_output/xhalf_metric_1/1/Brick.txt
 Node Name: Move Towards Forest Path
 Timestep 0
 Actors: Brick
 Targets: Forest Path
 Location: Forest Village
-----------
-Move Towards Random Forest (Actors: Brick) 4
-Node Name: Move Towards Random Forest
-Timestep 0
-Actors: Brick
-Targets: Random Forest
-Location: Forest Path
 ----------

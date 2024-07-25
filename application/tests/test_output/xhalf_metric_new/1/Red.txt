@@ -1,16 +1,16 @@
 ENTIRE STORYLINE OF Red IN Initial Story Graph
-Witness Wolf (Actors: Red) 0
-Node Name: Witness Wolf
-Timestep 0
-Actors: Red
-Targets: Wolf
-Location: Forest Village
-----------
-Get Visit Place Task for Red (Actors: Red) 1
+Get Visit Place Task for Red (Actors: Red) 0
 Node Name: Get Visit Place Task for Red
 Timestep 0
 Actors: Red
 Targets: 
+Location: Forest Village
+----------
+Witness Wolf (Actors: Red) 1
+Node Name: Witness Wolf
+Timestep 0
+Actors: Red
+Targets: Wolf
 Location: Forest Village
 ----------
 Get Rod Quest for Red (Actors: Red) 2
@@ -20,17 +20,17 @@ Actors: Red
 Targets: 
 Location: Forest Village
 ----------
-Actor Attacks Target (Actors: Wolf) 3
-Node Name: Actor Attacks Target
+Get Tell Mom Wolf Quest (Actors: Red) 3
+Node Name: Get Tell Mom Wolf Quest
 Timestep 0
-Actors: Wolf
-Targets: Red
+Actors: Red
+Targets: 
 Location: Forest Village
 ----------
-Defeat (Actors: Wolf) 4
-Node Name: Defeat
+Notice Missing Grandma (Actors: Red) 4
+Node Name: Notice Missing Grandma
 Timestep 0
-Actors: Wolf
-Targets: Red
+Actors: Red
+Targets: 
 Location: Forest Village
 ----------
