@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Witch) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Random Forest
+----------
+Take Quest Item (Columbo's Diary) (Actors: Witch) 1
+Node Name: Take Quest Item (Columbo's Diary)
+Timestep 0
+Actors: Witch
+Targets: Columbo's Diary
+Location: Random Forest
+----------
+Defeat (Actors: Brick) 2
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Random Forest
+----------
+Gain Consciousness (Actors: Witch) 3
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Random Forest
+----------
+Actor Kills Actor (Actors: Brick) 4
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Random Forest
+----------

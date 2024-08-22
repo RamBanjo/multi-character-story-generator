@@ -63,7 +63,7 @@ metric_reward: Extra points granted for following the metrics_requirements.
 metric_penalty: Points deducted for not following the metrics_requirements.
 task_movement_random: If set to True, when a character is attempting to move, they will choose randomly. If set to False it will always choose the first available location.
 '''
-def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], suggested_movement_requirement_list=[], extra_move_changes = [], minimum_move_req_score = None , action_repeat_penalty = -10, metrics_requirements = [], metric_reward = 50, metric_penalty = -50, previous_graph_list = [], metric_retention=0, task_movement_random = False, charname_extra_prob_dict : dict = dict()):
+def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], suggested_movement_requirement_list=[], extra_move_changes = [], minimum_move_req_score = None , action_repeat_penalty = -10, metrics_requirements = [], metric_reward = 50, metric_penalty = -50, previous_graph_list = [], metric_retention=0, task_movement_random = False, charname_extra_prob_dict : dict = dict(), metric_leniency = 5, metric_allow_equal = False):
 
     #make a copy of the graph
     if verbose:
@@ -205,10 +205,10 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                             purge_count = 0
                             followup_nodes_list = []
                             if not rule.is_joint_rule:
-
-                                followup_nodes_list = rule.story_condition
+                                # print("accessed")
+                                followup_nodes_list = rule.story_change
                                 if rule.remove_before_insert:
-                                    purge_count = len(rule.story_condition)
+                                    purge_count = len(rule.story_change)
 
                             else:
                                 match rule.joint_type:
@@ -218,27 +218,28 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                                         followup_nodes_list = [rule.joint_node]
                             
                             pass_metric_test = False
-
+                            
+                            # print(followup_nodes_list)
                             if not test_splitjoint:
-                                pass_metric_test = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=followup_nodes_list, step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list)
+                                pass_metric_test = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=followup_nodes_list, step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list, leniency_window=metric_leniency, accept_equal=metric_allow_equal, verbose=verbose)
                             else:
                                 #We consider the splitting joint rule to be following the metric if at least one of the continuations follow the metric.
                                 follow_metric_exists = False
 
                                 for node in rule.split_list:
-                                    check_result = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=[node], step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list)
+                                    check_result = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=[node], step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list, leniency_window=metric_leniency, accept_equal=metric_allow_equal, verbose=verbose)
                                     follow_metric_exists = follow_metric_exists or check_result
 
                                 pass_metric_test = follow_metric_exists
 
                             if pass_metric_test:
                                 if verbose:
-                                        print("The rule",rule.rule_name,"follows the metrics:", str(metric), "(Some score will be awarded.)")
-                                        rule_container.action_score += metric_reward
-                                else:
-                                    if verbose:
-                                        print("The rule",rule.rule_name,"violates the metrics.", str(metric), "(Some score will be deducted.)")
-                                        rule_container.action_score += metric_penalty
+                                    print("The rule",rule.rule_name,"follows the metrics:", str(metric), "(Some score will be awarded.)")
+                                rule_container.action_score += metric_reward
+                            else:
+                                if verbose:
+                                    print("The rule",rule.rule_name,"violates the metrics.", str(metric), "(Some score will be deducted.)")
+                                rule_container.action_score += metric_penalty
 
 
                     acceptable_rules_with_absolute_step_and_score.append(rule_container)
@@ -723,7 +724,7 @@ def perform_wait_action(target_story_graph:StoryGraph, current_character):
     
     return True
 
-def generate_multiple_graphs(initial_graph : StoryGraph, list_of_rules, required_story_length=20, max_storynodes_per_graph=5, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], suggested_movement_requirement_list=[], extra_move_changes = [], minimum_move_req_score = 0, action_repeat_penalty = -10, metric_requirements = [], metric_reward=50, metric_penalty=-50, metric_retention=0, task_movement_random=False, charname_extra_prob_dict : dict = dict()):
+def generate_multiple_graphs(initial_graph : StoryGraph, list_of_rules, required_story_length=20, max_storynodes_per_graph=5, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], suggested_movement_requirement_list=[], extra_move_changes = [], minimum_move_req_score = 0, action_repeat_penalty = -10, metric_requirements = [], metric_reward=50, metric_penalty=-50, metric_retention=0, task_movement_random=False, charname_extra_prob_dict : dict = dict(), metric_leniency = 5, metric_allow_equal = False):
     
     #NOTE: Max Storynodes per Graph includes the "Recall Tasks" node.
 
@@ -750,7 +751,7 @@ def generate_multiple_graphs(initial_graph : StoryGraph, list_of_rules, required
         if len(list_of_completed_story_graphs) == number_of_graphs_needed-1 and length_of_last_graph != 0:
             loop_graph_length = length_of_last_graph
 
-        new_graph = generate_story_from_starter_graph(init_storygraph=loop_init_graph, list_of_rules=list_of_rules, required_story_length=loop_graph_length, top_n=top_n, extra_attempts=extra_attempts, score_mode=score_mode, verbose=verbose, extra_movement_requirement_list=extra_movement_requirement_list, suggested_movement_requirement_list=suggested_movement_requirement_list, minimum_move_req_score=minimum_move_req_score, action_repeat_penalty=action_repeat_penalty, metrics_requirements=metric_requirements, metric_reward=metric_reward, metric_penalty=metric_penalty, previous_graph_list=list_of_completed_story_graphs, metric_retention=metric_retention, task_movement_random=task_movement_random, extra_move_changes=extra_move_changes, charname_extra_prob_dict = charname_extra_prob_dict)
+        new_graph = generate_story_from_starter_graph(init_storygraph=loop_init_graph, list_of_rules=list_of_rules, required_story_length=loop_graph_length, top_n=top_n, extra_attempts=extra_attempts, score_mode=score_mode, verbose=verbose, extra_movement_requirement_list=extra_movement_requirement_list, suggested_movement_requirement_list=suggested_movement_requirement_list, minimum_move_req_score=minimum_move_req_score, action_repeat_penalty=action_repeat_penalty, metrics_requirements=metric_requirements, metric_reward=metric_reward, metric_penalty=metric_penalty, previous_graph_list=list_of_completed_story_graphs, metric_retention=metric_retention, task_movement_random=task_movement_random, extra_move_changes=extra_move_changes, charname_extra_prob_dict = charname_extra_prob_dict, metric_leniency=metric_leniency, metric_allow_equal=metric_allow_equal)
 
         if verbose:
             print("Current Graph,", str(len(list_of_completed_story_graphs)), "Finished. These are the edges in the latest state of that graph:")

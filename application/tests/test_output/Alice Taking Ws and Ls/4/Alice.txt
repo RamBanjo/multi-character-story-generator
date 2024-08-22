@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Alice IN Initial Graph Continuation # 3
+Take an L (Actors: Alice) 0
+Node Name: Take an L
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Hub
+----------
+Take a W (Actors: Alice) 1
+Node Name: Take a W
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Hub
+----------
+Take an L (Actors: Alice) 2
+Node Name: Take an L
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Hub
+----------
+Wait (Actors: Alice) 3
+Node Name: Wait
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Hub
+----------
+Take an L (Actors: Alice) 4
+Node Name: Take an L
+Timestep 0
+Actors: Alice
+Targets: 
+Location: Hub
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Actor Kills Actor (Actors: Wolf) 0
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Magic Temple
+----------
+Wait (Actors: Wolf) 1
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Actor Scares Target (Actors: Wolf) 3
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Magic Temple
+----------
+Report Scared Forest Village (Actors: Wolf) 3
+Node Name: Report Scared Forest Village
+Timestep 0
+Actors: Wolf
+Targets: Grandma
+Location: Magic Temple
+----------
+Actor becomes defiant of Target (Actors: Brick) 4
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Magic Temple
+----------

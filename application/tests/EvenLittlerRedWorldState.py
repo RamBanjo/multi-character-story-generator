@@ -680,26 +680,32 @@ initial_graph.add_story_part(part=witch_rod_quest_node, character=witch, locatio
 
 metric_requirements = []
 
-# red_has_more_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.HIGHER, character_object=red)
+red_has_more_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.HIGHER, character_object=red)
 brick_has_more_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.HIGHER, character_object=brick_pig)
-# wolf_has_more_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.HIGHER, character_object=wolf)
+wolf_has_more_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.HIGHER, character_object=wolf)
 
-# papa_has_less_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.LOWER, character_object=papabear)
-# witch_has_less_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.LOWER, character_object=witch)
-# grandma_has_less_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.LOWER, character_object=grandma)
+papa_has_less_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.LOWER, character_object=papabear)
+witch_has_less_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.LOWER, character_object=witch)
+grandma_has_less_than_20_main = StoryMetric(metric_type=MetricType.PREFER, value=20, metric_mode=MetricMode.LOWER, character_object=grandma)
 
-# brick_less_than_20_cost_metric = StoryMetric(metric_type=MetricType.COST, value=20, metric_mode=MetricMode.LOWER, character_object=brick_pig)
+brick_less_than_20_cost_metric = StoryMetric(metric_type=MetricType.COST, value=20, metric_mode=MetricMode.LOWER, character_object=brick_pig)
+
+# red_more_than_50_cost_metric = StoryMetric(metric_type=MetricType.COST, value=50, metric_mode=MetricMode.HIGHER, character_object=red)
+brick_more_than_20_cost_metric = StoryMetric(metric_type=MetricType.COST, value=20, metric_mode=MetricMode.HIGHER, character_object=wolf)
 wolf_more_than_20_cost_metric = StoryMetric(metric_type=MetricType.COST, value=20, metric_mode=MetricMode.HIGHER, character_object=wolf)
 
-# red_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, value=40, metric_mode=MetricMode.HIGHER, character_object=red)
-# brickpig_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, value=40, metric_mode=MetricMode.HIGHER, character_object=brick_pig)
-# wolf_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, value=40, metric_mode=MetricMode.HIGHER, character_object=wolf)
+red_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, value=40, metric_mode=MetricMode.HIGHER, character_object=red)
+brickpig_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, value=40, metric_mode=MetricMode.HIGHER, character_object=brick_pig)
+wolf_has_more_than_40_uniqueness = StoryMetric(metric_type=MetricType.UNIQUE, value=40, metric_mode=MetricMode.HIGHER, character_object=wolf)
 
 red_has_more_than_20_joint = StoryMetric(metric_type=MetricType.JOINTS, value=20, metric_mode=MetricMode.HIGHER, character_object=red)
 
+# metric_requirements = [red_more_than_50_cost_metric]
+
 #TODO: There are now less metrics, so we should be able to see a bit more clearly if they actually affect anything. Make sure to talk to professor on what to edit before undertaking this extra test.
-metric_requirements = [brick_has_more_than_20_main, wolf_more_than_20_cost_metric, red_has_more_than_20_joint]
-# metric_requirements = [red_has_more_than_20_main, brick_has_more_than_20_main, wolf_has_more_than_20_main, brick_less_than_20_cost_metric, wolf_more_than_20_cost_metric, red_has_more_than_40_uniqueness, brickpig_has_more_than_40_uniqueness, wolf_has_more_than_40_uniqueness, red_has_more_than_20_joint, papa_has_less_than_20_main, witch_has_less_than_20_main, grandma_has_less_than_20_main]
+# metric_requirements = [brick_has_more_than_20_main, wolf_more_than_20_cost_metric, red_has_more_than_20_joint]
+
+metric_requirements = [red_has_more_than_20_main, brick_has_more_than_20_main, wolf_has_more_than_20_main, brick_less_than_20_cost_metric, wolf_more_than_20_cost_metric, red_has_more_than_40_uniqueness, brickpig_has_more_than_40_uniqueness, wolf_has_more_than_40_uniqueness, red_has_more_than_20_joint, papa_has_less_than_20_main, witch_has_less_than_20_main, grandma_has_less_than_20_main]
 
 #important_actions:
 # Defying Target
@@ -775,22 +781,22 @@ wait_prob_name_dict = {"Grandma":0.3, "Witch":0.3, "Papa Bear":0.3}
 #No Metrics
 retention = 0
 generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
-base_folder_name = "no_metric_separate_1"
+base_folder_name = "no_metric_10"
 
 # x0 Retention
 # retention = 0
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
-# base_folder_name = "x0_metric_separate_1"
+# base_folder_name = "x0_metric_all_working_metrics_3"
 
 # x0.5 Retention
 # retention = 0.5
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
-# base_folder_name = "xhalf_metric_separate_1"
+# base_folder_name = "xhalf_metric_all_working_3"
 
 # x1 Retention
-# retention = 1
+retention = 1
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, metric_requirements=metric_requirements, extra_movement_requirement_list=movement_requirement, task_movement_random=True, metric_retention=retention, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict, metric_reward=200, metric_penalty=-200)
-# base_folder_name = "x1_metric_separate_1"
+# base_folder_name = "x1_metric_red_high_cost_50_2"
 
 finish_gen_time = datetime.now()
 

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Papa Bear IN Initial Story Graph Continuation # 2
+Wait (Actors: Papa Bear) 0
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Papa Bear) 1
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Move Towards Mountain Valley (Actors: Papa Bear) 2
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Papa Bear
+Targets: Mountain Valley
+Location: Magic Temple
+----------
+Actor Scares Target (Actors: Wolf) 3
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Mountain Valley
+----------
+Wait (Actors: Papa Bear) 4
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Mountain Valley
+----------

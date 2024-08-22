@@ -2130,6 +2130,9 @@ class StoryGraph:
     def get_metric_score(self, metric_type : MetricType, character:CharacterNode):
 
         character_story_length = self.get_longest_path_length_by_character(character=character)
+        if character_story_length == 0:
+            return 0
+            
 
         relevant_nodes_found = 0
         match metric_type:
@@ -2174,7 +2177,7 @@ class StoryGraph:
 
             for index in range(0, len(previous_graphs)):
                 
-                forgetfulness_exponent = (len(previous_graphs) - index)
+                forgetfulness_exponent = float(len(previous_graphs) - index)
                 forgetfulness_multiplier = score_retention ** forgetfulness_exponent
                 forgotten_past_score.append(past_scores[index] * forgetfulness_multiplier)
                 final_divider += forgetfulness_multiplier
@@ -2184,7 +2187,7 @@ class StoryGraph:
 
         return current_score
 
-    def test_if_given_node_list_will_follow_metric_rule(self, metric : StoryMetric, node_list, step, purge_count = 0, previous_graphs = [], score_retention = 0, verbose = False):
+    def test_if_given_node_list_will_follow_metric_rule(self, metric : StoryMetric, node_list, step, purge_count = 0, previous_graphs = [], score_retention = 0, verbose = False, leniency_window = 5, accept_equal = False):
         
         has_joint_node = False
 
@@ -2219,20 +2222,22 @@ class StoryGraph:
 
         if verbose:
             print("Calculated Scores (current -> new) :", current_score, "->", new_score, "Score Delta:", score_delta)
-        follows_metric_rule = False
+        # follows_metric_rule = False
 
-        match metric.metric_mode:
-            case MetricMode.LOWER:
-                follows_metric_rule = score_delta <= 0 or new_score <= metric.value
-            case MetricMode.HIGHER:
-                follows_metric_rule = score_delta >= 0 or new_score >= metric.value
-            case MetricMode.STABLE:
-                if current_score > metric.value:
-                    follows_metric_rule = score_delta <= 0 or new_score <= metric.value
-                elif current_score < metric.value:
-                    follows_metric_rule = score_delta >= 0 or new_score >= metric.value
-                else:
-                    follows_metric_rule = abs(score_delta) <= 5
+        follows_metric_rule = metric_value_delta_check(metric_mode=metric.metric_mode, metric_value=metric.value, old_value=current_score, new_value=new_score, leniency_window=leniency_window, accept_equal=accept_equal)
+        
+        # match metric.metric_mode:
+        #     case MetricMode.LOWER:
+        #         follows_metric_rule = score_delta < 0 or new_score < metric.value
+        #     case MetricMode.HIGHER:
+        #         follows_metric_rule = score_delta > 0 or new_score > metric.value
+        #     case MetricMode.STABLE:
+        #         if current_score > metric.value:
+        #             follows_metric_rule = score_delta < 0 or new_score < metric.value
+        #         elif current_score < metric.value:
+        #             follows_metric_rule = score_delta > 0 or new_score > metric.value
+        #         else:
+        #             follows_metric_rule = abs(score_delta) <= 5
         if verbose:
             print("follows_metric_rule value:", follows_metric_rule)
         return follows_metric_rule

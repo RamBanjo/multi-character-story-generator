@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Defeat (Actors: Red) 0
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Path
+----------
+Evil Forgiveness (Actors: Red) 1
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Path
+----------
+Recall Tasks (Actors: Wolf) 2
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Path
+----------
+Gain Consciousness (Actors: Wolf) 3
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Path
+----------
+Defeat (Actors: Papa Bear) 4
+Node Name: Defeat
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Forest Path
+----------

@@ -5,6 +5,7 @@ import random
 import sys
 sys.path.insert(0,'')
 
+from application.components.StoryMetrics import MetricMode
 from application.components.ConditionTest import HasEdgeTest, HasTagTest, HeldItemTagTest, InBiasRangeTest, ObjectEqualityTest, SameLocationTest, SomethingPassesAllGivenTestsTest, ObjectPassesAtLeastOneTestTest, TagValueInRangeTest
 from application.components.Edge import Edge
 from application.components.RelChange import ConditionalChange, RelChange, RelativeBiasChange, RelativeTagChange, TagChange, TaskAdvance, TaskCancel, TaskChange
@@ -1048,3 +1049,24 @@ def get_multigraph_true_uniqueness(character, graph_list : list = []):
 #             list_of_equivalent_tests.append(HasDoubleEdgeTest(lhs_item, test.edge_name_test, rhs_item, value_test=test.value_test, soft_equal=test.soft_equal, inverse=test.inverse))    
 
 #     return list_of_equivalent_tests
+
+def metric_value_delta_check(metric_mode : MetricMode, metric_value : int, old_value : int, new_value : int, leniency_window : int = 5, accept_equal = False):
+
+    score_delta = new_value - old_value
+
+    follows_metric_rule = False
+
+    match metric_mode:
+        case MetricMode.LOWER:
+            follows_metric_rule = (not accept_equal and (score_delta < 0 or new_value < metric_value)) or (accept_equal and (score_delta <= 0 or new_value <= metric_value))
+        case MetricMode.HIGHER:
+            follows_metric_rule = (not accept_equal and (score_delta > 0 or new_value > metric_value)) or (accept_equal and (score_delta >= 0 or new_value >= metric_value))
+        case MetricMode.STABLE:
+            if old_value > metric_value:
+                follows_metric_rule = (not accept_equal and (score_delta < 0 or new_value < metric_value)) or (accept_equal and (score_delta <= 0 or new_value <= metric_value))
+            elif old_value < metric_value:
+                follows_metric_rule = (not accept_equal and (score_delta > 0 or new_value > metric_value)) or (accept_equal and (score_delta >= 0 or new_value >= metric_value))
+            else:
+                follows_metric_rule = (not accept_equal and abs(score_delta) < leniency_window) or (accept_equal and abs(score_delta) <= leniency_window)
+
+    return follows_metric_rule

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 4
+Wait (Actors: Brick) 0
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Brick) 1
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Brick
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Defeat (Actors: Brick) 2
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Forest Path
+----------
+Forgiveness (Actors: Brick) 3
+Node Name: Forgiveness
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Forest Path
+----------
+Move Towards Random Forest (Actors: Brick) 4
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Brick
+Targets: Random Forest
+Location: Forest Path
+----------

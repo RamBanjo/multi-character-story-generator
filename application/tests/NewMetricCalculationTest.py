@@ -11,6 +11,7 @@ from application.components.StoryNode import *
 from application.components.RelChange import *
 from application.components.UtilityEnums import *
 from application.components.RewriteRuleWithWorldState import *
+from application.components.StoryMetrics import *
 
 from application.StoryGeneration_NewFlowchart_WithMetrics import generate_story_from_starter_graph, make_base_graph_from_previous_graph, generate_multiple_graphs, attempt_move_towards_task_loc
 
@@ -31,10 +32,19 @@ init_graph = StoryGraph(name="Initial Graph", character_objects=[alice], startin
 patternless_into_taking_w = RewriteRule(story_condition=[], story_change=[take_w], name="Patternless Take W")
 patternless_into_taking_l = RewriteRule(story_condition=[], story_change=[take_l], name="Patternless Take L")
 
-retention = 0.5
+alice_main_character_more_than_50 = StoryMetric(metric_type=MetricType.PREFER, value=50, metric_mode=MetricMode.HIGHER, character_object=alice)
+
+retention = 1
+
+# init_graph.insert_story_part(part=take_l, character=alice, location=hub, absolute_step=0)
+# init_graph.insert_story_part(part=take_l, character=alice, location=hub, absolute_step=1)
+# init_graph.insert_story_part(part=take_w, character=alice, location=hub, absolute_step=2)
+
+# print(init_graph.test_if_given_node_list_will_follow_metric_rule(metric=alice_main_character_more_than_50, node_list=[take_l], step=3, verbose=True))
+# print(init_graph.test_if_given_node_list_will_follow_metric_rule(metric=alice_main_character_more_than_50, node_list=[take_w], step=3, verbose=True))
 
 start_gen_time = datetime.now()
-generated_graph_list = generate_multiple_graphs(initial_graph=init_graph, list_of_rules=[patternless_into_taking_l, patternless_into_taking_w], required_story_length=25, max_storynodes_per_graph=5, metric_retention=retention)
+generated_graph_list = generate_multiple_graphs(initial_graph=init_graph, list_of_rules=[patternless_into_taking_l, patternless_into_taking_w], metric_requirements=[alice_main_character_more_than_50], required_story_length=25, max_storynodes_per_graph=5, metric_retention=retention, verbose=True)
 
 finish_gen_time = datetime.now()
 
