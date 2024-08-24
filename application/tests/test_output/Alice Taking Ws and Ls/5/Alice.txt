@@ -6,15 +6,15 @@ Actors: Alice
 Targets: 
 Location: Hub
 ----------
-Wait (Actors: Alice) 1
-Node Name: Wait
+Take an L (Actors: Alice) 1
+Node Name: Take an L
 Timestep 0
 Actors: Alice
 Targets: 
 Location: Hub
 ----------
-Take a W (Actors: Alice) 2
-Node Name: Take a W
+Wait (Actors: Alice) 2
+Node Name: Wait
 Timestep 0
 Actors: Alice
 Targets: 

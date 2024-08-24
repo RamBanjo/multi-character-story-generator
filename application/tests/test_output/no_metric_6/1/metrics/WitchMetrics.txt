@@ -1,5 +1,0 @@
-Metric Information for Storyline of Witch in Initial Story Graph
-COST: 0.0
-UNIQUE: 100.0
-JOINTS: 60.0
-PREFER: 40.0
