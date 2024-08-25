@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 4
+Actor Scares Target (Actors: Wolf) 0
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------
+Actor becomes defiant of Target (Actors: Witch) 1
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Mountain Valley
+----------
+Report Scared Forest Village (Actors: Wolf) 2
+Node Name: Report Scared Forest Village
+Timestep 0
+Actors: Wolf
+Targets: Grandma
+Location: Magic Temple
+----------
+Wait (Actors: Wolf) 3
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Wolf) 4
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Wolf
+Targets: Forest Path
+Location: Mountain Valley
+----------

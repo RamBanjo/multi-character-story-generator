@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Get Tell Mom Wolf Quest (Actors: Red) 0
+Node Name: Get Tell Mom Wolf Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Witch) 1
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Magic Temple
+----------
+Defeat (Actors: Red) 2
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Magic Temple
+----------
+Wait (Actors: Red) 3
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
+Move Towards Mountain Valley (Actors: Red) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Red
+Targets: Mountain Valley
+Location: Magic Temple
+----------

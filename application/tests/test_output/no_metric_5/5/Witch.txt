@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 4
+Wait (Actors: Witch) 0
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Mountain Valley
+----------
+Actor becomes defiant of Target (Actors: Witch) 1
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Mountain Valley
+----------
+Wait (Actors: Witch) 2
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Witch) 3
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Witch
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Move Towards Mountain Valley (Actors: Witch) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Witch
+Targets: Mountain Valley
+Location: Magic Temple
+----------

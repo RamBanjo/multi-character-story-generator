@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Wait (Actors: Wolf) 0
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Actor Kills Actor (Actors: Red) 1
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Magic Temple
+----------
+Wait (Actors: Wolf) 2
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Wolf) 3
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Wolf) 4
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------

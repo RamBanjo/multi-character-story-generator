@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 2
+Actor Attacks Target (Actors: Witch) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Magic Temple
+----------
+Defeat (Actors: Red) 1
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Magic Temple
+----------
+Evil Forgiveness (Actors: Red) 2
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Magic Temple
+----------
+Recall Tasks (Actors: Witch) 3
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Gain Consciousness (Actors: Witch) 4
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------

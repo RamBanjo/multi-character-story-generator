@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Actor Attacks Target (Actors: Wolf) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Path
+----------
+Recall Tasks (Actors: Red) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Defeat (Actors: Red) 2
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Path
+----------
+Actor Kills Actor (Actors: Red) 3
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Red) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Red
+Targets: Mountain Valley
+Location: Forest Path
+----------
