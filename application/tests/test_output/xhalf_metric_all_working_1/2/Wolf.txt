@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Wolf) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Path
+----------
+Actor Scares Target (Actors: Wolf) 1
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Forest Path
+----------
+Actor becomes scared of Target (Actors: Witch) 2
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Wolf) 3
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Wolf
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Move Towards Magic Temple (Actors: Wolf) 4
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Wolf
+Targets: Magic Temple
+Location: Mountain Valley
+----------

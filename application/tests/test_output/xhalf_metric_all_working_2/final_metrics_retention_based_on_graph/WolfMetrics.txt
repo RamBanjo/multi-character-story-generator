@@ -1,0 +1,6 @@
+Metric Information for Storyline of Wolf in Initial Story Graph Continuation # 4
+COST: 0.0
+UNIQUE: 100.0
+JOINTS: 58.064516129032256
+PREFER: 42.58064516129032
+TRUE_UNIQUE: 68.0

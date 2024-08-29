@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 1
+Evil Forgiveness (Actors: Wolf) 0
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Village
+----------
+Gain Consciousness (Actors: Red) 1
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Recall Tasks (Actors: Red) 2
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Wait (Actors: Red) 3
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Visiting Place (Actors: Red) 4
+Node Name: Visiting Place
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Recall Tasks (Actors: Wolf) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
+Actor Scares Target (Actors: Wolf) 1
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------
+Actor becomes defiant of Target (Actors: Brick) 2
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Mountain Valley
+----------
+Actor Attacks Target (Actors: Wolf) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------
+Defeat (Actors: Wolf) 4
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------

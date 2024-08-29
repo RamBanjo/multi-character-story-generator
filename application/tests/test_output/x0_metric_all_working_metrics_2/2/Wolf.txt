@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 1
+Actor Attacks Target (Actors: Wolf) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Forest Path
+----------
+Defeat (Actors: Brick) 1
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Forest Path
+----------
+Recall Tasks (Actors: Wolf) 2
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Path
+----------
+Actor Kills Actor (Actors: Red) 3
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Path
+----------
+Wait (Actors: Wolf) 4
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Path
+----------

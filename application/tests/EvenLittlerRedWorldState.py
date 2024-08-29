@@ -783,12 +783,12 @@ wait_prob_name_dict = {"Grandma":0.3, "Witch":0.3, "Papa Bear":0.3}
 # base_folder_name = "no_metric_10"
 
 # x0 Retention
-retention = 0
-base_folder_name = "x0_metric_all_working_metrics_1"
+# retention = 0
+# base_folder_name = "x0_metric_all_working_metrics_10"
 
 # x0.5 Retention
-# retention = 0.5
-# base_folder_name = "xhalf_metric_all_working_3"
+retention = 0.5
+base_folder_name = "xhalf_metric_all_working_3"
 
 # x1 Retention
 # retention = 1

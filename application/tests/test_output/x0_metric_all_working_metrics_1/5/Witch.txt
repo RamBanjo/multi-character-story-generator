@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 4
+Defeat (Actors: Brick) 0
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Magic Temple
+----------
+Actor Kills Actor (Actors: Brick) 1
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 2
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 3
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 4
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
