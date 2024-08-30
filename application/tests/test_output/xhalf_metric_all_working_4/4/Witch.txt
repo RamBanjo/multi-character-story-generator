@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 3
+Recall Tasks (Actors: Witch) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Mountain Valley
+----------
+Defeat (Actors: Witch) 1
+Node Name: Defeat
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Mountain Valley
+----------
+Actor Kills Actor (Actors: Witch) 2
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Witch) 3
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Witch
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+task_cancel_for_Witch_Rod Quest (Actors: Witch) 4
+Node Name: task_cancel_for_Witch_Rod Quest
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
