@@ -1,0 +1,6 @@
+Metric Information for Storyline of Grandma in Initial Story Graph Continuation # 4
+COST: 0.0
+UNIQUE: 63.87096774193548
+JOINTS: 0.6451612903225806
+PREFER: 0.0
+TRUE_UNIQUE: 44.0
