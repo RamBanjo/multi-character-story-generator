@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Evil Forgiveness (Actors: Red) 0
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Forest Path
+----------
+Recall Tasks (Actors: Red) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Get Tell Mom Grandma Quest (Actors: Red) 2
+Node Name: Get Tell Mom Grandma Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Actor Attacks Target (Actors: Witch) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Forest Path
+----------
+Move Towards Forest Village (Actors: Red) 4
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Red
+Targets: Forest Village
+Location: Forest Path
+----------

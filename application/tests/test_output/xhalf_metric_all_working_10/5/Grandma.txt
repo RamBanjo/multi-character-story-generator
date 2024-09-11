@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Grandma IN Initial Story Graph Continuation # 4
+Recall Tasks (Actors: Grandma) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Grandma) 1
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Grandma
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Forest Village (Actors: Grandma) 2
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Grandma
+Targets: Forest Village
+Location: Forest Path
+----------
+Actor Destroys House Witch (Actors: Grandma) 3
+Node Name: Actor Destroys House Witch
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Forest Village
+----------
+Actor Destroys House Brick (Actors: Grandma) 4
+Node Name: Actor Destroys House Brick
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Forest Village
+----------

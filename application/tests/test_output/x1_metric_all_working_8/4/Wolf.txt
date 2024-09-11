@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Wait (Actors: Wolf) 0
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Wolf) 1
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Wolf
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Random Forest (Actors: Wolf) 2
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Wolf
+Targets: Random Forest
+Location: Forest Path
+----------
+Actor Attacks Target (Actors: Wolf) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Random Forest
+----------
+Defeat (Actors: Wolf) 4
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Random Forest
+----------

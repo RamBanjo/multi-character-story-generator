@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 4
+Wait (Actors: Witch) 0
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------
+Actor becomes defiant of Target (Actors: Witch) 1
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Forest Path
+----------
+Move Towards Forest Village (Actors: Witch) 2
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Witch
+Targets: Forest Village
+Location: Forest Path
+----------
+Wait (Actors: Witch) 3
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Village
+----------
+Wait (Actors: Witch) 4
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Village
+----------

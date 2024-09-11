@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Papa Bear IN Initial Story Graph Continuation # 3
+Actor Attacks Target (Actors: Papa Bear) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Magic Temple
+----------
+Wait (Actors: Papa Bear) 1
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Kill for Rod (Actors: Wolf) 2
+Node Name: Kill for Rod
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Magic Temple
+----------
+Wait (Actors: Papa Bear) 3
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Papa Bear) 4
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------

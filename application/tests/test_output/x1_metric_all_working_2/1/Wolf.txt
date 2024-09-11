@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph
+Scheme Leader Gives Tasks (Actors: Grandma) 0
+Node Name: Scheme Leader Gives Tasks
+Timestep 0
+Actors: Grandma
+Targets: Wolf
+Location: Forest Village
+----------
+Actor Scares Target (Actors: Wolf) 1
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Forest Village
+----------
+Actor Scares Target (Actors: Wolf) 2
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Forest Village
+----------
+Actor Attacks Target (Actors: Wolf) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Village
+----------
+Get Rod Quest for Wolf (Actors: Wolf) 4
+Node Name: Get Rod Quest for Wolf
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Village
+----------

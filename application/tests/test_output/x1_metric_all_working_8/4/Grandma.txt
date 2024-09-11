@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Grandma IN Initial Story Graph Continuation # 3
+Wait (Actors: Grandma) 0
+Node Name: Wait
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Mountain Valley
+----------
+Wait (Actors: Grandma) 1
+Node Name: Wait
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Grandma) 2
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Grandma
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Move Towards Mountain Valley (Actors: Grandma) 3
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Grandma
+Targets: Mountain Valley
+Location: Magic Temple
+----------
+Wait (Actors: Grandma) 4
+Node Name: Wait
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Mountain Valley
+----------

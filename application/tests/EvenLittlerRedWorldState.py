@@ -787,12 +787,12 @@ wait_prob_name_dict = {"Grandma":0.3, "Witch":0.3, "Papa Bear":0.3}
 # base_folder_name = "x0_metric_all_working_metrics_10"
 
 # x0.5 Retention
-retention = 0.5
-base_folder_name = "xhalf_metric_all_working_6"
+# retention = 0.5
+# base_folder_name = "xhalf_metric_all_working_10"
 
 # x1 Retention
-# retention = 1
-# base_folder_name = "x1_metric_red_high_cost_50_2"
+retention = 1
+base_folder_name = "x1_metric_all_working_10"
 
 # No Metrics
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)

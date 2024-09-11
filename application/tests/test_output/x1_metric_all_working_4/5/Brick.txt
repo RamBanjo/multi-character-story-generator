@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 4
+Actor Scares Target (Actors: Wolf) 0
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Magic Temple
+----------
+Defeat (Actors: Wolf) 1
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Magic Temple
+----------
+Evil Forgiveness (Actors: Wolf) 2
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Magic Temple
+----------
+Wait (Actors: Brick) 3
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Magic Temple
+----------
+Gain Consciousness (Actors: Brick) 4
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Magic Temple
+----------

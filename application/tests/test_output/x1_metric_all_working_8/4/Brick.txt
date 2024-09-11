@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 3
+Wait (Actors: Brick) 0
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Wait (Actors: Brick) 1
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Wait (Actors: Brick) 2
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Actor Attacks Target (Actors: Wolf) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Random Forest
+----------
+Defeat (Actors: Wolf) 4
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Random Forest
+----------

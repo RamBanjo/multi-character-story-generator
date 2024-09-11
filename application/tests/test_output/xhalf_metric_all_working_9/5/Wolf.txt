@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 4
+Wait (Actors: Wolf) 0
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Wolf) 1
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Wolf
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Actor Attacks Target (Actors: Papa Bear) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Mountain Valley
+----------
+Defeat and Steal Rod (Actors: Wolf) 3
+Node Name: Defeat and Steal Rod
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Mountain Valley
+----------
+Defeat (Actors: Wolf) 4
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Mountain Valley
+----------

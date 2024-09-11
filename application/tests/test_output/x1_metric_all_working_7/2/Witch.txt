@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Witch) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Gain Find Item Quest (Columbo's Diary) (Actors: Witch) 1
+Node Name: Gain Find Item Quest (Columbo's Diary)
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+task_cancel_for_Witch_Rod Quest (Actors: Witch) 2
+Node Name: task_cancel_for_Witch_Rod Quest
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Actor Scares Target (Actors: Wolf) 3
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Magic Temple
+----------
+Move Towards Mountain Valley (Actors: Witch) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Witch
+Targets: Mountain Valley
+Location: Magic Temple
+----------
