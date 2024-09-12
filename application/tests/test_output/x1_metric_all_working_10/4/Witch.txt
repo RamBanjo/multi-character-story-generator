@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 3
+Recall Tasks (Actors: Witch) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Actor Scares Target (Actors: Wolf) 1
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Magic Temple
+----------
+Actor becomes defiant of Target (Actors: Witch) 2
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Magic Temple
+----------
+task_cancel_for_Witch_Rod Quest (Actors: Witch) 3
+Node Name: task_cancel_for_Witch_Rod Quest
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Witch) 4
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Magic Temple
+----------
