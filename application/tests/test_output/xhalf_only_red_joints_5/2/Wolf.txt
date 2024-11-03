@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 1
+Actor Scares Target (Actors: Wolf) 0
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Magic Temple
+----------
+Actor becomes defiant of Target (Actors: Papa Bear) 1
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Papa Bear) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Magic Temple
+----------
+Recall Tasks (Actors: Wolf) 3
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+task_cancel_for_Wolf_Rod Quest (Actors: Wolf) 4
+Node Name: task_cancel_for_Wolf_Rod Quest
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------

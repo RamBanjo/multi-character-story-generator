@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 3
+Forgiveness (Actors: Brick) 0
+Node Name: Forgiveness
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Magic Temple
+----------
+Recall Tasks (Actors: Brick) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Brick) 2
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Brick
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Random Forest (Actors: Brick) 3
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Brick
+Targets: Random Forest
+Location: Forest Path
+----------
+Take Quest Item (Singing Harp) (Actors: Brick) 4
+Node Name: Take Quest Item (Singing Harp)
+Timestep 0
+Actors: Brick
+Targets: Singing Harp
+Location: Random Forest
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 3
+Recall Tasks (Actors: Witch) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+task_cancel_for_Witch_Rod Quest (Actors: Witch) 1
+Node Name: task_cancel_for_Witch_Rod Quest
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Defeat (Actors: Brick) 2
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Magic Temple
+----------
+Forgiveness (Actors: Brick) 3
+Node Name: Forgiveness
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Magic Temple
+----------
+Gain Consciousness (Actors: Witch) 4
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------

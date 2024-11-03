@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph
+Actor Attacks Target (Actors: Witch) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Forest Village
+----------
+Get Visit Place Task for Red (Actors: Red) 1
+Node Name: Get Visit Place Task for Red
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Get Rod Quest for Red (Actors: Red) 2
+Node Name: Get Rod Quest for Red
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Visiting Place (Actors: Red) 3
+Node Name: Visiting Place
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Red) 4
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Red
+Targets: Forest Path
+Location: Forest Village
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Witch) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------
+Gain Find Item Quest (Columbo's Diary) (Actors: Witch) 1
+Node Name: Gain Find Item Quest (Columbo's Diary)
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------
+Actor Scares Target (Actors: Wolf) 2
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Forest Path
+----------
+Move Towards Random Forest (Actors: Witch) 3
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Witch
+Targets: Random Forest
+Location: Forest Path
+----------
+task_cancel_for_Witch_Find Item Stack (Columbo's Diary) (Actors: Witch) 4
+Node Name: task_cancel_for_Witch_Find Item Stack (Columbo's Diary)
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Random Forest
+----------

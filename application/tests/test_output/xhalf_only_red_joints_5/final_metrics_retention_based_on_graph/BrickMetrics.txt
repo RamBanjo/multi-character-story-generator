@@ -1,0 +1,6 @@
+Metric Information for Storyline of Brick in Initial Story Graph Continuation # 4
+COST: 0.0
+UNIQUE: 89.6774193548387
+JOINTS: 26.451612903225808
+PREFER: 16.129032258064516
+TRUE_UNIQUE: 68.0

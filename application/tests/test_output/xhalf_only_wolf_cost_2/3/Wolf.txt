@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 2
+Actor Attacks Target (Actors: Wolf) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Magic Temple
+----------
+Actor becomes scared of Target (Actors: Brick) 1
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Magic Temple
+----------
+Report Scared Forest Village (Actors: Wolf) 2
+Node Name: Report Scared Forest Village
+Timestep 0
+Actors: Wolf
+Targets: Grandma
+Location: Magic Temple
+----------
+Recall Tasks (Actors: Wolf) 3
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Witness Wolf (Actors: Red) 4
+Node Name: Witness Wolf
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Magic Temple
+----------

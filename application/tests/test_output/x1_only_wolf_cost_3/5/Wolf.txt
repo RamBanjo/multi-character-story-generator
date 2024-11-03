@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 4
+Report Scared Forest Village (Actors: Wolf) 0
+Node Name: Report Scared Forest Village
+Timestep 0
+Actors: Wolf
+Targets: Grandma
+Location: Mountain Valley
+----------
+Wait (Actors: Wolf) 1
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
+Actor becomes scared of Target (Actors: Papa Bear) 2
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Mountain Valley
+----------
+Defeat and Steal Rod (Actors: Wolf) 3
+Node Name: Defeat and Steal Rod
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Wolf) 4
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Wolf
+Targets: Magic Temple
+Location: Mountain Valley
+----------

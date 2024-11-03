@@ -1,0 +1,5 @@
+Metric Information for Storyline of Red in Initial Story Graph Continuation # 3
+COST: 10.666666666666666
+UNIQUE: 84.0
+JOINTS: 36.0
+PREFER: 20.0

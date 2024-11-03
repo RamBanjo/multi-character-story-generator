@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Grandma IN Initial Story Graph Continuation # 4
+Witnessing Home Destruction (Actors: Red) 0
+Node Name: Witnessing Home Destruction
+Timestep 0
+Actors: Red
+Targets: Grandma
+Location: Forest Village
+----------
+Recall Tasks (Actors: Grandma) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Forest Village
+----------
+Witnessing Home Destruction (Actors: Red) 2
+Node Name: Witnessing Home Destruction
+Timestep 0
+Actors: Red
+Targets: Grandma
+Location: Forest Village
+----------
+Actor Attacks Target (Actors: Red) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Red
+Targets: Grandma
+Location: Forest Village
+----------
+Witnessing Home Destruction (Actors: Red) 4
+Node Name: Witnessing Home Destruction
+Timestep 0
+Actors: Red
+Targets: Grandma
+Location: Forest Village
+----------

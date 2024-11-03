@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 3
+Actor becomes defiant of Target (Actors: Witch) 0
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Mountain Valley
+----------
+Wait (Actors: Witch) 1
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Mountain Valley
+----------
+Actor Attacks Target (Actors: Witch) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Mountain Valley
+----------
+Defeat (Actors: Wolf) 3
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Mountain Valley
+----------
+Actor Kills Actor (Actors: Wolf) 4
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Mountain Valley
+----------

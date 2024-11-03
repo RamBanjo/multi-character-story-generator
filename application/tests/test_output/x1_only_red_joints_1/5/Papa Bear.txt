@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Papa Bear IN Initial Story Graph Continuation # 4
+Defeat and Steal Rod (Actors: Wolf) 0
+Node Name: Defeat and Steal Rod
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Magic Temple
+----------
+Gain Consciousness (Actors: Papa Bear) 1
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Papa Bear) 2
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Papa Bear) 3
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Actor becomes defiant of Target (Actors: Papa Bear) 4
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Magic Temple
+----------

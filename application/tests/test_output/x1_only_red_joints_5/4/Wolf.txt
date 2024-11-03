@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Wait (Actors: Wolf) 0
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Defeat (Actors: Red) 1
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Magic Temple
+----------
+Evil Forgiveness (Actors: Red) 2
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Magic Temple
+----------
+Gain Consciousness (Actors: Wolf) 3
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Wolf) 4
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Magic Temple
+----------

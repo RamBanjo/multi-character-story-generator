@@ -1,0 +1,5 @@
+Graph Results
+{'COST': [4.0, 4.0, 0.0, 4.0, 4.0], 'UNIQUE': [96.0, 100.0, 100.0, 84.0, 64.0], 'JOINTS': [28.0, 36.0, 28.0, 12.0, 20.0], 'PREFER': [16.0, 20.0, 24.0, 8.0, 12.0], 'TRUE_UNIQUE': [76.0, 80.0, 72.0, 60.0, 40.0]}
+
+Graph Averages
+{'COST': 3.2, 'UNIQUE': 88.8, 'JOINTS': 24.8, 'PREFER': 16.0, 'TRUE_UNIQUE': 65.6}

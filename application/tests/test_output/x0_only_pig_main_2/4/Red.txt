@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Actor Attacks Target (Actors: Wolf) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Mountain Valley
+----------
+Recall Tasks (Actors: Red) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Mountain Valley
+----------
+Defeat (Actors: Wolf) 2
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Mountain Valley
+----------
+Evil Forgiveness (Actors: Witch) 3
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Mountain Valley
+----------
+Gain Consciousness (Actors: Red) 4
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Red
+Targets: 
+Location: Mountain Valley
+----------

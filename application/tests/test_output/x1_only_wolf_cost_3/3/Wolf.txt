@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 2
+Recall Tasks (Actors: Wolf) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+task_cancel_for_Wolf_Rod Quest (Actors: Wolf) 1
+Node Name: task_cancel_for_Wolf_Rod Quest
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Wolf) 2
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Move Towards Mountain Valley (Actors: Wolf) 3
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Wolf
+Targets: Mountain Valley
+Location: Magic Temple
+----------
+Move Towards Magic Temple (Actors: Wolf) 4
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Wolf
+Targets: Magic Temple
+Location: Mountain Valley
+----------

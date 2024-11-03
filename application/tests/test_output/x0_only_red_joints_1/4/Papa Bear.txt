@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Papa Bear IN Initial Story Graph Continuation # 3
+Wait (Actors: Papa Bear) 0
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Mountain Valley
+----------
+Wait (Actors: Papa Bear) 1
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Mountain Valley
+----------
+Defeat (Actors: Wolf) 2
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Papa Bear
+Location: Mountain Valley
+----------
+Gain Consciousness (Actors: Papa Bear) 3
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Mountain Valley
+----------
+Wait (Actors: Papa Bear) 4
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Mountain Valley
+----------

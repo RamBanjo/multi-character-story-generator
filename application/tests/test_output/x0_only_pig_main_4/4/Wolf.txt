@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Wait (Actors: Wolf) 0
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
+Actor becomes defiant of Target (Actors: Papa Bear) 1
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Mountain Valley
+----------
+Actor Attacks Target (Actors: Papa Bear) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Wolf) 3
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Wolf
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Defeat (Actors: Red) 4
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Magic Temple
+----------

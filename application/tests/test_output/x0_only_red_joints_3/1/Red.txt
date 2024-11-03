@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph
+Get Visit Place Task for Red (Actors: Red) 0
+Node Name: Get Visit Place Task for Red
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Witness Wolf (Actors: Red) 1
+Node Name: Witness Wolf
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Village
+----------
+Actor Attacks Target (Actors: Wolf) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Village
+----------
+Get Tell Mom Wolf Quest (Actors: Red) 3
+Node Name: Get Tell Mom Wolf Quest
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Get Rod Quest for Red (Actors: Red) 4
+Node Name: Get Rod Quest for Red
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Red) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Visiting Place (Actors: Red) 1
+Node Name: Visiting Place
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Actor Attacks Target (Actors: Witch) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Red) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Red
+Targets: Forest Path
+Location: Forest Village
+----------
+Defeat (Actors: Red) 4
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Forest Path
+----------

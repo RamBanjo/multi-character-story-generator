@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 2
+Actor Attacks Target (Actors: Witch) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Random Forest
+----------
+Recall Tasks (Actors: Brick) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Take Quest Item (Singing Harp) (Actors: Brick) 2
+Node Name: Take Quest Item (Singing Harp)
+Timestep 0
+Actors: Brick
+Targets: Singing Harp
+Location: Random Forest
+----------
+Defeat (Actors: Witch) 3
+Node Name: Defeat
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Random Forest
+----------
+Evil Forgiveness (Actors: Witch) 4
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Random Forest
+----------

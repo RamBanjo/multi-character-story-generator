@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Grandma IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Grandma) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Random Forest
+----------
+Take Quest Item (Columbo's Diary) (Actors: Grandma) 1
+Node Name: Take Quest Item (Columbo's Diary)
+Timestep 0
+Actors: Grandma
+Targets: Columbo's Diary
+Location: Random Forest
+----------
+Report Scared Forest Village (Actors: Wolf) 2
+Node Name: Report Scared Forest Village
+Timestep 0
+Actors: Wolf
+Targets: Grandma
+Location: Random Forest
+----------
+Move Towards Forest Path (Actors: Grandma) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Grandma
+Targets: Forest Path
+Location: Random Forest
+----------
+Move Towards Forest Village (Actors: Grandma) 4
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Grandma
+Targets: Forest Village
+Location: Forest Path
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Grandma IN Initial Story Graph Continuation # 4
+Wait (Actors: Grandma) 0
+Node Name: Wait
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Grandma) 1
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Grandma
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Forest Village (Actors: Grandma) 2
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Grandma
+Targets: Forest Village
+Location: Forest Path
+----------
+Move Towards Forest Path (Actors: Grandma) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Grandma
+Targets: Forest Path
+Location: Forest Village
+----------
+Wait (Actors: Grandma) 4
+Node Name: Wait
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Forest Path
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 4
+Wait (Actors: Witch) 0
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Witch) 1
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Witch
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Actor Attacks Target (Actors: Witch) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Witch) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Witch
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Move Towards Random Forest (Actors: Witch) 4
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Witch
+Targets: Random Forest
+Location: Forest Path
+----------

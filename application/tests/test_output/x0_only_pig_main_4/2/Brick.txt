@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Brick) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Magic Temple
+----------
+task_cancel_for_Brick_Rod Quest (Actors: Brick) 1
+Node Name: task_cancel_for_Brick_Rod Quest
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Magic Temple
+----------
+Gain Find Item Quest (Singing Harp) (Actors: Brick) 2
+Node Name: Gain Find Item Quest (Singing Harp)
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Magic Temple
+----------
+Actor Attacks Target (Actors: Witch) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Magic Temple
+----------
+Defeat (Actors: Witch) 4
+Node Name: Defeat
+Timestep 0
+Actors: Witch
+Targets: Brick
+Location: Magic Temple
+----------

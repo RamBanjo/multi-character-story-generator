@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 4
+Actor Scares Target (Actors: Wolf) 0
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Witch
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 1
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Defeat (Actors: Brick) 2
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 3
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Witch) 4
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Magic Temple
+----------

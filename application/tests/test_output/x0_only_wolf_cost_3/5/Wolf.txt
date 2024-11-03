@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 4
+Wait (Actors: Wolf) 0
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Actor becomes scared of Target (Actors: Brick) 1
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Magic Temple
+----------
+Wait (Actors: Wolf) 2
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Defeat (Actors: Brick) 3
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Magic Temple
+----------
+Forgiveness (Actors: Brick) 4
+Node Name: Forgiveness
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Magic Temple
+----------

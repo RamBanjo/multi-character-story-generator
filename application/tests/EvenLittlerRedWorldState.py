@@ -705,7 +705,7 @@ red_has_more_than_20_joint = StoryMetric(metric_type=MetricType.JOINTS, value=20
 #TODO: There are now less metrics, so we should be able to see a bit more clearly if they actually affect anything. Make sure to talk to professor on what to edit before undertaking this extra test.
 # metric_requirements = [brick_has_more_than_20_main, wolf_more_than_20_cost_metric, red_has_more_than_20_joint]
 
-metric_requirements = [red_has_more_than_20_main, brick_has_more_than_20_main, wolf_has_more_than_20_main, brick_less_than_20_cost_metric, wolf_more_than_20_cost_metric, red_has_more_than_40_uniqueness, brickpig_has_more_than_40_uniqueness, wolf_has_more_than_40_uniqueness, red_has_more_than_20_joint, papa_has_less_than_20_main, witch_has_less_than_20_main, grandma_has_less_than_20_main]
+# metric_requirements = [red_has_more_than_20_main, brick_has_more_than_20_main, wolf_has_more_than_20_main, brick_less_than_20_cost_metric, wolf_more_than_20_cost_metric, red_has_more_than_40_uniqueness, brickpig_has_more_than_40_uniqueness, wolf_has_more_than_40_uniqueness, red_has_more_than_20_joint, papa_has_less_than_20_main, witch_has_less_than_20_main, grandma_has_less_than_20_main]
 
 #important_actions:
 # Defying Target
@@ -776,6 +776,12 @@ start_gen_time = datetime.now()
 
 wait_prob_name_dict = {"Grandma":0.3, "Witch":0.3, "Papa Bear":0.3}
 
+# The only three metrics that will be tested: Only Wolf Cost, Only Red Joints, Only Pig Main
+# metric_requirements = [wolf_more_than_20_cost_metric]
+# metric_requirements = [red_has_more_than_20_joint]
+metric_requirements = [brick_has_more_than_20_main]
+
+
 # generated_graph = generate_story_from_starter_graph(init_storygraph=initial_graph, list_of_rules=list_of_rules, required_story_length=5, verbose=True, extra_attempts=-1)
 #Uncomment each block for the desired result
 #No Metrics
@@ -783,16 +789,16 @@ wait_prob_name_dict = {"Grandma":0.3, "Witch":0.3, "Papa Bear":0.3}
 # base_folder_name = "no_metric_10"
 
 # x0 Retention
-# retention = 0
-# base_folder_name = "x0_metric_all_working_metrics_10"
+retention = 0
+base_folder_name = "x0_only_pig_main_4"
 
 # x0.5 Retention
 # retention = 0.5
-# base_folder_name = "xhalf_metric_all_working_10"
+# base_folder_name = "xhalf_only_red_joints_5"
 
 # x1 Retention
-retention = 1
-base_folder_name = "x1_metric_all_working_10"
+# retention = 1
+# base_folder_name = "x1_only_red_joints_5"
 
 # No Metrics
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)

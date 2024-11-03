@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 3
+Actor Scares Target (Actors: Wolf) 0
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------
+Actor Attacks Target (Actors: Wolf) 1
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Mountain Valley
+----------
+Actor Kills Actor (Actors: Red) 2
+Node Name: Actor Kills Actor
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Mountain Valley
+----------
+Wait (Actors: Wolf) 3
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
+Wait (Actors: Wolf) 4
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
