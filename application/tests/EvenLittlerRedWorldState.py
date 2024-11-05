@@ -789,12 +789,12 @@ metric_requirements = [brick_has_more_than_20_main]
 # base_folder_name = "no_metric_10"
 
 # x0 Retention
-retention = 0
-base_folder_name = "x0_only_pig_main_4"
+# retention = 0
+# base_folder_name = "x0_only_pig_main_5"
 
 # x0.5 Retention
-# retention = 0.5
-# base_folder_name = "xhalf_only_red_joints_5"
+retention = 0.5
+base_folder_name = "xhalf_only_pig_main_1"
 
 # x1 Retention
 # retention = 1
