@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 4
+Wait (Actors: Witch) 0
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Witch) 1
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Witch
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Move Towards Magic Temple (Actors: Witch) 2
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Witch
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Defeat (Actors: Red) 3
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Magic Temple
+----------
+Evil Forgiveness (Actors: Red) 4
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Magic Temple
+----------

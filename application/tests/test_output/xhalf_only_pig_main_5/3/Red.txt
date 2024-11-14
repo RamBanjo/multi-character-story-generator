@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 2
+Recall Tasks (Actors: Red) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Tell Mom Wolf Real (Actors: Red) 1
+Node Name: Tell Mom Wolf Real
+Timestep 0
+Actors: Red
+Targets: Red's Mom
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Red) 2
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Red
+Targets: Forest Path
+Location: Forest Village
+----------
+Actor Attacks Target (Actors: Witch) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Red) 4
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Red
+Targets: Mountain Valley
+Location: Forest Path
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 1
+Actor Attacks Target (Actors: Wolf) 0
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Path
+----------
+Witness Wolf (Actors: Red) 1
+Node Name: Witness Wolf
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Path
+----------
+Recall Tasks (Actors: Wolf) 2
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Forest Path
+----------
+Defeat (Actors: Wolf) 3
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Path
+----------
+Evil Forgiveness (Actors: Wolf) 4
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Path
+----------

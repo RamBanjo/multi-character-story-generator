@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Papa Bear IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Papa Bear) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Take Rod (Actors: Papa Bear) 1
+Node Name: Take Rod
+Timestep 0
+Actors: Papa Bear
+Targets: Protection Pillar
+Location: Magic Temple
+----------
+Wait (Actors: Papa Bear) 2
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Papa Bear) 3
+Node Name: Wait
+Timestep 0
+Actors: Papa Bear
+Targets: 
+Location: Magic Temple
+----------
+Actor becomes defiant of Target (Actors: Papa Bear) 4
+Node Name: Actor becomes defiant of Target
+Timestep 0
+Actors: Papa Bear
+Targets: Wolf
+Location: Magic Temple
+----------

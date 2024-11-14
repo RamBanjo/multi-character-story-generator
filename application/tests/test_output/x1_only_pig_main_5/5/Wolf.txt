@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 4
+Actor Scares Target (Actors: Wolf) 0
+Node Name: Actor Scares Target
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------
+Defeat (Actors: Wolf) 1
+Node Name: Defeat
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------
+Wait (Actors: Wolf) 2
+Node Name: Wait
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Mountain Valley
+----------
+Evil Forgiveness (Actors: Wolf) 3
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Wolf
+Targets: Brick
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Wolf) 4
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Wolf
+Targets: Magic Temple
+Location: Mountain Valley
+----------

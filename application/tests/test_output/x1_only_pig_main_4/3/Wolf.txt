@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Wolf IN Initial Story Graph Continuation # 2
+Recall Tasks (Actors: Wolf) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Defeat (Actors: Brick) 1
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Magic Temple
+----------
+task_cancel_for_Wolf_Rod Quest (Actors: Wolf) 2
+Node Name: task_cancel_for_Wolf_Rod Quest
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------
+Forgiveness (Actors: Brick) 3
+Node Name: Forgiveness
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Magic Temple
+----------
+Gain Consciousness (Actors: Wolf) 4
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Wolf
+Targets: 
+Location: Magic Temple
+----------

@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Wait (Actors: Red) 0
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
+Wait (Actors: Red) 1
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
+Move Towards Mountain Valley (Actors: Red) 2
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Red
+Targets: Mountain Valley
+Location: Magic Temple
+----------
+Defeat (Actors: Witch) 3
+Node Name: Defeat
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Mountain Valley
+----------
+Evil Forgiveness (Actors: Witch) 4
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Mountain Valley
+----------

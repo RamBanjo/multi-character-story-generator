@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 3
+Recall Tasks (Actors: Red) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Village
+----------
+Move Towards Forest Path (Actors: Red) 1
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Red
+Targets: Forest Path
+Location: Forest Village
+----------
+Actor Attacks Target (Actors: Wolf) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Path
+----------
+Defeat (Actors: Red) 3
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Path
+----------
+Evil Forgiveness (Actors: Red) 4
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Forest Path
+----------

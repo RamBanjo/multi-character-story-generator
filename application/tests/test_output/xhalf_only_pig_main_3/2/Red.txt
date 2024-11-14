@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 1
+Defeat (Actors: Witch) 0
+Node Name: Defeat
+Timestep 0
+Actors: Witch
+Targets: Red
+Location: Forest Path
+----------
+Gain Consciousness (Actors: Red) 1
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Actor Attacks Target (Actors: Wolf) 2
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Forest Path
+----------
+Recall Tasks (Actors: Red) 3
+Node Name: Recall Tasks
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Forgiveness (Actors: Red) 4
+Node Name: Forgiveness
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Forest Path
+----------

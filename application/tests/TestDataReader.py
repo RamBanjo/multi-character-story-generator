@@ -7,10 +7,10 @@ sys.path.insert(0,'')
 # Change the file settings here.
 
 test_folder_dir = "application/tests/test_output"
-average_prefix = "xhalf_only_red_joints"
+average_prefix = "xhalf_only_pig_main"
 subfolder_name = "final_metrics_retention_1"
 metric_suffix = "Metrics.txt"
-result_folder_name = "only_red_joints_xhalf_averages"
+result_folder_name = "only_pig_main_xhalf_averages"
 
 # file_path = "{dir}/{prefix}".format(dir = test_folder_dir, prefix = average_prefix)
 

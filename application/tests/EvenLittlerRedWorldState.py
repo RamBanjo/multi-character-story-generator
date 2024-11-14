@@ -792,13 +792,13 @@ metric_requirements = [brick_has_more_than_20_main]
 # retention = 0
 # base_folder_name = "x0_only_pig_main_5"
 
-# x0.5 Retention
-retention = 0.5
-base_folder_name = "xhalf_only_pig_main_1"
+# # x0.5 Retention
+# retention = 0.5
+# base_folder_name = "xhalf_only_pig_main_5"
 
 # x1 Retention
-# retention = 1
-# base_folder_name = "x1_only_red_joints_5"
+retention = 1
+base_folder_name = "x1_only_pig_main_5"
 
 # No Metrics
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
