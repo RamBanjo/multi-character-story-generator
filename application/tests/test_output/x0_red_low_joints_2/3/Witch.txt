@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 2
+Actor becomes scared of Target (Actors: Witch) 0
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Mountain Valley
+----------
+Recall Tasks (Actors: Witch) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Witch) 2
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Witch
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Defeat (Actors: Brick) 3
+Node Name: Defeat
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Magic Temple
+----------
+Forgiveness (Actors: Brick) 4
+Node Name: Forgiveness
+Timestep 0
+Actors: Brick
+Targets: Witch
+Location: Magic Temple
+----------

@@ -1055,18 +1055,56 @@ def metric_value_delta_check(metric_mode : MetricMode, metric_value : int, old_v
     score_delta = new_value - old_value
 
     follows_metric_rule = False
+    goal_reached = False
+
+
 
     match metric_mode:
         case MetricMode.LOWER:
-            follows_metric_rule = (not accept_equal and (score_delta < 0 or new_value < metric_value)) or (accept_equal and (score_delta <= 0 or new_value <= metric_value))
+
+            goal_reached = new_value < metric_value
+            if accept_equal:
+                goal_reached = new_value <= metric_value
+
+            # print(goal_reached)
+            follows_metric_rule = (not accept_equal and (score_delta < 0 or goal_reached)) or (accept_equal and (score_delta <= 0 or goal_reached))
+
         case MetricMode.HIGHER:
+
+            goal_reached = new_value > metric_value
+            if accept_equal:
+                goal_reached = new_value >= metric_value
+            
+            # print(goal_reached)
             follows_metric_rule = (not accept_equal and (score_delta > 0 or new_value > metric_value)) or (accept_equal and (score_delta >= 0 or new_value >= metric_value))
+
         case MetricMode.STABLE:
             if old_value > metric_value:
+
+                goal_reached = new_value < metric_value
+                if accept_equal:
+                    goal_reached = new_value <= metric_value
+
                 follows_metric_rule = (not accept_equal and (score_delta < 0 or new_value < metric_value)) or (accept_equal and (score_delta <= 0 or new_value <= metric_value))
             elif old_value < metric_value:
+
+                goal_reached = new_value > metric_value
+                if accept_equal:
+                    goal_reached = new_value >= metric_value
+
+                # print(goal_reached)
                 follows_metric_rule = (not accept_equal and (score_delta > 0 or new_value > metric_value)) or (accept_equal and (score_delta >= 0 or new_value >= metric_value))
             else:
-                follows_metric_rule = (not accept_equal and abs(score_delta) < leniency_window) or (accept_equal and abs(score_delta) <= leniency_window)
 
-    return follows_metric_rule
+                goal_reached = abs(score_delta) < leniency_window
+                if accept_equal:
+                    goal_reached = abs(score_delta) <= leniency_window           
+
+                # print(goal_reached)
+                follows_metric_rule = (not accept_equal and goal_reached) or (accept_equal and goal_reached)
+   
+    distance_to_goal = 0
+    if not goal_reached:
+        distance_to_goal = abs(metric_value - new_value)
+
+    return follows_metric_rule, distance_to_goal

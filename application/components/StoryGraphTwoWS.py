@@ -2210,6 +2210,20 @@ class StoryGraph:
 
         current_score = self.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
         new_score = graphcopy.get_metric_score(metric_type=metric.metric_type, character=metric.character_object)
+
+        worst_possible_score = 0
+
+        match metric.metric_mode:
+            case MetricMode.HIGHER:
+                worst_possible_score = 0
+            case MetricMode.LOWER:
+                worst_possible_score = 100
+            case MetricMode.STABLE:
+                worst_possible_score = 0
+
+                if new_score >= metric.value:
+                    worst_possible_score = 100
+
         #Index 0 has past graph's score and index 1 has that graph's length
 
         #This works like how it would used to as long as there is a score_retention of greater than 0 and no previous graph.
@@ -2226,6 +2240,8 @@ class StoryGraph:
 
         follows_metric_rule = metric_value_delta_check(metric_mode=metric.metric_mode, metric_value=metric.value, old_value=current_score, new_value=new_score, leniency_window=leniency_window, accept_equal=accept_equal)
         
+
+
         # match metric.metric_mode:
         #     case MetricMode.LOWER:
         #         follows_metric_rule = score_delta < 0 or new_score < metric.value
@@ -2240,7 +2256,7 @@ class StoryGraph:
         #             follows_metric_rule = abs(score_delta) <= 5
         if verbose:
             print("follows_metric_rule value:", follows_metric_rule)
-        return follows_metric_rule
+        return follows_metric_rule[0], follows_metric_rule[1], worst_possible_score
         #TODO: Test if the new score follows the metrics' rules. Reminder:
         # Keep Lower: Decreasing the score is not allowed if doing so would take the score out of the acceptable range.
         # Keep Higher: Increasing the score is not allowed if doing so would take the score out of the acceptable range.

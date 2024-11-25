@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 3
+Recall Tasks (Actors: Brick) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Forest Path
+----------
+Move Towards Mountain Valley (Actors: Brick) 1
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Brick
+Targets: Mountain Valley
+Location: Forest Path
+----------
+Actor becomes scared of Target (Actors: Brick) 2
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Brick
+Targets: Wolf
+Location: Mountain Valley
+----------
+Wait (Actors: Brick) 3
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Magic Temple (Actors: Brick) 4
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Brick
+Targets: Magic Temple
+Location: Mountain Valley
+----------

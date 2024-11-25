@@ -1,4 +1,5 @@
 #We will write this story generation function based on the new flowchart.
+import statistics
 import sys
 
 sys.path.insert(0,'')
@@ -59,8 +60,8 @@ suggested_movement_requirement_list: Same as above, but passing the tests grand 
 minimum_move_req_score: If set to None, then there is no minimum score. Otherwise, it will use the score from suggested_movement_requirement_list score and exclude certain movements that don't score enough.
 action_repeat_penalty: This amount of points will be deducted if the same rule is applied multiple itmes in the same storyline.
 metrics_requirements: List of StoryMetrics. The metric requirements that controls how the characters choose their actions.
-metric_reward: Extra points granted for following the metrics_requirements.
-metric_penalty: Points deducted for not following the metrics_requirements.
+metric_reward: Extra points granted for following the metrics_requirements. For reaching the Metric Goal, max reward is given. If the action chosen does not reach the Metric Goal, The amount given will be ratio between the max distance and the current distance. (EX. If goal is 20 or Higher and an action would cause a score to be 19, we would have 19/20 * metric_reward.)
+metric_penalty: Points deducted for not following the metrics_requirements. For not completing the Metric Goal, max penalty is given. Penalty is increased the further the result is from the Metric Goal. (EX. 20 or Higher and an action would cause it to go from 22 to 19, we would have 21/20 * metric_reward.)
 task_movement_random: If set to True, when a character is attempting to move, they will choose randomly. If set to False it will always choose the first available location.
 '''
 def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules, required_story_length, top_n = 5, extra_attempts=5, score_mode=0, verbose=False, extra_movement_requirement_list = [], suggested_movement_requirement_list=[], extra_move_changes = [], minimum_move_req_score = None , action_repeat_penalty = -10, metrics_requirements = [], metric_reward = 50, metric_penalty = -50, previous_graph_list = [], metric_retention=0, task_movement_random = False, charname_extra_prob_dict : dict = dict(), metric_leniency = 5, metric_allow_equal = False):
@@ -218,28 +219,52 @@ def generate_story_from_starter_graph(init_storygraph: StoryGraph, list_of_rules
                                         followup_nodes_list = [rule.joint_node]
                             
                             pass_metric_test = False
-                            
+                            distance_from_new_value_to_goal = 0.0
+                            distance_from_worst_case_to_goal = 100.0
+                            goal_distance_ratio = 1.0
+
                             # print(followup_nodes_list)
                             if not test_splitjoint:
-                                pass_metric_test = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=followup_nodes_list, step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list, leniency_window=metric_leniency, accept_equal=metric_allow_equal, verbose=verbose)
+                                #The formula for reward multiplier is 1 - (distance_from_new_value_to_goal / distance_from_worst_case_to_goal). For example, reaching 15 when the goal is 20 makes it so that the distance to goal is 5. Therefore, the multiplier would be (1 - (5 / 20)) = 15/20.
+                                #The formula for penalty multiplier is 1 + (distance_from_new_value_to_goal / distance_from_worst_case_to_goal). For example, falling down to 15 when the goal is 20 makes it so the distance to goal is 5. Therefore, the multiplier would be 1 + (5/20) = 25/20.
+                                test_result = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=followup_nodes_list, step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list, leniency_window=metric_leniency, accept_equal=metric_allow_equal, verbose=verbose)
+                                pass_metric_test = test_result[0]
+                                distance_from_new_value_to_goal = test_result[1]
+                                distance_from_worst_case_to_goal = abs(test_result[2] - metric.value)
+
+                                goal_distance_ratio  = float(distance_from_new_value_to_goal) / float(distance_from_worst_case_to_goal)
+                            
                             else:
                                 #We consider the splitting joint rule to be following the metric if at least one of the continuations follow the metric.
+                                #For the purpose of reward calculation, we take the average of all passing cases.
+                                #For the purpose of penalty calculation, we take the average of all cases, whether it passes or fails.
                                 follow_metric_exists = False
+                                list_of_passing_ratios = []
+                                list_of_all_ratios = []
 
                                 for node in rule.split_list:
-                                    check_result = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=[node], step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list, leniency_window=metric_leniency, accept_equal=metric_allow_equal, verbose=verbose)
-                                    follow_metric_exists = follow_metric_exists or check_result
+                                    check_result = final_story_graph.test_if_given_node_list_will_follow_metric_rule(metric=metric, node_list=[node], step=rule_insert_index, purge_count=purge_count, score_retention=metric_retention, previous_graphs=previous_graph_list, leniency_window=metric_leniency, accept_equal=metric_allow_equal, verbose=verbose)                                    
+                                    list_of_passing_ratios.append(check_result[1] / abs(check_result[2] - metric.value))
+
+                                    if check_result[0]:
+                                        follow_metric_exists = True
+                                        list_of_all_ratios.append(check_result[1] / abs(check_result[2] - metric.value))
 
                                 pass_metric_test = follow_metric_exists
+                                if pass_metric_test:
+                                    goal_distance_ratio = statistics.mean(list_of_passing_ratios)
+                                else:
+                                    goal_distance_ratio = statistics.mean(list_of_all_ratios)
 
                             if pass_metric_test:
                                 if verbose:
                                     print("The rule",rule.rule_name,"follows the metrics:", str(metric), "(Some score will be awarded.)")
-                                rule_container.action_score += metric_reward
+
+                                rule_container.action_score += (metric_reward * (1.0 - goal_distance_ratio))
                             else:
                                 if verbose:
                                     print("The rule",rule.rule_name,"violates the metrics.", str(metric), "(Some score will be deducted.)")
-                                rule_container.action_score += metric_penalty
+                                rule_container.action_score += (metric_penalty * (1.0 + goal_distance_ratio))
 
 
                     acceptable_rules_with_absolute_step_and_score.append(rule_container)
