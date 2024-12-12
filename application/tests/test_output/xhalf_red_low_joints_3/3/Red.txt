@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 2
+Wait (Actors: Red) 0
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Magic Temple
+----------
+Move Towards Mountain Valley (Actors: Red) 1
+Node Name: Move Towards Mountain Valley
+Timestep 0
+Actors: Red
+Targets: Mountain Valley
+Location: Magic Temple
+----------
+Move Towards Magic Temple (Actors: Red) 2
+Node Name: Move Towards Magic Temple
+Timestep 0
+Actors: Red
+Targets: Magic Temple
+Location: Mountain Valley
+----------
+Actor Attacks Target (Actors: Wolf) 3
+Node Name: Actor Attacks Target
+Timestep 0
+Actors: Wolf
+Targets: Red
+Location: Magic Temple
+----------
+Witness Wolf (Actors: Red) 4
+Node Name: Witness Wolf
+Timestep 0
+Actors: Red
+Targets: Wolf
+Location: Magic Temple
+----------

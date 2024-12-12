@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Grandma IN Initial Story Graph Continuation # 3
+Wait (Actors: Grandma) 0
+Node Name: Wait
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Grandma) 1
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Grandma
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Report Scared Forest Village (Actors: Wolf) 2
+Node Name: Report Scared Forest Village
+Timestep 0
+Actors: Wolf
+Targets: Grandma
+Location: Forest Path
+----------
+Move Towards Forest Village (Actors: Grandma) 3
+Node Name: Move Towards Forest Village
+Timestep 0
+Actors: Grandma
+Targets: Forest Village
+Location: Forest Path
+----------
+Actor Destroys House Witch (Actors: Grandma) 4
+Node Name: Actor Destroys House Witch
+Timestep 0
+Actors: Grandma
+Targets: 
+Location: Forest Village
+----------

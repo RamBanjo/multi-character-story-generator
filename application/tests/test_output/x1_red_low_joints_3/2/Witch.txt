@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 1
+Recall Tasks (Actors: Witch) 0
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------
+Defeat (Actors: Red) 1
+Node Name: Defeat
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Forest Path
+----------
+Forgiveness (Actors: Red) 2
+Node Name: Forgiveness
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Forest Path
+----------
+Gain Consciousness (Actors: Witch) 3
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------
+Move Towards Random Forest (Actors: Witch) 4
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Witch
+Targets: Random Forest
+Location: Forest Path
+----------

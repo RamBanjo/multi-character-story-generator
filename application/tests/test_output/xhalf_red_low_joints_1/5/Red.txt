@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Red IN Initial Story Graph Continuation # 4
+Wait (Actors: Red) 0
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Forest Path
+----------
+Move Towards Random Forest (Actors: Red) 1
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Red
+Targets: Random Forest
+Location: Forest Path
+----------
+Wait (Actors: Red) 2
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Random Forest
+----------
+Wait (Actors: Red) 3
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Random Forest
+----------
+Wait (Actors: Red) 4
+Node Name: Wait
+Timestep 0
+Actors: Red
+Targets: 
+Location: Random Forest
+----------

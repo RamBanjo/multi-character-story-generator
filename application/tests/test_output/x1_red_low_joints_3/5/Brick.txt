@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Brick IN Initial Story Graph Continuation # 4
+Wait (Actors: Brick) 0
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Move Towards Forest Path (Actors: Brick) 1
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Brick
+Targets: Forest Path
+Location: Random Forest
+----------
+Move Towards Random Forest (Actors: Brick) 2
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Brick
+Targets: Random Forest
+Location: Forest Path
+----------
+Wait (Actors: Brick) 3
+Node Name: Wait
+Timestep 0
+Actors: Brick
+Targets: 
+Location: Random Forest
+----------
+Move Towards Forest Path (Actors: Brick) 4
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Brick
+Targets: Forest Path
+Location: Random Forest
+----------

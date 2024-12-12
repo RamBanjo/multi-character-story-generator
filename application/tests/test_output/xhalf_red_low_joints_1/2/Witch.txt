@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 1
+Actor becomes scared of Target (Actors: Witch) 0
+Node Name: Actor becomes scared of Target
+Timestep 0
+Actors: Witch
+Targets: Wolf
+Location: Forest Path
+----------
+Recall Tasks (Actors: Witch) 1
+Node Name: Recall Tasks
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------
+Move Towards Random Forest (Actors: Witch) 2
+Node Name: Move Towards Random Forest
+Timestep 0
+Actors: Witch
+Targets: Random Forest
+Location: Forest Path
+----------
+Take Quest Item (Columbo's Diary) (Actors: Witch) 3
+Node Name: Take Quest Item (Columbo's Diary)
+Timestep 0
+Actors: Witch
+Targets: Columbo's Diary
+Location: Random Forest
+----------
+Move Towards Forest Path (Actors: Witch) 4
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Witch
+Targets: Forest Path
+Location: Random Forest
+----------

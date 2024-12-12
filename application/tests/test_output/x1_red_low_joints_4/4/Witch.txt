@@ -1,0 +1,36 @@
+ENTIRE STORYLINE OF Witch IN Initial Story Graph Continuation # 3
+Wait (Actors: Witch) 0
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Mountain Valley
+----------
+Evil Forgiveness (Actors: Red) 1
+Node Name: Evil Forgiveness
+Timestep 0
+Actors: Red
+Targets: Witch
+Location: Mountain Valley
+----------
+Gain Consciousness (Actors: Witch) 2
+Node Name: Gain Consciousness
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Mountain Valley
+----------
+Move Towards Forest Path (Actors: Witch) 3
+Node Name: Move Towards Forest Path
+Timestep 0
+Actors: Witch
+Targets: Forest Path
+Location: Mountain Valley
+----------
+Wait (Actors: Witch) 4
+Node Name: Wait
+Timestep 0
+Actors: Witch
+Targets: 
+Location: Forest Path
+----------

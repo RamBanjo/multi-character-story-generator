@@ -792,16 +792,16 @@ metric_requirements = [red_has_less_than_10_joint]
 # base_folder_name = "no_metric_10"
 
 # x0 Retention
-retention = 0
-base_folder_name = "x0_red_low_joints_3"
+# retention = 0
+# base_folder_name = "x0_red_low_joints_5"
 
 # # x0.5 Retention
 # retention = 0.5
-# base_folder_name = "xhalf_only_pig_main_5"
+# base_folder_name = "xhalf_red_low_joints_5"
 
 # x1 Retention
-# retention = 1
-# base_folder_name = "x1_only_pig_main_5"
+retention = 1
+base_folder_name = "x1_red_low_joints_5"
 
 # No Metrics
 # generated_graph_list = generate_multiple_graphs(initial_graph=initial_graph, list_of_rules=list_of_rules, required_story_length=25, max_storynodes_per_graph=5, verbose=True, extra_attempts=-1, suggested_movement_requirement_list=movement_suggestion, extra_movement_requirement_list=movement_requirement, task_movement_random=True, extra_move_changes=extra_move_changes, charname_extra_prob_dict=wait_prob_name_dict)
