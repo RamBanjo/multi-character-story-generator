@@ -265,3 +265,6 @@ for subgraph in generated_graph_list:
 
     graphcounter += 1
 ```
+
+## IMPORTANT NOTICE
+After some post-mortem testing, it has been discovered that the StoryMetrics were not as effective as they should have been. For those who would like to use StoryMetrics in the story's generation, please keep this notice in mind.
